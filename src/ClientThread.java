@@ -26,9 +26,14 @@ class ClientThread implements Runnable{
             e.printStackTrace();
         }
     }
+
+    public void stop(){
+
+    }
 }
 
 class App {
+    public static String log_out = "exit";
     private static final int SERVER_PORT=6000;
     public static void main(String[] args) throws IOException{
         System.out.println("Starting to connect.");
@@ -39,8 +44,13 @@ class App {
         String line = null;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while((line = br.readLine())!=null){
+            if (line.equals(log_out)) {
+                System.out.println("you have logged out!");
+                break;
+            }
             ps.println(line);
         }
+        Thread.currentThread().interrupt();
     }
 }
 
