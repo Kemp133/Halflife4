@@ -1,5 +1,7 @@
 package com.halflife3.Model;
 
+import javafx.scene.shape.Shape;
+
 import java.util.HashSet;
 
 public abstract class GameObject implements IRenderable, IUpdateable {
@@ -33,4 +35,8 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         position = new Vector2();
         velocity = new Vector2();
     }
+
+    /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
+     * change depending on what it's acting as a collider for (e.g. a box or a circle) */
+    public abstract Shape GetBounds();
 }
