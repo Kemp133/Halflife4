@@ -17,7 +17,7 @@ public class Client {
 
         //Send input to the server
         DataOutputStream dOut = new DataOutputStream(client.getOutputStream());
-        dOut.writeUTF("UwU ;-; C: TT ^^");
+        dOut.writeUTF("Joe's a donut");
 
         //Clean up and close the sockets
         dOut.flush();
