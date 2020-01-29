@@ -35,9 +35,10 @@ public class Server {
         System.out.println("Client connected");
 
         //Read from the client input
+        System.out.print("Client says: ");
         DataInputStream dIn = new DataInputStream(client.getInputStream());
         String message = dIn.readUTF();
-        System.out.println("Client says: " + message);
+        System.out.println(message);
 
         //Close the server socket
         server.close();
