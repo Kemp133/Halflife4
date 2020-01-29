@@ -1,20 +1,25 @@
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws IOException {
-        URL whatismyip = new URL("http://checkip.amazonaws.com");
-        BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
 
-        String ip = in.readLine();
+        //Enter the server's IP
+        System.out.print("Enter the server IP address: ");
+        Scanner in = new Scanner(System.in);
+        String ip = in.nextLine();
         int port = 6666;
-        System.out.println("IP: " + ip);
 
-        Socket client = new Socket("localhost", port);
-        System.out.println("Connected");
+        //Connect to the server with the IP
+        Socket client = new Socket("192.168.0.38", port);
+        System.out.println("Connected to " + ip);
 
+        //Send input to the server
         DataOutputStream dOut = new DataOutputStream(client.getOutputStream());
         dOut.writeUTF("UwU ;-; C: TT ^^");
+
+        //Clean up and close the sockets
         dOut.flush();
         dOut.close();
         client.close();
