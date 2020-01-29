@@ -71,4 +71,11 @@ public class Vector2 {
     public double distance(Vector2 v) {
         return Math.sqrt(Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2));
     }
+
+    /**
+     * A method to return the distance squared between two points. Efficient as it doesn't require a costly square root call
+     * @param v The Vector2 to find the squared distance to
+     * @return The squared distance between the two points
+     */
+    public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
 }
