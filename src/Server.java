@@ -5,15 +5,17 @@ public class Server {
 
     public static void main(String[] args) {
         try {
-            URL whatismyip = new URL("http://checkip.amazonaws.com");
-            BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
-            String ip = in.readLine();
-            ServerSocket ss = new ServerSocket(6666);
-            Socket socket = ss.accept();
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
-            String str = (String) dis.readUTF();
-            System.out.println("Client says: " + str);
-            ss.close();
+            ServerSocket server = new ServerSocket(6666);
+            System.out.println("Awaiting client...");
+
+            Socket client = server.accept();
+            System.out.println("Client connected");
+
+            DataInputStream dIn = new DataInputStream(client.getInputStream());
+            String message = dIn.readUTF();
+            System.out.println("Client says: " + message);
+
+            server.close();
         } catch (Exception e) {
             System.out.println("Doh!:" + e);
         }
