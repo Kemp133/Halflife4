@@ -1,13 +1,21 @@
 package com.halflife3.Model;
 
-/**
- * A class to represent a two dimensional position in space
- */
+/** A class to represent a two dimensional position in space */
 public class Vector2 {
-    /**
-     * Variables to hold the position variables, stored as doubles
-     */
+    /** Variables to hold the position variables, stored as doubles */
     private double x, y;
+
+    /** A constant value used to represent a rightwards vector in the global frame */
+    public final Vector2 RIGHT = new Vector2(1, 0);
+    /** A constant value used to represent a leftwards vector in the global frame */
+    public final Vector2 LEFT = new Vector2(-1, 0);
+    /** A constant value used to represent a downwards vector in the global frame */
+    public final Vector2 DOWN = new Vector2(0, -1);
+    /** A constant value used to represent an upwards vector in the global frame */
+    public final Vector2 UP = new Vector2(0, 1);
+
+    /** A base constructor for the Vector2 class to initialise a generic instance*/
+    public Vector2() {}
 
     /**
      * Constructor to create a Vector2
@@ -71,4 +79,11 @@ public class Vector2 {
     public double distance(Vector2 v) {
         return Math.sqrt(Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2));
     }
+
+    /**
+     * A method to return the distance squared between two points. Efficient as it doesn't require a costly square root call
+     * @param v The Vector2 to find the squared distance to
+     * @return The squared distance between the two points
+     */
+    public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
 }
