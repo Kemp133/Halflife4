@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
 
 import java.util.HashSet;
@@ -14,7 +15,8 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
      * to disallow duplicate keys from being added*/
     protected HashSet<String> keys;
-
+    /**Using to specific which object it is (player, block or bullet)*/
+    protected Role role;
     /** A constructor used to initialise a generic instance of this class */
     public GameObject() {}
 

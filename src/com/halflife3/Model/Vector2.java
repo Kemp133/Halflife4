@@ -27,6 +27,15 @@ public class Vector2 {
         this.y = y;
     }
 
+
+    public double getX (){
+        return this.x;
+    }
+
+    public double getY(){
+        return this.y;
+    }
+
     /**
      * A method to add a vector to the current vector
      * @param v The vector to add to the current vector
