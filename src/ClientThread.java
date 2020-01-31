@@ -4,15 +4,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 
 class ClientThread implements Runnable{
-    private Socket s;
-    BufferedReader br = null;
+    private BufferedReader br;
+    private Socket client;
 
-    public ClientThread(Socket s) throws IOException{
-        this.s = s;
-        br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+    public ClientThread(Socket client) throws IOException{
+        this.client = client;
+        br = new BufferedReader(new InputStreamReader(client.getInputStream()));
     }
 
     @Override
@@ -28,24 +29,36 @@ class ClientThread implements Runnable{
     }
 
     public void stop(){
-
+        try {
+            client.close();
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
-class App {
+class ClientApp {
     public static String log_out = "exit";
     private static final int SERVER_PORT=6000;
+
     public static void main(String[] args) throws IOException{
-        System.out.println("Starting to connect.");
-        //change host here.
-        Socket s = new Socket("192.168.0.35",SERVER_PORT);
+        //Enter the server's IP
+        System.out.println("Enter the server IP address: ");
+        Scanner in = new Scanner(System.in);
+        String ip = in.nextLine();
+
+        //Connect to the server with the IP
+        Socket s = new Socket(ip, SERVER_PORT);
+        System.out.println("Connected to " + ip);
         new Thread(new ClientThread(s)).start();
+
         PrintStream ps = new PrintStream(s.getOutputStream());
-        String line = null;
+        String line;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        while((line = br.readLine())!=null){
+        while((line = br.readLine()) != null){
             if (line.equals(log_out)) {
-                System.out.println("you have logged out!");
+                System.out.println("You have disconnected!");
                 break;
             }
             ps.println(line);

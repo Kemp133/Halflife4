@@ -2,16 +2,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class ServerThread implements Runnable{
     public static String log_out = "exit";
     private final AtomicBoolean running = new AtomicBoolean(false);
-    Socket s = null;
-    BufferedReader br = null;
+    private Socket s;
+    private BufferedReader br;
 
     public ServerThread(Socket s) throws IOException{
         this.s = s;
@@ -23,16 +23,16 @@ class ServerThread implements Runnable{
         running.set(true);
         while(running.get()){
             try {
-                String content = null;
+                String content;
                 while ((content = readFromClient()) != null){
-                    
+
                     if(content.equals(log_out)){
                         System.out.println("last client logged out...");
-                        App.sockets.remove(s);
+                        ServerApp.sockets.remove(s);
                         Thread.currentThread().interrupt();
                     }
                     System.out.println("From client：" + content);
-                    for (Socket socket : App.sockets) {
+                    for (Socket socket : ServerApp.sockets) {
                         PrintStream ps = new PrintStream(s.getOutputStream());
                         ps.println(content);
                     }
@@ -43,21 +43,28 @@ class ServerThread implements Runnable{
         }
     }
 
+
     public String readFromClient(){
         try {
             return br.readLine();
         } catch (IOException e) {
             e.printStackTrace();
-            App.sockets.remove(s);
+            ServerApp.sockets.remove(s);
         }
         return null;
     }
 }
-class App {
+
+class ServerApp {
     private static final int SERVER_PORT = 6000;
-    public static ArrayList<Socket> sockets = new ArrayList<Socket>();
-    public static void main(String[] args) throws IOException{
-        
+    public static ArrayList<Socket> sockets = new ArrayList<>();
+
+    public void stop(){
+
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+
         //get the server ip @from Dom Server.
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
@@ -69,22 +76,31 @@ class App {
             while(addresses.hasMoreElements()) {
                 InetAddress addr = addresses.nextElement();
                 if (addr instanceof Inet6Address) continue;
-                ipv4 = addr.getHostAddress();
+                String ipv4 = addr.getHostAddress();
                 if (iface.getDisplayName().startsWith("Q")) {
                     System.out.println("Server IP: " + ipv4);
                 }
             }
         }
-        
+
         //start the server
         ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
-        System.out.println("Starting searching for...");
+        System.out.println("Awaiting clients...");
+
+        //noinspection InfiniteLoopStatement
         while(true){
             Socket s = serverSocket.accept();
-            System.out.println("someone in ...");
+            System.out.println("Client connected");
             sockets.add(s);
             new Thread(new ServerThread(s)).start();
+            if(!ServerApp.sockets.isEmpty()){
+                System.out.println("waiting for futher connections:");
+                Thread.currentThread().sleep(100);
+                System.out.println("No other clients.");
+                serverSocket.close();
+            }
         }
+        //
     }
 }
 
