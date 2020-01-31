@@ -26,10 +26,11 @@ public abstract class GameObject implements IRenderable, IUpdateable {
      * @param velocity The initial velocity of the GameObject
      * @param rotation The initial rotation of the GameObject
      */
-    public GameObject(Vector2 position, Vector2 velocity, short rotation) {
+    public GameObject(Vector2 position, Vector2 velocity, short rotation, Role role) {
         this.position = position;
         this.velocity = velocity;
         this.rotation = rotation;
+        this.role = role;
     }
 
     //An initialiser block used to set position and velocity to an actual value when creating a generic instance of this class
