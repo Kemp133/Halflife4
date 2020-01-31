@@ -22,23 +22,15 @@ class ServerThread implements Runnable{
     public void run() {
         running.set(true);
         while(running.get()){
-            try {
-                String content;
-                while ((content = readFromClient()) != null){
+            String content;
+            while ((content = readFromClient()) != null){
 
-                    if(content.equals(log_out)){
-                        System.out.println("last client logged out...");
-                        ServerApp.sockets.remove(s);
-                        Thread.currentThread().interrupt();
-                    }
-                    System.out.println("From client：" + content);
-                    for (Socket socket : ServerApp.sockets) {
-                        PrintStream ps = new PrintStream(s.getOutputStream());
-                        ps.println(content);
-                    }
+                if(content.equals(log_out)){
+                    System.out.println("Last client logged out...");
+                    ServerApp.sockets.remove(s);
+                    Thread.currentThread().interrupt();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("From client: " + content);
             }
         }
     }
@@ -58,10 +50,6 @@ class ServerThread implements Runnable{
 class ServerApp {
     private static final int SERVER_PORT = 6000;
     public static ArrayList<Socket> sockets = new ArrayList<>();
-
-    public void stop(){
-
-    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -87,20 +75,19 @@ class ServerApp {
         ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
         System.out.println("Awaiting clients...");
 
-        //noinspection InfiniteLoopStatement
         while(true){
             Socket s = serverSocket.accept();
             System.out.println("Client connected");
             sockets.add(s);
             new Thread(new ServerThread(s)).start();
-            if(!ServerApp.sockets.isEmpty()){
-                System.out.println("waiting for futher connections:");
-                Thread.currentThread().sleep(100);
+            if(ServerApp.sockets.isEmpty()){
+                System.out.println("Waiting for further connections:");
+                Thread.sleep(1000);
                 System.out.println("No other clients.");
                 serverSocket.close();
+                break;
             }
         }
-        //
     }
 }
 

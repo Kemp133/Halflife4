@@ -9,29 +9,18 @@ import java.util.Scanner;
 
 class ClientThread implements Runnable{
     private BufferedReader br;
-    private Socket client;
 
     public ClientThread(Socket client) throws IOException{
-        this.client = client;
         br = new BufferedReader(new InputStreamReader(client.getInputStream()));
     }
 
     @Override
     public void run() {
-        String content = null;
+        String content;
         try {
             while((content = br.readLine()) != null){
                 System.out.println(content);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void stop(){
-        try {
-            client.close();
-            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

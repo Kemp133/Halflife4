@@ -20,7 +20,7 @@ public abstract class GameObject implements IRenderable, IUpdateable {
 
     /**
      * A constructor used by extending classes to create an instance of the GameObject class
-     * @param position The inital position of the GameObject
+     * @param position The initial position of the GameObject
      * @param velocity The initial velocity of the GameObject
      * @param rotation The initial rotation of the GameObject
      */
