@@ -43,6 +43,7 @@ class ServerThread implements Runnable{
         }
     }
 
+
     public String readFromClient(){
         try {
             return br.readLine();
@@ -58,7 +59,11 @@ class ServerApp {
     private static final int SERVER_PORT = 6000;
     public static ArrayList<Socket> sockets = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException{
+    public void stop(){
+
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         //get the server ip @from Dom Server.
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -77,7 +82,7 @@ class ServerApp {
                 }
             }
         }
-        
+
         //start the server
         ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
         System.out.println("Awaiting clients...");
@@ -88,8 +93,14 @@ class ServerApp {
             System.out.println("Client connected");
             sockets.add(s);
             new Thread(new ServerThread(s)).start();
+            if(!ServerApp.sockets.isEmpty()){
+                System.out.println("waiting for futher connections:");
+                Thread.currentThread().sleep(100);
+                System.out.println("No other clients.");
+                serverSocket.close();
+            }
         }
-        //serverSocket.close();
+        //
     }
 }
 
