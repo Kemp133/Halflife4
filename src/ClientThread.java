@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -58,6 +57,7 @@ class ClientApp {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while((line = br.readLine()) != null){
             if (line.equals(log_out)) {
+                ps.println(line);
                 System.out.println("You have disconnected!");
                 break;
             }
@@ -68,3 +68,4 @@ class ClientApp {
 }
 
 
+`
