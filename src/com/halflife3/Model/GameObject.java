@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 import java.util.HashSet;
@@ -38,5 +39,5 @@ public abstract class GameObject implements IRenderable, IUpdateable {
 
     /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
      * change depending on what it's acting as a collider for (e.g. a box or a circle) */
-    public abstract Shape GetBounds();
+    public abstract Rectangle GetBounds();
 }
