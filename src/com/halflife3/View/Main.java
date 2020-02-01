@@ -1,25 +1,42 @@
 package com.halflife3.View;
 
+import com.halflife3.Controller.KeyHandle;
+import com.halflife3.Model.Player;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import com.halflife3.Controller.KeyInput
+
 
 public class Main extends Application {
 
+    private Pane root = new Pane();
+    private Player player = new Player();
+
+    /*Initialize the root scene for the main game, and new game object can be
+    * add by calling getChildren.add().
+    * */
+    //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
+    private Parent createContent(){
+        root.setPrefSize(900, 400);
+        //TODO: Use loop to add all the object into scene.
+        root.getChildren().add(player);
+        return root;
+    }
+
+    /*
+    * Stage pass to start is the stage of game
+    * */
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("game.fxml"));
-        Parent root = loader.load();
-        primaryStage.setTitle("halflife");
-        KeyInput keycontroller = new KeyInput();
-        root.setOnKeyPressed(keycontroller);
-        double sceneWidth = 400;
-        double sceneHeight = 400;
-        primaryStage.setScene(new Scene(root, sceneWidth, sceneHeight));
-        primaryStage.show();
+        primaryStage.setTitle("HalfLife 3");
+        Scene scene = new Scene(createContent());
+
+        KeyHandle handle = new KeyHandle();
+        root.setOnKeyPressed(handle);
+
+        primaryStage.setScene(scene);
         root.requestFocus();
     }
 
