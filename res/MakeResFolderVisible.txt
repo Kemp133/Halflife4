@@ -1,0 +1,3 @@
+A file added to make the "res" folder visible. This will be where all the non-code assets for the game will be stored.
+
+Directories can be used to logically split the resources into discrete categories (e.g. "levels", "sprites", etc)
