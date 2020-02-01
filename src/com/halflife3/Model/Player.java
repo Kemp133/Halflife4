@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;
 
 
@@ -20,7 +21,7 @@ public class Player extends GameObject{
     }
 
     @Override
-    public void render() {
+    public void render(GraphicsContext gc) {
 
 
     }

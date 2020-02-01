@@ -2,10 +2,11 @@ package com.halflife3.Model;
 
 import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
+import javafx.scene.Node;
 
 import java.util.HashSet;
 
-public abstract class GameObject implements IRenderable, IUpdateable {
+public abstract class GameObject implements IRenderable, IUpdateable{
     /** Using a Vector2 to represent the location of a game object in the world */
     protected Vector2 position;
     /** Using a Vector2 to represent the current velocity of the object */
