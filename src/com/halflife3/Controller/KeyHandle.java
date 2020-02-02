@@ -4,14 +4,17 @@ import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 
 public class KeyHandle implements EventHandler<KeyEvent> {
-    public Input input;
-
+    public Input input = new Input();
+    /*
+    * Add some change: if one key was released, just that key to false
+    * in the keyspressed list.
+    * */
     @Override
     public void handle(KeyEvent keyEvent) {
         if(keyEvent.getEventType() == KeyEvent.KEY_PRESSED){
             input.keysPressed.replace(keyEvent.getCode(), true);
         } else if(keyEvent.getEventType() == KeyEvent.KEY_RELEASED) {
-            input.keysReleased.replace(keyEvent.getCode(), true);
+            input.keysPressed.replace(keyEvent.getCode(), false);
         } else if(keyEvent.getEventType() == KeyEvent.KEY_TYPED) {
             input.keysTyped.replace(keyEvent.getCode(), true);
         }

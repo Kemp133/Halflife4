@@ -1,10 +1,8 @@
 package com.halflife3.View;
 
-import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Model.Player;
 import com.halflife3.Model.Vector2;
-import com.sun.jdi.LongValue;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.canvas.Canvas;
@@ -14,7 +12,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.util.Iterator;
+
+import static javafx.scene.input.KeyCode.*;
 
 
 public class Main extends Application {
@@ -23,9 +22,12 @@ public class Main extends Application {
 
     private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0);
 
-    private class LongValue{
+    //Translate the Gametime value format, will be used at timer part.
+    private class LongValue {
         public long value;
-        public LongValue(long i){value = i;}
+        public LongValue(long i) {
+            value = i;
+        }
     }
 
     /*Initialize the root scene for the main game, and new game object can be
@@ -51,56 +53,45 @@ public class Main extends Application {
         Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
 
+        //set the key listener
         KeyHandle handle = new KeyHandle();
         root.setOnKeyPressed(handle);
         root.setOnKeyReleased(handle);
 
+        //set the image for player, need to change the
+        player.setImage("file:C:\\Users\\lenovo\\IdeaProjects\\halflife\\src\\com\\halflife3\\Model\\Player_pic.png");
+
         //Set the graphic tool for canvas
         GraphicsContext gc = canvas.getGraphicsContext2D();
+
         //main update.
         LongValue lastNanoTime = new LongValue(System.nanoTime());
+
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
-// calculate time since last update.
+                // calculate time since last update.
                 double elapsedTime = (currentNanoTime - lastNanoTime.value) / 1000000000.0;
                 lastNanoTime.value = currentNanoTime;
 
-// game logic
+                // game logic
+                if (handle.input.isKeyPressed(A))
+                    player.setVelocity(new Vector2(-100, 0));
+                if (handle.input.isKeyPressed(D))
+                    player.setVelocity(new Vector2(100, 0));
+                if (handle.input.isKeyPressed(W))
+                    player.setVelocity(new Vector2(0, -100));
+                if (handle.input.isKeyPressed(S))
+                    player.setVelocity(new Vector2(0, 100));
 
-//                briefcase.setVelocity(0, 0);
-//                if (input.contains("LEFT"))
-//                    briefcase.addVelocity(-50, 0);
-//                if (input.contains("RIGHT"))
-//                    briefcase.addVelocity(50, 0);
-//                if (input.contains("UP"))
-//                    briefcase.addVelocity(0, -50);
-//                if (input.contains("DOWN"))
-//                    briefcase.addVelocity(0, 50);
-//
-//                briefcase.update(elapsedTime);
 
-// collision detection
+                player.update(elapsedTime);
 
-//                Iterator<Sprite> moneybagIter = moneybagList.iterator();
-//                while (moneybagIter.hasNext()) {
-//                    Sprite moneybag = moneybagIter.next();
-//                    if (briefcase.intersects(moneybag)) {
-//                        moneybagIter.remove();
-//                        score.value++;
-//                    }
-//                }
 
-// render
+                // TODO: collision detection
 
+                // render
                 gc.clearRect(0, 0, 800, 600);
                 player.render(gc);
-
-//                for (Sprite moneybag : moneybagList)
-//                    moneybag.render(gc);
-
-                String pointsText = "Cash: $" + (100 * score.value);
-                gc.fillText(pointsText, 360, 36);
-                gc.strokeText(pointsText, 360, 36);
             }
         }.start();
         //main render.

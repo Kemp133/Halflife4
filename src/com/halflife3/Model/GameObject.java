@@ -40,7 +40,21 @@ public abstract class GameObject implements IRenderable, IUpdateable{
         velocity = new Vector2();
     }
 
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
+    }
+
     /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
      * change depending on what it's acting as a collider for (e.g. a box or a circle) */
     public abstract Shape GetBounds();
+
+    /*
+    * Detect the collision.
+    * */
+    public abstract boolean intersects(GameObject s);
+
 }
