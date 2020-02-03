@@ -4,5 +4,5 @@ abstract class enemy{
     int health;
     int hitboxSize;
     int speed;//speed determents how fast a eney moves when they move. For immobile enemies, speed = 0
-
+    int[] icon;
 }
