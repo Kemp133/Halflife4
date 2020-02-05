@@ -1,3 +1,5 @@
+package com.halflife3.Model;
+
 //this is to store the abstract data for all characters
 abstract class Character{
     //we need a health value, hitbox size, movement speed for all characters

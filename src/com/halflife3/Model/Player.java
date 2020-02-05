@@ -12,7 +12,7 @@ public class Player extends GameObject{
 
     //Initialize a player
     public Player(Vector2 position, Vector2 velocity, short rotation){
-        super(position,velocity,rotation,Role.player);
+        super(position,velocity,rotation);
     }
 
     @Override
