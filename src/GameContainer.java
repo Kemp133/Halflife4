@@ -15,7 +15,7 @@ public class GameContainer implements Runnable {
         window = new Window(this);
 
         thread = new Thread(this);
-        thread.run();
+        thread.start();
     }
 
     public void stop() {

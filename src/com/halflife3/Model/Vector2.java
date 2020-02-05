@@ -86,4 +86,7 @@ public class Vector2 {
      * @return The squared distance between the two points
      */
     public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
+
+    public double getX() { return this.x; }
+    public double getY() { return this.y; }
 }
