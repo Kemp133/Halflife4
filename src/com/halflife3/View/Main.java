@@ -40,8 +40,6 @@ public class Main extends Application {
         //root.getChildren().add(player);
         return root;
     }
-    //Try to use canvas instead of use the scene only
-
     /*
      * Stage pass to start is the stage of game
      * */
@@ -83,10 +81,7 @@ public class Main extends Application {
                 if (handle.input.isKeyPressed(S))
                     player.setVelocity(new Vector2(0, 100));
 
-
                 player.update(elapsedTime);
-
-
                 // TODO: collision detection
 
                 // render
@@ -94,8 +89,6 @@ public class Main extends Application {
                 player.render(gc);
             }
         }.start();
-        //main render.
-
         root.requestFocus();
         primaryStage.show();
 
