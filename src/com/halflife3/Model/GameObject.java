@@ -1,7 +1,9 @@
 package com.halflife3.Model;
 
+import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.Node;
 
 import java.util.HashSet;
 
@@ -37,7 +39,41 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         velocity = new Vector2();
     }
 
+
+
     /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
-     * change depending on what it's acting as a collider for (e.g. a box or a circle) */
+     * change depending on what its acting as a collider for (e.g. a box or a circle) */
     public abstract Rectangle GetBounds();
+
+    //region Position getters and Setters
+    /** A method to return the x value from the Vector2 */
+    public double getX() { return this.position.getX(); }
+    /** A method to return the y value from the Vector2 */
+    public double getY() { return this.position.getY(); }
+    /** A method to return the Vector2 that this GameObject holds */
+    public Vector2 getPosition() { return this.position; }
+    //endregion
+
+    //region Velocity Getters and Setters
+    /** A method to return the x value from the Vector2 */
+    public double getVelX() { return this.velocity.getX(); }
+    /** A method to return the y value from the Vector2 */
+    public double getVelY() { return this.velocity.getY(); }
+    /** A method to return the Vector2 that this GameObject holds */
+    public Vector2 getVelocity() { return this.velocity; }
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
+    }
+    //endregion
+
+    //region Rotation Getter and Setter
+    /** A method to return the rotation of the GameObject */
+    public double getRotation() { return this.rotation; }
+    //endregion
+
+    /*
+    * Detect the collision.
+    * */
+    public abstract boolean intersects(GameObject s);
+
 }
