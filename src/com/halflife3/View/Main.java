@@ -9,16 +9,19 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+
+import java.io.FileInputStream;
 
 import static javafx.scene.input.KeyCode.*;
 
 
 public class Main extends Application {
 
-    private Pane root = new Pane();
+
 
     private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0);
 
@@ -30,23 +33,36 @@ public class Main extends Application {
         }
     }
 
-    /*Initialize the root scene for the main game, and new game object can be
+    /**Initialize the root scene for the main game, and new game object can be
      * add by calling getChildren.add().
      * */
     //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
+    private Pane root = new Pane();
     private Parent createContent() {
         //root.setPrefSize(900, 400);
+
         //TODO: Use loop to add all the object into scene.
         //root.getChildren().add(player);
         return root;
     }
-    /*
-     * Stage pass to start is the stage of game
-     * */
+    /**Stage pass to start is the stage of game
+     **/
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("HalfLife 3");
         Scene scene = new Scene(createContent());
+
+        /**
+         * Set the background
+         * */
+        FileInputStream inputted = new FileInputStream("res/background_image.png");
+        Image image = new Image(inputted,32,32,true,true);
+        BackgroundImage myBI= new BackgroundImage(image,
+                BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT);
+        root.setBackground(new Background(myBI));
+
+
         primaryStage.setScene(scene);
         Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
@@ -56,8 +72,8 @@ public class Main extends Application {
         root.setOnKeyPressed(handle);
         root.setOnKeyReleased(handle);
 
-        //set the image for player, need to change the
-        player.setImage("file:C:\\Users\\lenovo\\IdeaProjects\\halflife\\src\\com\\halflife3\\Model\\Player_pic.png");
+        //set the image for player, need to change the path
+        player.setImage("res/Player_pic.png");
 
         //Set the graphic tool for canvas
         GraphicsContext gc = canvas.getGraphicsContext2D();

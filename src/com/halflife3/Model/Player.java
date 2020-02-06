@@ -4,6 +4,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 
 public class Player extends GameObject{
     public double width = 49;
@@ -35,12 +38,13 @@ public class Player extends GameObject{
         image = i;
         width = i.getWidth();
         height = i.getHeight();
+
     }
 
-    public void setImage(String filename)
-    {
-        Image i = new Image(filename);
-        setImage(i);
+    public void setImage(String filename) throws FileNotFoundException {
+        FileInputStream inputted = new FileInputStream(filename);
+        Image image = new Image(inputted);
+        setImage(image);
     }
 
     @Override
