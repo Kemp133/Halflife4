@@ -73,13 +73,13 @@ public class Main extends Application {
 
                 // game logic
                 if (handle.input.isKeyPressed(A))
-                    player.setVelocity(new Vector2(-100, 0));
+                    player.addVelocity(new Vector2(-100, 0));
                 if (handle.input.isKeyPressed(D))
-                    player.setVelocity(new Vector2(100, 0));
+                    player.addVelocity(new Vector2(100, 0));
                 if (handle.input.isKeyPressed(W))
-                    player.setVelocity(new Vector2(0, -100));
+                    player.addVelocity(new Vector2(0, -100));
                 if (handle.input.isKeyPressed(S))
-                    player.setVelocity(new Vector2(0, 100));
+                    player.addVelocity(new Vector2(0, 100));
 
                 player.update(elapsedTime);
                 // TODO: collision detection
