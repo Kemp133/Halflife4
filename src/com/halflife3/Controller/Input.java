@@ -1,11 +1,7 @@
 package com.halflife3.Controller;
 
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 
 import java.util.HashMap;
 
@@ -53,9 +49,9 @@ public class Input {
     //region resetValues (keyboard and mouse maps)
     public void resetValues() {
         for (KeyCode kc : KeyCode.values()) {
-            keysPressed.replace(kc, false);
+//            keysPressed.replace(kc, false);
             keysTyped.replace(kc, false);
-            keysReleased.replace(kc, false);
+//            keysReleased.replace(kc, false);
         }
 
         for(MouseButton mb : MouseButton.values()) {
@@ -65,43 +61,4 @@ public class Input {
         }
     }
     //endregion
-}
-
-class KeyboardInput implements EventHandler<KeyEvent> {
-    Input input;
-
-    @Override
-    public void handle(KeyEvent keyEvent) {
-        if(keyEvent.getEventType() == KeyEvent.KEY_PRESSED){
-            input.keysPressed.replace(keyEvent.getCode(), true);
-        } else if(keyEvent.getEventType() == KeyEvent.KEY_RELEASED) {
-            input.keysReleased.replace(keyEvent.getCode(), true);
-        } else if(keyEvent.getEventType() == KeyEvent.KEY_TYPED) {
-            input.keysTyped.replace(keyEvent.getCode(), true);
-        }
-    }
-
-    {
-        //TODO: Initialise input value with a global shared Input reference in the main class
-    }
-}
-
-class MouseInput implements EventHandler<MouseEvent> {
-    Input input;
-
-    @Override
-    public void handle(MouseEvent mouseEvent) {
-        if(mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            input.mouseButtonPressed.replace(mouseEvent.getButton(), true);
-        } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
-            input.mouseButtonClicked.replace(mouseEvent.getButton(), true);
-        } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_RELEASED) {
-            input.mouseButtonReleased.replace(mouseEvent.getButton(), true);
-        }
-        //TODO: There are so many different kinds of mouse event that happen, didn't have time to figure the rest out
-    }
-
-    {
-        //TODO: Initialise input value with a global shared Input reference in the main class
-    }
 }
