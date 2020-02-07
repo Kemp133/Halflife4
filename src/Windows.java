@@ -13,12 +13,15 @@ import javafx.stage.Stage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-public class Window extends Application {
+public class Windows extends Application {
 
     /*Stage window;
     BorderPane layout;*/ // Not needed for now
-
+    private String filepng = null;
     private StackPane pane = new StackPane();
+
+    public Windows(){
+    }
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
@@ -47,7 +50,7 @@ public class Window extends Application {
         pane.getChildren().add(button);
     }
     private void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/markus-henze-4vVZ8N88Ygs-unsplash.jpg");
+        FileInputStream inputStream = new FileInputStream("res/button_image.png");
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
@@ -76,7 +79,13 @@ public class Window extends Application {
         }
     }
 
+
+
     public static void main (String[] args) {
         launch(args);
+    }
+
+    public void Update() {
+
     }
 }

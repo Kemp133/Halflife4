@@ -1,6 +1,8 @@
-public class GameContainer implements Runnable {
+import javafx.stage.Window;
+
+public class GameContainer extends Windows implements Runnable{
     private Thread thread;
-    private Window window;
+    //private Windows window;
     private boolean running = false;
     private final double UPDATE_CAP = 1.0/60.0;
     private int width = 320, height = 240;
@@ -8,14 +10,13 @@ public class GameContainer implements Runnable {
     private String title = "Half-Life 3 v1.0";
 
     public GameContainer() {
-
+        super();
     }
 
-    public void start() {
-        window = new Window(this);
 
+    public void start() {
         thread = new Thread(this);
-        thread.start();
+       thread.start();
     }
 
     public void stop() {
@@ -60,7 +61,7 @@ public class GameContainer implements Runnable {
 
             if (render) {
                 //TODO: Render game
-                window.Update();
+                this.Update();
                 frames++;
             } else {
                 try {
