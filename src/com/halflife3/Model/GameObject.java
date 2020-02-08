@@ -37,6 +37,7 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     {
         position = new Vector2();
         velocity = new Vector2();
+        keys = new HashSet<>();
     }
 
 
