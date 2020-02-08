@@ -2,16 +2,22 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.imageio.stream.FileImageInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class Windows extends Application {
 
@@ -27,7 +33,7 @@ public class Windows extends Application {
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
 
-    private void addButtons() throws FileNotFoundException {
+   /* private void addButtons() throws FileNotFoundException {
         //Button newGButton = new Button("New Game");
         //Button optButton = new Button("Options");
         //Button quit = new Button("Quit");
@@ -48,9 +54,34 @@ public class Windows extends Application {
         //Button testButton = new Button("", imageView);
 
         pane.getChildren().add(button);
+    }*/
+
+    private void addMenu() throws IOException {
+        LinMenu main_menu = LinMenu.getInstance();
+
+        FileInputStream input = new FileInputStream("res/button_image.png");
+        Image image = new Image(input);
+        ImageView imageview = new ImageView(image);
+        MenuButton button = new MenuButton("Settings", imageview, main_menu.getItems().get(0),main_menu.getItems().get(1),main_menu.getItems().get(2),main_menu.getItems().get(3));
+        button.setCenterShape(true);
+      /*  MenuButton button_stat = new MenuButton("Start",imageview,main_menu.getItems().get(0));
+        MenuButton button_set = new MenuButton("Settings",imageview,main_menu.getItems().get(1));
+        MenuButton button_exit = new MenuButton("Exit",imageview,main_menu.getItems().get(2));
+
+        I have problems with button lay_out
+        */
+
+        Pane menu_pane = new Pane();
+        menu_pane.getChildren().add(button);
+
+        /*hbox2.setLayoutY(hbox1.getWidth());
+        hbox1.setLayoutX(hbox1.getHeight());*/
+
+        pane.getChildren().add(menu_pane);
+
     }
     private void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/button_image.png");
+        FileInputStream inputStream = new FileInputStream("res/button_image.png"); //change the backgraoud file plz
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
@@ -62,7 +93,11 @@ public class Windows extends Application {
 
     private StackPane createContent() throws FileNotFoundException {
         addBackground();
-        addButtons();
+        try {
+            addMenu();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return pane;
     }
@@ -70,6 +105,7 @@ public class Windows extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+
             primaryStage.setTitle("Team HalfLife");
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
