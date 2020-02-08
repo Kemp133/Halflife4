@@ -63,7 +63,8 @@ public class Windows extends Application {
         Image image = new Image(input);
         ImageView imageview = new ImageView(image);
         MenuButton button = new MenuButton("Settings", imageview, main_menu.getItems().get(0),main_menu.getItems().get(1),main_menu.getItems().get(2),main_menu.getItems().get(3));
-        button.setCenterShape(true);
+        button.setLayoutX(250);
+        button.setLayoutY(200);
       /*  MenuButton button_stat = new MenuButton("Start",imageview,main_menu.getItems().get(0));
         MenuButton button_set = new MenuButton("Settings",imageview,main_menu.getItems().get(1));
         MenuButton button_exit = new MenuButton("Exit",imageview,main_menu.getItems().get(2));
@@ -71,13 +72,10 @@ public class Windows extends Application {
         I have problems with button lay_out
         */
 
-        Pane menu_pane = new Pane();
-        menu_pane.getChildren().add(button);
-
         /*hbox2.setLayoutY(hbox1.getWidth());
         hbox1.setLayoutX(hbox1.getHeight());*/
 
-        pane.getChildren().add(menu_pane);
+        pane.getChildren().add(button);
 
     }
     private void addBackground() throws FileNotFoundException {
@@ -122,6 +120,6 @@ public class Windows extends Application {
     }
 
     public void Update() {
-
+        //What to update? I am confused
     }
 }
