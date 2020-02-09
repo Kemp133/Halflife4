@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 
-public class Player extends GameObject{
+public class Player extends GameObject {
     public double width = 49;
     public double height = 43;
     private Image image;
@@ -21,8 +21,7 @@ public class Player extends GameObject{
     @Override
     public Rectangle GetBounds() {
         //Create rectangle object(one of node in javafx)
-        Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
-        return rectangle;
+        return new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
     }
 
     //TODO: write the intersects
@@ -58,4 +57,7 @@ public class Player extends GameObject{
         this.position = this.position.add(this.velocity.multiply(time));
     }
 
+    public void addVelocity(Vector2 toAdd) {
+        this.velocity.add(toAdd);
+    }
 }
