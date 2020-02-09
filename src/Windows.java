@@ -1,15 +1,16 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -25,8 +26,9 @@ public class Windows extends Application {
     BorderPane layout;*/ // Not needed for now
     private String filepng = null;
     private StackPane pane = new StackPane();
+    private LinMenu main_menu = LinMenu.getInstance();
 
-    public Windows(){
+    public Windows() throws FileNotFoundException {
     }
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
@@ -57,14 +59,19 @@ public class Windows extends Application {
     }*/
 
     private void addMenu() throws IOException {
-        LinMenu main_menu = LinMenu.getInstance();
 
         FileInputStream input = new FileInputStream("res/button_image.png");
         Image image = new Image(input);
         ImageView imageview = new ImageView(image);
-        MenuButton button = new MenuButton("Settings", imageview, main_menu.getItems().get(0),main_menu.getItems().get(1),main_menu.getItems().get(2),main_menu.getItems().get(3));
-        button.setLayoutX(250);
-        button.setLayoutY(200);
+
+        MenuBar manuBar = main_menu.getBar();
+        
+        HBox manu_pane = new HBox(manuBar);
+
+        manu_pane.setAlignment(Pos.CENTER);
+        //MenuButton button = new MenuButton("Settings", imageview, main_menu.getItems().get(0),main_menu.getItems().get(1),main_menu.getItems().get(2),main_menu.getItems().get(3));
+        //button.setLayoutX(250);
+        //button.setLayoutY(200);
       /*  MenuButton button_stat = new MenuButton("Start",imageview,main_menu.getItems().get(0));
         MenuButton button_set = new MenuButton("Settings",imageview,main_menu.getItems().get(1));
         MenuButton button_exit = new MenuButton("Exit",imageview,main_menu.getItems().get(2));
@@ -74,9 +81,7 @@ public class Windows extends Application {
 
         /*hbox2.setLayoutY(hbox1.getWidth());
         hbox1.setLayoutX(hbox1.getHeight());*/
-
-        pane.getChildren().add(button);
-
+        pane.getChildren().add(manu_pane);
     }
     private void addBackground() throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream("res/button_image.png"); //change the backgraoud file plz
@@ -86,7 +91,9 @@ public class Windows extends Application {
         imageView.setFitWidth(SCREEN_WIDTH);
         imageView.setFitHeight(SCREEN_HEIGHT);
 
-        pane.getChildren().add(imageView);
+        Pane backgroud = new Pane(imageView);
+
+        pane.getChildren().add(backgroud);
     }
 
     private StackPane createContent() throws FileNotFoundException {
@@ -103,7 +110,6 @@ public class Windows extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-
             primaryStage.setTitle("Team HalfLife");
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
@@ -115,7 +121,7 @@ public class Windows extends Application {
 
 
 
-    public static void main (String[] args) {
+    public static void main (String[] args) throws FileNotFoundException {
         launch(args);
     }
 

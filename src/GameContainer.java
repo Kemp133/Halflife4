@@ -1,5 +1,7 @@
 import javafx.stage.Window;
 
+import java.io.FileNotFoundException;
+
 public class GameContainer extends Windows implements Runnable{
     private Thread thread;
     //private Windows window;
@@ -9,7 +11,7 @@ public class GameContainer extends Windows implements Runnable{
     private float scale = 3f;
     private String title = "Half-Life 3 v1.0";
 
-    public GameContainer() {
+    public GameContainer() throws FileNotFoundException {
         super();
     }
 
@@ -80,7 +82,7 @@ public class GameContainer extends Windows implements Runnable{
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         GameContainer gc = new GameContainer();
         gc.start();
     }
