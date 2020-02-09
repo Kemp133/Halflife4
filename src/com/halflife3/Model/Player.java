@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 public class Player extends GameObject {
     public double width = 49;
     public double height = 43;
+    public Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
     private Image image;
 
     //Initialize a player
