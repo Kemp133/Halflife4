@@ -64,11 +64,9 @@ public class Windows extends Application {
         Image image = new Image(input);
         ImageView imageview = new ImageView(image);
 
-        MenuBar manuBar = main_menu.getBar();
-        
-        HBox manu_pane = new HBox(manuBar);
+        VBox manuBar = main_menu.getBar();
 
-        manu_pane.setAlignment(Pos.CENTER);
+        manuBar.setAlignment(Pos.CENTER);
         //MenuButton button = new MenuButton("Settings", imageview, main_menu.getItems().get(0),main_menu.getItems().get(1),main_menu.getItems().get(2),main_menu.getItems().get(3));
         //button.setLayoutX(250);
         //button.setLayoutY(200);
@@ -81,7 +79,7 @@ public class Windows extends Application {
 
         /*hbox2.setLayoutY(hbox1.getWidth());
         hbox1.setLayoutX(hbox1.getHeight());*/
-        pane.getChildren().add(manu_pane);
+        pane.getChildren().add(manuBar);
     }
     private void addBackground() throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream("res/button_image.png"); //change the backgraoud file plz
