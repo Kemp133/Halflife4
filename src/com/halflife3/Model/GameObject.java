@@ -82,6 +82,6 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         return Math.sqrt( Math.pow((position.getX() - this.position.getX()),2) +  Math.pow((position.getY() - this.position.getY()),2) );
     }
     public double getDistance(GameObject entity){
-        return Math.sqrt( Math.pow((position.getX() - this.position.getX()),2) +  Math.pow((position.getY() - this.position.getY()),2) );
+        return Math.sqrt( Math.pow((entity.getX() - this.position.getX()),2) +  Math.pow((entity.getY() - this.position.getY()),2) );
     }
 }
