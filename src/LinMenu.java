@@ -19,7 +19,7 @@ public class LinMenu extends ContextMenu {
     private VBox main_manu = null;
     private File audio_path = new File("res/bensound-summer.mp3");
     private Media media = new Media(audio_path.toURI().toString());
-    private MediaPlayer player = new MediaPlayer(media);
+    private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
     private Slider volume = new Slider();
 
     private LinMenu() throws FileNotFoundException {
@@ -29,24 +29,33 @@ public class LinMenu extends ContextMenu {
 
         MenuItem startItem = new MenuItem("new game");
         MenuItem loadItem = new MenuItem("load game");
-        MenuItem audioItem = new MenuItem("audio");
+        MenuItem audioItem_on = new MenuItem("audio on");
+        MenuItem audioitem_off = new MenuItem("audio off");
         CustomMenuItem audio = new CustomMenuItem(volume);
         audio.setHideOnClick(false);
         MenuButton start_m = new MenuButton("Start",imageview,startItem,loadItem);
-        MenuButton settings_m = new MenuButton("Settings",imageview,audioItem,audio);
+        MenuButton settings_m = new MenuButton("Settings",imageview,audioItem_on,audioitem_off,audio);
         Button exit_m = new Button("Exit",imageview);
 
         //adding mouse input
         startItem.setOnAction(e->{
             player.play();
-            audio.setOnAction(actionEvent -> volumeControl(volume));
         });
+        audioItem_on.setOnAction(actionEvent -> Is_mute(false));
+        audioitem_off.setOnAction(actionEvent -> Is_mute(true));
+        audio.setOnAction(actionEvent -> volumeControl(volume));
         exit_m.setOnAction(actionEvent -> Platform.exit());
-
-
         main_manu = new VBox(100);
         main_manu.getChildren().addAll(start_m, settings_m, exit_m);
 
+    }
+
+    private void Is_mute(boolean b) {
+        if(b){
+            player.stop();
+        }else{
+            player.play();
+        }
     }
 
     private void volumeControl(Slider volume) {
