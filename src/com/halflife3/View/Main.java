@@ -80,13 +80,10 @@ public class Main extends Application {
         //root.getChildren().add(player.GetBounds());
         //Rectangle clip = new Rectangle(20,20,100,100);
         //Rectangle clip2 = new Rectangle(20,20,100,100);
-
         //canvas.setClip(clip);
         //root.setClip(clip);
         //canvas.translateXProperty().bind(clip.xProperty().multiply(-1));
         //canvas.translateYProperty().bind(clip.yProperty().multiply(-1));
-
-
         //Rectangle clip = new Rectangle(0,0,300,200);
 //        clip.widthProperty().bind(scene.widthProperty());
 //        clip.heightProperty().bind(scene.heightProperty());
@@ -97,12 +94,9 @@ public class Main extends Application {
 //        clip.yProperty().bind(Bindings.createDoubleBinding(
 //                () -> clampRange(player.getY() - scene.getHeight() / 2, 0, root.getHeight() - scene.getHeight()),
 //                player.GetBounds().yProperty(), scene.heightProperty()));
-
         //root.setClip(clip);
         //root.translateXProperty().bind(clip.xProperty().multiply(-1));
         //root.translateYProperty().bind(clip.yProperty().multiply(-1));
-
-
 
 
         //set the key listener
@@ -119,6 +113,10 @@ public class Main extends Application {
         //main update.
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
+        MapRender map = new MapRender();
+        map.SetMap("res/map.png");
+        map.loadLevel();
+
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 // calculate time since last update.
@@ -127,37 +125,31 @@ public class Main extends Application {
 
                 // game logic
                 if (handle.input.isKeyPressed(A))
-                    player.addVelocity(new Vector2(-100, 0));
-                if (handle.input.isKeyPressed(D))
-                    player.addVelocity(new Vector2(100, 0));
-                if (handle.input.isKeyPressed(W))
-                    player.addVelocity(new Vector2(0, -100));
-                if (handle.input.isKeyPressed(S))
-                    player.addVelocity(new Vector2(0, 100));
+                    //player.addVelocity(new Vector2(-100, 0));
+                    player.getVelocity().setX(-100);
+                else if (handle.input.isKeyPressed(D))
+                    //player.addVelocity(new Vector2(100, 0));
+                    player.getVelocity().setX(100);
+                else if (handle.input.isKeyPressed(W))
+                    //player.addVelocity(new Vector2(0, -100));
+                    player.getVelocity().setY(-100);
+                else if (handle.input.isKeyPressed(S))
+                    //player.addVelocity(new Vector2(0, 100));
+                    player.getVelocity().setY(100);
+                else
+                    player.getVelocity().reset();
 
+
+
+                player.collision(map.get_list(),elapsedTime);
                 player.update(elapsedTime);
-                // TODO: collision detection
+
+
 
                 // render
                 gc.clearRect(0, 0, 800, 600);
-                //double a = clip.getX() + ((player.getX() - clip.getX()) - scene.getWidth() / 2);
-                //double b = clip.getX() + ((player.getX() - clip.getX()) - scene.getWidth() / 2);
-//                if(a < 0){
-//                    a = 0;
-//                }
-//                if (b < 0) {
-//                    b = 0;
-//                }
-//                if(a > scene.getWidth()){
-//                    a = scene.getWidth();
-//                }
-//                if(b > scene.getHeight()){
-//                    b = scene.getHeight();
-//                }
-                //clip.setX(a);
-                //clip.setY(b);
-
                 player.render(gc);
+                map.render(gc);
             }
         }.start();
         root.requestFocus();

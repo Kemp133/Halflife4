@@ -94,4 +94,21 @@ public class Vector2 {
     public double getY() {
         return y;
     }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void reverse(){
+        this.x = -x;
+        this.y = -y;
+    }
+    public void reset(){
+        this.x = 0;
+        this.y = 0;
+    }
 }

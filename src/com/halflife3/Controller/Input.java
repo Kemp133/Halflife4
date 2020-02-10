@@ -49,9 +49,9 @@ public class Input {
     //region resetValues (keyboard and mouse maps)
     public void resetValues() {
         for (KeyCode kc : KeyCode.values()) {
-//            keysPressed.replace(kc, false);
+            keysPressed.replace(kc, false);
             keysTyped.replace(kc, false);
-//            keysReleased.replace(kc, false);
+            keysReleased.replace(kc, false);
         }
 
         for(MouseButton mb : MouseButton.values()) {
