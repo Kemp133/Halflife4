@@ -2,22 +2,16 @@ import com.halflife3.Controller.*;
 import com.halflife3.Model.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.event.EventType;
+import javafx.scene.*;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCode.S;
 
 public class JavaFXWindow extends Application {
 
@@ -33,6 +27,7 @@ public class JavaFXWindow extends Application {
         Scene scene = new Scene(root, 800, 800);
         scene.addEventHandler(KeyEvent.ANY, new KeyboardInput(input));
         scene.addEventHandler(MouseEvent.ANY, new MouseInput(input));
+        scene.setCursor(Cursor.NONE);
         stage.setTitle("This is a window!");
         stage.setScene(scene);
 
@@ -40,18 +35,15 @@ public class JavaFXWindow extends Application {
 
         Player Player1 = new Player(new Vector2(100,100), new Vector2(), (short)0, om);
         //set the image for player, need to change the
-        Player1.setImage("file:res/Player_pic.png");
+        Player1.setImage("res/Player_pic.png");
 
         Player Player2 = new Player(new Vector2(200, 200), new Vector2(), (short)0, om);
-        Player2.setImage("file:res/Player_pic.png");
+        Player2.setImage("res/Player_pic.png");
+
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0,0), (short)0, om, input);
 
         //main update.
         final long[] startNanoTime = {System.nanoTime()};
-
-//        Set<GameObject> gos = new HashSet<>(); //Replaced by the ObjectManager
-//        gos.add(Player1);
-//        gos.add(Player2);
-        new Bullet(new Vector2( 150, 150), new Vector2(0, 0), (short)0, om);
 
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
@@ -81,9 +73,9 @@ public class JavaFXWindow extends Application {
                 if (input.isKeyPressed(DOWN))
                     Player2.addVelocity(new Vector2(0, 150));
 
-
-//                Player1.update(elapsedTime);
-//                Player2.update(elapsedTime);
+                if(input.isKeyPressed(C)) {
+                    om.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
+                }
 
                 for(IUpdateable go : om.getGameObjects()) {
                     go.update(elapsedTime);
@@ -96,10 +88,6 @@ public class JavaFXWindow extends Application {
                 for(IRenderable go : om.getGameObjects()) {
                     go.render(gc);
                 }
-
-
-//                Player1.render(gc);
-//                Player2.render(gc);
                 input.resetValues();
             }
         }.start();
