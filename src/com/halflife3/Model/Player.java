@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -17,9 +18,11 @@ public class Player extends GameObject {
     public Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
     private Image image;
 
+    private float moveSpeed = 150;
+
     //Initialize a player
-    public Player(Vector2 position, Vector2 velocity, short rotation){
-        super(position,velocity,rotation);
+    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om){
+        super(position,velocity,rotation, om);
     }
 
     @Override
@@ -62,7 +65,7 @@ public class Player extends GameObject {
 
     }
 
-    public void collision(Deque<Bricks> Blocks, double time){
+    public void collision(Deque<Bricks> Blocks, double time) {
 
         Vector2 orginal_position = new Vector2(this.position.getX(), this.position.getY());
 
@@ -72,18 +75,16 @@ public class Player extends GameObject {
         rectangle.setY(this.position.getY());
 
         Iterator<Bricks> it = Blocks.iterator();
-        while(it.hasNext()){
-            if(it.next().GetBounds().intersects(this.rectangle.getBoundsInLocal())){
+        while (it.hasNext()) {
+            if (it.next().GetBounds().intersects(this.rectangle.getBoundsInLocal())) {
                 this.position = orginal_position;
                 rectangle.setX(this.position.getX());
                 rectangle.setY(this.position.getY());
                 //this.velocity = new Vector2(0,0);
             }
         }
-
     }
 
-//    public void addVelocity(Vector2 toAdd) {
-//        this.velocity.add(toAdd);
-//    }
+    public float getMoveSpeed() { return this.moveSpeed; }
+    public void setMoveSpeed(float speed) { this.moveSpeed = speed; }
 }

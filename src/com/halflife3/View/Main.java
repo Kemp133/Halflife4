@@ -1,11 +1,11 @@
 package com.halflife3.View;
 
 import com.halflife3.Controller.KeyHandle;
+import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.Player;
 import com.halflife3.Model.Vector2;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Parent;
@@ -15,18 +15,18 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-import javax.swing.*;
+
 import java.io.FileInputStream;
-import java.math.BigDecimal;
 
 import static javafx.scene.input.KeyCode.*;
 
 
 public class Main extends Application {
 
+    private Pane root = new Pane();
+    private ObjectManager objectManager;
 
-
-    private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0);
+    private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
 
     //Translate the Gametime value format, will be used at timer part.
     private class LongValue {
@@ -46,8 +46,6 @@ public class Main extends Application {
      * add by calling getChildren.add().
      * */
     //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
-    private Pane root = new Pane();
-
     private Parent createContent() {
         //root.setPrefSize(900, 400);
 
@@ -60,9 +58,10 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("HalfLife 3");
-        Canvas canvas = new Canvas(800,600);
+        Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
         Scene scene = new Scene(createContent(),800,600);
+        primaryStage.setScene(scene);
 
         /**
          * Set the background
@@ -104,8 +103,8 @@ public class Main extends Application {
         root.setOnKeyPressed(handle);
         root.setOnKeyReleased(handle);
 
-        //set the image for player, need to change the path
-        player.setImage("res/Player_pic.png");
+        //set the image for player, need to change the
+        player.setImage("file:res/Player_pic.png");
 
         //Set the graphic tool for canvas
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -153,7 +152,6 @@ public class Main extends Application {
             }
         }.start();
         root.requestFocus();
-        primaryStage.setScene(scene);
         primaryStage.show();
 
     }

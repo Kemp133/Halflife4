@@ -12,7 +12,7 @@ public class KeyboardInput implements EventHandler<KeyEvent> {
 
     @Override
     public void handle(KeyEvent keyEvent) {
-        System.out.println(String.format("Key %s was pressed!", keyEvent.getCode().toString()));
+//        System.out.println(String.format("Key %s was pressed!", keyEvent.getCode().toString()));
 
         if (keyEvent.getEventType().equals(KeyEvent.KEY_PRESSED)) {
             input.keysPressed.replace(keyEvent.getCode(), true);
