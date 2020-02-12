@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -77,6 +78,10 @@ public class JavaFXWindow extends Application {
                     om.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
                 }
 
+                if(input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
+                    Bullet bullet = new Bullet(new Vector2(Player1.getX(), Player1.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(Player1.getPosition()), (short)0, om);
+                }
+
                 for(IUpdateable go : om.getGameObjects()) {
                     go.update(elapsedTime);
                 }
@@ -87,6 +92,10 @@ public class JavaFXWindow extends Application {
 
                 for(IRenderable go : om.getGameObjects()) {
                     go.render(gc);
+                }
+
+                for(GameObject go : om.getGameObjects()) {
+                    go.setVelocity(new Vector2(0,0));
                 }
                 input.resetValues();
             }
