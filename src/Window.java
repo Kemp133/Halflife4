@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -24,14 +25,21 @@ public class Window extends Application {
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
 
+    private void addTitle() {
+        Label newTitle = new Label("Login");
+        newTitle.setLayoutX(0);
+        newTitle.setLayoutY(0);
+        pane.getChildren().add(newTitle);
+    }
+
     private void addButtons() throws FileNotFoundException {
-        //Button newGButton = new Button("New Game");
-        //Button optButton = new Button("Options");
-        //Button quit = new Button("Quit");
-        //newGButton.setLayoutX(250);
-        //newGButton.setLayoutY(220);
-        //newGButton.setCenterShape(true);
-        //pane.getChildren().addAll(newGButton, optButton, quit);
+        Button newGButton = new Button("New Game");
+        Button optButton = new Button("Options");
+        Button quit = new Button("Quit");
+        newGButton.setLayoutX(250);
+        newGButton.setLayoutY(220);
+        newGButton.setCenterShape(true);
+        pane.getChildren().addAll(newGButton, optButton, quit);
 
         //Adds an image to a button
         FileInputStream input = new FileInputStream("res/button_image.png");
@@ -39,9 +47,6 @@ public class Window extends Application {
         ImageView imageView = new ImageView(image);
 
         Button button = new Button("New Game", imageView);
-
-        //ImageView imageView = new ImageView(new Image(getClass().getResource("/res/button_image.png").toExternalForm()));
-        //Button testButton = new Button("", imageView);
 
         pane.getChildren().add(button);
     }
@@ -59,6 +64,7 @@ public class Window extends Application {
 
     private StackPane createContent() throws FileNotFoundException {
         addBackground();
+        addTitle();
         addButtons();
 
         return pane;
