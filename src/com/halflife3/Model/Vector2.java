@@ -87,6 +87,28 @@ public class Vector2 {
      */
     public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
 
-    public double getX() { return this.x; }
-    public double getY() { return this.y; }
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void reverse(){
+        this.x = -x;
+        this.y = -y;
+    }
+    public void reset(){
+        this.x = 0;
+        this.y = 0;
+    }
 }

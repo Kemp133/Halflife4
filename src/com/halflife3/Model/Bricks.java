@@ -6,19 +6,15 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.Set;
 
-
-public class Player extends GameObject {
-    public double width = 49;
-    public double height = 43;
+public class Bricks extends GameObject {
+    public double width = 40;
+    public double height = 40;
     public Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
     private Image image;
 
     //Initialize a player
-    public Player(Vector2 position, Vector2 velocity, short rotation){
+    public Bricks(Vector2 position, Vector2 velocity, short rotation){
         super(position,velocity,rotation);
     }
 
@@ -26,7 +22,7 @@ public class Player extends GameObject {
     public Rectangle GetBounds() {
         //Create rectangle object(one of node in javafx)
         //return new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
-        return this.rectangle;
+        return  this.rectangle;
     }
 
     //TODO: write the intersects
@@ -53,37 +49,18 @@ public class Player extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
+
         gc.drawImage( image, position.getX(), position.getY() );
     }
 
     //update the position
     @Override
     public void update(double time) {
-
+        //this.position = this.position.add(this.velocity.multiply(time));
+        //TODO: for this after bullet created, if bullet touch the brick, brick should be removed
     }
 
-    public void collision(Deque<Bricks> Blocks, double time){
-
-        Vector2 orginal_position = new Vector2(this.position.getX(), this.position.getY());
-
-        this.position = this.position.add(this.velocity.multiply(time));
-        this.velocity.reset();
-        rectangle.setX(this.position.getX());
-        rectangle.setY(this.position.getY());
-
-        Iterator<Bricks> it = Blocks.iterator();
-        while(it.hasNext()){
-            if(it.next().GetBounds().intersects(this.rectangle.getBoundsInLocal())){
-                this.position = orginal_position;
-                rectangle.setX(this.position.getX());
-                rectangle.setY(this.position.getY());
-                //this.velocity = new Vector2(0,0);
-            }
-        }
-
+    public void addVelocity(Vector2 toAdd) {
+        this.velocity.add(toAdd);
     }
-
-//    public void addVelocity(Vector2 toAdd) {
-//        this.velocity.add(toAdd);
-//    }
 }
