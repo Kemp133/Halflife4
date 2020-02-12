@@ -12,7 +12,7 @@ public class GameContainer implements Runnable {
     }
 
     public void start() {
-        window = new Window(this);
+        window = new Window();
 
         thread = new Thread(this);
         thread.start();
@@ -60,7 +60,7 @@ public class GameContainer implements Runnable {
 
             if (render) {
                 //TODO: Render game
-                window.Update();
+                //window.Update();
                 frames++;
             } else {
                 try {

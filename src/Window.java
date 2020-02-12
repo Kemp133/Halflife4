@@ -39,13 +39,13 @@ public class Window extends Application {
         ImageView imageView = new ImageView(image);
 
         Button button = new Button("New Game", imageView);
-        //
 
         //ImageView imageView = new ImageView(new Image(getClass().getResource("/res/button_image.png").toExternalForm()));
         //Button testButton = new Button("", imageView);
 
         pane.getChildren().add(button);
     }
+
     private void addBackground() throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream("res/markus-henze-4vVZ8N88Ygs-unsplash.jpg");
         Image image = new Image(inputStream);
