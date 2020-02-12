@@ -10,6 +10,7 @@ public class KeyHandle implements EventHandler<KeyEvent> {
     * in the keyspressed list.
     * */
     @Override
+
     public void handle(KeyEvent keyEvent) {
         if(keyEvent.getEventType() == KeyEvent.KEY_PRESSED){
             input.keysPressed.replace(keyEvent.getCode(), true);

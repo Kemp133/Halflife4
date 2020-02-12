@@ -8,6 +8,8 @@ import javafx.scene.shape.Rectangle;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Deque;
+import java.util.Iterator;
+import java.util.Set;
 
 
 public class Player extends GameObject {
@@ -43,6 +45,7 @@ public class Player extends GameObject {
         image = i;
         width = i.getWidth();
         height = i.getHeight();
+
     }
 
     public void setImage(String filename) throws FileNotFoundException {
@@ -67,20 +70,21 @@ public class Player extends GameObject {
         Vector2 orginal_position = new Vector2(this.position.getX(), this.position.getY());
 
         this.position = this.position.add(this.velocity.multiply(time));
-        this.velocity.reset();
+
         rectangle.setX(this.position.getX());
         rectangle.setY(this.position.getY());
 
         for (Bricks block : Blocks) {
             if (block.GetBounds().intersects(this.rectangle.getBoundsInLocal())) {
-                this.position = orginal_position;
+
+                this.position = orginal_position.subtract(this.velocity.multiply(time*20));
                 rectangle.setX(this.position.getX());
                 rectangle.setY(this.position.getY());
                 //this.velocity = new Vector2(0,0);
             }
         }
+        this.velocity.reset();
     }
-
     public void addVelocity(Vector2 toAdd) {
         this.velocity.add(toAdd);
     }
