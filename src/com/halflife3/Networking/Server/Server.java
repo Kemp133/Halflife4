@@ -99,7 +99,7 @@ public class Server implements Runnable {
 
     public void sendTo(Object o, String mAddress, int mPort) {
         try {
-            DatagramSocket dSocket = new DatagramSocket();
+            MulticastSocket dSocket = new MulticastSocket();
             InetAddress group = InetAddress.getByName(mAddress);
 
 //          Creates a byte array of the object
@@ -107,27 +107,6 @@ public class Server implements Runnable {
 
             DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, group, mPort);
             dSocket.send(packet);
-
-//            Broadcast the message over all the network interfaces
-            /*Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
-
-                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
-                    continue; // Don't want to broadcast to the loopback interface
-                }
-
-                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                    InetAddress broadcast = interfaceAddress.getBroadcast();
-                    if (broadcast == null) {
-                        continue;
-                    }
-
-                    // Send the broadcast package!
-                    DatagramPacket sendPacket = new DatagramPacket(sendBuf, sendBuf.length, broadcast, mPort);
-                    dSocket.send(sendPacket);
-                }
-            }*/
 
         } catch (UnknownHostException e) {
             System.err.println("Exception:  " + e);

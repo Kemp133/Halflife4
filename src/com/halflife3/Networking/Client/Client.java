@@ -2,6 +2,7 @@ package com.halflife3.Networking.Client;
 
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
+import com.halflife3.Networking.Packets.TestPacket;
 import com.halflife3.Networking.Server.Server;
 
 import java.io.*;
@@ -28,7 +29,7 @@ public class Client implements Runnable {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
             serverSocket.joinGroup(group);
-            System.out.println("Joined group: " + group);
+            System.out.println("Joined group: " + group.getHostName());
         } catch (ConnectException e) {
             System.out.println("Unable to join the group");
         } catch (IOException e) {
@@ -39,7 +40,7 @@ public class Client implements Runnable {
     public void getHostInfo() {
         try {
 //            Receives the welcome (Test) packet
-            byte[] firstBuf = new byte[5000];
+            byte[] firstBuf = new byte[objectToByteArray(new TestPacket()).length];
             DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
             System.out.println("Looking for host...");
             serverSocket.receive(firstPacket);
