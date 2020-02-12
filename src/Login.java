@@ -125,15 +125,15 @@ public class Login extends Application {
         confPassword.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
         nameField.setMinHeight(30);
         nameField.setMinWidth(80);
-        nameField.setText(null);
         passwordField.setMinHeight(30);
         passwordField.setMinWidth(80);
-        passwordField.setText(null);
         passwordFieldConf.setMinHeight(30);
         passwordFieldConf.setMinWidth(80);
-        passwordFieldConf.setText(null);
         incorrectFields.setFill(Color.RED);
         incorrectFields.setVisible(false);
+
+        //Sets text fields to null
+        setNullFields();
 
         stage.setTitle("Login/Create User");
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -146,9 +146,10 @@ public class Login extends Application {
                 if (nameField.getText() != null && passwordField.getText() != null) {
                     if (confirmUser(getConnection(), nameField.getText(), passwordField.getText()) == true) {
                         //TODO: Assign username to 'player' and change to game screen
+                        incorrectFields.setText("Found user"); //TODO: delete after above
+                        incorrectFields.setVisible(true); //TODO: delete after above
                     } else {
-                        nameField.setText(null);
-                        passwordField.setText(null);
+                        setNullFields();
                         incorrectFields.setText("User not found. Please create a user.");
                         incorrectFields.setVisible(true);
                     }
@@ -163,6 +164,7 @@ public class Login extends Application {
         //This will change the scene to show the create new user gridpane
         createNewUser.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
+                setNullFields();
                 Scene sceneCreate = new Scene(newUserPane(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
                 stage.setScene(sceneCreate);
                 stage.show();
@@ -176,16 +178,16 @@ public class Login extends Application {
                     if (doesUserExist(getConnection(), nameField.getText()) == true) {
                         incorrectFields.setText("That username already exists. Please choose another one");
                         incorrectFields.setVisible(true);
-                    } else if (passwordField.getText() != passwordFieldConf.getText()){
-                        nameField.setText(null);
-                        passwordField.setText(null);
-                        passwordFieldConf.setText(null);
+                    } else if (!passwordField.getText().equals(passwordFieldConf.getText())){
+                        setNullFields();
                         incorrectFields.setText("Passwords do not match");
                         incorrectFields.setVisible(true);
                     } else {
                         //Insert user and password into table
                         addNewUser(getConnection(), nameField.getText(), passwordField.getText());  //ADD METHOD FOR HASHING PASSWORD THAT RETURNS A STRING
                         //TODO: Assign username to player and Change to game screen
+                        incorrectFields.setText("User created"); //TODO: delete after above
+                        incorrectFields.setVisible(true); //TODO: delete after above
                     }
                 }
                 else {
@@ -198,6 +200,7 @@ public class Login extends Application {
         //This will change the scene to show the login gridpane
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
+                setNullFields();
                 Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
                 stage.setScene(sceneLogin);
                 stage.show();
@@ -245,16 +248,26 @@ public class Login extends Application {
         return false;
     }
 
-    //Confirms users name and password exists and is correct. WILL NEED TO CHANGE SCORE -> PASSWORD AND
+    //Confirms users name and password exists and is correct.
     public boolean confirmUser(Connection c, String username, String passwordEntered) {
         try {
-            //Creating the Statement
+            //Retrieving the salt from the table based on the username given
+            byte[] salt = new byte[0];
             Statement stmt = c.createStatement();
-            String query = "SELECT * FROM UserDataScore WHERE name = username AND password = passwordEntered";
+            String querySalt = "SELECT salt FROM UserDataScore WHERE name = username";
+            ResultSet rs = stmt.executeQuery(querySalt);
+            while (rs.next()) {
+                salt = rs.getBytes("salt");
+            }
+            //Hashing the password given based on the salt retrieved
+            byte[] hashedPassword = hashPassword(salt, passwordEntered);
+            //Creating the Statement
+            Statement stmt2 = c.createStatement();
+            String queryDetails = "SELECT * FROM UserDataScore WHERE name = username AND password = hashedPassword";  //TODO: AND salt = salt?? or not needed?
             //Executing the query
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rsDetails = stmt2.executeQuery(queryDetails);
             //Returns true if user details are correct and false if they aren't
-            if (rs.next() != false) {
+            if (rsDetails.next() != false) {
                 return true;
             }
         } catch (SQLException e) {
@@ -267,10 +280,11 @@ public class Login extends Application {
     public void addNewUser(Connection c, String username, String passwordEntered) {
         try {
             //Creating a hashed password based on a random salt
-            byte[] hashedPassword = hashPassword(returnSalt(), passwordEntered);
+            byte[] randomSalt = returnSalt();
+            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
             //Creating the Statement
             Statement stmt = c.createStatement();
-            String query = "INSERT INTO UserDataScore (name, score, salt, password) VALUES (username, 0, salt, hashedPassword)";
+            String query = "INSERT INTO UserDataScore (name, score, salt, password) VALUES (username, 0, randomSalt, hashedPassword)";
             //Executing the query
             ResultSet rs = stmt.executeQuery(query);
         } catch (SQLException e) {
@@ -295,7 +309,13 @@ public class Login extends Application {
             e.printStackTrace();
         }
         md.update(salt);
-        byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        return hashedPassword;
+        return md.digest(password.getBytes(StandardCharsets.UTF_8));
+    }
+
+    //Sets text fields to null
+    public void setNullFields() {
+        nameField.setText(null);
+        passwordField.setText(null);
+        passwordFieldConf.setText(null);
     }
 }
