@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -25,8 +26,8 @@ public abstract class Enemy extends GameObject {
     }
 
     //Initialize a player
-    public Enemy(Vector2 position, Vector2 velocity, short rotation,int life){
-        super(position,velocity,rotation);
+    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life){
+        super(position,velocity,rotation, om);
         health = life;
     }
 

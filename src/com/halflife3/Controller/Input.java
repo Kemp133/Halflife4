@@ -1,5 +1,6 @@
 package com.halflife3.Controller;
 
+import com.halflife3.Model.Vector2;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 
@@ -17,6 +18,8 @@ public class Input {
     public HashMap<MouseButton, Boolean> mouseButtonClicked = new HashMap<>();
     public HashMap<MouseButton, Boolean> mouseButtonReleased = new HashMap<>();
     //endregion
+
+    public Vector2 mousePosition = new Vector2(0,0);
 
     //region static initializer
     {

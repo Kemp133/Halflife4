@@ -12,7 +12,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 
@@ -24,7 +23,7 @@ import static javafx.scene.input.KeyCode.*;
 public class Main extends Application {
 
     private Pane root = new Pane();
-    private ObjectManager objectManager;
+    private ObjectManager objectManager = new ObjectManager();
 
     private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
 
@@ -104,7 +103,7 @@ public class Main extends Application {
         root.setOnKeyReleased(handle);
 
         //set the image for player, need to change the
-        player.setImage("file:res/Player_pic.png");
+        player.setImage("res/Player_pic.png");
 
         //Set the graphic tool for canvas
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -112,7 +111,7 @@ public class Main extends Application {
         //main update.
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
-        MapRender map = new MapRender();
+        MapRender map = new MapRender(objectManager);
         map.SetMap("res/map.png");
         map.loadLevel();
 
@@ -160,4 +159,3 @@ public class Main extends Application {
         launch(args);
     }
 }
-

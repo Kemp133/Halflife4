@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.Arrays;
 
 public class Database {
     private static final String url = "jdbc:mariadb://localhost:3306/test";
@@ -24,7 +23,7 @@ public class Database {
 
         try (Connection connection = DriverManager.getConnection(url, user, password)) {
             System.out.println("Connected to the database successfully!!");
-            addUser(connection, "Johnny101", "testing", "testing");
+            addUser(connection, "testuser101", "testing", "testing");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

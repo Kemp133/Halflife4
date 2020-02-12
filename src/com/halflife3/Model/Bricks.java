@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -14,8 +15,9 @@ public class Bricks extends GameObject {
     private Image image;
 
     //Initialize a player
-    public Bricks(Vector2 position, Vector2 velocity, short rotation){
-        super(position,velocity,rotation);
+    public Bricks(Vector2 position, Vector2 velocity, short rotation, ObjectManager om){
+        super(position,velocity,rotation, om);
+        keys.add("Wall");
     }
 
     @Override

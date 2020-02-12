@@ -47,7 +47,9 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         keys = new HashSet<>();
     }
 
-
+    public boolean containsKey(String key) {
+        return keys.contains(key);
+    }
 
     /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
      * change depending on what its acting as a collider for (e.g. a box or a circle) */

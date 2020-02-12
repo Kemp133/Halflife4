@@ -2,24 +2,33 @@ package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.shape.Circle;
+import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
+import java.io.FileInputStream;
+
 public class Bullet extends GameObject {
-    Circle model;
-    int radius = 10;
+    Image sprite;
 
     double lifeTime = 5.0;
 
     public Bullet(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
-        model = new Circle(this.position.getX(), this.position.getY(), radius);
+        keys.add("Bullet");
     }
 
+    {
+        try {
+            FileInputStream inputted = new FileInputStream("res/bullet.png");
+            this.sprite = new Image(inputted);
+        } catch (Exception e) {
+            System.out.println("Error loading image");
+        }
+    }
 
     @Override
     public Rectangle GetBounds() {
-        return new Rectangle(this.position.getX(), this.position.getY(), model.getRadius() * 2, model.getRadius() * 2);
+        return new Rectangle(this.position.getX(), this.position.getY(), sprite.getWidth(), sprite.getHeight());
     }
 
     @Override
@@ -29,11 +38,11 @@ public class Bullet extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.fillOval(this.position.getX(), this.position.getY(), model.getRadius() * 2, model.getRadius() * 2);
+        gc.drawImage(sprite, getX(), getY());
     }
 
     @Override
     public void update(double time) {
-        this.position = position.add(this.position.multiply(time));
+        position.add(velocity.multiply(time));
     }
 }
