@@ -9,7 +9,7 @@ import java.net.*;
 public class Server implements Runnable {
 
     public static final int     MULTICAST_PORT      = 5555;
-    public static final String  MULTICAST_ADDRESS   = "230.0.0.123";
+    public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
     public static final int     LISTENER_PORT       = 5544;
 
     private boolean running = false;
