@@ -20,6 +20,9 @@ public class Client implements Runnable {
 //    Client's position on the map
     private Vector2 position;
 
+//    isRunning
+    private boolean running = false;
+
     public void joinGroup() {
         try {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
@@ -63,12 +66,19 @@ public class Client implements Runnable {
             e.printStackTrace();
         }
 
+        running = true;
         new Thread(this).start();
     }
 
     @Override
     public void run() {
 //        TODO: If position has changed send it to the server
+        while(running) {
+            System.out.println("Client running");
+            wait(1000);
+        }
+
+        running = false;
     }
 
     public Object receivePacket() {
@@ -89,6 +99,14 @@ public class Client implements Runnable {
         }
 
         return o;
+    }
+
+    private void wait(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private byte[] objectToByteArray(Object o) {
