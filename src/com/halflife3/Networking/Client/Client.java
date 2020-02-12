@@ -41,12 +41,13 @@ public class Client implements Runnable {
 //            Receives the welcome (Test) packet
             byte[] firstBuf = new byte[5000];
             DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
+            System.out.println("Looking for host...");
             serverSocket.receive(firstPacket);
 
 //            Gets the server's address
             hostAddress = firstPacket.getAddress();
 
-            System.out.println("Host: " + hostAddress);
+            System.out.println("Host found: " + hostAddress);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,7 +76,7 @@ public class Client implements Runnable {
 //        TODO: If position has changed send it to the server
         while(running) {
             System.out.println("Client running");
-            wait(1000);
+            wait(10000);
         }
 
         running = false;

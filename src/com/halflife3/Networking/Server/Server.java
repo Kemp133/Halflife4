@@ -5,6 +5,7 @@ import com.halflife3.Networking.Packets.TestPacket;
 
 import java.io.*;
 import java.net.*;
+import java.util.Enumeration;
 
 public class Server implements Runnable {
 
@@ -38,13 +39,13 @@ public class Server implements Runnable {
             int timeOut = 20;
             while (running && timeOut > 0) {
                 sendWelcome();
-                wait(500);
+                wait(5000);
 
-                if (ClientPositionHandler.positions.isEmpty()) {
-                    if (timeOut % 2 == 0)
-                        System.out.println("Timeout in: " + timeOut/2);
-                    timeOut--;
-                }
+//                if (ClientPositionHandler.positions.isEmpty()) {
+//                    if (timeOut % 2 == 0)
+//                        System.out.println("Timeout in: " + timeOut/2);
+//                    timeOut--;
+//                }
             }
             running = false;
         }).start();
@@ -72,9 +73,9 @@ public class Server implements Runnable {
         byte[] pokeBuf = new byte[objectToByteArray(new ConnectPacket()).length];
         DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-        if (ClientPositionHandler.positions.isEmpty()) {
-            clientSocket.setSoTimeout(10000);
-        } else clientSocket.setSoTimeout(0);
+//        if (ClientPositionHandler.positions.isEmpty()) {
+//            clientSocket.setSoTimeout(10000);
+//        } else clientSocket.setSoTimeout(0);
 
         try {
             clientSocket.receive(incPoke);
@@ -83,16 +84,12 @@ public class Server implements Runnable {
             return;
         }
 
-        /*************************************************/
         System.out.println("Packet from client " + incPoke.getAddress() + " received");
-        /*************************************************/
-        Object receivedPoke = byteArrayToObject(pokeBuf);
 
+        Object receivedPoke = byteArrayToObject(pokeBuf);
         listenerServer.received(receivedPoke, incPoke.getAddress(), incPoke.getPort());
 
-        /*************************************************/
         System.out.println("Client's position added to the list");
-        /*************************************************/
     }
 
     public static void addConnection(InetAddress address, int port) {
@@ -100,16 +97,37 @@ public class Server implements Runnable {
         ClientPositionHandler.positions.put(address, connection.getPosition());
     }
 
-    public void sendTo(Object o, String hostName, int desPort) {
+    public void sendTo(Object o, String mAddress, int mPort) {
         try {
             DatagramSocket dSocket = new DatagramSocket();
-            InetAddress address = InetAddress.getByName(hostName);
+            InetAddress group = InetAddress.getByName(mAddress);
 
 //          Creates a byte array of the object
             byte[] sendBuf = objectToByteArray(o);
 
-            DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, address, desPort);
+            DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, group, mPort);
             dSocket.send(packet);
+
+//            Broadcast the message over all the network interfaces
+            /*Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
+
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue; // Don't want to broadcast to the loopback interface
+                }
+
+                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                    InetAddress broadcast = interfaceAddress.getBroadcast();
+                    if (broadcast == null) {
+                        continue;
+                    }
+
+                    // Send the broadcast package!
+                    DatagramPacket sendPacket = new DatagramPacket(sendBuf, sendBuf.length, broadcast, mPort);
+                    dSocket.send(sendPacket);
+                }
+            }*/
 
         } catch (UnknownHostException e) {
             System.err.println("Exception:  " + e);
