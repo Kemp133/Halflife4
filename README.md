@@ -4,7 +4,7 @@
 
 
 ---
-##For the programming IDE of the Gods (i.e. IntelliJ)
+## For the programming IDE of the Gods (i.e. IntelliJ)
 When creating an instance of the project, you'll need to add the following text to the VM Options:
 
 <code>

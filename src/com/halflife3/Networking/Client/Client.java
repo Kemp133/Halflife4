@@ -1,85 +1,111 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.Networking.RemoveConnectionPacket;
+import com.halflife3.Model.Vector2;
+import com.halflife3.Networking.Packets.ConnectPacket;
+import com.halflife3.Networking.Server.Server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ConnectException;
-import java.net.Socket;
-import java.net.SocketException;
+import java.io.*;
+import java.net.*;
 
-public class Client implements Runnable{
+public class Client implements Runnable {
 
-    private String host;
-    private int port;
+//    For "catching" the server
+    protected MulticastSocket serverSocket = null;
+    protected InetAddress group = null;
 
-    private Socket socket;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
+//    For sending packets to the server
+    private InetAddress hostAddress;
+    private DatagramSocket outSocket;
 
-    private boolean running = false;
-    private EventListenerClient listener;
+//    Client's position on the map
+    private Vector2 position;
 
-    public Client(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
-
-    public void connect() {
+    public void joinGroup() {
         try {
-            socket = new Socket(host,port);
-            System.out.println("Connected to: " + host);
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-            listener = new EventListenerClient();
-            new Thread(this).start();
-        }catch(ConnectException e) {
-            System.out.println("Unable to connect to the server");
-        }catch(IOException e) {
+            serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
+            group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
+            serverSocket.joinGroup(group);
+            System.out.println("Joined group: " + group);
+        } catch (ConnectException e) {
+            System.out.println("Unable to join the group");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void close() {
+    public void getHostInfo() {
         try {
-            running = false;
-            RemoveConnectionPacket packet = new RemoveConnectionPacket();
-            sendObject(packet);
-            in.close();
-            out.close();
-            socket.close();
-        }catch(IOException e) {
+//            Receives the welcome (Test) packet
+            byte[] firstBuf = new byte[5000];
+            DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
+            serverSocket.receive(firstPacket);
+
+//            Gets the server's address
+            hostAddress = firstPacket.getAddress();
+
+            System.out.println("Host: " + hostAddress);
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void sendObject(Object packet) {
+    public void start() {
+//        Lets the server know we have connected
+        ConnectPacket join = new ConnectPacket();
+        byte[] tempBuf = objectToByteArray(join);
+
+        DatagramPacket poke = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
         try {
-            out.writeObject(packet);
-        }catch(IOException e) {
+            outSocket = new DatagramSocket();
+            outSocket.send(poke);
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        new Thread(this).start();
     }
 
     @Override
     public void run() {
-        try {
-            running = true;
-
-            while(running) {
-                try {
-                    Object data = in.readObject();
-                    listener.received(data);
-                }catch(ClassNotFoundException e) {
-                    e.printStackTrace();
-                }catch(SocketException e) {
-                    close();
-                }
-            }
-        }catch(IOException e) {
-            e.printStackTrace();
-        }
+//        TODO: If position has changed send it to the server
     }
 
+    public Object receivePacket() {
+        Object o = null;
+
+        try {
+//            Receives the packet
+            byte[] recBuf = new byte[5000];
+            DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
+            serverSocket.receive(packet);
+//            Converts the packet byte array into an object
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(recBuf);
+            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
+            o = instream.readObject();
+            instream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return o;
+    }
+
+    private byte[] objectToByteArray(Object o) {
+        byte[] sendBuf = null;
+
+        try {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
+            outstream.flush();
+            outstream.writeObject(o);
+            outstream.flush();
+            sendBuf = byteStream.toByteArray();
+            outstream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sendBuf;
+    }
 }

@@ -1,27 +1,20 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Networking.AddConnectionPacket;
-import com.halflife3.Networking.RemoveConnectionPacket;
+import com.halflife3.Networking.Packets.ConnectPacket;
+
+import java.net.InetAddress;
 
 public class EventListenerServer {
 
-    public void received(Object p, ConnectionServer connection) {
-        if(p instanceof AddConnectionPacket) {
-            AddConnectionPacket packet = (AddConnectionPacket)p;
-            packet.id = connection.id;
-            for(int i=0; i<ConnectionHandlerServer.connections.size(); i++) {
-                ConnectionServer c = ConnectionHandlerServer.connections.get(i);
-                if(c != connection) {
-                    c.sendObject(packet);
-                }
-            }
+    public void received(Object packet, InetAddress sender, int sendersPort) {
 
-        }else if(p instanceof RemoveConnectionPacket) {
-            RemoveConnectionPacket packet = (RemoveConnectionPacket)p;
-            System.out.println("Connection: " + packet.id + " has disconnected");
-            ConnectionHandlerServer.connections.get(packet.id).close();
-            ConnectionHandlerServer.connections.remove(packet.id);
+        if (packet instanceof ConnectPacket) {
+
+            Server.addConnection(sender, sendersPort);
+
         }
+        //TODO: "else if" for a Vector2 a.k.a Position packet event
+
     }
 
 }
