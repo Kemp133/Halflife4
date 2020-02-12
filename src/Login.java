@@ -88,13 +88,17 @@ public class Login extends Application {
         login.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null) {
-                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText()) == true) {
-                        //Assign username and change to game screen
-                    } else {
-                        nameField.setText(null);
-                        passwordField.setText(null);
-                        incorrectFields.setText("User not found. Please create a user.");
-                        incorrectFields.setVisible(true);
+                    try {
+                        if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
+                            //Assign username and change to game screen
+                        } else {
+                            nameField.setText(null);
+                            passwordField.setText(null);
+                            incorrectFields.setText("User not found. Please create a user.");
+                            incorrectFields.setVisible(true);
+                        }
+                    } catch(Exception ex) {
+                        System.out.println(ex.toString());
                     }
                 }
                 else {
@@ -107,12 +111,16 @@ public class Login extends Application {
         newUser.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null) {
-                    if (doesUserExist(getConnection(), nameField.getText(), passwordField.getText()) == true) {
-                        incorrectFields.setText("That username already exists. Please choose another one");
-                        incorrectFields.setVisible(true);
-                    } else {
-                        //Insert user and password into table
-                        //change to game screen
+                    try {
+                        if (doesUserExist(getConnection(), nameField.getText(), passwordField.getText())) {
+                            incorrectFields.setText("That username already exists. Please choose another one");
+                            incorrectFields.setVisible(true);
+                        } else {
+                            //Insert user and password into table
+                            //change to game screen
+                        }
+                    } catch (Exception ex) {
+                        System.out.println(ex.toString());
                     }
                 }
                 else {
