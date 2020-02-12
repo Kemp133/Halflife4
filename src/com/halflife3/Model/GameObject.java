@@ -70,7 +70,7 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     /** A method to return the y value from the Vector2 */
     public double getVelY() { return this.velocity.getY(); }
     /** A method to return the Vector2 that this GameObject holds */
-    public Vector2 getVelocity() { return new Vector2(this.velocity); }
+    public Vector2 getVelocity() { return this.velocity; }
     public void setVelocity(Vector2 velocity) {
         this.velocity = velocity;
     }

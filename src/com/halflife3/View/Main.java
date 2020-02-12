@@ -119,6 +119,7 @@ public class Main extends Application {
             public void handle(long currentNanoTime) {
                 // calculate time since last update.
                 double elapsedTime = (currentNanoTime - lastNanoTime.value) / 1000000000.0;
+                System.out.println(elapsedTime);
                 lastNanoTime.value = currentNanoTime;
 
                 // game logic
@@ -138,11 +139,8 @@ public class Main extends Application {
                     player.getVelocity().reset();
 
 
-
                 player.collision(map.get_list(),elapsedTime);
                 player.update(elapsedTime);
-
-
 
                 // render
                 gc.clearRect(0, 0, 800, 600);
