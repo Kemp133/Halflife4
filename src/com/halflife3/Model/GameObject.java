@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import com.halflife3.Controller.ObjectManager;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -18,8 +19,12 @@ public abstract class GameObject implements IRenderable, IUpdateable {
      * to disallow duplicate keys from being added*/
     protected HashSet<String> keys;
 
+    protected ObjectManager objectManager;
+
     /** A constructor used to initialise a generic instance of this class */
-    public GameObject() {}
+    public GameObject(ObjectManager om) {
+        this.objectManager = om;
+    }
 
     /**
      * A constructor used by extending classes to create an instance of the GameObject class
@@ -27,16 +32,19 @@ public abstract class GameObject implements IRenderable, IUpdateable {
      * @param velocity The initial velocity of the GameObject
      * @param rotation The initial rotation of the GameObject
      */
-    public GameObject(Vector2 position, Vector2 velocity, short rotation) {
+    public GameObject(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         this.position = position;
         this.velocity = velocity;
         this.rotation = rotation;
+        this.objectManager = om;
+        om.addObject(this);
     }
 
     //An initialiser block used to set position and velocity to an actual value when creating a generic instance of this class
     {
         position = new Vector2();
         velocity = new Vector2();
+        keys = new HashSet<>();
     }
 
 
@@ -51,7 +59,7 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     /** A method to return the y value from the Vector2 */
     public double getY() { return this.position.getY(); }
     /** A method to return the Vector2 that this GameObject holds */
-    public Vector2 getPosition() { return this.position; }
+    public Vector2 getPosition() { return new Vector2(this.position); }
     //endregion
 
     //region Velocity Getters and Setters
@@ -60,7 +68,7 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     /** A method to return the y value from the Vector2 */
     public double getVelY() { return this.velocity.getY(); }
     /** A method to return the Vector2 that this GameObject holds */
-    public Vector2 getVelocity() { return this.velocity; }
+    public Vector2 getVelocity() { return new Vector2(this.velocity); }
     public void setVelocity(Vector2 velocity) {
         this.velocity = velocity;
     }
@@ -76,4 +84,11 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     * */
     public abstract boolean intersects(GameObject s);
 
+    //gives the distance between a position and this game object
+    public double getDistance(Vector2 position){
+        return Math.sqrt( Math.pow((position.getX() - this.position.getX()),2) +  Math.pow((position.getY() - this.position.getY()),2) );
+    }
+    public double getDistance(GameObject entity){
+        return Math.sqrt( Math.pow((entity.getX() - this.position.getX()),2) +  Math.pow((entity.getY() - this.position.getY()),2) );
+    }
 }

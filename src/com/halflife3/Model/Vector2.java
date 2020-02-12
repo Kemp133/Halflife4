@@ -27,6 +27,11 @@ public class Vector2 {
         this.y = y;
     }
 
+    public Vector2(Vector2 toCopy) {
+        this.x = toCopy.getX();
+        this.y = toCopy.getY();
+    }
+
     /**
      * A method to add a vector to the current vector
      * @param v The vector to add to the current vector
@@ -87,6 +92,28 @@ public class Vector2 {
      */
     public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
 
-    public double getX() { return this.x; }
-    public double getY() { return this.y; }
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void reverse(){
+        this.x = -x;
+        this.y = -y;
+    }
+    public void reset(){
+        this.x = 0;
+        this.y = 0;
+    }
 }
