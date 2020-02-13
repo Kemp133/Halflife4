@@ -1,4 +1,6 @@
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -27,6 +29,7 @@ public class Windows extends Application {
     private String filepng = null;
     private StackPane pane = new StackPane();
     private LinMenu main_menu = LinMenu.getInstance();
+    private Stage pStage = null;
 
     public Windows() throws FileNotFoundException {
     }
@@ -35,50 +38,16 @@ public class Windows extends Application {
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
 
-   /* private void addButtons() throws FileNotFoundException {
-        //Button newGButton = new Button("New Game");
-        //Button optButton = new Button("Options");
-        //Button quit = new Button("Quit");
-        //newGButton.setLayoutX(250);
-        //newGButton.setLayoutY(220);
-        //newGButton.setCenterShape(true);
-        //pane.getChildren().addAll(newGButton, optButton, quit);
-
-        //Adds an image to a button
-        FileInputStream input = new FileInputStream("res/button_image.png");
-        Image image = new Image(input);
-        ImageView imageView = new ImageView(image);
-
-        Button button = new Button("New Game", imageView);
-        //
-
-        //ImageView imageView = new ImageView(new Image(getClass().getResource("/res/button_image.png").toExternalForm()));
-        //Button testButton = new Button("", imageView);
-
-        pane.getChildren().add(button);
-    }*/
-
     private void addMenu() throws IOException {
-
-        FileInputStream input = new FileInputStream("res/button_image.png");
-        Image image = new Image(input);
-        ImageView imageview = new ImageView(image);
-
+        main_menu.getStartItem().setOnAction(actionEvent -> {
+            try {
+                entergameStage();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         VBox manuBar = main_menu.getBar();
-
         manuBar.setAlignment(Pos.CENTER);
-        //MenuButton button = new MenuButton("Settings", imageview, main_menu.getItems().get(0),main_menu.getItems().get(1),main_menu.getItems().get(2),main_menu.getItems().get(3));
-        //button.setLayoutX(250);
-        //button.setLayoutY(200);
-      /*  MenuButton button_stat = new MenuButton("Start",imageview,main_menu.getItems().get(0));
-        MenuButton button_set = new MenuButton("Settings",imageview,main_menu.getItems().get(1));
-        MenuButton button_exit = new MenuButton("Exit",imageview,main_menu.getItems().get(2));
-
-        I have problems with button lay_out
-        */
-
-        /*hbox2.setLayoutY(hbox1.getWidth());
-        hbox1.setLayoutX(hbox1.getHeight());*/
         pane.getChildren().add(manuBar);
     }
     private void addBackground() throws FileNotFoundException {
@@ -109,6 +78,7 @@ public class Windows extends Application {
     public void start(Stage primaryStage) {
         try {
             primaryStage.setTitle("Team HalfLife");
+            pStage = primaryStage;
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -117,13 +87,34 @@ public class Windows extends Application {
         }
     }
 
-
-
     public static void main (String[] args) throws FileNotFoundException {
         launch(args);
     }
 
-    public void Update() {
-        //What to update? I am confused
+    public void entergameStage() throws IOException {
+        //Update to a game stage
+        //FXMLLoader loader = new FXMLLoader(getClass().getResource("half-life.fxml"));  //use fxml for a new map
+        BorderPane root = new BorderPane();
+        Button exit = new Button("Exit");
+        exit.setOnAction(actionEvent -> Platform.exit());
+        Stage Newstage = new Stage();
+        Newstage.setScene(new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT));
+        Newstage.show();
+        //root.requestFocus();
+        //root.getChildren().add(exit);
+        root.setCenter(exit);
+        pane.getChildren().add(root);
     }
+
+    public void Update(){
+
+    }
+
+    private Stage getpStage(){
+        try{
+            return this.pStage;
+        } catch(Exception e){
+            System.err.println("primary stage not built!");
+        }
+        return null;    }
 }

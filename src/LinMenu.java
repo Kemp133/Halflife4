@@ -1,5 +1,8 @@
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -10,6 +13,7 @@ import javafx.scene.media.MediaPlayer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collection;
 
 public class LinMenu extends ContextMenu {
@@ -21,13 +25,14 @@ public class LinMenu extends ContextMenu {
     private Media media = new Media(audio_path.toURI().toString());
     private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
     private Slider volume = new Slider();
+    private MenuItem startItem = null;
 
-    private LinMenu() throws FileNotFoundException {
+    public LinMenu() throws FileNotFoundException {
         FileInputStream input = new FileInputStream("res/button_image.png");
         Image image = new Image(input);
         ImageView imageview = new ImageView(image);
 
-        MenuItem startItem = new MenuItem("new game");
+       startItem = new MenuItem("new game");
         MenuItem loadItem = new MenuItem("load game");
         MenuItem audioItem_on = new MenuItem("audio on");
         MenuItem audioitem_off = new MenuItem("audio off");
@@ -48,6 +53,10 @@ public class LinMenu extends ContextMenu {
         main_manu = new VBox(100);
         main_manu.getChildren().addAll(start_m, settings_m, exit_m);
 
+    }
+
+    public MenuItem getStartItem() {
+        return startItem;
     }
 
     private void Is_mute(boolean b) {
@@ -76,6 +85,5 @@ public class LinMenu extends ContextMenu {
        }
        return main_manu;
     }
-
 
 }
