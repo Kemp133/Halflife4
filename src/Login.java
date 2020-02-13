@@ -146,11 +146,11 @@ public class Login extends Application {
                 if (nameField.getText() != null && passwordField.getText() != null) {
                     if (confirmUser(getConnection(), nameField.getText(), passwordField.getText()) == true) {
                         //TODO: Assign username to 'player' and change to game screen
-                        incorrectFields.setText("Found user"); //TODO: delete after above
-                        incorrectFields.setVisible(true); //TODO: delete after above
+                        incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
+                        incorrectFields.setVisible(true); //TODO: Delete after above
                     } else {
                         setNullFields();
-                        incorrectFields.setText("User not found. Please create a user.");
+                        incorrectFields.setText("Incorrect username and/or password.");
                         incorrectFields.setVisible(true);
                     }
                 }
@@ -184,7 +184,7 @@ public class Login extends Application {
                         incorrectFields.setVisible(true);
                     } else {
                         //Insert user and password into table
-                        addNewUser(getConnection(), nameField.getText(), passwordField.getText());  //ADD METHOD FOR HASHING PASSWORD THAT RETURNS A STRING
+                        addNewUser(getConnection(), nameField.getText(), passwordField.getText());
                         //TODO: Assign username to player and Change to game screen
                         incorrectFields.setText("User created"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: delete after above
@@ -228,67 +228,104 @@ public class Login extends Application {
         return c;
     }
 
+    public void closeConnections(Connection c, PreparedStatement p, ResultSet r) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (SQLException e) { /* ignored */}
+        }
+        if (p != null) {
+            try {
+                p.close();
+            } catch (SQLException e) { /* ignored */}
+        }
+        if (r != null) {
+            try {
+                r.close();
+            } catch (SQLException e) { /* ignored */}
+        }
+    }
+
     //Returns true if a user exists in the database table and false if it doesn't
     public boolean doesUserExist(Connection c, String username) {
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
         try {
-            //Creating the Statement
-            Statement stmt = null;
-            stmt = c.createStatement();
             //Creating a query checking if username is in the table
-            String query = "SELECT * FROM UserDataScore WHERE name = username";
+            String query = "SELECT * FROM \"UserDataScore\" WHERE name = '" + username + "'";
+            //Creating the Statement
+            preparedStatement = c.prepareStatement(query);
             //Executing the query
-            ResultSet rs = stmt.executeQuery(query);
+            rs = preparedStatement.executeQuery();
             //Returns true if a user exists and false if it doesn't
             if (rs.next() != false) {
                 return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnections(c, preparedStatement, rs);
         }
         return false;
     }
 
     //Confirms users name and password exists and is correct.
     public boolean confirmUser(Connection c, String username, String passwordEntered) {
+        PreparedStatement saltStatement = null;
+        ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rsDetails = null;
         try {
             //Retrieving the salt from the table based on the username given
             byte[] salt = new byte[0];
-            Statement stmt = c.createStatement();
-            String querySalt = "SELECT salt FROM UserDataScore WHERE name = username";
-            ResultSet rs = stmt.executeQuery(querySalt);
+            //Creating the query
+            String querySalt = "SELECT salt FROM \"UserDataScore\" WHERE name = " + username;
+            //Creating the statement
+            saltStatement = c.prepareStatement(querySalt);
+            rs = saltStatement.executeQuery();
             while (rs.next()) {
                 salt = rs.getBytes("salt");
             }
             //Hashing the password given based on the salt retrieved
             byte[] hashedPassword = hashPassword(salt, passwordEntered);
-            //Creating the Statement
-            Statement stmt2 = c.createStatement();
-            String queryDetails = "SELECT * FROM UserDataScore WHERE name = username AND password = hashedPassword";  //TODO: AND salt = salt?? or not needed?
+            //Creating the query
+            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE name = " + username + " AND password = " + hashedPassword;  //TODO: AND salt = salt?? or not needed?
+            //Creating the statement
+            preparedStatement = c.prepareStatement(queryDetails);
             //Executing the query
-            ResultSet rsDetails = stmt2.executeQuery(queryDetails);
+            rsDetails = preparedStatement.executeQuery();
             //Returns true if user details are correct and false if they aren't
             if (rsDetails.next() != false) {
                 return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnections(c, saltStatement, rs);
+            closeConnections(null, preparedStatement, rsDetails);
         }
         return false;
     }
 
     //Adds new user information to the table
     public void addNewUser(Connection c, String username, String passwordEntered) {
+        PreparedStatement preparedStatement = null;
         try {
             //Creating a hashed password based on a random salt
             byte[] randomSalt = returnSalt();
             byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
-            //Creating the Statement
-            Statement stmt = c.createStatement();
-            String query = "INSERT INTO UserDataScore (name, score, salt, password) VALUES (username, 0, randomSalt, hashedPassword)";
+            System.out.println("salt: " + randomSalt + " hashed password: " + hashedPassword);
+            //Creating the query
+            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + randomSalt + "', '" + hashedPassword + "')";
+            System.out.println("query: " + query);
+            //Creating the statement
+            preparedStatement = c.prepareStatement(query);
             //Executing the query
-            ResultSet rs = stmt.executeQuery(query);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnections(c, preparedStatement, null);
         }
     }
 
