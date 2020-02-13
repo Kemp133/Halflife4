@@ -1,11 +1,10 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Networking.Packets.ConnectPacket;
-import com.halflife3.Networking.Packets.TestPacket;
+import com.halflife3.Networking.Packets.WelcomePacket;
 
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
 
 public class Server implements Runnable {
 
@@ -16,6 +15,8 @@ public class Server implements Runnable {
     private boolean running = false;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
+    private final int SERVER_TIMEOUT = 60000; // milliseconds
+    private static int clientPort = 6000;
 
     public void start() {
         try {
@@ -33,24 +34,24 @@ public class Server implements Runnable {
         running = true;
         System.out.println("Multicasting on port: " + MULTICAST_PORT);
 
-//        Constantly multicasts TestPacket,
-//        shuts server down if nobody connects for more than 10 seconds
+//        Multicasts WelcomePackets, closes server after 60s of no connections
         new Thread(() -> {
-            int timeOut = 20;
+            int timeOut = SERVER_TIMEOUT/1000;
             while (running && timeOut > 0) {
                 sendWelcome();
-                wait(5000);
+                waitASecond();
 
-//                if (ClientPositionHandler.positions.isEmpty()) {
-//                    if (timeOut % 2 == 0)
-//                        System.out.println("Timeout in: " + timeOut/2);
-//                    timeOut--;
-//                }
+                if (ClientPositionHandler.clientList.isEmpty()) {
+                    if (timeOut <= 3)
+                        System.out.println("Timeout in: " + timeOut);
+                    timeOut--;
+                }
             }
             running = false;
+            clientSocket.close();
         }).start();
 
-//        Constantly listens for incoming packets
+//        Listens for incoming packets
         while (running) {
             System.out.println("Listening for clients...");
             try {
@@ -59,12 +60,10 @@ public class Server implements Runnable {
                 e.printStackTrace();
             }
         }
-
-        running = false;
     }
 
     private void sendWelcome() {
-        TestPacket packet = new TestPacket();
+        WelcomePacket packet = new WelcomePacket();
         packet.msg = "Welcome to the server!";
         sendTo(packet, MULTICAST_ADDRESS, MULTICAST_PORT);
     }
@@ -73,9 +72,9 @@ public class Server implements Runnable {
         byte[] pokeBuf = new byte[objectToByteArray(new ConnectPacket()).length];
         DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-//        if (ClientPositionHandler.positions.isEmpty()) {
-//            clientSocket.setSoTimeout(10000);
-//        } else clientSocket.setSoTimeout(0);
+        if (ClientPositionHandler.clientList.isEmpty()) {
+            clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
+        } else clientSocket.setSoTimeout(0);
 
         try {
             clientSocket.receive(incPoke);
@@ -87,14 +86,19 @@ public class Server implements Runnable {
         System.out.println("Packet from client " + incPoke.getAddress() + " received");
 
         Object receivedPoke = byteArrayToObject(pokeBuf);
-        listenerServer.received(receivedPoke, incPoke.getAddress(), incPoke.getPort());
-
-        System.out.println("Client's position added to the list");
+        listenerServer.received(receivedPoke, incPoke.getAddress());
     }
 
-    public static void addConnection(InetAddress address, int port) {
-        ConnectedToServer connection = new ConnectedToServer(address, port);
-        ClientPositionHandler.positions.put(address, connection.getPosition());
+    public static void addConnection(InetAddress address) {
+        ConnectedToServer connection = new ConnectedToServer(address, clientPort);
+        new Thread(connection).start();
+        ClientPositionHandler.clientList.put(address, connection);
+        clientPort++;
+    }
+
+    public static void removeConnection(InetAddress address) {
+        ClientPositionHandler.clientList.get(address).close();
+        ClientPositionHandler.clientList.remove(address);
     }
 
     public void sendTo(Object o, String mAddress, int mPort) {
@@ -116,9 +120,9 @@ public class Server implements Runnable {
         }
     }
 
-    private void wait(int millis) {
+    private void waitASecond() {
         try {
-            Thread.sleep(millis);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

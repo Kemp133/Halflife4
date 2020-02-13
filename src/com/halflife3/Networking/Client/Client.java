@@ -2,7 +2,8 @@ package com.halflife3.Networking.Client;
 
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
-import com.halflife3.Networking.Packets.TestPacket;
+import com.halflife3.Networking.Packets.DisconnectPacket;
+import com.halflife3.Networking.Packets.WelcomePacket;
 import com.halflife3.Networking.Server.Server;
 
 import java.io.*;
@@ -40,7 +41,7 @@ public class Client implements Runnable {
     public void getHostInfo() {
         try {
 //            Receives the welcome (Test) packet
-            byte[] firstBuf = new byte[objectToByteArray(new TestPacket()).length];
+            byte[] firstBuf = new byte[objectToByteArray(new WelcomePacket()).length];
             DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
             System.out.println("Looking for host...");
             serverSocket.receive(firstPacket);
@@ -74,38 +75,51 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-//        TODO: If position has changed send it to the server
+//        TODO: If position has changed send Vector2 to the server
         while(running) {
             System.out.println("Client running");
-            wait(10000);
+            for (int i = 10; i > 0; i--)
+                waitASecond();
         }
 
         running = false;
+        close();
+    }
+
+    public void close() {
+        DisconnectPacket leave = new DisconnectPacket();
+        byte[] tempBuf = objectToByteArray(leave);
+
+//        TODO: Change Server.LISTENER_PORT to a client specific port
+        DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
+        try {
+            outSocket.send(dc);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        serverSocket.close();
+        outSocket.close();
     }
 
     public Object receivePacket() {
         Object o = null;
 
         try {
-//            Receives the packet
             byte[] recBuf = new byte[5000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
-//            Converts the packet byte array into an object
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(recBuf);
-            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
-            o = instream.readObject();
-            instream.close();
-        } catch (IOException | ClassNotFoundException e) {
+            o = byteArrayToObject(recBuf);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         return o;
     }
 
-    private void wait(int millis) {
+    private void waitASecond() {
         try {
-            Thread.sleep(millis);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -127,5 +141,20 @@ public class Client implements Runnable {
         }
 
         return sendBuf;
+    }
+
+    private Object byteArrayToObject(byte[] buf) {
+        Object o = null;
+
+        try {
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
+            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
+            o = instream.readObject();
+            instream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return o;
     }
 }

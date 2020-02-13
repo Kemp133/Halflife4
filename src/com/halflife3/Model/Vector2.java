@@ -1,7 +1,10 @@
 package com.halflife3.Model;
 
+import java.io.Serializable;
+
 /** A class to represent a two dimensional position in space */
-public class Vector2 {
+public class Vector2 implements Serializable {
+    private static final long serialVersionUID = 4L;
     /** Variables to hold the position variables, stored as doubles */
     private double x, y;
 
