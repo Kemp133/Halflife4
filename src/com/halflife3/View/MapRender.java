@@ -16,7 +16,7 @@ public class MapRender {
     Image image;
     private Deque<Bricks> Bricks_list = new ArrayDeque<>();
 
-    MapRender(){}
+    public MapRender(){}
 
     public void SetMap(String filename) throws FileNotFoundException {
         FileInputStream inputted = new FileInputStream(filename);

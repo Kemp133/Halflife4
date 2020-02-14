@@ -32,20 +32,18 @@ public class Main extends Application {
     //Translate the Gametime value format, will be used at timer part.
     private class LongValue {
         public long value;
+
         public LongValue(long i) {
             value = i;
         }
     }
 
-    //Part of the camera.
-    private double clampRange(double value, double min, double max) {
-        if (value < min) return min ;
-        if (value > max) return max ;
-        return value ;
-    }
-    /**Initialize the root scene for the main game, and new game object can be
+
+
+    /**
+     * Initialize the root scene for the main game, and new game object can be
      * add by calling getChildren.add().
-     * */
+     */
     //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
     private Parent createContent() {
         //root.setPrefSize(900, 400);
@@ -53,22 +51,24 @@ public class Main extends Application {
         //root.getChildren().add(player);
         return root;
     }
-    /**Stage pass to start is the stage of game
+
+    /**
+     * Stage pass to start is the stage of game
      **/
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("HalfLife 3");
         Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
-        Scene scene = new Scene(createContent(),800,600);
+        Scene scene = new Scene(createContent(), 800, 600);
         primaryStage.setScene(scene);
 
         /**
          * Set the background
          * */
         FileInputStream inputted = new FileInputStream("res/background_image.png");
-        Image image = new Image(inputted,40,40,true,true);
-        BackgroundImage myBI= new BackgroundImage(image,
+        Image image = new Image(inputted, 40, 40, true, true);
+        BackgroundImage myBI = new BackgroundImage(image,
                 BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT,
                 BackgroundSize.DEFAULT);
         root.setBackground(new Background(myBI));
@@ -83,7 +83,7 @@ public class Main extends Application {
         root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
         scene.setCursor(Cursor.NONE);
         //Create cursor
-        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0,0), (short)0, objectManager, input);
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input);
 
         //set the image for player, need to change the
         player.setImage("res/Player_pic.png");
@@ -99,6 +99,8 @@ public class Main extends Application {
         map.loadLevel(objectManager);
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
+
+
                 // calculate time since last update.
                 double elapsedTime = (currentNanoTime - lastNanoTime.value) / 1000000000.0;
                 System.out.println(elapsedTime);
@@ -119,11 +121,11 @@ public class Main extends Application {
                     player.getVelocity().setY(100);
                 else
                     player.getVelocity().reset();
-                if(input.isKeyPressed(C)) {
+                if (input.isKeyPressed(C)) {
                     objectManager.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
                 }
-                if(input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
-                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short)0, objectManager);
+                if (input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
+                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short) 0, objectManager);
                 }
 
 
@@ -136,14 +138,14 @@ public class Main extends Application {
                         //this.velocity = new Vector2(0,0);
                     }
                 }
-                player.collision(player_hit_block,elapsedTime);
+                player.collision(player_hit_block, elapsedTime);
 
 
                 // render
                 gc.clearRect(0, 0, 800, 600);
                 player.render(gc);
                 map.render(gc);
-                for(IRenderable go : objectManager.getGameObjects()) {
+                for (IRenderable go : objectManager.getGameObjects()) {
                     go.render(gc);
                 }
             }
