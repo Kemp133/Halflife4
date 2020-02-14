@@ -1,7 +1,10 @@
 package com.halflife3.Model;
 
+import java.io.Serializable;
+
 /** A class to represent a two dimensional position in space */
-public class Vector2 {
+public class Vector2 implements Serializable {
+    private static final long serialVersionUID = 4L;
     /** Variables to hold the position variables, stored as doubles */
     private double x, y;
 
@@ -25,6 +28,11 @@ public class Vector2 {
     public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Vector2(Vector2 toCopy) {
+        this.x = toCopy.getX();
+        this.y = toCopy.getY();
     }
 
     /**
@@ -87,6 +95,28 @@ public class Vector2 {
      */
     public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
 
-    public double getX() { return this.x; }
-    public double getY() { return this.y; }
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void reverse(){
+        this.x = -x;
+        this.y = -y;
+    }
+    public void reset(){
+        this.x = 0;
+        this.y = 0;
+    }
 }

@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import com.halflife3.Controller.ObjectManager;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -18,8 +19,12 @@ public abstract class GameObject implements IRenderable, IUpdateable {
      * to disallow duplicate keys from being added*/
     protected HashSet<String> keys;
 
+    protected ObjectManager objectManager;
+
     /** A constructor used to initialise a generic instance of this class */
-    public GameObject() {}
+    public GameObject(ObjectManager om) {
+        this.objectManager = om;
+    }
 
     /**
      * A constructor used by extending classes to create an instance of the GameObject class
@@ -27,10 +32,12 @@ public abstract class GameObject implements IRenderable, IUpdateable {
      * @param velocity The initial velocity of the GameObject
      * @param rotation The initial rotation of the GameObject
      */
-    public GameObject(Vector2 position, Vector2 velocity, short rotation) {
+    public GameObject(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         this.position = position;
         this.velocity = velocity;
         this.rotation = rotation;
+        this.objectManager = om;
+        om.addObject(this);
     }
 
     //An initialiser block used to set position and velocity to an actual value when creating a generic instance of this class
@@ -40,7 +47,9 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         keys = new HashSet<>();
     }
 
-
+    public boolean containsKey(String key) {
+        return keys.contains(key);
+    }
 
     /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
      * change depending on what its acting as a collider for (e.g. a box or a circle) */
@@ -52,7 +61,7 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     /** A method to return the y value from the Vector2 */
     public double getY() { return this.position.getY(); }
     /** A method to return the Vector2 that this GameObject holds */
-    public Vector2 getPosition() { return this.position; }
+    public Vector2 getPosition() { return new Vector2(this.position); }
     //endregion
 
     //region Velocity Getters and Setters
@@ -77,4 +86,11 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     * */
     public abstract boolean intersects(GameObject s);
 
+    //gives the distance between a position and this game object
+    public double getDistance(GameObject entity){
+        return position.distance(entity.getPosition());
+    }
+    public double squareDistance(GameObject entity){
+        return position.squareDistance(entity.getPosition());
+    }
 }
