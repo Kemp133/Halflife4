@@ -1,19 +1,22 @@
 package com.halflife3.View;
 
+import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
+import com.halflife3.Controller.MouseInput;
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Model.Player;
-import com.halflife3.Model.Vector2;
+import com.halflife3.Model.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
 
 import java.io.FileInputStream;
 
@@ -21,11 +24,10 @@ import static javafx.scene.input.KeyCode.*;
 
 
 public class Main extends Application {
-
     private Pane root = new Pane();
     private ObjectManager objectManager = new ObjectManager();
-
     private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
+    static Input input = new Input();
 
     //Translate the Gametime value format, will be used at timer part.
     private class LongValue {
@@ -47,7 +49,6 @@ public class Main extends Application {
     //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
     private Parent createContent() {
         //root.setPrefSize(900, 400);
-
         //TODO: Use loop to add all the object into scene.
         //root.getChildren().add(player);
         return root;
@@ -75,32 +76,14 @@ public class Main extends Application {
         /**
          * Try to build a camera
          * */
-        //root.getChildren().add(player.GetBounds());
-        //Rectangle clip = new Rectangle(20,20,100,100);
-        //Rectangle clip2 = new Rectangle(20,20,100,100);
-        //canvas.setClip(clip);
-        //root.setClip(clip);
-        //canvas.translateXProperty().bind(clip.xProperty().multiply(-1));
-        //canvas.translateYProperty().bind(clip.yProperty().multiply(-1));
-        //Rectangle clip = new Rectangle(0,0,300,200);
-//        clip.widthProperty().bind(scene.widthProperty());
-//        clip.heightProperty().bind(scene.heightProperty());
-//
-//        clip.xProperty().bind(Bindings.createDoubleBinding(
-//                () -> clampRange(player.getX() - scene.getWidth() / 2, 0, root.getWidth() - scene.getWidth()),
-//                player.GetBounds().xProperty(), scene.widthProperty()));
-//        clip.yProperty().bind(Bindings.createDoubleBinding(
-//                () -> clampRange(player.getY() - scene.getHeight() / 2, 0, root.getHeight() - scene.getHeight()),
-//                player.GetBounds().yProperty(), scene.heightProperty()));
-        //root.setClip(clip);
-        //root.translateXProperty().bind(clip.xProperty().multiply(-1));
-        //root.translateYProperty().bind(clip.yProperty().multiply(-1));
-
-
         //set the key listener
         KeyHandle handle = new KeyHandle();
         root.setOnKeyPressed(handle);
         root.setOnKeyReleased(handle);
+        root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
+        scene.setCursor(Cursor.NONE);
+        //Create cursor
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0,0), (short)0, objectManager, input);
 
         //set the image for player, need to change the
         player.setImage("res/Player_pic.png");
@@ -111,10 +94,9 @@ public class Main extends Application {
         //main update.
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
-        MapRender map = new MapRender(objectManager);
+        MapRender map = new MapRender();
         map.SetMap("res/map.png");
-        map.loadLevel();
-
+        map.loadLevel(objectManager);
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 // calculate time since last update.
@@ -137,15 +119,33 @@ public class Main extends Application {
                     player.getVelocity().setY(100);
                 else
                     player.getVelocity().reset();
+                if(input.isKeyPressed(C)) {
+                    objectManager.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
+                }
+                if(input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
+                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short)0, objectManager);
+                }
 
 
-                player.collision(map.get_list(),elapsedTime);
                 player.update(elapsedTime);
+                //Put the collision detection into the main loop
+                Boolean player_hit_block = false;
+                for (Bricks block : map.get_list()) {
+                    if (block.GetBounds().intersects(player.rectangle.getBoundsInLocal())) {
+                        player_hit_block = true;
+                        //this.velocity = new Vector2(0,0);
+                    }
+                }
+                player.collision(player_hit_block,elapsedTime);
+
 
                 // render
                 gc.clearRect(0, 0, 800, 600);
                 player.render(gc);
                 map.render(gc);
+                for(IRenderable go : objectManager.getGameObjects()) {
+                    go.render(gc);
+                }
             }
         }.start();
         root.requestFocus();

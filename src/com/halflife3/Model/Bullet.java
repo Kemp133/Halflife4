@@ -38,11 +38,11 @@ public class Bullet extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, getX(), getY());
+        gc.drawImage(sprite, this.position.getX(), this.position.getY());
     }
 
     @Override
     public void update(double time) {
-        position.add(velocity.multiply(time));
+        this.position.add(velocity.multiply(time));
     }
 }

@@ -17,6 +17,7 @@ public class Player extends GameObject {
     public double height = 43;
     public Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
     private Image image;
+    private Vector2 original_position;
 
     private float moveSpeed = 150;
 
@@ -62,29 +63,21 @@ public class Player extends GameObject {
     //update the position
     @Override
     public void update(double time) {
-
-    }
-
-    public void collision(Deque<Bricks> Blocks, double time) {
-
-        Vector2 orginal_position = new Vector2(this.position.getX(), this.position.getY());
-
+        original_position = new Vector2(this.position.getX(), this.position.getY());
         this.position = this.position.add(this.velocity.multiply(time));
-
         rectangle.setX(this.position.getX());
         rectangle.setY(this.position.getY());
+    }
 
-        for (Bricks block : Blocks) {
-            if (block.GetBounds().intersects(this.rectangle.getBoundsInLocal())) {
-
-                this.position = orginal_position.subtract(this.velocity.multiply(time*20));
-                rectangle.setX(this.position.getX());
-                rectangle.setY(this.position.getY());
-                //this.velocity = new Vector2(0,0);
-            }
+    public void collision(boolean if_collision, double time) {
+        if (if_collision) {
+            this.position = original_position.subtract(this.velocity.multiply(time*20));
+            rectangle.setX(this.position.getX());
+            rectangle.setY(this.position.getY());
         }
         this.velocity.reset();
     }
+
     public void addVelocity(Vector2 toAdd) {
         this.velocity.add(toAdd);
     }
