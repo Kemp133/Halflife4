@@ -2,9 +2,9 @@ package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
 
-public class explodeEnemy extends Enemy{
+public class ExplodeEnemy extends Enemy{
 
-    public explodeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+    public ExplodeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         super(position, velocity, rotation, om, 2);
     }
     //TODO: write the method

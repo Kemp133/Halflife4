@@ -2,10 +2,10 @@ package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
 
-public class meleeEnemy extends Enemy{
+public class MeleeEnemy extends Enemy{
 
-    public meleeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life) {
-        super(position, velocity, rotation, om, life);
+    public MeleeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+        super(position, velocity, rotation, om, 1);
     }
 
     //TODO: overlapping hitbox means damage, if not, move to player
