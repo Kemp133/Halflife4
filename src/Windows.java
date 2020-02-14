@@ -50,6 +50,7 @@ public class Windows extends Application {
         manuBar.setAlignment(Pos.CENTER);
         pane.getChildren().add(manuBar);
     }
+
     private void addBackground() throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream("res/button_image.png"); //change the backgraoud file plz
         Image image = new Image(inputStream);
@@ -87,34 +88,37 @@ public class Windows extends Application {
         }
     }
 
-    public static void main (String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException {
         launch(args);
     }
 
     public void entergameStage() throws IOException {
         //Update to a game stage
-        //FXMLLoader loader = new FXMLLoader(getClass().getResource("half-life.fxml"));  //use fxml for a new map
-        BorderPane root = new BorderPane();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("half-life.fxml"));  //use fxml for a new map
+        //BorderPane root = new BorderPane();
+        Parent root = loader.getRoot();
         Button exit = new Button("Exit");
-        exit.setOnAction(actionEvent -> Platform.exit());
+//        exit.setAlignment(Pos.CENTER);
+//        exit.setOnAction(actionEvent -> Platform.exit());
         Stage Newstage = new Stage();
         Newstage.setScene(new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT));
         Newstage.show();
-        //root.requestFocus();
+        root.requestFocus();
         //root.getChildren().add(exit);
-        root.setCenter(exit);
+
         pane.getChildren().add(root);
     }
 
-    public void Update(){
+    public void Update() {
 
     }
 
-    private Stage getpStage(){
-        try{
+    private Stage getpStage() {
+        try {
             return this.pStage;
-        } catch(Exception e){
+        } catch (Exception e) {
             System.err.println("primary stage not built!");
         }
-        return null;    }
+        return null;
+    }
 }
