@@ -111,9 +111,9 @@ public class Main extends Application {
         //main update.
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
-        MapRender map = new MapRender(objectManager);
+        MapRender map = new MapRender();
         map.SetMap("res/map.png");
-        map.loadLevel();
+        map.loadLevel(objectManager);
 
         new AnimationTimer() {
             public void handle(long currentNanoTime) {

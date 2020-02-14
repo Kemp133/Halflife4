@@ -1,3 +1,5 @@
+
+import com.halflife3.View.Main;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -112,8 +114,9 @@ public class Windows extends Application {
 //        root.requestFocus();
 //        //root.getChildren().add(exit);
         //pane.getChildren().add(root);
-        Leaderboard lboard = new Leaderboard();
-        lboard.start(getpStage());
+//        Leaderboard lboard = new Leaderboard();
+//        lboard.start(getpStage());
+        new Main().start(pStage);
     }
 
     public void Update() {
