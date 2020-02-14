@@ -8,6 +8,9 @@ import com.halflife3.Networking.Server.Server;
 
 import java.io.*;
 import java.net.*;
+import java.util.Enumeration;
+
+import static com.halflife3.Networking.Server.Server.GET_PORT_PORT;
 
 public class Client implements Runnable {
 
@@ -19,18 +22,42 @@ public class Client implements Runnable {
     private InetAddress hostAddress;
     private DatagramSocket outSocket;
 
-//    Client's position on the map
+//    Client's data
     private Vector2 position;
+    public static InetAddress clientAddress;
+    public static int uniquePort;
+    private EventListenerClient listenerClient;
 
 //    isRunning
     private boolean running = false;
 
+//    Joins the multicast group to listen for multicasted packets
     public void joinGroup() {
         try {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
+
+//            Looks for the Wi-Fi adapter and sets the interface to it
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface net = interfaces.nextElement();
+                if (!net.getName().startsWith("wlan"))
+                    continue;
+
+                Enumeration<InetAddress> addresses = net.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr.toString().length() < 17) {
+                        serverSocket.setInterface(addr);
+//                        Gets the current client's IP address
+                        clientAddress = addr;
+                    }
+                }
+            }
+
             serverSocket.joinGroup(group);
-            System.out.println("Joined group: " + group.getHostName());
+
+            System.out.println("Joined group: " + group.getHostName() + " with address: " + clientAddress.toString());
         } catch (ConnectException e) {
             System.out.println("Unable to join the group");
         } catch (IOException e) {
@@ -38,6 +65,7 @@ public class Client implements Runnable {
         }
     }
 
+//    Gets the server's IP address
     public void getHostInfo() {
         try {
 //            Receives the welcome (Test) packet
@@ -56,11 +84,13 @@ public class Client implements Runnable {
         }
     }
 
+//    Connects to the server and gets a port to output to
     public void start() {
-//        Lets the server know we have connected
+        listenerClient = new EventListenerClient();
+
+//        Lets the server know the client has connected
         ConnectPacket join = new ConnectPacket();
         byte[] tempBuf = objectToByteArray(join);
-
         DatagramPacket poke = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
         try {
             outSocket = new DatagramSocket();
@@ -68,6 +98,9 @@ public class Client implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+//        Gets the unique port to communicate with the server
+        getUniquePort();
 
         running = true;
         new Thread(this).start();
@@ -86,12 +119,12 @@ public class Client implements Runnable {
         close();
     }
 
+//    Sends a disconnect packet to the server and closes the sockets
     public void close() {
         DisconnectPacket leave = new DisconnectPacket();
         byte[] tempBuf = objectToByteArray(leave);
 
-//        TODO: Change Server.LISTENER_PORT to a client specific port
-        DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
+        DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, uniquePort);
         try {
             outSocket.send(dc);
         } catch (IOException e) {
@@ -102,21 +135,38 @@ public class Client implements Runnable {
         outSocket.close();
     }
 
-    public Object receivePacket() {
-        Object o = null;
+//    Gets the unique port to communicate with the server
+    public void getUniquePort() {
+        try {
+            serverSocket = new MulticastSocket(GET_PORT_PORT);
+            serverSocket.setInterface(clientAddress);
+            serverSocket.joinGroup(group);
 
+            receivePacket();
+
+            serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
+            serverSocket.setInterface(clientAddress);
+            serverSocket.joinGroup(group);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Unique Client Port: " + uniquePort);
+    }
+
+//    Receives and sorts a packet
+    public void receivePacket() {
         try {
             byte[] recBuf = new byte[5000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
-            o = byteArrayToObject(recBuf);
+            Object o = byteArrayToObject(recBuf);
+            listenerClient.received(o);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return o;
     }
 
+//    Makes the Thread sleep for 1 second
     private void waitASecond() {
         try {
             Thread.sleep(1000);
@@ -125,6 +175,7 @@ public class Client implements Runnable {
         }
     }
 
+//    Converts an object (packet) into a byte array
     private byte[] objectToByteArray(Object o) {
         byte[] sendBuf = null;
 
@@ -143,6 +194,7 @@ public class Client implements Runnable {
         return sendBuf;
     }
 
+//    Converts a byte array into an object (packet)
     private Object byteArrayToObject(byte[] buf) {
         Object o = null;
 

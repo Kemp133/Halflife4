@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-public class ConnectedToServer implements Runnable{
+public class ConnectedToServer implements Runnable {
     private InetAddress clientAddress;
     private Vector2 position;
 
