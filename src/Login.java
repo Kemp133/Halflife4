@@ -1,7 +1,4 @@
-import com.halflife3.Controller.Exceptions.PasswordNotMatchingException;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,6 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import java.sql.*;
+
+import java.util.Arrays;
 
 public class Login extends Application {
 
@@ -101,7 +100,6 @@ public class Login extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
         //Setting properties of buttons
         login.setText("Login");
         login.setMinHeight(30);
@@ -258,7 +256,7 @@ public class Login extends Application {
             //Executing the query
             rs = preparedStatement.executeQuery();
             //Returns true if a user exists and false if it doesn't
-            if (rs.next() != false) {
+            if (rs.next()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -289,13 +287,13 @@ public class Login extends Application {
             //Hashing the password given based on the salt retrieved
             byte[] hashedPassword = hashPassword(salt, passwordEntered);
             //Creating the query
-            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE name = " + username + " AND password = " + hashedPassword;  //TODO: AND salt = salt?? or not needed?
+            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE name = " + username + " AND password = " + Arrays.toString(hashedPassword);  //AND salt = salt?? or not needed? Not needed, checking the username and passwords match is all that's needed, you get the salt from a
             //Creating the statement
             preparedStatement = c.prepareStatement(queryDetails);
             //Executing the query
             rsDetails = preparedStatement.executeQuery();
             //Returns true if user details are correct and false if they aren't
-            if (rsDetails.next() != false) {
+            if (rsDetails.next()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -314,9 +312,9 @@ public class Login extends Application {
             //Creating a hashed password based on a random salt
             byte[] randomSalt = returnSalt();
             byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
-            System.out.println("salt: " + randomSalt + " hashed password: " + hashedPassword);
+            System.out.println("salt: " + Arrays.toString(randomSalt) + " hashed password: " + Arrays.toString(hashedPassword));
             //Creating the query
-            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + randomSalt + "', '" + hashedPassword + "')";
+            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + Arrays.toString(randomSalt) + "', '" + Arrays.toString(hashedPassword) + "')";
             System.out.println("query: " + query);
             //Creating the statement
             preparedStatement = c.prepareStatement(query);
@@ -339,11 +337,12 @@ public class Login extends Application {
 
     //Hashes password using the created or retrieved salt
     public byte[] hashPassword(byte[] salt, String password) {
-        MessageDigest md = null;
+        MessageDigest md; //Removed redundant assign to null (as all class references are null on), as per IntelliJ's request
         try {
             md = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return null; //MessageDigest can cause a null pointer exception, just return null to stop this from happening (as well as acting as an error state)
         }
         md.update(salt);
         return md.digest(password.getBytes(StandardCharsets.UTF_8));

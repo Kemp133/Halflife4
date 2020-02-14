@@ -8,29 +8,25 @@ import javafx.scene.shape.Rectangle;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Deque;
-import java.util.Iterator;
-import java.util.Set;
-
 
 public class Player extends GameObject {
     public double width = 49;
     public double height = 43;
-    public Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
+    public Rectangle rectangle = new Rectangle(position.getX(), position.getY(), width, height);
     private Image image;
     private Vector2 original_position;
 
     private float moveSpeed = 150;
 
     //Initialize a player
-    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om){
-        super(position,velocity,rotation, om);
+    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+        super(position, velocity, rotation, om);
+        keys.add("player");
     }
 
     @Override
     public Rectangle GetBounds() {
-        //Create rectangle object(one of node in javafx)
-        //return new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
-        return this.rectangle;
+        return rectangle;
     }
 
     //TODO: write the intersects
@@ -41,12 +37,10 @@ public class Player extends GameObject {
 
 
     //Read the image
-    public void setImage(Image i)
-    {
+    public void setImage(Image i) {
         image = i;
         width = i.getWidth();
         height = i.getHeight();
-
     }
 
     public void setImage(String filename) throws FileNotFoundException {
@@ -57,16 +51,16 @@ public class Player extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage( image, position.getX(), position.getY() );
+        gc.drawImage(image, position.getX(), position.getY());
     }
 
     //update the position
     @Override
     public void update(double time) {
-        original_position = new Vector2(this.position.getX(), this.position.getY());
-        this.position = this.position.add(this.velocity.multiply(time));
-        rectangle.setX(this.position.getX());
-        rectangle.setY(this.position.getY());
+        original_position = new Vector2(position);
+        position = position.add(new Vector2(velocity).multiply(time));
+        rectangle.setX(position.getX());
+        rectangle.setY(position.getY());
     }
 
     public void collision(boolean if_collision, double time) {
@@ -75,13 +69,14 @@ public class Player extends GameObject {
             rectangle.setX(this.position.getX());
             rectangle.setY(this.position.getY());
         }
-        this.velocity.reset();
+
+        velocity.reset();
     }
 
     public void addVelocity(Vector2 toAdd) {
-        this.velocity.add(toAdd);
+        velocity = velocity.add(toAdd);
     }
 
-    public float getMoveSpeed() { return this.moveSpeed; }
-    public void setMoveSpeed(float speed) { this.moveSpeed = speed; }
+    public float getMoveSpeed() { return moveSpeed; }
+    public void setMoveSpeed(float speed) { moveSpeed = speed; }
 }

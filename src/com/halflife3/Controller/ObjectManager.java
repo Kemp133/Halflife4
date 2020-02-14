@@ -22,6 +22,6 @@ public class ObjectManager {
     }
 
     public void setGameObjects(HashSet<GameObject> toSet) {
-        this.gameObjects = toSet;
+        gameObjects = toSet;
     }
 }

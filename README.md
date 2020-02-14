@@ -5,7 +5,7 @@
 
 ---
 ## For the programming IDE of the Gods (i.e. IntelliJ)
-When creating an instance of the project, you'll need to add the following text to the VM Options:
+When creating a run profile for the project, you'll need to add the following text to the VM Options:
 
 <code>
 --module-path [PATH_TO_FX] --add-modules=javafx.controls,javafx.fxml

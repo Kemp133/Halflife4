@@ -31,8 +31,8 @@ public class Vector2 implements Serializable {
     }
 
     public Vector2(Vector2 toCopy) {
-        this.x = toCopy.getX();
-        this.y = toCopy.getY();
+        x = toCopy.getX();
+        y = toCopy.getY();
     }
 
     /**
@@ -41,8 +41,8 @@ public class Vector2 implements Serializable {
      * @return The sum of the current and passed vector
      */
     public Vector2 add(Vector2 v) {
-        this.x += v.x;
-        this.y += v.y;
+        x += v.x;
+        y += v.y;
         return this;
     }
 
@@ -52,8 +52,8 @@ public class Vector2 implements Serializable {
      * @return The difference between the current and passed vector
      */
     public Vector2 subtract(Vector2 v) {
-        this.x -= v.x;
-        this.y -= v.y;
+        x -= v.x;
+        y -= v.y;
         return this;
     }
 
@@ -63,8 +63,8 @@ public class Vector2 implements Serializable {
      * @return The scalar multiplication of the current vector and the passed scalar
      */
     public Vector2 multiply(double s) {
-        this.x *= s;
-        this.y *= s;
+        x *= s;
+        y *= s;
         return this;
     }
 
@@ -74,8 +74,8 @@ public class Vector2 implements Serializable {
      * @return The scalar division of the current vector and the passed scalar
      */
     public Vector2 divide(double s) {
-        this.x /= s;
-        this.y /= s;
+        x /= s;
+        y /= s;
         return this;
     }
 
@@ -85,7 +85,7 @@ public class Vector2 implements Serializable {
      * @return A double representing the euclidean distance between the current and passed vector
      */
     public double distance(Vector2 v) {
-        return Math.sqrt(Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2));
+        return Math.sqrt(Math.pow(v.x - x, 2) + Math.pow(v.y - y, 2));
     }
 
     /**
@@ -93,7 +93,9 @@ public class Vector2 implements Serializable {
      * @param v The Vector2 to find the squared distance to
      * @return The squared distance between the two points
      */
-    public double squareDistance(Vector2 v) { return Math.pow(v.x - this.x, 2) + Math.pow(v.y - this.y, 2);}
+    public double squareDistance(Vector2 v) { return Math.pow(v.x - x, 2) + Math.pow(v.y - y, 2);}
+
+    public double magnitude() { return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));}
 
     public double getX() {
         return x;
@@ -111,12 +113,18 @@ public class Vector2 implements Serializable {
         this.y = y;
     }
 
+    public Vector2 normalise() {
+        x /= magnitude();
+        y /= magnitude();
+        return this;
+    }
+
     public void reverse(){
-        this.x = -x;
-        this.y = -y;
+        x = -x;
+        y = -y;
     }
     public void reset(){
-        this.x = 0;
-        this.y = 0;
+        x = 0;
+        y = 0;
     }
 }

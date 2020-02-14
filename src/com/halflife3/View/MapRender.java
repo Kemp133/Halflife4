@@ -15,13 +15,15 @@ public class MapRender {
 
     Image image;
     private Deque<Bricks> Bricks_list = new ArrayDeque<>();
+    private ObjectManager om;
 
-    public MapRender(){}
+    MapRender(ObjectManager om) {
+        this.om = om;
+    }
 
     public void SetMap(String filename) throws FileNotFoundException {
         FileInputStream inputted = new FileInputStream(filename);
-        Image image = new Image(inputted);
-        this.image = image;
+        image = new Image(inputted); //Removed unnecessary Image reference assignment
     }
 
     public Deque<Bricks> get_list(){
@@ -29,13 +31,12 @@ public class MapRender {
     }
 
     public void render(GraphicsContext gc){
-        Iterator<Bricks> it = Bricks_list.iterator();
-        while(it.hasNext()){
-            it.next().render(gc);
+        for (Bricks bricks : Bricks_list) { //Replaced with for loop
+            bricks.render(gc);
         }
     }
 
-    public void loadLevel(ObjectManager om) throws FileNotFoundException {
+    public void loadLevel() throws FileNotFoundException {
         double w = image.getWidth();
         double h = image.getHeight();
         PixelReader pr = image.getPixelReader();
@@ -46,7 +47,7 @@ public class MapRender {
                 int green = (pixel >> 8) & 0xff;
                 int blue = (pixel) & 0xff;
                 if (blue == 0 && green == 0 && red == 0) {
-                    Bricks new_Brick = new Bricks(new Vector2((xx) * 40, (yy) * 40), new Vector2(0, 0), (short) 0,om);
+                    Bricks new_Brick = new Bricks(new Vector2((xx) * 40, (yy) * 40), new Vector2(0, 0), (short) 0, om);
                     new_Brick.setImage("res/block.png");
                     Bricks_list.add(new_Brick);
                 }
