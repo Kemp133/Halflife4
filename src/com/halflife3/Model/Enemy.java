@@ -36,14 +36,14 @@ public abstract class Enemy extends GameObject {
         //Create rectangle object(one of node in javafx)
         return new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
     }
-    //TODO: write the intersects
+    //TODO: write the intersects, this checks if the hitbox of GameObject s overlaps with this enemy
     @Override
     public boolean intersects(GameObject s) {
         return false;
     }
 
 
-    //Read the image
+    //Read the image, sets it as the image of this Enemy
     public void setImage(Image i)
     {
         image = i;
@@ -69,14 +69,22 @@ public abstract class Enemy extends GameObject {
         this.position = this.position.add(this.velocity.multiply(time));
     }
 
+    //adds velocity
     public void addVelocity(Vector2 toAdd) {
         this.velocity.add(toAdd);
     }
+
     //TODO: need to move to specific location, also avoiding the obstacle
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
+        LinkedList<Vector2> path = getPath(this.position, position);
         //step 2: move to target
+        while(!path.isEmpty()){
+            this.position = path.pop();
+            //wait(1);
+        }
     }
+    //this method gets the path between two positions
     public LinkedList<Vector2> getPath(Vector2 original , Vector2 position){
         //create the list
         LinkedList<Vector2> pathList = new LinkedList<Vector2>();
@@ -139,13 +147,16 @@ public abstract class Enemy extends GameObject {
     //TODO: need to move to specific location, also avoiding the obstacle
     public void moveTo(GameObject entity){
         //step 1: find shortest path without walls
+        LinkedList<Vector2> path = getPath(this.getPosition(), entity.getPosition());
         //step 2: move to target
+        this.position = path.pop();
     }
-    //TODO:
+    //this method removes the enemy from the screen
+    //TODO: add a death animation
     public void death(){
        if (health == 0){
-
+          selfDestroy();
        }
     }
-
+    public abstract void attackPattern();
 }

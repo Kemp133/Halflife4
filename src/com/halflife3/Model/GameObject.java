@@ -1,10 +1,7 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
-import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-import javafx.scene.Node;
 
 import java.util.HashSet;
 
@@ -92,5 +89,10 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     }
     public double squareDistance(GameObject entity){
         return position.squareDistance(entity.getPosition());
+    }
+
+    //this method is called to destroy this gameobject
+    public void selfDestroy(){
+        objectManager.removeObject(this);
     }
 }
