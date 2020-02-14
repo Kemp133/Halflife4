@@ -26,11 +26,11 @@ public class LinMenu extends ContextMenu {
     private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
     private Slider volume = new Slider();
     private MenuItem startItem = null;
+    private Button login = null;
 
     public LinMenu() throws FileNotFoundException {
         FileInputStream input = new FileInputStream("res/button_image.png");
         Image image = new Image(input);
-        ImageView imageview = new ImageView(image);
 
        startItem = new MenuItem("new game");
         MenuItem loadItem = new MenuItem("load game");
@@ -38,14 +38,15 @@ public class LinMenu extends ContextMenu {
         MenuItem audioitem_off = new MenuItem("audio off");
         CustomMenuItem audio = new CustomMenuItem(volume);
         audio.setHideOnClick(false);
-        MenuButton start_m = new MenuButton("Start",imageview,startItem,loadItem);
-        MenuButton settings_m = new MenuButton("Settings",imageview,audioItem_on,audioitem_off,audio);
-        Button exit_m = new Button("Exit",imageview);
+        MenuButton start_m = new MenuButton("Start",new ImageView(image),startItem,loadItem);
+        MenuButton settings_m = new MenuButton("Settings",new ImageView(image),audioItem_on,audioitem_off,audio);
+        Button exit_m = new Button("Exit",new ImageView(image));
 
         //adding mouse input
         startItem.setOnAction(e->{
             player.play();
         });
+
         audioItem_on.setOnAction(actionEvent -> Is_mute(false));
         audioitem_off.setOnAction(actionEvent -> Is_mute(true));
         audio.setOnAction(actionEvent -> volumeControl(volume));
@@ -54,6 +55,7 @@ public class LinMenu extends ContextMenu {
         main_manu.getChildren().addAll(start_m, settings_m, exit_m);
 
     }
+
 
     public MenuItem getStartItem() {
         return startItem;
@@ -86,4 +88,11 @@ public class LinMenu extends ContextMenu {
        return main_manu;
     }
 
+    public Button getLogin() {
+        return login;
+    }
+
+    public void setLogin(Button login) {
+        this.login = login;
+    }
 }

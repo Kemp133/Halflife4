@@ -44,6 +44,8 @@ public class Windows extends Application {
                 entergameStage();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
         VBox manuBar = main_menu.getBar();
@@ -92,26 +94,32 @@ public class Windows extends Application {
         launch(args);
     }
 
-    public void entergameStage() throws IOException {
-        //Update to a game stage
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("half-life.fxml"));  //use fxml for a new map
-        //BorderPane root = new BorderPane();
-        Parent root = loader.getRoot();
-        Button exit = new Button("Exit");
-//        exit.setAlignment(Pos.CENTER);
-//        exit.setOnAction(actionEvent -> Platform.exit());
-        Stage Newstage = new Stage();
-        Newstage.setScene(new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT));
-        Newstage.show();
-        root.requestFocus();
-        //root.getChildren().add(exit);
-
-        pane.getChildren().add(root);
+    public void entergameStage() throws Exception {
+//        //turn to leader border
+//        //FXMLLoader loader = new FXMLLoader(getClass().getResource("half-life.fxml"));  //use fxml for a new map
+//        //BorderPane root = new BorderPane();
+//        Parent root = loader.getRoot();
+//        Button exit = new Button("Exit");
+////        exit.setAlignment(Pos.CENTER);
+////        exit.setOnAction(actionEvent -> Platform.exit());
+//        Stage Newstage = new Stage();
+//        try{
+//            Newstage.setScene(new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT));
+//        }catch(Exception e){
+//            System.err.println("root is null");
+//        }
+//        Newstage.show();
+//        root.requestFocus();
+//        //root.getChildren().add(exit);
+        //pane.getChildren().add(root);
+        Leaderboard lboard = new Leaderboard();
+        lboard.start(getpStage());
     }
 
     public void Update() {
 
     }
+
 
     private Stage getpStage() {
         try {
