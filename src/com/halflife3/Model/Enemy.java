@@ -5,11 +5,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
-import java.util.*;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
+import java.util.LinkedList;
 
 public abstract class Enemy extends GameObject {
     protected double width;
