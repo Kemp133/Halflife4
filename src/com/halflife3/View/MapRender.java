@@ -17,7 +17,7 @@ public class MapRender {
     private Deque<Bricks> Bricks_list = new ArrayDeque<>();
     private ObjectManager om;
 
-    MapRender(ObjectManager om) {
+    public MapRender(ObjectManager om) {
         this.om = om;
     }
 

@@ -51,7 +51,7 @@ public class Player extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(image, position.getX(), position.getY());
+        gc.drawImage(image, position.getX() - width / 2, position.getY() - height / 2);
     }
 
     //update the position

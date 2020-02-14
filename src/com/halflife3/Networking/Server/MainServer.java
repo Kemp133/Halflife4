@@ -5,6 +5,7 @@ import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.*;
+import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.View.Main;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
@@ -92,9 +93,9 @@ public class MainServer extends Application {
         //main update.
         com.halflife3.Networking.Server.MainServer.LongValue lastNanoTime = new com.halflife3.Networking.Server.MainServer.LongValue(System.nanoTime());
 
-        MapRender map = new MapRender();
+        MapRender map = new MapRender(objectManager);
         map.SetMap("res/map.png");
-        map.loadLevel(objectManager);
+        map.loadLevel();
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
 
