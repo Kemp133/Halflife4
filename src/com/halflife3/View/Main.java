@@ -113,7 +113,6 @@ public class Main extends Application {
 
         MapRender map = new MapRender();
         map.SetMap("res/map.png");
-        map.SetMap("res/map.png");
         map.loadLevel(objectManager);
 
         new AnimationTimer() {

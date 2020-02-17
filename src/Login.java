@@ -169,6 +169,11 @@ public class Login extends Application {
                 else {
                     incorrectFields.setText("Please type in a username and password");
                     incorrectFields.setVisible(true);
+                    try {
+                        new Windows().start(Pstage);
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });

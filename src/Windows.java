@@ -1,5 +1,3 @@
-/*This is the main menu after
-log-in successfully to the database*/
 
 import com.halflife3.View.Main;
 import javafx.application.Application;
