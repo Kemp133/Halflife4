@@ -17,6 +17,8 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
      * to disallow duplicate keys from being added*/
     protected HashSet<String> keys;
+    /**Using id to distinguish each object in the object manager */
+    protected int ID;
 
     protected ObjectManager objectManager;
 
@@ -31,11 +33,12 @@ public abstract class GameObject implements IRenderable, IUpdateable {
      * @param velocity The initial velocity of the GameObject
      * @param rotation The initial rotation of the GameObject
      */
-    public GameObject(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+    public GameObject(Vector2 position, Vector2 velocity, short rotation, ObjectManager om,int ID) {
         this.position = position;
         this.velocity = velocity;
         this.rotation = rotation;
         this.objectManager = om;
+        this.ID = ID;
         om.addObject(this);
     }
 
@@ -123,5 +126,9 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     //this method is called to destroy this gameobject
     public void selfDestroy(){
         objectManager.removeObject(this);
+    }
+
+    public int getID() {
+        return ID;
     }
 }

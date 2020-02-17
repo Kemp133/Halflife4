@@ -47,7 +47,8 @@ public class MapRender {
                 int green = (pixel >> 8) & 0xff;
                 int blue = (pixel) & 0xff;
                 if (blue == 0 && green == 0 && red == 0) {
-                    Bricks new_Brick = new Bricks(new Vector2((xx) * 40, (yy) * 40), new Vector2(0, 0), (short) 0, om);
+
+                    Bricks new_Brick = new Bricks(new Vector2((xx) * 40, (yy) * 40), new Vector2(0, 0), (short) 0, om,0);
                     new_Brick.setImage("res/block.png");
                     Bricks_list.add(new_Brick);
                 }
