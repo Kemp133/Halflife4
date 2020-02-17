@@ -21,7 +21,7 @@ public class EventListenerServer {
         } else if (packet instanceof Vector2) {
 
             Vector2 position = (Vector2) packet;
-            ClientPositionHandler.clientList.get(sender).setPosition(position);
+            ClientPositionHandlerServer.clientList.get(sender).setPosition(position);
 
         }
 

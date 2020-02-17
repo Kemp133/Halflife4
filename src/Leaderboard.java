@@ -42,7 +42,7 @@ public class Leaderboard extends Application {
         ResultSetMetaData rsMetaData = rs.getMetaData();
         System.out.println("Column name: " + rsMetaData.getColumnName(1));
         System.out.println("Column name: " + rsMetaData.getColumnName(2));
-        if (rs.next() == false) {
+        if (!rs.next()) { //No need to do rs.next() == false as rs.next returns a boolean, so to check for false you can just instead have !rs.next()
             System.out.println("no match");
         } else {
             System.out.println("match");

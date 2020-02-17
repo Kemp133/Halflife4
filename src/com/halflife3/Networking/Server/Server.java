@@ -1,21 +1,25 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Networking.Packets.ConnectPacket;
+import com.halflife3.Networking.Packets.UniquePortPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
 
 import java.io.*;
 import java.net.*;
+import java.util.Enumeration;
 
 public class Server implements Runnable {
 
     public static final int     MULTICAST_PORT      = 5555;
     public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
     public static final int     LISTENER_PORT       = 5544;
+    public static final int     GET_PORT_PORT       = 5566;
 
     private boolean running = false;
+    private static boolean welcoming = true;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
-    private final int SERVER_TIMEOUT = 60000; // milliseconds
+    public final int SERVER_TIMEOUT = 60000; // milliseconds
     private static int clientPort = 6000;
 
     public void start() {
@@ -35,19 +39,23 @@ public class Server implements Runnable {
         System.out.println("Multicasting on port: " + MULTICAST_PORT);
 
 //        Multicasts WelcomePackets, closes server after 60s of no connections
+        //TODO: Server send position to every client and server update each client's position
         new Thread(() -> {
             int timeOut = SERVER_TIMEOUT/1000;
+            WelcomePacket packet = new WelcomePacket();
+            packet.msg = "Welcome to the server!";
             while (running && timeOut > 0) {
-                sendWelcome();
-                waitASecond();
+                if (welcoming) { multicastPacket(packet, MULTICAST_PORT); }
+                    waitASecond();
 
-                if (ClientPositionHandler.clientList.isEmpty()) {
+                if (ClientPositionHandlerServer.clientList.isEmpty()) {
                     if (timeOut <= 3)
                         System.out.println("Timeout in: " + timeOut);
                     timeOut--;
                 }
             }
             running = false;
+            welcoming = false;
             clientSocket.close();
         }).start();
 
@@ -62,17 +70,11 @@ public class Server implements Runnable {
         }
     }
 
-    private void sendWelcome() {
-        WelcomePacket packet = new WelcomePacket();
-        packet.msg = "Welcome to the server!";
-        sendTo(packet, MULTICAST_ADDRESS, MULTICAST_PORT);
-    }
-
     private void connectionListener() throws IOException {
         byte[] pokeBuf = new byte[objectToByteArray(new ConnectPacket()).length];
         DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-        if (ClientPositionHandler.clientList.isEmpty()) {
+        if (ClientPositionHandlerServer.clientList.isEmpty()) {
             clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
         } else clientSocket.setSoTimeout(0);
 
@@ -83,7 +85,8 @@ public class Server implements Runnable {
             return;
         }
 
-        System.out.println("Packet from client " + incPoke.getAddress() + " received");
+        System.out.println(incPoke.getAddress() + " has connected");
+        welcoming = false;
 
         Object receivedPoke = byteArrayToObject(pokeBuf);
         listenerServer.received(receivedPoke, incPoke.getAddress());
@@ -92,25 +95,50 @@ public class Server implements Runnable {
     public static void addConnection(InetAddress address) {
         ConnectedToServer connection = new ConnectedToServer(address, clientPort);
         new Thread(connection).start();
-        ClientPositionHandler.clientList.put(address, connection);
+
+        UniquePortPacket portPacket = new UniquePortPacket();
+        portPacket.setPort(clientPort);
+        portPacket.setClientAddress(address);
+        multicastPacket(portPacket, GET_PORT_PORT);
+
+        ClientPositionHandlerServer.clientList.put(address, connection);
+
         clientPort++;
+        welcoming = true;
     }
 
     public static void removeConnection(InetAddress address) {
-        ClientPositionHandler.clientList.get(address).close();
-        ClientPositionHandler.clientList.remove(address);
+        ClientPositionHandlerServer.clientList.get(address).close();
+        ClientPositionHandlerServer.clientList.remove(address);
     }
 
-    public void sendTo(Object o, String mAddress, int mPort) {
+    public static void multicastPacket(Object o, int mPort) {
         try {
-            MulticastSocket dSocket = new MulticastSocket();
-            InetAddress group = InetAddress.getByName(mAddress);
+            MulticastSocket multicastSocket = new MulticastSocket();
+
+//            Looks for the Wi-Fi adapter and sets the interface to it
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface net = interfaces.nextElement();
+                if (!net.getName().startsWith("wlan"))
+                    continue;
+
+                Enumeration<InetAddress> addresses = net.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr.toString().length() < 17) {
+                        multicastSocket.setInterface(addr);
+                    }
+                }
+            }
+
+            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
 //          Creates a byte array of the object
             byte[] sendBuf = objectToByteArray(o);
 
             DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, group, mPort);
-            dSocket.send(packet);
+            multicastSocket.send(packet);
 
         } catch (UnknownHostException e) {
             System.err.println("Exception:  " + e);
@@ -120,7 +148,7 @@ public class Server implements Runnable {
         }
     }
 
-    private void waitASecond() {
+    public static void waitASecond() {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -128,7 +156,7 @@ public class Server implements Runnable {
         }
     }
 
-    private byte[] objectToByteArray(Object o) {
+    private static byte[] objectToByteArray(Object o) {
         byte[] sendBuf = null;
 
         try {
