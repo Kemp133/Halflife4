@@ -42,7 +42,7 @@ public class Main extends Application {
         return value ;
     }
     /**Initialize the root scene for the main game, and new game object can be
-     * add by calling getChildren.add().
+     * add by callinpog getChildren.add().
      * */
     //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
     private Parent createContent() {
@@ -112,6 +112,7 @@ public class Main extends Application {
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
         MapRender map = new MapRender();
+        map.SetMap("res/map.png");
         map.SetMap("res/map.png");
         map.loadLevel(objectManager);
 

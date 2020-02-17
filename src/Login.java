@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +29,8 @@ public class Login extends Application {
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+
+    private Stage Pstage;   //get the primary stage
 
     Button login = new Button();
     Button createNewUser = new Button();
@@ -102,6 +105,8 @@ public class Login extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
+        setPstage(stage);
+
         //Setting properties of buttons
         login.setText("Login");
         login.setMinHeight(30);
@@ -148,6 +153,13 @@ public class Login extends Application {
                         //TODO: Assign username to 'player' and change to game screen
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
+
+                        try {
+                            new Windows().start(Pstage);
+                        } catch (FileNotFoundException ex) {
+                            ex.printStackTrace();
+                        }
+
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
@@ -354,5 +366,10 @@ public class Login extends Application {
         nameField.setText(null);
         passwordField.setText(null);
         passwordFieldConf.setText(null);
+    }
+
+
+    public void setPstage(Stage pstage) {
+        Pstage = pstage;
     }
 }

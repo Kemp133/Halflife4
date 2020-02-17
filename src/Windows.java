@@ -18,6 +18,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/*The class shows game manu after log-in successfully
+* Function include:
+* new game;load game
+* audio setings*/
 public class Windows extends Application {
 
     private String filepng = null;
@@ -83,6 +87,7 @@ public class Windows extends Application {
     public void start(Stage primaryStage) {
         try {
             primaryStage.setTitle("Team HalfLife");
+            primaryStage.setResizable(true);
             pStage = primaryStage;
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
@@ -98,9 +103,11 @@ public class Windows extends Application {
 
     public void entergameStage() throws Exception {
         new Main().start(pStage);
+        pStage.centerOnScreen();
     }
 
     public void Update() {
+        //get ther
 
     }
 

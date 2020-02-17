@@ -1,3 +1,4 @@
+import com.halflife3.Networking.Server.Server;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -35,7 +36,11 @@ public class FirstMenu extends Application {
 
         server_m.setOnAction(e->{
             //jump to server main class
-            runServer();
+            try {
+                runServer();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
 
         client_m.setOnAction(e->{
@@ -49,8 +54,11 @@ public class FirstMenu extends Application {
         });
     }
 
-    private void runServer() {
-
+    private void runServer() throws Exception {
+        new ServerDisplay().start(pstage);
+        pstage.centerOnScreen();
+        Server myServer = new Server();
+        myServer.run();
     }
 
     @Override
