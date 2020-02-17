@@ -1,4 +1,3 @@
-import com.halflife3.Controller.Exceptions.PasswordNotMatchingException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -25,13 +24,14 @@ import java.security.SecureRandom;
 
 import java.sql.*;
 
+import java.util.Arrays;
+
 public class Login extends Application {
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-    private Stage Pstage;   //get the primary stage
-
+    private Stage Pstage = null;
     Button login = new Button();
     Button createNewUser = new Button();
     Button backButton = new Button();
@@ -104,10 +104,9 @@ public class Login extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
-        setPstage(stage);
-
         //Setting properties of buttons
+
+        Pstage = stage;
         login.setText("Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
@@ -153,13 +152,13 @@ public class Login extends Application {
                         //TODO: Assign username to 'player' and change to game screen
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
-
+                        
                         try {
                             new Windows().start(Pstage);
                         } catch (FileNotFoundException ex) {
                             ex.printStackTrace();
                         }
-
+                        
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
@@ -275,7 +274,7 @@ public class Login extends Application {
             //Executing the query
             rs = preparedStatement.executeQuery();
             //Returns true if a user exists and false if it doesn't
-            if (rs.next() != false) {
+            if (rs.next()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -296,7 +295,7 @@ public class Login extends Application {
             //Retrieving the salt from the table based on the username given
             byte[] salt = new byte[0];
             //Creating the query
-            String querySalt = "SELECT salt FROM \"UserDataScore\" WHERE name = " + username;
+            String querySalt = "SELECT salt FROM \"UserDataScore\" WHERE \"name\" = '" + username + "'";
             //Creating the statement
             saltStatement = c.prepareStatement(querySalt);
             rs = saltStatement.executeQuery();
@@ -306,13 +305,13 @@ public class Login extends Application {
             //Hashing the password given based on the salt retrieved
             byte[] hashedPassword = hashPassword(salt, passwordEntered);
             //Creating the query
-            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE name = " + username + " AND password = " + hashedPassword;  //TODO: AND salt = salt?? or not needed?
+            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE \"name\" = '" + username + "' AND \"password\" = '" + passwordEntered + "'";
             //Creating the statement
             preparedStatement = c.prepareStatement(queryDetails);
             //Executing the query
             rsDetails = preparedStatement.executeQuery();
             //Returns true if user details are correct and false if they aren't
-            if (rsDetails.next() != false) {
+            if (rsDetails.next()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -331,10 +330,8 @@ public class Login extends Application {
             //Creating a hashed password based on a random salt
             byte[] randomSalt = returnSalt();
             byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
-            System.out.println("salt: " + randomSalt + " hashed password: " + hashedPassword);
             //Creating the query
-            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + randomSalt + "', '" + hashedPassword + "')";
-            System.out.println("query: " + query);
+            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; // Added a random salt and plaintext password
             //Creating the statement
             preparedStatement = c.prepareStatement(query);
             //Executing the query
@@ -356,11 +353,12 @@ public class Login extends Application {
 
     //Hashes password using the created or retrieved salt
     public byte[] hashPassword(byte[] salt, String password) {
-        MessageDigest md = null;
+        MessageDigest md; //Removed redundant assign to null (as all class references are null on), as per IntelliJ's request
         try {
             md = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return null; //MessageDigest can cause a null pointer exception, just return null to stop this from happening (as well as acting as an error state)
         }
         md.update(salt);
         return md.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -373,8 +371,36 @@ public class Login extends Application {
         passwordFieldConf.setText(null);
     }
 
+    //TODO: Used for
+    /*public void getData(Connection c, String username) throws SQLException {
+        //Creating the Statement
+        Statement stmt = c.createStatement();
+        String query = "Select * from \"UserDataScore\" where name = '" + username + "'";
+        System.out.println("Get data query: " + query);
+        //Executing the query
+        ResultSet rs = stmt.executeQuery(query);
+        //Retrieving ResultSetMetaData object
+        ResultSetMetaData rsMetaData = rs.getMetaData();
+        System.out.println("Column name: " + rsMetaData.getColumnName(1));
+        System.out.println("Column name: " + rsMetaData.getColumnName(2));
+        System.out.println("Column name: " + rsMetaData.getColumnName(3));
+        System.out.println("Column name: " + rsMetaData.getColumnName(4));
+        if (!rs.next()) { //No need to do rs.next() == false as rs.next returns a boolean, so to check for false you can just instead have !rs.next()
+            System.out.println("no match");
+        } else {
+            System.out.println("match");
+        }
+        while (rs.next()) {
 
-    public void setPstage(Stage pstage) {
-        Pstage = pstage;
-    }
+            System.out.print(rs.getInt(1));
+            System.out.print(": ");
+            System.out.println(rs.getString(2));
+            System.out.print(": ");
+            System.out.println(rs.getInt(3));
+            System.out.print(": ");
+            System.out.println(rs.getString(4));
+            System.out.print(": ");
+            System.out.println(rs.getString(5));
+        }
+    }*/
 }
