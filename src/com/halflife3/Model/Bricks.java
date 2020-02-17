@@ -11,19 +11,17 @@ import java.io.FileNotFoundException;
 public class Bricks extends GameObject {
     public double width = 40;
     public double height = 40;
-    public Rectangle rectangle = new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
+    public Rectangle rectangle = new Rectangle(position.getX(), position.getY(), width, height);
     private Image image;
 
     //Initialize a player
     public Bricks(Vector2 position, Vector2 velocity, short rotation, ObjectManager om){
-        super(position,velocity,rotation,om);
+        super(position,velocity,rotation, om);
     }
 
     @Override
     public Rectangle GetBounds() {
-        //Create rectangle object(one of node in javafx)
-        //return new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
-        return  this.rectangle;
+        return rectangle;
     }
 
     //TODO: write the intersects
@@ -39,7 +37,6 @@ public class Bricks extends GameObject {
         image = i;
         width = i.getWidth();
         height = i.getHeight();
-
     }
 
     public void setImage(String filename) throws FileNotFoundException {
@@ -50,18 +47,13 @@ public class Bricks extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-
         gc.drawImage( image, position.getX(), position.getY() );
     }
 
     //update the position
     @Override
     public void update(double time) {
-        //this.position = this.position.add(this.velocity.multiply(time));
+        //position = position.add(velocity.multiply(time));
         //TODO: for this after bullet created, if bullet touch the brick, brick should be removed
-    }
-
-    public void addVelocity(Vector2 toAdd) {
-        this.velocity.add(toAdd);
     }
 }

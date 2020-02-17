@@ -1,6 +1,7 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -20,7 +21,7 @@ public class Bullet extends GameObject {
     {
         try {
             FileInputStream inputted = new FileInputStream("res/bullet.png");
-            this.sprite = new Image(inputted);
+            sprite = new Image(inputted);
         } catch (Exception e) {
             System.out.println("Error loading image");
         }
@@ -28,7 +29,7 @@ public class Bullet extends GameObject {
 
     @Override
     public Rectangle GetBounds() {
-        return new Rectangle(this.position.getX(), this.position.getY(), sprite.getWidth(), sprite.getHeight());
+        return new Rectangle(position.getX(), position.getY(), sprite.getWidth(), sprite.getHeight());
     }
 
     @Override
@@ -38,11 +39,11 @@ public class Bullet extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, this.position.getX(), this.position.getY());
+        gc.drawImage(sprite, getX(), getY());
     }
 
     @Override
     public void update(double time) {
-        this.position.add(velocity.multiply(time));
+        position = position.add(new Vector2(velocity).multiply(time));
     }
 }

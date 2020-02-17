@@ -1,6 +1,8 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
+import com.halflife3.Model.Interfaces.IRenderable;
+import com.halflife3.Model.Interfaces.IUpdateable;
 import javafx.scene.shape.Rectangle;
 
 import java.util.HashSet;
@@ -54,28 +56,55 @@ public abstract class GameObject implements IRenderable, IUpdateable {
 
     //region Position getters and Setters
     /** A method to return the x value from the Vector2 */
-    public double getX() { return this.position.getX(); }
+    public double getX() { return position.getX(); }
     /** A method to return the y value from the Vector2 */
-    public double getY() { return this.position.getY(); }
+    public double getY() { return position.getY(); }
     /** A method to return the Vector2 that this GameObject holds */
-    public Vector2 getPosition() { return new Vector2(this.position); }
+    public Vector2 getPosition() { return new Vector2(position); }
+
+    /**
+     * A method to set the position with a given Vector2
+     * @param position the position to set this object to
+     */
+    public void setPosition(Vector2 position) {
+        this.position = position;
+    }
+    /** A method to set the position of this object with a given x and y
+     * @param x the x position of the new position
+     * @param y the y position of the new position
+     */
+    public void setPosition(double x, double y) {
+        position.setX(x);
+        position.setY(y);
+    }
     //endregion
 
     //region Velocity Getters and Setters
     /** A method to return the x value from the Vector2 */
-    public double getVelX() { return this.velocity.getX(); }
+    public double getVelX() { return velocity.getX(); }
     /** A method to return the y value from the Vector2 */
-    public double getVelY() { return this.velocity.getY(); }
+    public double getVelY() { return velocity.getY(); }
     /** A method to return the Vector2 that this GameObject holds */
-    public Vector2 getVelocity() { return this.velocity; }
+    public Vector2 getVelocity() { return velocity; }
+    /**
+     * A method to set the velocity of the current object
+     * @param velocity the new velocity to set this object to
+     */
     public void setVelocity(Vector2 velocity) {
         this.velocity = velocity;
+    }
+    /** A method to reset the velocity back to [0,0] */
+    public void resetVelocity() {
+        velocity.reset();
     }
     //endregion
 
     //region Rotation Getter and Setter
     /** A method to return the rotation of the GameObject */
-    public double getRotation() { return this.rotation; }
+    public double getRotation() { return rotation; }
+    public void setRotation(short toAdd) {
+        rotation = (short)(toAdd % 360);
+    }
     //endregion
 
     /*

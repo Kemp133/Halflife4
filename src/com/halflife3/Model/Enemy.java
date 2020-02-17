@@ -32,7 +32,7 @@ public abstract class Enemy extends GameObject {
     @Override
     public Rectangle GetBounds() {
         //Create rectangle object(one of node in javafx)
-        return new Rectangle(this.position.getX(), this.position.getY(), this.width, this.height);
+        return new Rectangle(position.getX(), position.getY(), width, height);
     }
     //TODO: write the intersects, this checks if the hitbox of GameObject s overlaps with this enemy
     @Override
@@ -64,12 +64,12 @@ public abstract class Enemy extends GameObject {
     //update the position
     @Override
     public void update(double time) {
-        this.position = this.position.add(this.velocity.multiply(time));
+        position = position.add(velocity.multiply(time));
     }
 
     //adds velocity
     public void addVelocity(Vector2 toAdd) {
-        this.velocity.add(toAdd);
+        velocity = velocity.add(toAdd);
     }
 
     //TODO: need to move to specific location, also avoiding the obstacle
