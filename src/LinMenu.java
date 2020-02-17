@@ -1,20 +1,17 @@
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
 
 public class LinMenu extends ContextMenu {
 
@@ -26,14 +23,16 @@ public class LinMenu extends ContextMenu {
     private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
     private Slider volume = new Slider();
     private MenuItem startItem = null;
+    private MenuItem loadItem = null;
     private Button login = null;
+    private Text text = new Text("Game_Name");
 
     public LinMenu() throws FileNotFoundException {
         FileInputStream input = new FileInputStream("res/button_image.png");
         Image image = new Image(input);
 
-       startItem = new MenuItem("new game");
-        MenuItem loadItem = new MenuItem("load game");
+        startItem = new MenuItem("new game");
+        loadItem = new MenuItem("load game");
         MenuItem audioItem_on = new MenuItem("audio on");
         MenuItem audioitem_off = new MenuItem("audio off");
         CustomMenuItem audio = new CustomMenuItem(volume);
@@ -41,10 +40,16 @@ public class LinMenu extends ContextMenu {
         MenuButton start_m = new MenuButton("Start",new ImageView(image),startItem,loadItem);
         MenuButton settings_m = new MenuButton("Settings",new ImageView(image),audioItem_on,audioitem_off,audio);
         Button exit_m = new Button("Exit",new ImageView(image));
+        text.setFont(Font.font("Corbel",200));
+        text.setFill(Color.WHITE);
 
         //adding mouse input
         startItem.setOnAction(e->{
             player.play();
+        });
+
+        loadItem.setOnAction(e->{
+
         });
 
         audioItem_on.setOnAction(actionEvent -> Is_mute(false));
@@ -52,13 +57,17 @@ public class LinMenu extends ContextMenu {
         audio.setOnAction(actionEvent -> volumeControl(volume));
         exit_m.setOnAction(actionEvent -> Platform.exit());
         main_manu = new VBox(100);
-        main_manu.getChildren().addAll(start_m, settings_m, exit_m);
+        main_manu.getChildren().addAll(text,start_m, settings_m, exit_m);
 
     }
 
 
     public MenuItem getStartItem() {
         return startItem;
+    }
+
+    public MenuItem getLoadItem(){
+        return loadItem;
     }
 
     private void Is_mute(boolean b) {

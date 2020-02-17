@@ -1,33 +1,25 @@
+/*This is the main menu after
+log-in successfully to the database*/
 
 import com.halflife3.View.Main;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import javax.imageio.stream.FileImageInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Windows extends Application {
 
-    /*Stage window;
-    BorderPane layout;*/ // Not needed for now
     private String filepng = null;
     private StackPane pane = new StackPane();
     private LinMenu main_menu = LinMenu.getInstance();
@@ -50,13 +42,21 @@ public class Windows extends Application {
                 e.printStackTrace();
             }
         });
+        main_menu.getLoadItem().setOnAction(actionEvent->{
+            loadgame();
+        });
         VBox manuBar = main_menu.getBar();
         manuBar.setAlignment(Pos.CENTER);
         pane.getChildren().add(manuBar);
     }
 
+    //load game from sql
+    private void loadgame() {
+
+    }
+
     private void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/button_image.png"); //change the backgraoud file plz
+        FileInputStream inputStream = new FileInputStream("res/windows-backgroud.jpg"); //change the backgraoud file plz
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
@@ -97,25 +97,6 @@ public class Windows extends Application {
     }
 
     public void entergameStage() throws Exception {
-//        //turn to leader border
-//        //FXMLLoader loader = new FXMLLoader(getClass().getResource("half-life.fxml"));  //use fxml for a new map
-//        //BorderPane root = new BorderPane();
-//        Parent root = loader.getRoot();
-//        Button exit = new Button("Exit");
-////        exit.setAlignment(Pos.CENTER);
-////        exit.setOnAction(actionEvent -> Platform.exit());
-//        Stage Newstage = new Stage();
-//        try{
-//            Newstage.setScene(new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT));
-//        }catch(Exception e){
-//            System.err.println("root is null");
-//        }
-//        Newstage.show();
-//        root.requestFocus();
-//        //root.getChildren().add(exit);
-        //pane.getChildren().add(root);
-//        Leaderboard lboard = new Leaderboard();
-//        lboard.start(getpStage());
         new Main().start(pStage);
     }
 
