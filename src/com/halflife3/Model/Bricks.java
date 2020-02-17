@@ -15,8 +15,8 @@ public class Bricks extends GameObject {
     private Image image;
 
     //Initialize a player
-    public Bricks(Vector2 position, Vector2 velocity, short rotation, ObjectManager om){
-        super(position,velocity,rotation, om);
+    public Bricks(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int ID){
+        super(position,velocity,rotation, om, ID);
     }
 
     @Override

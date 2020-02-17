@@ -39,6 +39,7 @@ public class Server implements Runnable {
         System.out.println("Multicasting on port: " + MULTICAST_PORT);
 
 //        Multicasts WelcomePackets, closes server after 60s of no connections
+        //TODO: Server send position to every client and server update each client's position
         new Thread(() -> {
             int timeOut = SERVER_TIMEOUT/1000;
             WelcomePacket packet = new WelcomePacket();
