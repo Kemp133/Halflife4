@@ -142,6 +142,7 @@ public class Main extends Application {
                 player.collision(player_hit_block, elapsedTime);
 
 
+
                 // render
                 gc.clearRect(0, 0, 800, 600);
                 player.render(gc);
