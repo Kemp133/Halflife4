@@ -26,8 +26,8 @@ public abstract class Enemy extends GameObject {
     }
 
     //Initialize a player
-    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life){
-        super(position,velocity,rotation, om);
+    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life,int ID){
+        super(position,velocity,rotation, om,ID);
         health = life;
     }
 

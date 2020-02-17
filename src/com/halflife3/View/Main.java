@@ -27,7 +27,7 @@ import static javafx.scene.input.KeyCode.*;
 public class Main extends Application {
     private Pane root = new Pane();
     private ObjectManager objectManager = new ObjectManager();
-    private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
+    private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager,1);
     static Input input = new Input();
 
     //Translate the Gametime value format, will be used at timer part.
@@ -84,7 +84,7 @@ public class Main extends Application {
         root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
         scene.setCursor(Cursor.NONE);
         //Create cursor
-        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input);
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input,10);
 
         //set the image for player, need to change the
         player.setImage("res/Player_pic.png");
@@ -126,7 +126,7 @@ public class Main extends Application {
                     objectManager.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
                 }
                 if (input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
-                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short) 0, objectManager);
+                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short) 0, objectManager,3);
                 }
 
 

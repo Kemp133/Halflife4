@@ -19,8 +19,8 @@ public class Player extends GameObject {
     private float moveSpeed = 100;
 
     //Initialize a player
-    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
-        super(position, velocity, rotation, om);
+    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int ID) {
+        super(position, velocity, rotation, om,ID);
         keys.add("player");
     }
 
@@ -65,7 +65,7 @@ public class Player extends GameObject {
 
     public void collision(boolean if_collision, double time) {
         if (if_collision) {
-            this.position = original_position.subtract(this.velocity.multiply(time*5));
+            this.position = original_position.subtract(this.velocity.multiply(2*time));
             rectangle.setX(this.position.getX());
             rectangle.setY(this.position.getY());
         }

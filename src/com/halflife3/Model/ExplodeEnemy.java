@@ -4,8 +4,8 @@ import com.halflife3.Controller.ObjectManager;
 
 public class ExplodeEnemy extends Enemy{
 
-    public ExplodeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
-        super(position, velocity, rotation, om, 2);
+    public ExplodeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om,int ID) {
+        super(position, velocity, rotation, om, 2,ID);
     }
     //TODO: write the method
     @Override

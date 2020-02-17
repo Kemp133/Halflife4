@@ -36,14 +36,14 @@ public class JavaFXWindow extends Application {
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        Player Player1 = new Player(new Vector2(100,100), new Vector2(), (short)0, om);
+        Player Player1 = new Player(new Vector2(100,100), new Vector2(), (short)0, om,1);
         //set the image for player, need to change the
         Player1.setImage("res/Player_pic.png");
 
-        Player Player2 = new Player(new Vector2(200, 200), new Vector2(), (short)0, om);
+        Player Player2 = new Player(new Vector2(200, 200), new Vector2(), (short)0, om,1);
         Player2.setImage("res/Player_pic.png");
 
-        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0,0), (short)0, om, input);
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0,0), (short)0, om, input,10);
 
         //main update.
         final long[] startNanoTime = {System.nanoTime()};
@@ -65,7 +65,7 @@ public class JavaFXWindow extends Application {
                 if (input.isKeyPressed(S))
                     Player1.addVelocity(new Vector2(0, 1).multiply(Player1.getMoveSpeed()));
                 if(input.isKeyPressed(SPACE)) {
-                    Bullet bullet = new Bullet(Player1.getPosition(), new Vector2(0, 30), (short)0, om);
+                    Bullet bullet = new Bullet(Player1.getPosition(), new Vector2(0, 30), (short)0, om,3);
                 }
 
                 if (input.isKeyPressed(LEFT))
@@ -82,7 +82,7 @@ public class JavaFXWindow extends Application {
                 }
 
                 if(input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
-                    Bullet bullet = new Bullet(new Vector2(Player1.getX(), Player1.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(Player1.getPosition()).normalise().multiply(100), (short)0, om);
+                    Bullet bullet = new Bullet(new Vector2(Player1.getX(), Player1.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(Player1.getPosition()).normalise().multiply(100), (short)0, om,3);
                 }
 
                 for(IUpdateable go : om.getGameObjects()) {

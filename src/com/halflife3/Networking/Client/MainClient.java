@@ -5,6 +5,7 @@ import com.halflife3.Controller.MouseInput;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
+import com.halflife3.Model.Interfaces.IUpdateable;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -27,11 +28,20 @@ public class MainClient extends Application {
     //static ServerPositionHandlerClient handler = new ServerPositionHandlerClient();
     private Pane root = new Pane();
     private ObjectManager objectManager = new ObjectManager();
-    private Player player_client = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
-    private Player player_server = new Player(new Vector2(300, 300), new Vector2(0, 0), (short) 0, objectManager);
+    private Player player_client = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager,1);
+    private Player player_server = new Player(new Vector2(300, 300), new Vector2(0, 0), (short) 0, objectManager,1);
 
     //private Vector2 client_position = player_client.getPosition();
 
+/**
+ * Plan to give each game_object an ID
+ * And add every object to the object manager
+ * 0: Block_Breakable
+ * 1: Player
+ * 2: Block_unBreakable
+ * 3: Bullet
+ * 4: Enemy
+ * */
 
 
     public static void main(String[] args) {
@@ -86,7 +96,7 @@ public class MainClient extends Application {
         root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
         scene.setCursor(Cursor.NONE);
         //Create cursor
-        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input);
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input,10);
 
         //set the image for player, need to change the
         player_client.setImage("res/Player_pic.png");
@@ -96,7 +106,7 @@ public class MainClient extends Application {
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         //main update.
-        com.halflife3.Networking.Client.MainClient.LongValue lastNanoTime = new com.halflife3.Networking.Client.MainClient.LongValue(System.nanoTime());
+        final long[] startNanoTime = {System.nanoTime()};
 
         MapRender map = new MapRender(objectManager);
         map.SetMap("res/map.png");
@@ -105,9 +115,8 @@ public class MainClient extends Application {
             public void handle(long currentNanoTime) {
 
                 // calculate time since last update.
-                double elapsedTime = (currentNanoTime - lastNanoTime.value) / 1000000000.0;
-                //System.out.println(elapsedTime);
-                lastNanoTime.value = currentNanoTime;
+                double elapsedTime = (currentNanoTime - startNanoTime[0]) / 1000000000.0;
+                startNanoTime[0] = currentNanoTime;
 
                 // game logic
                 if (handle.input.isKeyPressed(A))
@@ -124,17 +133,19 @@ public class MainClient extends Application {
                     player_client.getVelocity().setY(100);
                 else
                     player_client.getVelocity().reset();
-                if (input.isKeyPressed(C)) {
+
+                if (handle.input.isKeyPressed(C)) {
                     objectManager.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
                 }
-                if (input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
-                    Bullet bullet = new Bullet(new Vector2(player_client.getX(), player_client.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player_client.getPosition()), (short) 0, objectManager);
+                if(handle.input.isKeyPressed(SPACE) || input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
+                    Bullet bullet = new Bullet(new Vector2(player_client.getX(), player_client.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player_client.getPosition()).normalise().multiply(100), (short)0, objectManager,3);
                 }
 
-
-                player_client.update(elapsedTime);
+                for(IUpdateable go : objectManager.getGameObjects()) {
+                    go.update(elapsedTime);
+                }
                 //Put the collision detection into the main loop
-                Boolean player_hit_block = false;
+                boolean player_hit_block = false;
                 for (Bricks block : map.get_list()) {
                     if (block.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())) {
                         player_hit_block = true;
@@ -149,9 +160,7 @@ public class MainClient extends Application {
 
                 // render
                 gc.clearRect(0, 0, 800, 600);
-                player_client.render(gc);
-                player_server.render(gc);
-                map.render(gc);
+
                 for (IRenderable go : objectManager.getGameObjects()) {
                     go.render(gc);
                 }
@@ -162,14 +171,6 @@ public class MainClient extends Application {
 
     }
 
-    //Translate the Gametime value format, will be used at timer part.
-    private class LongValue {
-        public long value;
-
-        public LongValue(long i) {
-            value = i;
-        }
-    }
 }
 
 
