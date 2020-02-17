@@ -42,13 +42,13 @@ public class Window extends Application {
         pane.getChildren().addAll(newGButton, optButton, quit);
 
         //Adds an image to a button
-        FileInputStream input = new FileInputStream("res/button_image.png");
+        /*FileInputStream input = new FileInputStream("res/button_image.png");
         Image image = new Image(input);
         ImageView imageView = new ImageView(image);
 
         Button button = new Button("New Game", imageView);
 
-        pane.getChildren().add(button);
+        pane.getChildren().add(button);*/
     }
 
     private void addBackground() throws FileNotFoundException {
