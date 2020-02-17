@@ -125,6 +125,8 @@ public abstract class Enemy extends GameObject {
         pathList.addFirst(chosen);
         return pathList;
     }
+
+    //Auxillary method for getPath
     public static int FindSmallest (double [] arr1) {
         int index = 0;
         double min = arr1[index];
@@ -138,10 +140,12 @@ public abstract class Enemy extends GameObject {
         }
         return index;
     }
+
     //TODO: create a method that finds walls
     public boolean hasWall(Vector2 location){
         return false;
     }
+
     //TODO: need to move to specific location, also avoiding the obstacle
     public void moveTo(GameObject entity){
         //step 1: find shortest path without walls
@@ -157,4 +161,10 @@ public abstract class Enemy extends GameObject {
        }
     }
     public abstract void attackPattern();
+
+    //TODO: Find closest player
+    /*
+    public Player closestPlayer(){
+
+    }*/
 }
