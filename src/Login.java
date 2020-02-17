@@ -148,6 +148,13 @@ public class Login extends Application {
                         //TODO: Assign username to 'player' and change to game screen
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
+                        
+                        try {
+                            new Windows().start(Pstage);
+                        } catch (FileNotFoundException ex) {
+                            ex.printStackTrace();
+                        }
+                        
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
