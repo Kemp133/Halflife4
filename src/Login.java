@@ -27,11 +27,11 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class Login extends Application {
-
+    private Stage Pstage = null;
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-    private Stage Pstage = null;
+
     Button login = new Button();
     Button createNewUser = new Button();
     Button backButton = new Button();
