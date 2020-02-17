@@ -12,8 +12,8 @@ public class Bullet extends GameObject {
 
     double lifeTime = 5.0;
 
-    public Bullet(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
-        super(position, velocity, rotation, om);
+    public Bullet(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int ID) {
+        super(position, velocity, rotation, om, ID);
         keys.add("Bullet");
     }
 
