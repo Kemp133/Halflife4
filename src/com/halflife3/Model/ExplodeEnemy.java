@@ -14,6 +14,10 @@ public class ExplodeEnemy extends Enemy{
     //TODO: write the method
     @Override
     public void attackPattern(Player[] playerList) {
+        while(getDistance(closestPlayer(playerList)) > 10){
+            moveTo(closestPlayer(playerList));
+        }
+        //TODO: deal damage in a 10 radius area
         death();
     }
 }
