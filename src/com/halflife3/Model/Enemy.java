@@ -7,7 +7,6 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
 
 public abstract class Enemy extends GameObject {
     protected double width;
@@ -75,18 +74,18 @@ public abstract class Enemy extends GameObject {
     //TODO: need to move to specific location, also avoiding the obstacle
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
-        LinkedList<Vector2> path = getPath(this.position, position);
         //step 2: move to target
-        while(!path.isEmpty()){
-            this.position = path.pop();
-            //wait(1);
-        }
+        this.position = getPath(this.position, position);
+    }
+    public void moveTo(GameObject entity){
+        //step 1: find shortest path without walls
+        this.position = getPath(this.getPosition(), entity.getPosition());
+        //step 2: move to target
     }
     //this method gets the path between two positions
-    public LinkedList<Vector2> getPath(Vector2 original , Vector2 position){
+    public Vector2 getPath(Vector2 original , Vector2 position){
         //create the list
-        LinkedList<Vector2> pathList = new LinkedList<Vector2>();
-        if(original == position){ return pathList;}
+        if(original == position){ return position;}
         //upEmpty?
         Vector2 up = new Vector2(original.getX(), original.getY() + 1);
         //rightEmpty?
@@ -99,7 +98,9 @@ public abstract class Enemy extends GameObject {
         double rdis = right.squareDistance(position);
         double ddis = down.squareDistance(position);
         double ldis = left.squareDistance(position);
+
         double[] shortest = {udis, rdis, ddis, ldis};
+
         if (hasWall(up)){ shortest[0] =  Math.pow(2, 10);}
         if (hasWall(right)){ shortest[1] = Math.pow(2, 10);}
         if (hasWall(down)){ shortest[2] = Math.pow(2, 10);}
@@ -121,9 +122,7 @@ public abstract class Enemy extends GameObject {
                 chosen = left;
                 break;
         }
-        pathList = getPath(chosen , position);
-        pathList.addFirst(chosen);
-        return pathList;
+        return chosen;
     }
 
     //Auxillary method for getPath
@@ -147,12 +146,7 @@ public abstract class Enemy extends GameObject {
     }
 
     //TODO: need to move to specific location, also avoiding the obstacle
-    public void moveTo(GameObject entity){
-        //step 1: find shortest path without walls
-        LinkedList<Vector2> path = getPath(this.getPosition(), entity.getPosition());
-        //step 2: move to target
-        this.position = path.pop();
-    }
+
     //this method removes the enemy from the screen
     //TODO: add a death animation
     public void death(){
