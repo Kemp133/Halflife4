@@ -7,7 +7,6 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Deque;
 
 public class Player extends GameObject {
     public double width = 49;

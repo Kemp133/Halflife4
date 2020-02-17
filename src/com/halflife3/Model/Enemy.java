@@ -7,6 +7,7 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 
 public abstract class Enemy extends GameObject {
     protected double width;
@@ -71,7 +72,6 @@ public abstract class Enemy extends GameObject {
         velocity = velocity.add(toAdd);
     }
 
-    //TODO: need to move to specific location, also avoiding the obstacle
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
         //step 2: move to target
@@ -79,8 +79,8 @@ public abstract class Enemy extends GameObject {
     }
     public void moveTo(GameObject entity){
         //step 1: find shortest path without walls
-        this.position = getPath(this.getPosition(), entity.getPosition());
         //step 2: move to target
+        this.position = getPath(this.getPosition(), entity.getPosition());
     }
     //this method gets the path between two positions
     public Vector2 getPath(Vector2 original , Vector2 position){
@@ -140,6 +140,23 @@ public abstract class Enemy extends GameObject {
         return index;
     }
 
+    //Find closest player
+    public Player closestPlayer(Player[] playerList){
+        LinkedList<Double> playerDistance = null;
+        for (Player player : playerList) {
+            playerDistance.add(getDistance(player));
+        }
+
+        Object[] playerDistanceArr = playerDistance.toArray();
+        double[] playerDistanceArrayDouble = new double[0];
+
+        for(int j = 0; j < playerDistanceArr.length; j++){
+            playerDistanceArrayDouble[j] = (double) playerDistanceArr[j];
+        }
+        int closet = FindSmallest(playerDistanceArrayDouble);
+        return playerList[closet];
+    }
+
     //TODO: create a method that finds walls
     public boolean hasWall(Vector2 location){
         return false;
@@ -154,11 +171,8 @@ public abstract class Enemy extends GameObject {
           selfDestroy();
        }
     }
-    public abstract void attackPattern();
 
-    //TODO: Find closest player
-    /*
-    public Player closestPlayer(){
+    //TODO: overlapping hitbox means damage, if not, move to player
+    public abstract void attackPattern(Player[] playerList);
 
-    }*/
 }
