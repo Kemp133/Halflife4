@@ -1,4 +1,9 @@
+package com.halflife3;
+
 import javafx.application.Application;
+import javafx.application.Preloader;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,6 +19,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,24 +29,26 @@ import java.sql.*;
 
 import java.util.Arrays;
 
-public class Login extends Application {
+public class Login extends Preloader {
 
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth() * 0.2;
+    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight() * 0.3;
 
-    Button login = new Button();
-    Button createNewUser = new Button();
-    Button backButton = new Button();
-    Button create = new Button();
-    Text name = new Text("Name");
-    TextField nameField = new TextField();
-    Text password = new Text("Password");
-    PasswordField passwordField = new PasswordField();
-    Text confPassword = new Text("Confirm Password");
-    PasswordField passwordFieldConf = new PasswordField();
-    Text incorrectFields = new Text();
+    private static Button login = new Button();
+    private static Button createNewUser = new Button();
+    private static Button backButton = new Button();
+    private static Button create = new Button();
+    private static Text name = new Text("Name");
+    private static TextField nameField = new TextField();
+    private static Text password = new Text("Password");
+    private static PasswordField passwordField = new PasswordField();
+    private static Text confPassword = new Text("Confirm Password");
+    private static PasswordField passwordFieldConf = new PasswordField();
+    private static Text incorrectFields = new Text();
 
-    public GridPane loginPane() {
+    private static Stage preloaderStage;
+
+    private static GridPane basePane() {
         GridPane gridPaneLogin = new GridPane();
         //Setting size for the pane
         gridPaneLogin.setMinSize(800, 600);
@@ -55,6 +63,12 @@ public class Login extends Application {
         //Setting the Grid alignment
         gridPaneLogin.setAlignment(Pos.CENTER);
 
+        return gridPaneLogin;
+    }
+
+    public static GridPane loginPane() {
+        GridPane gridPaneLogin = basePane();
+
         //Arranging all the nodes in the grid
         gridPaneLogin.add(name, 0, 0);
         gridPaneLogin.add(nameField, 1, 0);
@@ -68,20 +82,7 @@ public class Login extends Application {
     }
 
     public GridPane newUserPane() {
-        GridPane gridPaneCreateUser = new GridPane();
-
-        //Setting size for the pane
-        gridPaneCreateUser.setMinSize(800, 600);
-
-        //Setting the padding
-        gridPaneCreateUser.setPadding(new Insets(10, 10, 10, 10));
-
-        //Setting the vertical and horizontal gaps between the columns
-        gridPaneCreateUser.setVgap(30);
-        gridPaneCreateUser.setHgap(30);
-
-        //Setting the Grid alignment
-        gridPaneCreateUser.setAlignment(Pos.CENTER);
+        GridPane gridPaneCreateUser = basePane();
 
         //Arranging all the nodes in the grid
         gridPaneCreateUser.add(name, 0, 0);
@@ -97,52 +98,30 @@ public class Login extends Application {
         return gridPaneCreateUser;
     }
 
+    @Override
+    public void handleStateChangeNotification(StateChangeNotification stateChangeNotification) {
+        if(stateChangeNotification.getType() == StateChangeNotification.Type.BEFORE_START) {
+
+
+        }
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
-        //Setting properties of buttons
-        login.setText("Login");
-        login.setMinHeight(30);
-        login.setMinWidth(100);
+        preloaderStage = stage;
 
-        createNewUser.setText("Create New Account");
-        createNewUser.setMinHeight(30);
-        createNewUser.setMinWidth(150);
+        initaliseFields();
 
-        backButton.setText("Back");
-        backButton.setMinHeight(30);
-        backButton.setMinWidth(150);
-
-        create.setText("Create User");
-        create.setMinHeight(30);
-        create.setMinWidth(150);
-
-        //Setting properties of text/textFields
-        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        password.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        confPassword.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        nameField.setMinHeight(30);
-        nameField.setMinWidth(80);
-        passwordField.setMinHeight(30);
-        passwordField.setMinWidth(80);
-        passwordFieldConf.setMinHeight(30);
-        passwordFieldConf.setMinWidth(80);
-        incorrectFields.setFill(Color.RED);
-        incorrectFields.setVisible(false);
-
-        //Sets text fields to null
-        setNullFields();
-
-        stage.setTitle("Login/Create User");
-        Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
-        stage.setScene(sceneLogin);
-        stage.show();
+        preloaderStage.setTitle("com.halflife3.Login/Create User");
+        Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+        preloaderStage.setScene(sceneLogin);
+        preloaderStage.show();
 
         //Setting on click events for login
         login.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null) {
-                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText()) == true) {
+                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
                         //TODO: Assign username to 'player' and change to game screen
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
@@ -164,8 +143,8 @@ public class Login extends Application {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
                 Scene sceneCreate = new Scene(newUserPane(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
-                stage.setScene(sceneCreate);
-                stage.show();
+                preloaderStage.setScene(sceneCreate);
+                preloaderStage.show();
             }
         });
 
@@ -173,7 +152,7 @@ public class Login extends Application {
         create.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
-                    if (doesUserExist(getConnection(), nameField.getText()) == true) {
+                    if (doesUserExist(getConnection(), nameField.getText())) {
                         incorrectFields.setText("That username already exists. Please choose another one");
                         incorrectFields.setVisible(true);
                     } else if (!passwordField.getText().equals(passwordFieldConf.getText())){
@@ -200,10 +179,17 @@ public class Login extends Application {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
                 Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
-                stage.setScene(sceneLogin);
-                stage.show();
+                preloaderStage.setScene(sceneLogin);
+                preloaderStage.show();
             }
         });
+    }
+
+    //Sets text fields to null
+    public void setNullFields() {
+        nameField.setText(null);
+        passwordField.setText(null);
+        passwordFieldConf.setText(null);
     }
 
     public Connection getConnection() {
@@ -274,20 +260,25 @@ public class Login extends Application {
         PreparedStatement preparedStatement = null;
         ResultSet rsDetails = null;
         try {
-            //Retrieving the salt from the table based on the username given
+  /*          //Retrieving the salt from the table based on the username given
             byte[] salt = new byte[0];
+            String retVal = "";
             //Creating the query
-            String querySalt = "SELECT salt FROM \"UserDataScore\" WHERE name = " + username;
+            String querySalt = "SELECT salt FROM \"UserDataScore\" WHERE name = '" + username + "'";
             //Creating the statement
             saltStatement = c.prepareStatement(querySalt);
             rs = saltStatement.executeQuery();
             while (rs.next()) {
-                salt = rs.getBytes("salt");
+                retVal = rs.getString(1);
             }
+
+            System.out.println(retVal);
+            System.out.println(Arrays.toString(retVal.getBytes(StandardCharsets.UTF_8)));
+*/
             //Hashing the password given based on the salt retrieved
-            byte[] hashedPassword = hashPassword(salt, passwordEntered);
+//            byte[] hashedPassword = hashPassword(salt, passwordEntered);
             //Creating the query
-            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE name = " + username + " AND password = " + Arrays.toString(hashedPassword);  //AND salt = salt?? or not needed? Not needed, checking the username and passwords match is all that's needed, you get the salt from a
+            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE name = '" + username + "' AND password = '" + /*Arrays.toString(hashedPassword)*/ passwordEntered + "'";  //AND salt = salt?? or not needed? Not needed, checking the username and passwords match is all that's needed, you get the salt from a
             //Creating the statement
             preparedStatement = c.prepareStatement(queryDetails);
             //Executing the query
@@ -310,11 +301,11 @@ public class Login extends Application {
         PreparedStatement preparedStatement = null;
         try {
             //Creating a hashed password based on a random salt
-            byte[] randomSalt = returnSalt();
-            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
-            System.out.println("salt: " + Arrays.toString(randomSalt) + " hashed password: " + Arrays.toString(hashedPassword));
+//            byte[] randomSalt = returnSalt();
+//            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
+//            System.out.println("salt: " + Arrays.toString(randomSalt) + " hashed password: " + Arrays.toString(hashedPassword));
             //Creating the query
-            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + Arrays.toString(randomSalt) + "', '" + Arrays.toString(hashedPassword) + "')";
+            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "nothingtoseehere"/*Arrays.toString(randomSalt)*/ + "', '" + /*Arrays.toString(hashedPassword)*/ passwordEntered + "')";
             System.out.println("query: " + query);
             //Creating the statement
             preparedStatement = c.prepareStatement(query);
@@ -327,31 +318,59 @@ public class Login extends Application {
         }
     }
 
-    //Creates a salt for the user when creating a new account
-    public byte[] returnSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
+//    //Creates a salt for the user when creating a new account
+//    public byte[] returnSalt() {
+//        SecureRandom random = new SecureRandom();
+//        byte[] salt = new byte[16];
+//        random.nextBytes(salt);
+//        return salt;
+//    }
 
-    //Hashes password using the created or retrieved salt
-    public byte[] hashPassword(byte[] salt, String password) {
-        MessageDigest md; //Removed redundant assign to null (as all class references are null on), as per IntelliJ's request
-        try {
-            md = MessageDigest.getInstance("SHA-512");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null; //MessageDigest can cause a null pointer exception, just return null to stop this from happening (as well as acting as an error state)
-        }
-        md.update(salt);
-        return md.digest(password.getBytes(StandardCharsets.UTF_8));
-    }
+//    //Hashes password using the created or retrieved salt
+//    public byte[] hashPassword(byte[] salt, String password) {
+//        MessageDigest md; //Removed redundant assign to null (as all class references are null on creation)
+//        try {
+//            md = MessageDigest.getInstance("SHA-512");
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//            return null; //MessageDigest can cause a null pointer exception, just return null to stop this from happening
+//        }
+//        md.update(salt);
+//        return md.digest(password.getBytes(StandardCharsets.UTF_8));
+//    }
 
-    //Sets text fields to null
-    public void setNullFields() {
-        nameField.setText(null);
-        passwordField.setText(null);
-        passwordFieldConf.setText(null);
+    public void initaliseFields() {
+        //Setting properties of buttons
+        login.setText("com.halflife3.Login");
+        login.setMinHeight(30);
+        login.setMinWidth(100);
+
+        createNewUser.setText("Create New Account");
+        createNewUser.setMinHeight(30);
+        createNewUser.setMinWidth(150);
+
+        backButton.setText("Back");
+        backButton.setMinHeight(30);
+        backButton.setMinWidth(150);
+
+        create.setText("Create User");
+        create.setMinHeight(30);
+        create.setMinWidth(150);
+
+        //Setting properties of text/textFields
+        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        password.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        confPassword.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        nameField.setMinHeight(30);
+        nameField.setMinWidth(80);
+        passwordField.setMinHeight(30);
+        passwordField.setMinWidth(80);
+        passwordFieldConf.setMinHeight(30);
+        passwordFieldConf.setMinWidth(80);
+        incorrectFields.setFill(Color.RED);
+        incorrectFields.setVisible(false);
+
+        //Sets text fields to null
+        setNullFields();
     }
 }
