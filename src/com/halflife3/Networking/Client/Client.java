@@ -11,6 +11,7 @@ import java.net.*;
 import java.util.Enumeration;
 
 import static com.halflife3.Networking.Server.Server.GET_PORT_PORT;
+import java.util.Enumeration;
 
 public class Client implements Runnable {
 
@@ -23,7 +24,7 @@ public class Client implements Runnable {
     private DatagramSocket outSocket;
 
 //    Client's data
-    private Vector2 position;
+    //private Vector2 position;
     public static InetAddress clientAddress;
     public static int uniquePort;
     private EventListenerClient listenerClient;
@@ -91,6 +92,7 @@ public class Client implements Runnable {
 //        Lets the server know the client has connected
         ConnectPacket join = new ConnectPacket();
         byte[] tempBuf = objectToByteArray(join);
+
         DatagramPacket poke = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
         try {
             outSocket = new DatagramSocket();
@@ -106,20 +108,30 @@ public class Client implements Runnable {
         new Thread(this).start();
     }
 
+
+
+
     @Override
     public void run() {
 //        TODO: If position has changed send Vector2 to the server
+        //TODO: Get position from handler and send to server
         while(running) {
-            System.out.println("Client running");
-            for (int i = 10; i > 0; i--)
-                waitASecond();
+            System.out.println("Client running, Client position = ");
+            System.out.println(ServerPositionHandlerClient.getClient_position().getX());
+            System.out.println(ServerPositionHandlerClient.getClient_position().getY());
+
         }
 
         running = false;
         close();
     }
 
-//    Sends a disconnect packet to the server and closes the sockets
+
+
+
+
+
+    //    Sends a disconnect packet to the server and closes the sockets
     public void close() {
         DisconnectPacket leave = new DisconnectPacket();
         byte[] tempBuf = objectToByteArray(leave);

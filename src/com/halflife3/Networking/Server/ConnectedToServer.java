@@ -10,7 +10,8 @@ import java.net.SocketException;
 
 public class ConnectedToServer implements Runnable {
     private InetAddress clientAddress;
-    private Vector2 position;
+    private Vector2 client_position;
+    private Vector2 server_position;
 
     private boolean running;
     private DatagramSocket uniqueSocket = null;
@@ -18,7 +19,7 @@ public class ConnectedToServer implements Runnable {
 
     public ConnectedToServer(InetAddress address, int clientListeningPort) {
         clientAddress = address;
-        position = new Vector2(0, 0); // startX and startY
+        client_position = new Vector2(0, 0); // startX and startY
         listenerServer = new EventListenerServer();
 
         try {
@@ -90,10 +91,10 @@ public class ConnectedToServer implements Runnable {
     }
 
     public Vector2 getPosition() {
-        return position;
+        return client_position;
     }
 
     public void setPosition(Vector2 position) {
-        this.position = position;
+        this.client_position = position;
     }
 }

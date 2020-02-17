@@ -16,7 +16,7 @@ public class Player extends GameObject {
     private Image image;
     private Vector2 original_position;
 
-    private float moveSpeed = 150;
+    private float moveSpeed = 100;
 
     //Initialize a player
     public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
@@ -51,7 +51,7 @@ public class Player extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(image, position.getX() - width / 2, position.getY() - height / 2);
+        gc.drawImage(image, position.getX() , position.getY() );
     }
 
     //update the position
@@ -65,7 +65,7 @@ public class Player extends GameObject {
 
     public void collision(boolean if_collision, double time) {
         if (if_collision) {
-            this.position = original_position.subtract(this.velocity.multiply(time*20));
+            this.position = original_position.subtract(this.velocity.multiply(time*5));
             rectangle.setX(this.position.getX());
             rectangle.setY(this.position.getY());
         }

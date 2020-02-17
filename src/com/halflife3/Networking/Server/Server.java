@@ -45,7 +45,7 @@ public class Server implements Runnable {
             packet.msg = "Welcome to the server!";
             while (running && timeOut > 0) {
                 if (welcoming) { multicastPacket(packet, MULTICAST_PORT); }
-                waitASecond();
+                    waitASecond();
 
                 if (ClientPositionHandlerServer.clientList.isEmpty()) {
                     if (timeOut <= 3)
