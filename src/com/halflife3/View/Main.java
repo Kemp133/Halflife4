@@ -9,10 +9,10 @@ import com.halflife3.Model.Interfaces.IRenderable;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Cursor;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -28,6 +28,9 @@ public class Main extends Application {
     private Pane root = new Pane();
     private ObjectManager objectManager = new ObjectManager();
     private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
+
+    private MeleeEnemy melee = new MeleeEnemy(new Vector2(150,150), new Vector2(0, 0),(short) 0 ,objectManager);
+
     static Input input = new Input();
 
     //Translate the Gametime value format, will be used at timer part.
@@ -87,6 +90,9 @@ public class Main extends Application {
         //set the image for player, need to change the
         player.setImage("res/Player_pic.png");
 
+        //set the image for meleeEnemy
+        melee.setImage("res/pixil-frame-0.png");
+
         //Set the graphic tool for canvas
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -94,7 +100,7 @@ public class Main extends Application {
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
         MapRender map = new MapRender(objectManager);
-        map.SetMap("res/map.png");
+        map.SetMap("res/mapAndEnemy.png");
         map.loadLevel();
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
