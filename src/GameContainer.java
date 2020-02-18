@@ -1,10 +1,10 @@
-import javafx.stage.Window;
+import GameUI.Windows;
 
 import java.io.FileNotFoundException;
 
 public class GameContainer extends Windows implements Runnable{
     private Thread thread;
-    //private Windows window;
+    //private GameUI.Windows window;
     private boolean running = false;
     private final double UPDATE_CAP = 1.0/60.0;
     private int width = 320, height = 240;
