@@ -27,6 +27,7 @@ public abstract class Enemy extends GameObject {
     public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life){
         super(position,velocity,rotation, om);
         health = life;
+
     }
 
     @Override

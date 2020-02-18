@@ -94,7 +94,7 @@ public class Main extends Application {
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
         MapRender map = new MapRender(objectManager);
-        map.SetMap("res/map.png");
+        map.SetMap("res/mapAndEnemy.png");
         map.loadLevel();
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
