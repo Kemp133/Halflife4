@@ -4,7 +4,7 @@ import com.halflife3.Controller.ObjectManager;
 
 public class MeleeEnemy extends Enemy{
 
-    public MeleeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om,int ID) {
+    public MeleeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om){
         super(position, velocity, rotation, om, 1);
     }
 
@@ -14,5 +14,6 @@ public class MeleeEnemy extends Enemy{
         while (health > 0){
             moveTo(closestPlayer(playerList));
         }
+        death();
     }
 }

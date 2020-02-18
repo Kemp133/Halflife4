@@ -47,6 +47,8 @@ public class MapRender {
         double height = image.getHeight(); //15px
         PixelReader pixelReader = image.getPixelReader();
 
+        int enemyID = 0;
+
         for (int xx = 0; xx < width; xx++) {
             for (int yy = 0; yy < height; yy++) {
                 int pixels = pixelReader.getArgb(xx, yy);
@@ -60,12 +62,14 @@ public class MapRender {
                     Bricks new_Brick = new Bricks(position, velocity, (short) 0, om);
                     new_Brick.setImage("res/block.png");
                     Bricks_list.add(new_Brick);
-                }
+                }/*
                 if (blue == 0 && green == 0 && red != 0) {
-
-                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(new Vector2 ((xx) * 32, (yy) * 32) , new Vector2(0, 0), (short) 0, om);
+                    Vector2 position = new Vector2((xx) * 32, (yy) * 32);
+                    Vector2 velocity = new Vector2(0, 0);
+                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(position, velocity, (short) 0, om, enemyID);
+                    enemyID++;
                     Melee_list.add(new_MeleeEnemy);
-                }
+                }*/
             }
         }
     }
