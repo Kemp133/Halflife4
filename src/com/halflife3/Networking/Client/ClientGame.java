@@ -176,7 +176,7 @@ public class ClientGame extends Application {
 
                     //TODO: Send the client's bullets' positions & velocities to the server
                     //region Sends the client's position now
-                    Client.sendPacket(player_client, Client.getUniquePort());
+                    //Client.sendPacket(player_client, Client.getUniquePort());
                     //endregion
 
                     lastUpdate = currentNanoTime;

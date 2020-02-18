@@ -5,7 +5,6 @@ import com.halflife3.Model.Player;
 import com.halflife3.Model.Vector2;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class AllPlayersPacket implements Serializable {

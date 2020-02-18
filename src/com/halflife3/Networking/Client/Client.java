@@ -21,8 +21,6 @@ public class Client implements Runnable {
 
 //    For receiving clients' positions
     protected static MulticastSocket positionSocket = null;
-    protected InetAddress positionsGroup = null;
-
 
     //    For sending packets to the server
     private static InetAddress hostAddress;
@@ -42,10 +40,8 @@ public class Client implements Runnable {
     public void joinGroup() {
         try {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
-            group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
-
             positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
-            positionsGroup = InetAddress.getByName(Server.MULTICAST_ADDRESS);
+            group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
             //region Sets interface to Wi-Fi and gets the IP address
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -67,7 +63,7 @@ public class Client implements Runnable {
             //endregion
 
             serverSocket.joinGroup(group);
-            positionSocket.joinGroup(positionsGroup);
+            positionSocket.joinGroup(group);
 
             System.out.println("Joined group: " + group.getHostName() + " with address: " + clientAddress.toString());
         } catch (ConnectException e) {
@@ -165,6 +161,18 @@ public class Client implements Runnable {
             byte[] recBuf = new byte[5000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
+            Object o = byteArrayToObject(recBuf);
+            listenerClient.received(o);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void receivePositions() {
+        try {
+            byte[] recBuf = new byte[5000];
+            DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
+            positionSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);
             listenerClient.received(o);
         } catch (IOException e) {
