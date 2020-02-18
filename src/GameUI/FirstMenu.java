@@ -1,3 +1,6 @@
+package GameUI;
+
+import GameUI.ServerDisplay;
 import com.halflife3.DatabaseUI.Login;
 import com.halflife3.Networking.Server.Server;
 import javafx.application.Application;
@@ -6,14 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.scene.control.*;
 
-import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -22,11 +23,12 @@ import static javafx.scene.paint.Color.WHITE;
 //The menu set for choose server and clinet
 public class FirstMenu extends Application {
     private Stage pstage = null;
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+    private static final double SCREEN_WIDTH = 800;
+    private static final double SCREEN_HEIGHT = 600;
     StackPane root = new StackPane();
     private Button client_m;
     private Button server_m;
+    private Text text = new Text("Please choose one");
 
     public FirstMenu() throws FileNotFoundException {
         FileInputStream input = new FileInputStream("res/button_image.png");
@@ -72,7 +74,7 @@ public class FirstMenu extends Application {
 
     public StackPane createContent(){
         VBox pane = new VBox(100);
-        pane.getChildren().addAll(server_m,client_m);
+        pane.getChildren().addAll(text,server_m,client_m);
         pane.setAlignment(Pos.CENTER);
         root.getChildren().add(pane);
         return root;
