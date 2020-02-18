@@ -27,19 +27,17 @@ import static javafx.scene.input.KeyCode.*;
 public class Main extends Application {
     private Pane root = new Pane();
     private ObjectManager objectManager = new ObjectManager();
-    private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager,1);
+    private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
     static Input input = new Input();
 
     //Translate the Gametime value format, will be used at timer part.
-    private class LongValue {
+    private static class LongValue {
         public long value;
 
         public LongValue(long i) {
             value = i;
         }
     }
-
-
 
     /**
      * Initialize the root scene for the main game, and new game object can be
@@ -64,9 +62,9 @@ public class Main extends Application {
         Scene scene = new Scene(createContent(), 800, 600);
         primaryStage.setScene(scene);
 
-        /**
-         * Set the background
-         * */
+        /*
+          Set the background
+         */
         FileInputStream inputted = new FileInputStream("res/background_image.png");
         Image image = new Image(inputted, 40, 40, true, true);
         BackgroundImage myBI = new BackgroundImage(image,
@@ -74,9 +72,9 @@ public class Main extends Application {
                 BackgroundSize.DEFAULT);
         root.setBackground(new Background(myBI));
 
-        /**
-         * Try to build a camera
-         * */
+        /*
+          Try to build a camera
+          */
         //set the key listener
         KeyHandle handle = new KeyHandle();
         root.setOnKeyPressed(handle);
@@ -84,7 +82,7 @@ public class Main extends Application {
         root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
         scene.setCursor(Cursor.NONE);
         //Create cursor
-        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input,10);
+        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short) 0, objectManager, input);
 
         //set the image for player, need to change the
         player.setImage("res/Player_pic.png");
@@ -126,13 +124,13 @@ public class Main extends Application {
                     objectManager.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
                 }
                 if (input.mouseButtonPressed.get(MouseButton.PRIMARY)) {
-                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short) 0, objectManager,3);
+                    Bullet bullet = new Bullet(new Vector2(player.getX(), player.getY()), new Vector2(input.mousePosition.getX(), input.mousePosition.getY()).subtract(player.getPosition()), (short) 0, objectManager);
                 }
 
 
                 player.update(elapsedTime);
                 //Put the collision detection into the main loop
-                Boolean player_hit_block = false;
+                boolean player_hit_block = false;
                 for (Bricks block : map.get_list()) {
                     if (block.GetBounds().intersects(player.rectangle.getBoundsInLocal())) {
                         player_hit_block = true;

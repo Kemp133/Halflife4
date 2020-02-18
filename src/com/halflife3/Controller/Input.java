@@ -44,7 +44,7 @@ public class Input {
     public boolean isKeyTyped(KeyCode kc) {
         return keysTyped.get(kc);
     }
-    public boolean isKeyUp(KeyCode kc) {
+    public boolean isKeyReleased(KeyCode kc) {
         return keysReleased.get(kc);
     }
     //endregion

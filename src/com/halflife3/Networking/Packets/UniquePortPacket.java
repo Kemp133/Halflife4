@@ -1,13 +1,24 @@
 package com.halflife3.Networking.Packets;
 
+import com.halflife3.Model.Vector2;
+
 import java.io.Serializable;
 import java.net.InetAddress;
 
 public class UniquePortPacket  implements Serializable {
 
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 5L;
     private int port = 0;
     private InetAddress clientAddress;
+    private Vector2 startPosition;
+
+    public Vector2 getStartPosition() {
+        return startPosition;
+    }
+
+    public void setStartPosition(Vector2 startPosition) {
+        this.startPosition = startPosition;
+    }
 
     public InetAddress getClientAddress() {
         return clientAddress;

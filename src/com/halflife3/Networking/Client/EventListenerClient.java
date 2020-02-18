@@ -13,7 +13,8 @@ public class EventListenerClient {
 //            "If" for when multiple clients are already connected
             if (Client.clientAddress.getHostAddress()
                     .equals(portPacket.getClientAddress().getHostAddress())) {
-                Client.uniquePort = portPacket.getPort();
+                Client.setUniquePort(portPacket.getPort());
+                Client.startingPosition = portPacket.getStartPosition();
             }
 
         }
