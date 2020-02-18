@@ -1,3 +1,5 @@
+package com.halflife3.DatabaseUI;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -108,7 +110,7 @@ public class Login extends Application {
         //Setting properties of buttons
 
         Pstage = stage;
-        login.setText("Login");
+        login.setText("com.halflife3.DatabaseUI.Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
 
@@ -120,7 +122,7 @@ public class Login extends Application {
         backButton.setMinHeight(30);
         backButton.setMinWidth(150);
 
-        create.setText("Create User");
+        create.setText("Create com.halflife3.DatabaseUI.User");
         create.setMinHeight(30);
         create.setMinWidth(150);
 
@@ -140,7 +142,7 @@ public class Login extends Application {
         //Sets text fields to null
         setNullFields();
 
-        stage.setTitle("Login/Create User");
+        stage.setTitle("com.halflife3.DatabaseUI.Login/Create com.halflife3.DatabaseUI.User");
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(sceneLogin);
         stage.show();
@@ -198,7 +200,7 @@ public class Login extends Application {
                         //Insert user and password into table
                         addNewUser(getConnection(), nameField.getText(), passwordField.getText());
                         //TODO: Assign username to player and Change to game screen
-                        incorrectFields.setText("User created"); //TODO: delete after above
+                        incorrectFields.setText("com.halflife3.DatabaseUI.User created"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: delete after above
                     }
                 }
