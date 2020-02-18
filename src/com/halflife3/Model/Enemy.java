@@ -5,10 +5,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
-import java.beans.VetoableChangeListener;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public abstract class Enemy extends GameObject {
@@ -169,7 +167,6 @@ public abstract class Enemy extends GameObject {
 
     }
 */
-
 
     //Auxillary method for getPath
     public static int FindSmallest (double [] arr1) {
