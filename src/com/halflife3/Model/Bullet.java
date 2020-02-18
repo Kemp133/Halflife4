@@ -9,19 +9,14 @@ import javafx.scene.shape.Rectangle;
 import java.io.FileInputStream;
 
 public class Bullet extends GameObject {
-    Image sprite;
+    private Image sprite;
 
-    double lifeTime = 5.0;
-
-    public Bullet(Vector2 position, Vector2 velocity, short rotation, ObjectManager om,int ID) {
-        super(position, velocity, rotation, om,ID);
+    public Bullet(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+        super(position, velocity, rotation, om);
         keys.add("Bullet");
-    }
-
-    {
         try {
-            FileInputStream inputted = new FileInputStream("res/bullet.png");
-            sprite = new Image(inputted);
+            FileInputStream bulletPNG = new FileInputStream("res/bullet.png");
+            sprite = new Image(bulletPNG);
         } catch (Exception e) {
             System.out.println("Error loading image");
         }

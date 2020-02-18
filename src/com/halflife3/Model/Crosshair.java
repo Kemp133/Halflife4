@@ -15,8 +15,8 @@ public class Crosshair extends GameObject {
 
     final int SPRITE_SIZE = 32;
 
-    public Crosshair(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, Input input,int ID) {
-        super(position, velocity, rotation, om,ID);
+    public Crosshair(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, Input input) {
+        super(position, velocity, rotation, om);
         this.input = input;
     }
 

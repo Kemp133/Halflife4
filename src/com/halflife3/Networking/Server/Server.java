@@ -1,17 +1,18 @@
 package com.halflife3.Networking.Server;
 
+import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.UniquePortPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
 
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
+import java.util.*;
 
 public class Server implements Runnable {
 
-    public static final int     MULTICAST_PORT      = 5555;
     public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
+    public static final int     MULTICAST_PORT      = 5555;
     public static final int     LISTENER_PORT       = 5544;
     public static final int     GET_PORT_PORT       = 5566;
 
@@ -21,8 +22,17 @@ public class Server implements Runnable {
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 60000; // milliseconds
     private static int clientPort = 6000;
+    private static ArrayList<InetAddress> connectedIPs;
+    private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
+    private static Vector2[] startPositions = {new Vector2(80, 80),
+                                               new Vector2(680, 80),
+                                               new Vector2(80, 480),
+                                               new Vector2(680, 480)};
 
     public void start() {
+        for (Vector2 startPosition : startPositions)
+            positionAvailable.put(startPosition, true);
+
         try {
             clientSocket = new DatagramSocket(LISTENER_PORT);
         } catch (SocketException e) {
@@ -30,29 +40,34 @@ public class Server implements Runnable {
         }
 
         listenerServer = new EventListenerServer();
+        connectedIPs = new ArrayList<>();
         new Thread(this).start();
     }
+
+
+    ///TODO: Figure out how to send the connected clients' positions
+
 
     @Override
     public void run() {
         running = true;
         System.out.println("Multicasting on port: " + MULTICAST_PORT);
 
-//        Multicasts WelcomePackets, closes server after 60s of no connections
-        //TODO: Server send position to every client and server update each client's position
+//        Multicasts WelcomePackets
         new Thread(() -> {
             int timeOut = SERVER_TIMEOUT/1000;
-            WelcomePacket packet = new WelcomePacket();
-            packet.msg = "Welcome to the server!";
             while (running && timeOut > 0) {
-                if (welcoming) { multicastPacket(packet, MULTICAST_PORT); }
-                    waitASecond();
+                if (welcoming) {
+                    multicastPacket(new WelcomePacket(), MULTICAST_PORT);
+                }
+
+                waitASecond();
 
                 if (ClientPositionHandlerServer.clientList.isEmpty()) {
                     if (timeOut <= 3)
                         System.out.println("Timeout in: " + timeOut);
                     timeOut--;
-                }
+                } else timeOut = SERVER_TIMEOUT/1000;
             }
             running = false;
             welcoming = false;
@@ -61,7 +76,9 @@ public class Server implements Runnable {
 
 //        Listens for incoming packets
         while (running) {
-            System.out.println("Listening for clients...");
+            if (ClientPositionHandlerServer.clientList.size() < 4) {
+                System.out.println("Listening for clients...");
+            }
             try {
                 connectionListener();
             } catch (IOException e) {
@@ -83,6 +100,9 @@ public class Server implements Runnable {
         } catch (SocketTimeoutException e) {
             running = false;
             return;
+        } catch (SocketException e) {
+            System.out.println("Server closed");
+            return;
         }
 
         System.out.println(incPoke.getAddress() + " has connected");
@@ -93,23 +113,46 @@ public class Server implements Runnable {
     }
 
     public static void addConnection(InetAddress address) {
-        ConnectedToServer connection = new ConnectedToServer(address, clientPort);
-        new Thread(connection).start();
+
+        if (ClientPositionHandlerServer.clientList.size() >= 4) {
+            System.out.println("Server is full");
+            return;
+        }
 
         UniquePortPacket portPacket = new UniquePortPacket();
+        //region Sets up a unique portPacket for a client
         portPacket.setPort(clientPort);
         portPacket.setClientAddress(address);
+        for (Vector2 startPosition : startPositions) {
+            if (positionAvailable.get(startPosition)) {
+                portPacket.setStartPosition(startPosition);
+                positionAvailable.replace(startPosition, false);
+                break;
+            }
+        }
+        //endregion
+
+        ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition());
+        new Thread(connection).start();
+
         multicastPacket(portPacket, GET_PORT_PORT);
 
         ClientPositionHandlerServer.clientList.put(address, connection);
+        connectedIPs.add(address);
 
         clientPort++;
         welcoming = true;
     }
 
     public static void removeConnection(InetAddress address) {
+        if (ClientPositionHandlerServer.clientList.size() >= 4) {
+            welcoming = true;
+        }
+        positionAvailable.replace(ClientPositionHandlerServer.clientList.get(address).getSpawnPoint(), true);
         ClientPositionHandlerServer.clientList.get(address).close();
         ClientPositionHandlerServer.clientList.remove(address);
+        connectedIPs.remove(address);
+        System.out.println(address + " has disconnected");
     }
 
     public static void multicastPacket(Object o, int mPort) {

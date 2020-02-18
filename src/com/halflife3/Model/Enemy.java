@@ -26,8 +26,8 @@ public abstract class Enemy extends GameObject {
     }
 
     //Initialize a player
-    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life,int ID){
-        super(position,velocity,rotation, om,ID);
+    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life){
+        super(position,velocity,rotation, om);
         health = life;
     }
 
@@ -42,20 +42,11 @@ public abstract class Enemy extends GameObject {
         return false;
     }
 
-
-    //Read the image, sets it as the image of this Enemy
-    public void setImage(Image i)
-    {
-        image = i;
-        width = i.getWidth();
-        height = i.getHeight();
-
-    }
-
-    public void setImage(String filename) throws FileNotFoundException {
-        FileInputStream inputted = new FileInputStream(filename);
-        Image image = new Image(inputted);
-        setImage(image);
+    public void setImage(String file) throws FileNotFoundException {
+        FileInputStream pngFile = new FileInputStream(file);
+        image = new Image(pngFile);
+        width = image.getWidth();
+        height = image.getHeight();
     }
 
     @Override

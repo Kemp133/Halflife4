@@ -11,26 +11,27 @@ import java.net.*;
 import java.util.Enumeration;
 
 import static com.halflife3.Networking.Server.Server.GET_PORT_PORT;
-import java.util.Enumeration;
 
 public class Client implements Runnable {
 
+    //region Variables
 //    For "catching" the server
-    protected MulticastSocket serverSocket = null;
+    protected static MulticastSocket serverSocket = null;
     protected InetAddress group = null;
 
 //    For sending packets to the server
-    private InetAddress hostAddress;
-    private DatagramSocket outSocket;
+    private static InetAddress hostAddress;
+    private static DatagramSocket outSocket;
 
 //    Client's data
-    //private Vector2 position;
     public static InetAddress clientAddress;
-    public static int uniquePort;
+    private static int uniquePort;
     private EventListenerClient listenerClient;
+    public static Vector2 startingPosition;
 
 //    isRunning
-    private boolean running = false;
+    private static boolean running = false;
+    //endregion
 
 //    Joins the multicast group to listen for multicasted packets
     public void joinGroup() {
@@ -38,7 +39,7 @@ public class Client implements Runnable {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
-//            Looks for the Wi-Fi adapter and sets the interface to it
+            //region Sets interface to Wi-Fi and gets the IP address
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface net = interfaces.nextElement();
@@ -50,11 +51,11 @@ public class Client implements Runnable {
                     InetAddress addr = addresses.nextElement();
                     if (addr.toString().length() < 17) {
                         serverSocket.setInterface(addr);
-//                        Gets the current client's IP address
                         clientAddress = addr;
                     }
                 }
             }
+            //endregion
 
             serverSocket.joinGroup(group);
 
@@ -69,7 +70,7 @@ public class Client implements Runnable {
 //    Gets the server's IP address
     public void getHostInfo() {
         try {
-//            Receives the welcome (Test) packet
+//            Receives the Welcome packet
             byte[] firstBuf = new byte[objectToByteArray(new WelcomePacket()).length];
             DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
             System.out.println("Looking for host...");
@@ -79,7 +80,6 @@ public class Client implements Runnable {
             hostAddress = firstPacket.getAddress();
 
             System.out.println("Host found: " + hostAddress);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,48 +91,31 @@ public class Client implements Runnable {
 
 //        Lets the server know the client has connected
         ConnectPacket join = new ConnectPacket();
-        byte[] tempBuf = objectToByteArray(join);
-
-        DatagramPacket poke = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
-        try {
-            outSocket = new DatagramSocket();
-            outSocket.send(poke);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendPacket(join, Server.LISTENER_PORT);
 
 //        Gets the unique port to communicate with the server
-        getUniquePort();
+        getUniqueInfo();
 
         running = true;
         new Thread(this).start();
     }
 
-
-
-
     @Override
     public void run() {
-//        TODO: If position has changed send Vector2 to the server
-        //TODO: Get position from handler and send to server
         while(running) {
-            System.out.println("Client running, Client position = ");
-            System.out.println(ServerPositionHandlerClient.getClient_position().getX());
-            System.out.println(ServerPositionHandlerClient.getClient_position().getY());
-
+            System.out.println("Client running");
+            for (int i = 0; i < 300 && running; i++) {
+                waitASecond();
+            }
         }
-
-        running = false;
-        close();
+        System.out.println("Client stopped running");
     }
 
+//    Sends a disconnect packet to the server and closes the sockets
+    public static void close() {
+        running = false;
 
-
-
-
-
-    //    Sends a disconnect packet to the server and closes the sockets
-    public void close() {
+        //region Sends Disconnect packet to the Server
         DisconnectPacket leave = new DisconnectPacket();
         byte[] tempBuf = objectToByteArray(leave);
 
@@ -142,13 +125,14 @@ public class Client implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //endregion
 
         serverSocket.close();
         outSocket.close();
     }
 
-//    Gets the unique port to communicate with the server
-    public void getUniquePort() {
+//    Gets the unique port to communicate with the server and a starting position
+    public void getUniqueInfo() {
         try {
             serverSocket = new MulticastSocket(GET_PORT_PORT);
             serverSocket.setInterface(clientAddress);
@@ -178,6 +162,18 @@ public class Client implements Runnable {
         }
     }
 
+//    Sends a packet to the Server
+    public static void sendPacket(Object objectToSend, int port) {
+        byte[] tempBuf = objectToByteArray(objectToSend);
+        DatagramPacket packet = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, port);
+        try {
+            outSocket = new DatagramSocket();
+            outSocket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 //    Makes the Thread sleep for 1 second
     private void waitASecond() {
         try {
@@ -188,7 +184,7 @@ public class Client implements Runnable {
     }
 
 //    Converts an object (packet) into a byte array
-    private byte[] objectToByteArray(Object o) {
+    private static byte[] objectToByteArray(Object o) {
         byte[] sendBuf = null;
 
         try {
@@ -220,5 +216,19 @@ public class Client implements Runnable {
         }
 
         return o;
+    }
+
+    public InetAddress getClientAddress() { return clientAddress; }
+
+    public Vector2 getStartingPosition() {
+        return startingPosition;
+    }
+
+    public static int getUniquePort() {
+        return uniquePort;
+    }
+
+    public static void setUniquePort(int uniquePort) {
+        Client.uniquePort = uniquePort;
     }
 }
