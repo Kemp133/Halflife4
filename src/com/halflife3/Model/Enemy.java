@@ -5,8 +5,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
+import java.beans.VetoableChangeListener;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public abstract class Enemy extends GameObject {
@@ -63,7 +65,7 @@ public abstract class Enemy extends GameObject {
         velocity = velocity.add(toAdd);
     }
 
-    public void moveTo(Vector2 position){
+   public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
         //step 2: move to target
         this.position = getPath(this.position, position);
@@ -116,6 +118,59 @@ public abstract class Enemy extends GameObject {
         return chosen;
     }
 
+    /*The find path method
+    The method would receive a destiny_pos as input
+    return only one vector at every input
+    requires to be called with the movement with enemy
+    Algorithm:
+    find neighbour of(original_pos);
+    for(v : neighbour)
+        if(getF(v) < getF(minF)
+        v = minF
+    return v;
+    */
+/*
+    public Vector2 getPath(Vector2 original_pos, Vector2 player_pos){
+        Vector2 res = original_pos;
+        ArrayList<Vector2> neighbour = getNeighbour(original_pos);
+        for(Vector2 v : neighbour){
+            if(getF(res,player_pos) > getF(v,player_pos))
+                res = v;
+        }
+        return res;
+    }
+
+    //get the MahattnDistance from v1 to v2
+    private double getF(Vector2 v1, Vector2 v2) {
+        return Math.abs(v1.getX()/40-v2.getX()/40)+Math.abs(v1.getY()/40-v2.getY()/40);
+    }
+
+    */
+/*I don't know how to get the bricks_list so there is error *//*
+
+    public ArrayList<Vector2> getNeighbour(Vector2 original_pos){
+        ArrayList<Vector2> openList = new ArrayList<Vector2>();
+        for(Vector2 v :Bricks_List) {
+            //Problem the Player might be standing between two blocks
+            for (double x = original_pos.getX() - 40; x <= original_pos.getX() + 40; x += 10) {
+                for (double y = original_pos.getY() - 40; y <= original_pos.getY() + 40; y += 10) {
+                    if (v.getX() == x && v.getY() == y && v != original_pos && !isWall(v)) {
+                        openList.add(v);
+                    }
+                }
+            }
+        }
+        return openList;
+    }
+
+    public boolean isWall(Vector2 v){
+        */
+/*Can I use color judging for wall judge?*//*
+
+    }
+*/
+
+
     //Auxillary method for getPath
     public static int FindSmallest (double [] arr1) {
         int index = 0;
@@ -165,5 +220,6 @@ public abstract class Enemy extends GameObject {
 
     //TODO: overlapping hitbox means damage, if not, move to player
     public abstract void attackPattern(Player[] playerList);
+
 
 }
