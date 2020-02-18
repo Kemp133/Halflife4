@@ -2,29 +2,12 @@ package com.halflife3.Model;
 
 import java.io.Serializable;
 
-/** A class to represent a two dimensional position in space */
 public class Vector2 implements Serializable {
     private static final long serialVersionUID = 4L;
-    /** Variables to hold the position variables, stored as doubles */
     private double x, y;
 
-//    /** A constant value used to represent a rightwards vector in the global frame */
-//    public final Vector2 RIGHT = new Vector2(1, 0);
-//    /** A constant value used to represent a leftwards vector in the global frame */
-//    public final Vector2 LEFT = new Vector2(-1, 0);
-//    /** A constant value used to represent a downwards vector in the global frame */
-//    public final Vector2 DOWN = new Vector2(0, -1);
-//    /** A constant value used to represent an upwards vector in the global frame */
-//    public final Vector2 UP = new Vector2(0, 1);
-
-    /** A base constructor for the Vector2 class to initialise a generic instance*/
     public Vector2() {}
 
-    /**
-     * Constructor to create a Vector2
-     * @param x The x position of the point
-     * @param y The y position of the point
-     */
     public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
@@ -93,10 +76,32 @@ public class Vector2 implements Serializable {
      * @param v The Vector2 to find the squared distance to
      * @return The squared distance between the two points
      */
-    public double squareDistance(Vector2 v) { return Math.pow(v.x - x, 2) + Math.pow(v.y - y, 2);}
+    public double squareDistance(Vector2 v) {
+        return Math.pow(v.x - x, 2) + Math.pow(v.y - y, 2);
+    }
 
-    public double magnitude() { return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));}
+    public double magnitude() {
+        return Math.sqrt( Math.pow(x, 2) + Math.pow(y, 2) );
+    }
 
+    public Vector2 normalise() {
+        double mag = magnitude();
+        x /= mag;
+        y /= mag;
+        return this;
+    }
+
+    public void reverse(){
+        x = -x;
+        y = -y;
+    }
+
+    public void reset(){
+        x = 0;
+        y = 0;
+    }
+
+    //region Getters and Setters for X and Y
     public double getX() {
         return x;
     }
@@ -112,19 +117,10 @@ public class Vector2 implements Serializable {
     public void setY(double y) {
         this.y = y;
     }
+    //endregion
 
-    public Vector2 normalise() {
-        x /= magnitude();
-        y /= magnitude();
-        return this;
-    }
-
-    public void reverse(){
-        x = -x;
-        y = -y;
-    }
-    public void reset(){
-        x = 0;
-        y = 0;
+    @Override
+    public String toString() {
+        return (int)x + "|" + (int)y;
     }
 }

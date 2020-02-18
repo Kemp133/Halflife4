@@ -27,12 +27,11 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class Login extends Application {
-    /*mtest*/
-
+    private Stage Pstage = null;
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-    private Stage Pstage = null;
+
     Button login = new Button();
     Button createNewUser = new Button();
     Button backButton = new Button();
@@ -107,7 +106,7 @@ public class Login extends Application {
     public void start(Stage stage) throws Exception {
         //Setting properties of buttons
 
-        Pstage = stage;
+        this.setPstage(stage);
         login.setText("Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
@@ -153,7 +152,7 @@ public class Login extends Application {
                         //TODO: Assign username to 'player' and change to game screen
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
-                        
+
                         try {
                             new Windows().start(Pstage);
                         } catch (FileNotFoundException ex) {
@@ -365,6 +364,10 @@ public class Login extends Application {
         nameField.setText(null);
         passwordField.setText(null);
         passwordFieldConf.setText(null);
+    }
+
+    public void setPstage(Stage pstage) {
+        this.Pstage = pstage;
     }
 
     //TODO: Used for

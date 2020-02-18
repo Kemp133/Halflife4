@@ -11,19 +11,19 @@ import java.net.SocketException;
 public class ConnectedToServer implements Runnable {
     private InetAddress clientAddress;
     private Vector2 client_position;
-    private Vector2 server_position;
+    private Vector2 spawnPoint; //Future-proofing for Player in-game death
 
     private boolean running;
     private DatagramSocket uniqueSocket = null;
     private EventListenerServer listenerServer;
 
-    public ConnectedToServer(InetAddress address, int clientListeningPort) {
+    public ConnectedToServer(InetAddress address, int clientListeningPort, Vector2 spawnPoint) {
         clientAddress = address;
-        client_position = new Vector2(0, 0); // startX and startY
+        this.spawnPoint = client_position = spawnPoint;
         listenerServer = new EventListenerServer();
 
         try {
-            uniqueSocket = new DatagramSocket(clientListeningPort);
+            uniqueSocket = new DatagramSocket(clientListeningPort, clientAddress);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -33,7 +33,6 @@ public class ConnectedToServer implements Runnable {
     public void run() {
         running = true;
         while (running) {
-            System.out.println("Waiting for position change of: " + clientAddress); // For logging atm
             connectionListener();
         }
     }
@@ -44,20 +43,20 @@ public class ConnectedToServer implements Runnable {
     }
 
     private void connectionListener() {
-        byte[] posBuf = new byte[objectToByteArray(new Vector2()).length]; //Only Vector2 packets atm
+        byte[] posBuf = new byte[objectToByteArray(new Vector2()).length];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
         try {
             uniqueSocket.receive(incPos);
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
 
         Object receivedPosition = byteArrayToObject(posBuf);
         listenerServer.received(receivedPosition, clientAddress);
     }
 
-    private byte[] objectToByteArray(Object o) {
+    private static byte[] objectToByteArray(Object o) {
         byte[] sendBuf = null;
 
         try {
@@ -96,5 +95,9 @@ public class ConnectedToServer implements Runnable {
 
     public void setPosition(Vector2 position) {
         this.client_position = position;
+    }
+
+    public Vector2 getSpawnPoint() {
+        return spawnPoint;
     }
 }

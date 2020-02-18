@@ -7,6 +7,7 @@ import com.halflife3.Model.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import javafx.scene.paint.Color;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +15,7 @@ import java.util.*;
 
 public class MapRender {
 
-    Image image;
+    private Image image;
     private Deque<Bricks> Bricks_list = new ArrayDeque<>();
     private ObjectManager om;
     private Deque<MeleeEnemy> Melee_list = new ArrayDeque<>();
@@ -23,9 +24,8 @@ public class MapRender {
         this.om = om;
     }
 
-    public void SetMap(String filename) throws FileNotFoundException {
-        FileInputStream inputted = new FileInputStream(filename);
-        image = new Image(inputted); //Removed unnecessary Image reference assignment
+    public void SetMap(String mapPNG) throws FileNotFoundException {
+        image = new Image(new FileInputStream(mapPNG));
     }
 
     public Deque<Bricks> get_list(){
@@ -33,8 +33,8 @@ public class MapRender {
     }
     public Deque<MeleeEnemy> getMelee_list(){ return Melee_list; }
 
-    public void render(GraphicsContext gc){
-        for (Bricks bricks : Bricks_list) { //Replaced with for loop
+    public void render(GraphicsContext gc) {
+        for (Bricks bricks : Bricks_list) {
             bricks.render(gc);
         }
         for (MeleeEnemy meleeEnemy : Melee_list){
@@ -43,18 +43,21 @@ public class MapRender {
     }
 
     public void loadLevel() throws FileNotFoundException {
-        double w = image.getWidth();
-        double h = image.getHeight();
-        PixelReader pr = image.getPixelReader();
-        for (int xx = 0; xx < w; xx++) {
-            for (int yy = 0; yy < h; yy++) {
-                int pixel = pr.getArgb(xx, yy);
-                int red = (pixel >> 16) & 0xff;
-                int green = (pixel >> 8) & 0xff;
-                int blue = (pixel) & 0xff;
-                if (blue == 0 && green == 0 && red == 0) {
+        double width = image.getWidth(); //20px
+        double height = image.getHeight(); //15px
+        PixelReader pixelReader = image.getPixelReader();
 
-                    Bricks new_Brick = new Bricks(new Vector2((xx) * 40, (yy) * 40), new Vector2(0, 0), (short) 0, om,0);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int pixels = pixelReader.getArgb(x, y);
+                int red = (pixels >> 16) & 0xff;
+                int green = (pixels >> 8) & 0xff;
+                int blue = (pixels) & 0xff;
+
+                if (blue == 0 && green == 0 && red == 0) { // pixels.getColor(x, y) == Color.BLACK
+                    Vector2 position = new Vector2((x) * 40, (y) * 40);
+                    Vector2 velocity = new Vector2(0, 0);
+                    Bricks new_Brick = new Bricks(position, velocity, (short) 0, om);
                     new_Brick.setImage("res/block.png");
                     Bricks_list.add(new_Brick);
                 }
@@ -65,6 +68,5 @@ public class MapRender {
                 }
             }
         }
-
     }
 }
