@@ -7,11 +7,11 @@ import com.halflife3.Model.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
-import javafx.scene.paint.Color;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class MapRender {
 
@@ -47,15 +47,15 @@ public class MapRender {
         double height = image.getHeight(); //15px
         PixelReader pixelReader = image.getPixelReader();
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int pixels = pixelReader.getArgb(x, y);
+        for (int xx = 0; xx < width; xx++) {
+            for (int yy = 0; yy < height; yy++) {
+                int pixels = pixelReader.getArgb(xx, yy);
                 int red = (pixels >> 16) & 0xff;
                 int green = (pixels >> 8) & 0xff;
                 int blue = (pixels) & 0xff;
 
-                if (blue == 0 && green == 0 && red == 0) { // pixels.getColor(x, y) == Color.BLACK
-                    Vector2 position = new Vector2((x) * 40, (y) * 40);
+                if (blue == 0 && green == 0 && red == 0) { // pixels.getColor(xx, yy) == Color.BLACK
+                    Vector2 position = new Vector2((xx) * 40, (yy) * 40);
                     Vector2 velocity = new Vector2(0, 0);
                     Bricks new_Brick = new Bricks(position, velocity, (short) 0, om);
                     new_Brick.setImage("res/block.png");
@@ -63,7 +63,7 @@ public class MapRender {
                 }
                 if (blue == 0 && green == 0 && red != 0) {
 
-                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(new Vector2 ((xx) * 32, (yy) * 32) , new Vector2(0, 0), (short) 0, om,1 );
+                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(new Vector2 ((xx) * 32, (yy) * 32) , new Vector2(0, 0), (short) 0, om);
                     Melee_list.add(new_MeleeEnemy);
                 }
             }

@@ -43,7 +43,7 @@ public class ConnectedToServer implements Runnable {
     }
 
     private void connectionListener() {
-        byte[] posBuf = new byte[objectToByteArray(new Vector2()).length];
+        byte[] posBuf = new byte[5000];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
         try {
@@ -82,6 +82,8 @@ public class ConnectedToServer implements Runnable {
             ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
             o = instream.readObject();
             instream.close();
+        } catch (EOFException e) {
+            System.out.println("Byte array 'posBuf' in ConnectedToServer class too small");
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

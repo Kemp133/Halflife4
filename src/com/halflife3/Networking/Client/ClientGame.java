@@ -21,19 +21,14 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCode.SPACE;
 
 public class ClientGame extends Application {
 
     //region Variables
-    private Client clientNetwork;
-    private int uPort;
-
     static Input input;
     private static Pane root;
     private static ObjectManager objectManager;
@@ -44,7 +39,7 @@ public class ClientGame extends Application {
     //endregion
 
     public void getStarted() {
-        clientNetwork = new Client();
+        Client clientNetwork = new Client();
         clientNetwork.joinGroup();
         clientNetwork.getHostInfo();
         clientNetwork.start();
@@ -179,8 +174,10 @@ public class ClientGame extends Application {
                     }
                     //endregion
 
-//                  TODO: Send the client's bullets' positions & velocities to the server
-                    Client.sendPacket(player_client.getPosition(), Client.getUniquePort());
+                    //TODO: Send the client's bullets' positions & velocities to the server
+                    //region Sends the client's position now
+                    Client.sendPacket(player_client, Client.getUniquePort());
+                    //endregion
 
                     lastUpdate = currentNanoTime;
                 }

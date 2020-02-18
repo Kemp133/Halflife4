@@ -19,7 +19,12 @@ public class Client implements Runnable {
     protected static MulticastSocket serverSocket = null;
     protected InetAddress group = null;
 
-//    For sending packets to the server
+//    For receiving clients' positions
+    protected static MulticastSocket positionSocket = null;
+    protected InetAddress positionsGroup = null;
+
+
+    //    For sending packets to the server
     private static InetAddress hostAddress;
     private static DatagramSocket outSocket;
 
@@ -39,6 +44,9 @@ public class Client implements Runnable {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
+            positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
+            positionsGroup = InetAddress.getByName(Server.MULTICAST_ADDRESS);
+
             //region Sets interface to Wi-Fi and gets the IP address
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -51,6 +59,7 @@ public class Client implements Runnable {
                     InetAddress addr = addresses.nextElement();
                     if (addr.toString().length() < 17) {
                         serverSocket.setInterface(addr);
+                        positionSocket.setInterface(addr);
                         clientAddress = addr;
                     }
                 }
@@ -58,6 +67,7 @@ public class Client implements Runnable {
             //endregion
 
             serverSocket.joinGroup(group);
+            positionSocket.joinGroup(positionsGroup);
 
             System.out.println("Joined group: " + group.getHostName() + " with address: " + clientAddress.toString());
         } catch (ConnectException e) {
