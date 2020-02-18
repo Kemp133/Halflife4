@@ -4,6 +4,7 @@ import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Affine;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,11 +22,12 @@ public class Player extends GameObject implements Serializable {
     private InetAddress ipOfClient;
     private boolean AI = true;
     private float moveSpeed = 100;
+    private Affine rotate;
 
     public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
         keys.add("player");
-        rectangle = new Rectangle(position.getX()-width/2, position.getY()-height/2, width, height);
+        rectangle = new Rectangle(position.getX(), position.getY(), width, height);
     }
 
     @Override
@@ -48,7 +50,10 @@ public class Player extends GameObject implements Serializable {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(image, position.getX() , position.getY() );
+        gc.save(); // Save default transform
+        gc.setTransform(rotate);
+        gc.drawImage(image, position.getX() , position.getY());
+        gc.restore(); // Restore default transform
     }
 
     @Override
@@ -99,5 +104,9 @@ public class Player extends GameObject implements Serializable {
 
     public void setSpawn_point(Vector2 spawn_point) {
         this.spawn_point = spawn_point;
+    }
+
+    public void setRotate(Affine rotate) {
+        this.rotate = rotate;
     }
 }

@@ -18,11 +18,13 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+
 
 import static javafx.scene.input.KeyCode.*;
 
@@ -150,11 +152,31 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Collision detection
+                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
                     boolean player_hit_block = false;
                     for (Bricks block : map.get_list()) {
                         if (block.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())) {
                             player_hit_block = true;
                         }
+                    }
+                    boolean Bullet_hit_wall = false;
+                    boolean Bullet_hit_player = false;
+                    for(GameObject go:objectManager.getGameObjects()){
+                        if (go.getKeys().contains("Bullet")){
+                            for(Bricks block : map.get_list()){
+                                if(go.GetBounds().intersects(block.GetBounds().getBoundsInLocal())){
+                                    Bullet_hit_wall = true;
+                                    crash_bullet_list.add(go);
+                                }
+                            }
+                            if(go.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())){
+                                Bullet_hit_player = true;
+                                crash_bullet_list.add(go);
+                            }
+                        }
+                    }
+                    for(GameObject bullet:crash_bullet_list){
+                        bullet.remove();
                     }
                     //endregion
 
@@ -167,6 +189,17 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Renders all game objects
+                    Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
+                            player_client.getY() + (player_client.height/2));
+                    Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
+                            .subtract(player_client_center);
+                    Affine rotate = new Affine();
+                    //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
+                    //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
+                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(),direction.getX())), player_client_center.getX(), player_client_center.getY());
+                    player_client.setRotate(rotate);
+                    //System.out.println(Math.atan2(direction.getY(),direction.getX()));
+
                     for (IRenderable go : objectManager.getGameObjects()) {
                         go.render(graphicsContext);
                     }
