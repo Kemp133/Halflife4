@@ -1,13 +1,15 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Model.Vector2;
+import com.halflife3.Networking.Packets.AllPlayersPacket;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.UniquePortPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
 
 public class Server implements Runnable {
 
@@ -15,14 +17,16 @@ public class Server implements Runnable {
     public static final int     MULTICAST_PORT      = 5555;
     public static final int     LISTENER_PORT       = 5544;
     public static final int     GET_PORT_PORT       = 5566;
+    public static final int     POSITIONS_PORT      = 5533;
 
     private boolean running = false;
+    private boolean multicastPositions = false;
+    private AllPlayersPacket positionsPacket;
     private static boolean welcoming = true;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 60000; // milliseconds
     private static int clientPort = 6000;
-    private static ArrayList<InetAddress> connectedIPs;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
     private static Vector2[] startPositions = {new Vector2(80, 80),
                                                new Vector2(680, 80),
@@ -33,6 +37,8 @@ public class Server implements Runnable {
         for (Vector2 startPosition : startPositions)
             positionAvailable.put(startPosition, true);
 
+        positionsPacket = new AllPlayersPacket(startPositions);
+
         try {
             clientSocket = new DatagramSocket(LISTENER_PORT);
         } catch (SocketException e) {
@@ -40,7 +46,6 @@ public class Server implements Runnable {
         }
 
         listenerServer = new EventListenerServer();
-        connectedIPs = new ArrayList<>();
         new Thread(this).start();
     }
 
@@ -72,6 +77,16 @@ public class Server implements Runnable {
             running = false;
             welcoming = false;
             clientSocket.close();
+        }).start();
+
+        new Thread(() -> {
+
+            while (running) {
+                if (multicastPositions) {
+                    multicastPacket(positionsPacket, POSITIONS_PORT);
+                } else waitASecond();
+            }
+
         }).start();
 
 //        Listens for incoming packets
@@ -137,8 +152,8 @@ public class Server implements Runnable {
 
         multicastPacket(portPacket, GET_PORT_PORT);
 
+        ClientPositionHandlerServer.connectedIPs.add(address);
         ClientPositionHandlerServer.clientList.put(address, connection);
-        connectedIPs.add(address);
 
         clientPort++;
         welcoming = true;
@@ -151,7 +166,7 @@ public class Server implements Runnable {
         positionAvailable.replace(ClientPositionHandlerServer.clientList.get(address).getSpawnPoint(), true);
         ClientPositionHandlerServer.clientList.get(address).close();
         ClientPositionHandlerServer.clientList.remove(address);
-        connectedIPs.remove(address);
+        ClientPositionHandlerServer.connectedIPs.remove(address);
         System.out.println(address + " has disconnected");
     }
 
@@ -159,7 +174,7 @@ public class Server implements Runnable {
         try {
             MulticastSocket multicastSocket = new MulticastSocket();
 
-//            Looks for the Wi-Fi adapter and sets the interface to it
+            //region Looks for the Wi-Fi adapter and sets the interface to it
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface net = interfaces.nextElement();
@@ -174,12 +189,10 @@ public class Server implements Runnable {
                     }
                 }
             }
+            //endregion
 
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
-
-//          Creates a byte array of the object
             byte[] sendBuf = objectToByteArray(o);
-
             DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, group, mPort);
             multicastSocket.send(packet);
 

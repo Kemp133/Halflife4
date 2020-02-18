@@ -1,3 +1,5 @@
+package com.halflife3.DatabaseUI;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -27,11 +29,12 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class Login extends Application {
-    private Stage Pstage = null;
+    /*mtest*/
+
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-
+    private Stage Pstage = null;
     Button login = new Button();
     Button createNewUser = new Button();
     Button backButton = new Button();
@@ -106,8 +109,8 @@ public class Login extends Application {
     public void start(Stage stage) throws Exception {
         //Setting properties of buttons
 
-        this.setPstage(stage);
-        login.setText("Login");
+        Pstage = stage;
+        login.setText("com.halflife3.DatabaseUI.Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
 
@@ -119,7 +122,7 @@ public class Login extends Application {
         backButton.setMinHeight(30);
         backButton.setMinWidth(150);
 
-        create.setText("Create User");
+        create.setText("Create com.halflife3.DatabaseUI.User");
         create.setMinHeight(30);
         create.setMinWidth(150);
 
@@ -139,7 +142,7 @@ public class Login extends Application {
         //Sets text fields to null
         setNullFields();
 
-        stage.setTitle("Login/Create User");
+        stage.setTitle("com.halflife3.DatabaseUI.Login/Create com.halflife3.DatabaseUI.User");
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(sceneLogin);
         stage.show();
@@ -153,12 +156,12 @@ public class Login extends Application {
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
 
-                        try {
+                        /*try {
                             new Windows().start(Pstage);
                         } catch (FileNotFoundException ex) {
                             ex.printStackTrace();
-                        }
-                        
+                        }*/
+
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
@@ -197,7 +200,7 @@ public class Login extends Application {
                         //Insert user and password into table
                         addNewUser(getConnection(), nameField.getText(), passwordField.getText());
                         //TODO: Assign username to player and Change to game screen
-                        incorrectFields.setText("User created"); //TODO: delete after above
+                        incorrectFields.setText("com.halflife3.DatabaseUI.User created"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: delete after above
                     }
                 }
@@ -219,11 +222,13 @@ public class Login extends Application {
         });
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         Connection c = null;
         try {
             Class.forName("org.postgresql.Driver");
-            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/Leaderboard", "postgres", "123");
+            String url = "jdbc:postgresql://rogue.db.elephantsql.com:5432/nuzmlzpr";
+            url = url.trim();
+            c = DriverManager.getConnection(url, "nuzmlzpr", "pd7OdC_3BiVrAPNU68CETtFtBaqFxJFB");
 
             if (c != null) {
                 System.out.println("Connection complete");
@@ -263,7 +268,7 @@ public class Login extends Application {
         ResultSet rs = null;
         try {
             //Creating a query checking if username is in the table
-            String query = "SELECT * FROM \"UserDataScore\" WHERE name = '" + username + "'";
+            String query = "SELECT * FROM userdatascore WHERE name = '" + username + "'";
             //Creating the Statement
             preparedStatement = c.prepareStatement(query);
             //Executing the query
@@ -290,7 +295,7 @@ public class Login extends Application {
             //Retrieving the salt from the table based on the username given
             byte[] salt = new byte[0];
             //Creating the query
-            String querySalt = "SELECT salt FROM \"UserDataScore\" WHERE \"name\" = '" + username + "'";
+            String querySalt = "SELECT salt FROM userdatascore WHERE \"name\" = '" + username + "'";
             //Creating the statement
             saltStatement = c.prepareStatement(querySalt);
             rs = saltStatement.executeQuery();
@@ -300,7 +305,7 @@ public class Login extends Application {
             //Hashing the password given based on the salt retrieved
             byte[] hashedPassword = hashPassword(salt, passwordEntered);
             //Creating the query
-            String queryDetails = "SELECT * FROM \"UserDataScore\" WHERE \"name\" = '" + username + "' AND \"password\" = '" + passwordEntered + "'";
+            String queryDetails = "SELECT * FROM userdatascore WHERE \"name\" = '" + username + "' AND \"password\" = '" + passwordEntered + "'";
             //Creating the statement
             preparedStatement = c.prepareStatement(queryDetails);
             //Executing the query
@@ -326,7 +331,7 @@ public class Login extends Application {
             byte[] randomSalt = returnSalt();
             byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
             //Creating the query
-            String query = "INSERT INTO \"UserDataScore\" (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; // Added a random salt and plaintext password
+            String query = "INSERT INTO userdatascore (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; // Added a random salt and plaintext password
             //Creating the statement
             preparedStatement = c.prepareStatement(query);
             //Executing the query
@@ -365,41 +370,4 @@ public class Login extends Application {
         passwordField.setText(null);
         passwordFieldConf.setText(null);
     }
-
-    public void setPstage(Stage pstage) {
-        this.Pstage = pstage;
-    }
-
-    //TODO: Used for
-    /*public void getData(Connection c, String username) throws SQLException {
-        //Creating the Statement
-        Statement stmt = c.createStatement();
-        String query = "Select * from \"UserDataScore\" where name = '" + username + "'";
-        System.out.println("Get data query: " + query);
-        //Executing the query
-        ResultSet rs = stmt.executeQuery(query);
-        //Retrieving ResultSetMetaData object
-        ResultSetMetaData rsMetaData = rs.getMetaData();
-        System.out.println("Column name: " + rsMetaData.getColumnName(1));
-        System.out.println("Column name: " + rsMetaData.getColumnName(2));
-        System.out.println("Column name: " + rsMetaData.getColumnName(3));
-        System.out.println("Column name: " + rsMetaData.getColumnName(4));
-        if (!rs.next()) { //No need to do rs.next() == false as rs.next returns a boolean, so to check for false you can just instead have !rs.next()
-            System.out.println("no match");
-        } else {
-            System.out.println("match");
-        }
-        while (rs.next()) {
-
-            System.out.print(rs.getInt(1));
-            System.out.print(": ");
-            System.out.println(rs.getString(2));
-            System.out.print(": ");
-            System.out.println(rs.getInt(3));
-            System.out.print(": ");
-            System.out.println(rs.getString(4));
-            System.out.print(": ");
-            System.out.println(rs.getString(5));
-        }
-    }*/
 }

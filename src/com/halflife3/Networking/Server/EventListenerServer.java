@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Server;
 
+import com.halflife3.Model.Player;
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
@@ -22,6 +23,11 @@ public class EventListenerServer {
 
             Vector2 position = (Vector2) packet;
             ClientPositionHandlerServer.clientList.get(sender).setPosition(position);
+
+        } else if (packet instanceof Player) {
+
+            Player clientPlayer = (Player) packet;
+            ClientPositionHandlerServer.playerList.add(clientPlayer);
 
         }
 

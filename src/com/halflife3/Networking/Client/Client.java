@@ -19,7 +19,10 @@ public class Client implements Runnable {
     protected static MulticastSocket serverSocket = null;
     protected InetAddress group = null;
 
-//    For sending packets to the server
+//    For receiving clients' positions
+    protected static MulticastSocket positionSocket = null;
+
+    //    For sending packets to the server
     private static InetAddress hostAddress;
     private static DatagramSocket outSocket;
 
@@ -37,6 +40,7 @@ public class Client implements Runnable {
     public void joinGroup() {
         try {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
+            positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
             //region Sets interface to Wi-Fi and gets the IP address
@@ -51,6 +55,7 @@ public class Client implements Runnable {
                     InetAddress addr = addresses.nextElement();
                     if (addr.toString().length() < 17) {
                         serverSocket.setInterface(addr);
+                        positionSocket.setInterface(addr);
                         clientAddress = addr;
                     }
                 }
@@ -58,6 +63,7 @@ public class Client implements Runnable {
             //endregion
 
             serverSocket.joinGroup(group);
+            positionSocket.joinGroup(group);
 
             System.out.println("Joined group: " + group.getHostName() + " with address: " + clientAddress.toString());
         } catch (ConnectException e) {
@@ -155,6 +161,18 @@ public class Client implements Runnable {
             byte[] recBuf = new byte[5000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
+            Object o = byteArrayToObject(recBuf);
+            listenerClient.received(o);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void receivePositions() {
+        try {
+            byte[] recBuf = new byte[5000];
+            DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
+            positionSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);
             listenerClient.received(o);
         } catch (IOException e) {

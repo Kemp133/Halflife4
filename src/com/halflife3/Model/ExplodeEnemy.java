@@ -8,9 +8,10 @@ public class ExplodeEnemy extends Enemy{
     public ExplodeEnemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om,int ID) {
         super(position, velocity, rotation, om, 2);
     }
+
     //TODO: write the method
     @Override
-    public void attackPattern() {
+    public void attackPattern(Player[] playerList) {
         //find closest player
         //move to player, if distance <= n
         //stop for 2 seconds

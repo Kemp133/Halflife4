@@ -3,7 +3,6 @@ package com.halflife3.Model;
 import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
@@ -17,6 +16,7 @@ public class Player extends GameObject implements Serializable {
     public double height = 35;
     public Rectangle rectangle;
     private Image image;
+    private Vector2 spawn_point;
     private Vector2 original_position;
     private InetAddress ipOfClient;
     private boolean AI = true;
@@ -91,5 +91,13 @@ public class Player extends GameObject implements Serializable {
 
     public void setAI(boolean AI) {
         this.AI = AI;
+    }
+
+    public Vector2 getSpawn_point() {
+        return spawn_point;
+    }
+
+    public void setSpawn_point(Vector2 spawn_point) {
+        this.spawn_point = spawn_point;
     }
 }
