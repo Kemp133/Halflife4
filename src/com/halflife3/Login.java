@@ -1,6 +1,9 @@
 package com.halflife3;
 
+import com.halflife3.Model.ApplicationUser;
+import com.halflife3.Model.Interfaces.ICredentialUser;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.application.Preloader;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -18,6 +21,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -31,8 +35,8 @@ import java.util.Arrays;
 
 public class Login extends Preloader {
 
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth() * 0.2;
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight() * 0.3;
+    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth() * 0.5;
+    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight() * 0.5;
 
     private static Button login = new Button();
     private static Button createNewUser = new Button();
@@ -47,6 +51,9 @@ public class Login extends Preloader {
     private static Text incorrectFields = new Text();
 
     private static Stage preloaderStage;
+
+    private boolean hasLoggedIn = false;
+    private ICredentialUser user;
 
     private static GridPane basePane() {
         GridPane gridPaneLogin = new GridPane();
@@ -98,11 +105,18 @@ public class Login extends Preloader {
         return gridPaneCreateUser;
     }
 
+    public void mayBeHid() {
+        if(hasLoggedIn) {
+            user.setApplicationUser(nameField.getText());
+            Platform.runLater(() -> preloaderStage.hide());
+        }
+    }
+
     @Override
     public void handleStateChangeNotification(StateChangeNotification stateChangeNotification) {
         if(stateChangeNotification.getType() == StateChangeNotification.Type.BEFORE_START) {
-
-
+            user = (ICredentialUser)stateChangeNotification.getApplication();
+            mayBeHid();
         }
     }
 
@@ -112,7 +126,8 @@ public class Login extends Preloader {
 
         initaliseFields();
 
-        preloaderStage.setTitle("com.halflife3.Login/Create User");
+        preloaderStage.setTitle("Log In");
+        preloaderStage.initStyle(StageStyle.UTILITY);
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
         preloaderStage.setScene(sceneLogin);
         preloaderStage.show();
@@ -123,8 +138,8 @@ public class Login extends Preloader {
                 if (nameField.getText() != null && passwordField.getText() != null) {
                     if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
                         //TODO: Assign username to 'player' and change to game screen
-                        incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
-                        incorrectFields.setVisible(true); //TODO: Delete after above
+                        hasLoggedIn = true;
+                        mayBeHid();
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
@@ -341,7 +356,7 @@ public class Login extends Preloader {
 
     public void initaliseFields() {
         //Setting properties of buttons
-        login.setText("com.halflife3.Login");
+        login.setText("Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
 

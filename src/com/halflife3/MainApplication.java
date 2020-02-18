@@ -1,7 +1,10 @@
 package com.halflife3;
 
+import com.halflife3.Model.ApplicationUser;
+import com.halflife3.Model.Interfaces.ICredentialUser;
 import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
@@ -12,11 +15,14 @@ import javafx.stage.StageStyle;
 
 import java.io.*;
 
-public class MainApplication extends Application {
+public class MainApplication extends Application implements ICredentialUser {
 
     private static WindowAttributes windowAttributes;
+    private static ApplicationUser user;
     private double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth() * 0.8;
     private double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight() * 0.8;
+
+    private Stage mainStage;
 
     private boolean isMaximised;
 
@@ -33,11 +39,12 @@ public class MainApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        setMainStage(stage);
+        mainStage = stage;
+        setMainStage(mainStage);
         VBox vbox = new VBox();
         Scene scene = new Scene(vbox);
-        stage.setScene(scene);
-        stage.show();
+        mainStage.setScene(scene);
+        mayBeShown();
     }
 
     public static void loadWindowAttributes() {
@@ -86,5 +93,19 @@ public class MainApplication extends Application {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void mayBeShown() {
+        if(user != null && mainStage != null) {
+            Platform.runLater(() -> mainStage.show());
+        }
+    }
+
+    @Override
+    public void setApplicationUser(String username) {
+        user = new ApplicationUser();
+        user.username = username;
+        user.isValidSession = true;
+        mayBeShown();
     }
 }
