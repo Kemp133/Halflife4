@@ -1,3 +1,5 @@
+package GameUI;
+
 import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;

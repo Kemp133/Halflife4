@@ -1,5 +1,6 @@
 package com.halflife3.DatabaseUI;
 
+import GameUI.Windows;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -156,11 +157,11 @@ public class Login extends Application {
                         incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: Delete after above
 
-                        /*try {
+                       try {
                             new Windows().start(Pstage);
                         } catch (FileNotFoundException ex) {
                             ex.printStackTrace();
-                        }*/
+                        }
 
                     } else {
                         setNullFields();
@@ -171,6 +172,7 @@ public class Login extends Application {
                 else {
                     incorrectFields.setText("Please type in a username and password");
                     incorrectFields.setVisible(true);
+
                 }
             }
         });

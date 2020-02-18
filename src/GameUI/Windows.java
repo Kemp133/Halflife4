@@ -1,4 +1,4 @@
-/*This is the main menu after
+package GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
 import com.halflife3.View.Main;

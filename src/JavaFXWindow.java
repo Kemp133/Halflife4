@@ -1,3 +1,4 @@
+/*
 import com.halflife3.Controller.*;
 import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
@@ -109,3 +110,4 @@ public class JavaFXWindow extends Application {
         launch(args);
     }
 }
+*/

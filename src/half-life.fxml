@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<BorderPane fx:controller="Lin_Controller" style="-fx-background-color: black;" xmlns:fx="http://javafx.com/fxml">
+<BorderPane fx:controller="GameUI.Lin_Controller" style="-fx-background-color: black;" xmlns:fx="http://javafx.com/fxml">
     <top>
         <BorderPane prefHeight="35" style="-fx-background-color: #0B5091; -fx-padding: 10px, 5px, 10px, 5px" >
             <left><Label fx:id="scoreLabel" style="-fx-font-size: 150%; -fx-text-fill: white" /></left>
