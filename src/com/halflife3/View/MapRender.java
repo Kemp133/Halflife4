@@ -63,7 +63,7 @@ public class MapRender {
                 }
                 if (blue == 0 && green == 0 && red != 0) {
 
-                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(new Vector2 ((xx) * 32, (yy) * 32) , new Vector2(0, 0), (short) 0, om,1 );
+                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(new Vector2 ((x) * 32, (y) * 32) , new Vector2(0, 0), (short) 0, om,1 );
                     Melee_list.add(new_MeleeEnemy);
                 }
             }

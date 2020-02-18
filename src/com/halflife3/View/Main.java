@@ -29,6 +29,12 @@ public class Main extends Application {
     private ObjectManager objectManager = new ObjectManager();
     private Player player = new Player(new Vector2(100, 100), new Vector2(0, 0), (short) 0, objectManager);
     static Input input = new Input();
+    //add this to get the map in enemy classes;
+    private MapRender map = null;
+
+    public MapRender getMap() {
+        return map;
+    }
 
     //Translate the Gametime value format, will be used at timer part.
     private static class LongValue {
@@ -93,7 +99,8 @@ public class Main extends Application {
         //main update.
         LongValue lastNanoTime = new LongValue(System.nanoTime());
 
-        MapRender map = new MapRender(objectManager);
+        //MapRender map = new MapRender(objectManager);
+        map = new MapRender(objectManager);
         map.SetMap("res/map.png");
         map.loadLevel();
         new AnimationTimer() {

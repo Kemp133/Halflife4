@@ -1,4 +1,3 @@
-/*
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
@@ -46,4 +45,3 @@ public class Bricks extends GameObject {
         //TODO: If bullet touches the brick and the brick can be destroyed, remove brick
     }
 }
-*/

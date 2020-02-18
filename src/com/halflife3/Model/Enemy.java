@@ -152,7 +152,7 @@ public abstract class Enemy extends GameObject {
             //Problem the Player might be standing between two blocks
             for (double x = original_pos.getX() - 40; x <= original_pos.getX() + 40; x += 10) {
                 for (double y = original_pos.getY() - 40; y <= original_pos.getY() + 40; y += 10) {
-                    if (v.getX() == x && v.getY() == y && v != original_pos && !isWall(v)) {
+                    if (v.getX() == x && v.getY() == y && v != original_pos && !hasWall(v)) {
                         openList.add(v);
                     }
                 }
@@ -160,13 +160,7 @@ public abstract class Enemy extends GameObject {
         }
         return openList;
     }
-
-    public boolean isWall(Vector2 v){
-        */
-/*Can I use color judging for wall judge?*//*
-
-    }
-*/
+    */
 
     //Auxillary method for getPath
     public static int FindSmallest (double [] arr1) {

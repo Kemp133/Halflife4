@@ -1,3 +1,4 @@
+/*
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
@@ -18,3 +19,4 @@ public class ExplodeEnemy extends Enemy{
         death();
     }
 }
+*/
