@@ -1,3 +1,5 @@
+package com.halflife3.DatabaseUI;
+
 public class User {
     private String name;
     private int score;
