@@ -49,6 +49,9 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         keys = new HashSet<>();
     }
 
+    public GameObject(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+    }
+
     public boolean containsKey(String key) {
         return keys.contains(key);
     }

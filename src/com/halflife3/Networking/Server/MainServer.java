@@ -33,7 +33,7 @@ public class MainServer extends Application {
 
     //private Vector2 client_position = player_client.getPosition();
 
-/**
+*
  * Plan to give each game_object an ID
  * And add every object to the object manager
  * 0: Block_Breakable
@@ -41,7 +41,8 @@ public class MainServer extends Application {
  * 2: Block_unBreakable
  * 3: Bullet
  * 4: Enemy
- * */
+ *
+
 
 
     public static void main(String[] args) {
@@ -51,10 +52,11 @@ public class MainServer extends Application {
         launch(args);
     }
 
-    /**
+*
      * Initialize the root scene for the main game, and new game object can be
      * add by calling getChildren.add().
-     */
+
+
     //TODO: Build a Hashset to save all the Game Object or use Group? Group has some useful method for render
     private Parent createContent() {
         //root.setPrefSize(900, 400);
@@ -63,9 +65,10 @@ public class MainServer extends Application {
         return root;
     }
 
-    /**
+*
      * Stage pass to start is the stage of game
-     **/
+     *
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("HalfLife 3");
@@ -74,9 +77,10 @@ public class MainServer extends Application {
         Scene scene = new Scene(createContent(), 800, 600);
         primaryStage.setScene(scene);
 
-        /**
+*
          * Set the background
-         * */
+         *
+
         FileInputStream inputted = new FileInputStream("res/background_image.png");
         Image image = new Image(inputted, 40, 40, true, true);
         BackgroundImage myBI = new BackgroundImage(image,
@@ -84,9 +88,10 @@ public class MainServer extends Application {
                 BackgroundSize.DEFAULT);
         root.setBackground(new Background(myBI));
 
-        /**
+*
          * Try to build a camera
-         * */
+         *
+
         //set the key listener
         KeyHandle handle = new KeyHandle();
         root.setOnKeyPressed(handle);

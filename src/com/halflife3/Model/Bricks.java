@@ -1,3 +1,4 @@
+/*
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
@@ -65,3 +66,4 @@ public class Bricks extends GameObject {
         this.velocity.add(toAdd);
     }
 }
+*/

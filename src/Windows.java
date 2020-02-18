@@ -1,7 +1,6 @@
 /*This is the main menu after
 log-in successfully to the database*/
 
-import com.halflife3.View.Main;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -102,7 +101,7 @@ public class Windows extends Application {
     }
 
     public void entergameStage() throws Exception {
-        new Main().start(pStage);
+        //new Main().start(pStage);
         pStage.centerOnScreen();
     }
 
