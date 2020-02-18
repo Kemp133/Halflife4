@@ -1,13 +1,15 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Model.Vector2;
+import com.halflife3.Networking.Packets.AllPlayersPacket;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.UniquePortPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
 
 public class Server implements Runnable {
 
@@ -18,6 +20,8 @@ public class Server implements Runnable {
     public static final int     POSITIONS_PORT      = 5533;
 
     private boolean running = false;
+    private boolean multicastPositions = false;
+    private AllPlayersPacket positionsPacket;
     private static boolean welcoming = true;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
@@ -32,6 +36,8 @@ public class Server implements Runnable {
     public void start() {
         for (Vector2 startPosition : startPositions)
             positionAvailable.put(startPosition, true);
+
+        positionsPacket = new AllPlayersPacket(startPositions);
 
         try {
             clientSocket = new DatagramSocket(LISTENER_PORT);
@@ -71,6 +77,16 @@ public class Server implements Runnable {
             running = false;
             welcoming = false;
             clientSocket.close();
+        }).start();
+
+        new Thread(() -> {
+
+            while (running) {
+                if (multicastPositions) {
+                    multicastPacket(positionsPacket, POSITIONS_PORT);
+                } else waitASecond();
+            }
+
         }).start();
 
 //        Listens for incoming packets

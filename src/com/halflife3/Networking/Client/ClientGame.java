@@ -100,7 +100,7 @@ public class ClientGame extends Application {
 
         AnimationTimer game = new AnimationTimer() {
             private long lastUpdate = 0;
-            private int bulletLimiter = 0;
+            private int bulletLimiter = 6;
             public void handle(long currentNanoTime) {
                 if (currentNanoTime - lastUpdate > nSecPerFrame) {
                     //region Calculate time since last update.
@@ -130,18 +130,16 @@ public class ClientGame extends Application {
                     }
                     //endregion
 
-                    //TODO: Limit number of bullets player can shoot
                     //region Create a new bullet
-                    if(input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter % 19 == 0) {
+                    if (input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                         Vector2 bulletPos = new Vector2(player_client.getX() + player_client.width,
                                                         player_client.getY() + player_client.height);
                         Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
                                                 .subtract(player_client.getPosition()).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
-                    }
-                    bulletLimiter++;
-                    if (bulletLimiter >= 60) bulletLimiter = 1;
+                        bulletLimiter = 6;
+                    } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
                     //TODO: Get positions of all clients from the Server
