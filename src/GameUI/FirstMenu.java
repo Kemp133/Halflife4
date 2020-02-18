@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
 
 import static javafx.scene.paint.Color.WHITE;
 
-//The menu set for choose server and clinet
+//The menu set for choose server and client
 public class FirstMenu extends Application {
     private Stage pstage = null;
     private static final double SCREEN_WIDTH = 800;
