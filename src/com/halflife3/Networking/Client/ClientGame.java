@@ -1,6 +1,5 @@
 package com.halflife3.Networking.Client;
 
-import GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
@@ -16,7 +15,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -25,7 +23,6 @@ import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -79,7 +76,7 @@ public class ClientGame extends Application {
         }
         //TODO: Create new Players with the received positions
 
-        this.start(window);
+        launch();
     }
 
     @Override
@@ -129,17 +126,9 @@ public class ClientGame extends Application {
 
         //region Map loading
         MapRender map = new MapRender(objectManager);
-            try {
-                map.SetMap("res/map.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            try {
-                map.loadLevel();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            //endregion
+        map.SetMap("res/map.png");
+        map.loadLevel();
+        //endregion
 
         final long[] startNanoTime = {System.nanoTime()};
 
@@ -266,7 +255,6 @@ public class ClientGame extends Application {
         primaryStage.show();
 
     }
-
 
     @Override
     public void stop() throws Exception {

@@ -2,14 +2,12 @@ package com.halflife3.View;
 
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.Bricks;
-import com.halflife3.Model.MeleeEnemy;
 import com.halflife3.Model.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
 
-import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
@@ -18,7 +16,7 @@ import java.util.Deque;
 public class MapRender {
 
     private Image image;
-    private Deque<Bricks> Bricks_list = new ArrayDeque<>();
+    private static Deque<Bricks> Bricks_list = new ArrayDeque<>();
     private ObjectManager om;
 
 
@@ -30,7 +28,7 @@ public class MapRender {
         image = new Image(new FileInputStream(mapPNG));
     }
 
-    public Deque<Bricks> get_list(){
+    public static Deque<Bricks> get_list(){
         return Bricks_list;
     }
 
