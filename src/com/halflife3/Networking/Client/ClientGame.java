@@ -110,11 +110,11 @@ public class ClientGame extends Application {
         audio.getSlider1().setHideOnClick(false);
         audio.getMenu().getItems().add(audio.getSlider1());
         audio.getMenuBar().getMenus().add(audio.getMenu());
-        audio.getBattle_music().setAutoPlay(true);
-        audio.getBattle_music().setMute(false);
-        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
-        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+//        audio.getBattle_music().setAutoPlay(true);
+//        audio.getBattle_music().setMute(false);
+//        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
+//        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+//        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());
         //endregion
 
