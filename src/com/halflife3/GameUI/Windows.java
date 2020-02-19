@@ -2,6 +2,7 @@ package com.halflife3.GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
 import com.halflife3.Networking.Client.ClientGame;
+import com.halflife3.Networking.Client.ClientWindow;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -38,7 +39,7 @@ public class Windows extends Application {
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
-                new ClientGame(getpStage()).getStarted();
+                new ClientWindow(getpStage()).start(getpStage());
             } catch (Exception e) {
                 e.printStackTrace();
             }

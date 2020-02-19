@@ -47,12 +47,6 @@ public class ClientGame extends Application {
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
-    //region for menu --lin
-    private Stage window;
-    public ClientGame(Stage Window){
-        window = Window;
-    }
-    //end of region
 
     public void getStarted() {
 
@@ -88,12 +82,6 @@ public class ClientGame extends Application {
 
         }
 
-        if(window != null) {
-            try { this.start(window); } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        else
             launch();
     }
 
