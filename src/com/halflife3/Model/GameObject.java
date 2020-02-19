@@ -3,7 +3,6 @@ package com.halflife3.Model;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.Model.Interfaces.IUpdateable;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 import java.util.HashSet;
@@ -11,13 +10,13 @@ import java.util.HashSet;
 public abstract class GameObject implements IRenderable, IUpdateable {
     protected Vector2 position;
     protected Vector2 velocity;
-    protected short rotation;
+    protected double rotation;
     protected ObjectManager objectManager;
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
      * to disallow duplicate keys from being added*/
     protected HashSet<String> keys;
 
-    public GameObject(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+    public GameObject(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
         this.position = position;
         this.velocity = velocity;
         this.rotation = rotation;
@@ -74,10 +73,10 @@ public abstract class GameObject implements IRenderable, IUpdateable {
     //endregion
 
     //region Rotation Getter and Setter
-    public short getRotation() { return rotation; }
+    public double getRotation() { return rotation; }
 
-    public void setRotation(short toAdd) {
-        rotation = (short)(toAdd % 360);
+    public void setRotation(double toAdd) {
+        rotation = toAdd % 360;
     }
     //endregion
 
