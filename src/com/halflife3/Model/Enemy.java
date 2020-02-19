@@ -137,7 +137,7 @@ public abstract class Enemy extends GameObject {
 
     //TODO: add a death animation
     public void death(){
-       if (health == 0){
+       if (health >= 0){
           selfDestroy();
        }
     }
