@@ -1,7 +1,9 @@
 package GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
-import com.halflife3.View.Main;
+import com.halflife3.Networking.Client.ClientGame;
+import com.halflife3.Networking.Client.MainClient;
+import com.halflife3.Networking.Server.MainServer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,7 +29,7 @@ public class Windows extends Application {
     private String filepng = null;
     private StackPane pane = new StackPane();
     private LinMenu main_menu = LinMenu.getInstance();
-    private Stage pStage = null;
+    private Stage pStage;
 
     public Windows() throws FileNotFoundException {
     }
@@ -39,9 +41,8 @@ public class Windows extends Application {
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
-                entergameStage();
-            } catch (IOException e) {
-                e.printStackTrace();
+                pStage.close();
+                MainClient.main(null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -86,9 +87,9 @@ public class Windows extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            setpStage(primaryStage);
             primaryStage.setTitle("Team HalfLife");
             primaryStage.setResizable(true);
-            pStage = primaryStage;
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -102,8 +103,8 @@ public class Windows extends Application {
     }
 
     public void entergameStage() throws Exception {
-        new Main().start(pStage);
-        pStage.centerOnScreen();
+        pStage.close();
+        MainClient.main(null);
     }
 
     public void Update() {
@@ -119,5 +120,9 @@ public class Windows extends Application {
             System.err.println("primary stage not built!");
         }
         return null;
+    }
+
+    public void setpStage(Stage stage){
+        this.pStage = stage;
     }
 }
