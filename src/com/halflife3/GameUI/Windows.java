@@ -1,4 +1,4 @@
-package GameUI;/*This is the main menu after
+package com.halflife3.GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
 import com.halflife3.View.Main;
@@ -40,8 +40,6 @@ public class Windows extends Application {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
                 entergameStage();
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }

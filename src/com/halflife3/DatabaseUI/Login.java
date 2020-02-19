@@ -1,41 +1,28 @@
 package com.halflife3.DatabaseUI;
 
-import GameUI.Windows;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import com.halflife3.GameUI.interfaces.ICredentialUser;
+import javafx.application.Platform;
+import javafx.application.Preloader;
+import javafx.event.*;
+import javafx.geometry.*;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
+import javafx.scene.text.*;
+import javafx.stage.*;
 
-import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 
 import java.sql.*;
 
-import java.util.Arrays;
-
-public class Login extends Application {
+public class Login extends Preloader {
     /*mtest*/
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-    private Stage Pstage = null;
     Button login = new Button();
     Button createNewUser = new Button();
     Button backButton = new Button();
@@ -48,7 +35,12 @@ public class Login extends Application {
     PasswordField passwordFieldConf = new PasswordField();
     Text incorrectFields = new Text();
 
-    public GridPane loginPane() {
+    private static Stage preloaderStage = null;
+
+    private boolean hasLoggedIn = false;
+    private ICredentialUser user;
+
+    private static GridPane basePane() {
         GridPane gridPaneLogin = new GridPane();
         //Setting size for the pane
         gridPaneLogin.setMinSize(800, 600);
@@ -63,6 +55,12 @@ public class Login extends Application {
         //Setting the Grid alignment
         gridPaneLogin.setAlignment(Pos.CENTER);
 
+        return gridPaneLogin;
+    }
+
+    public GridPane loginPane() {
+        GridPane gridPaneLogin = basePane();
+
         //Arranging all the nodes in the grid
         gridPaneLogin.add(name, 0, 0);
         gridPaneLogin.add(nameField, 1, 0);
@@ -76,20 +74,7 @@ public class Login extends Application {
     }
 
     public GridPane newUserPane() {
-        GridPane gridPaneCreateUser = new GridPane();
-
-        //Setting size for the pane
-        gridPaneCreateUser.setMinSize(800, 600);
-
-        //Setting the padding
-        gridPaneCreateUser.setPadding(new Insets(10, 10, 10, 10));
-
-        //Setting the vertical and horizontal gaps between the columns
-        gridPaneCreateUser.setVgap(30);
-        gridPaneCreateUser.setHgap(30);
-
-        //Setting the Grid alignment
-        gridPaneCreateUser.setAlignment(Pos.CENTER);
+        GridPane gridPaneCreateUser = basePane();
 
         //Arranging all the nodes in the grid
         gridPaneCreateUser.add(name, 0, 0);
@@ -105,13 +90,23 @@ public class Login extends Application {
         return gridPaneCreateUser;
     }
 
+    private void mayBeHid() {
+        if(hasLoggedIn) {
+            user.setApplicationUser(nameField.getText());
+            Platform.runLater(() -> preloaderStage.hide());
+        }
+    }
 
     @Override
-    public void start(Stage stage) throws Exception {
-        //Setting properties of buttons
+    public void handleStateChangeNotification(StateChangeNotification info) {
+        if(info.getType() == StateChangeNotification.Type.BEFORE_START) {
+            user = (ICredentialUser)info.getApplication();
+            mayBeHid();
+        }
+    }
 
-        Pstage = stage;
-        login.setText("com.halflife3.DatabaseUI.Login");
+    private void initaliseFields() {
+        login.setText("Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
 
@@ -123,7 +118,7 @@ public class Login extends Application {
         backButton.setMinHeight(30);
         backButton.setMinWidth(150);
 
-        create.setText("Create com.halflife3.DatabaseUI.User");
+        create.setText("Create User");
         create.setMinHeight(30);
         create.setMinWidth(150);
 
@@ -142,8 +137,15 @@ public class Login extends Application {
 
         //Sets text fields to null
         setNullFields();
+    }
 
-        stage.setTitle("com.halflife3.DatabaseUI.Login/Create com.halflife3.DatabaseUI.User");
+    @Override
+    public void start(Stage stage) throws Exception {
+        //Setting properties of buttons
+        preloaderStage = stage;
+        preloaderStage.setTitle("Login/Create User");
+
+        initaliseFields();
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(sceneLogin);
         stage.show();
@@ -152,17 +154,15 @@ public class Login extends Application {
         login.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null) {
-                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText()) == true) {
+                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
                         //TODO: Assign username to 'player' and change to game screen
-                        incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
-                        incorrectFields.setVisible(true); //TODO: Delete after above
-
-                       try {
-                            new Windows().start(Pstage);
-                        } catch (FileNotFoundException ex) {
-                            ex.printStackTrace();
-                        }
-
+                        hasLoggedIn = true;
+                        mayBeHid();
+//                       try {
+//                            new Windows().start(preloaderStage);
+//                        } catch (FileNotFoundException ex) {
+//                            ex.printStackTrace();
+//                        }
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
@@ -191,7 +191,7 @@ public class Login extends Application {
         create.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
-                    if (doesUserExist(getConnection(), nameField.getText()) == true) {
+                    if (doesUserExist(getConnection(), nameField.getText())) {
                         incorrectFields.setText("That username already exists. Please choose another one");
                         incorrectFields.setVisible(true);
                     } else if (!passwordField.getText().equals(passwordFieldConf.getText())){
@@ -202,7 +202,7 @@ public class Login extends Application {
                         //Insert user and password into table
                         addNewUser(getConnection(), nameField.getText(), passwordField.getText());
                         //TODO: Assign username to player and Change to game screen
-                        incorrectFields.setText("com.halflife3.DatabaseUI.User created"); //TODO: delete after above
+                        incorrectFields.setText("User created"); //TODO: delete after above
                         incorrectFields.setVisible(true); //TODO: delete after above
                     }
                 }
@@ -330,8 +330,8 @@ public class Login extends Application {
         PreparedStatement preparedStatement = null;
         try {
             //Creating a hashed password based on a random salt
-            byte[] randomSalt = returnSalt();
-            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
+//            byte[] randomSalt = returnSalt();
+//            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
             //Creating the query
             String query = "INSERT INTO userdatascore (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; // Added a random salt and plaintext password
             //Creating the statement

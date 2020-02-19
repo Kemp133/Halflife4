@@ -1,4 +1,4 @@
-package GameUI;
+package com.halflife3.GameUI;
 
 import javafx.application.Platform;
 import javafx.scene.control.*;
@@ -21,8 +21,8 @@ public class LinMenu extends ContextMenu {
     private static LinMenu insatnce = null;
     private VBox main_manu = null;
     private File audio_path = new File("res/bensound-summer.mp3");
-    private Media media = new Media(audio_path.toURI().toString());
-    private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
+//    private Media media = new Media(audio_path.toURI().toString());
+//    private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
     private Slider volume = new Slider();
     private MenuItem startItem = null;
     private MenuItem loadItem = null;
@@ -46,17 +46,17 @@ public class LinMenu extends ContextMenu {
         text.setFill(Color.WHITE);
 
         //adding mouse input
-        startItem.setOnAction(e->{
-            player.play();
-        });
+//        startItem.setOnAction(e->{
+//            player.play();
+//        });
 
         loadItem.setOnAction(e->{
 
         });
 
-        audioItem_on.setOnAction(actionEvent -> Is_mute(false));
-        audioitem_off.setOnAction(actionEvent -> Is_mute(true));
-        audio.setOnAction(actionEvent -> volumeControl(volume));
+//        audioItem_on.setOnAction(actionEvent -> Is_mute(false));
+//        audioitem_off.setOnAction(actionEvent -> Is_mute(true));
+//        audio.setOnAction(actionEvent -> volumeControl(volume));
         exit_m.setOnAction(actionEvent -> Platform.exit());
         main_manu = new VBox(100);
         main_manu.getChildren().addAll(text,start_m, settings_m, exit_m);
@@ -72,17 +72,17 @@ public class LinMenu extends ContextMenu {
         return loadItem;
     }
 
-    private void Is_mute(boolean b) {
-        if(b){
-            player.stop();
-        }else{
-            player.play();
-        }
-    }
+//    private void Is_mute(boolean b) {
+//        if(b){
+//            player.stop();
+//        }else{
+//            player.play();
+//        }
+//    }
 
-    private void volumeControl(Slider volume) {
-       player.volumeProperty().bind(volume.valueProperty().divide(100));
-    }
+//    private void volumeControl(Slider volume) {
+//       player.volumeProperty().bind(volume.valueProperty().divide(100));
+//    }
 
     public static LinMenu getInstance() throws FileNotFoundException {
         //build instance
