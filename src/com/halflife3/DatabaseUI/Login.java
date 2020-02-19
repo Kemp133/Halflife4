@@ -50,7 +50,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
     private Background addBackground() {
         try {
 
-            FileInputStream inputStream = new FileInputStream("res/loginFromGimpVerWithBox.png");
+            FileInputStream inputStream = new FileInputStream("res/Windowspic.png");
             Image image = new Image(inputStream);
 
             BackgroundSize backgroundSize = new BackgroundSize(SCREEN_WIDTH, SCREEN_HEIGHT, false, false, false, true);
