@@ -258,6 +258,7 @@ public class Login extends Application {
         createNewUser.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
+                incorrectFields.setVisible(false);
                 Scene sceneCreate = new Scene(newUserPane(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
                 stage.setScene(sceneCreate);
                 stage.show();
