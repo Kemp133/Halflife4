@@ -126,18 +126,8 @@ public class Player extends GameObject implements Serializable {
         return health;
     }
 
-    public void AI_controller(Vector2 p1_position, Vector2 p2_position, Vector2 p3_position, Deque Brick_list){
-        Vector2 closest_position;
-        HashSet<Vector2> position_list = new HashSet<>();
-        position_list.add(p1_position);
-        position_list.add(p2_position);
-        position_list.add(p3_position);
-        for(Vector2 pos: position_list){
-
-        }
 
 
-    }
 
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
