@@ -2,18 +2,19 @@ package GameUI;
 
 import com.halflife3.DatabaseUI.Login;
 import com.halflife3.Networking.Server.MainServer;
-import com.halflife3.Networking.Server.Server;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.imageio.stream.FileImageInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -22,8 +23,8 @@ import static javafx.scene.paint.Color.WHITE;
 //The menu set for choose server and clinet
 public class FirstMenu extends Application {
     private Stage pstage = null;
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+    private static final double SCREEN_WIDTH = 800;
+    private static final double SCREEN_HEIGHT = 600;
     StackPane root = new StackPane();
     private Button client_m;
     private Button server_m;
@@ -31,6 +32,8 @@ public class FirstMenu extends Application {
     public FirstMenu() throws FileNotFoundException {
         FileInputStream input = new FileInputStream("res/button_image.png");
         javafx.scene.image.Image image = new Image(input);
+
+
 
         client_m = new Button("Client",new ImageView(image));
         server_m = new Button("Server",new ImageView(image));
@@ -69,11 +72,16 @@ public class FirstMenu extends Application {
         stage.show();
     }
 
-    public StackPane createContent(){
+    public StackPane createContent() throws FileNotFoundException {
+        Image image2 = new Image(new FileInputStream("res/first_menu.png"));
+        ImageView imageView = new ImageView(image2);
+        imageView.setFitWidth(SCREEN_WIDTH);
+        imageView.setFitHeight(SCREEN_HEIGHT);
+        Pane back = new Pane(imageView);
         VBox pane = new VBox(100);
         pane.getChildren().addAll(server_m,client_m);
         pane.setAlignment(Pos.CENTER);
-        root.getChildren().add(pane);
+        root.getChildren().addAll(back,pane);
         return root;
     }
 
