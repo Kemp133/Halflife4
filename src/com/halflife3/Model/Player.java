@@ -24,6 +24,8 @@ public class Player extends GameObject implements Serializable {
     private float moveSpeed = 100;
     private Affine rotate;
     private PositionPacket packetToSend;
+    protected int health;
+
 
     public Player(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
@@ -164,21 +166,7 @@ public class Player extends GameObject implements Serializable {
         height = image.getHeight();
     }
 
-    @Override
-    public void render(GraphicsContext gc) {
-        gc.drawImage( image, position.getX(), position.getY() );
-    }
 
-    //update the position
-    @Override
-    public void update(double time) {
-        position = position.add(velocity.multiply(time));
-    }
-
-    //adds velocity
-    public void addVelocity(Vector2 toAdd) {
-        velocity = velocity.add(toAdd);
-    }
 
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
@@ -283,4 +271,13 @@ public class Player extends GameObject implements Serializable {
     //TODO: overlapping hitbox means damage, if not, move to player
     public void attackPattern(Player[] playerList){}
 
-}
+      @Override
+      public void render(GraphicsContext gc) {
+
+      }
+
+      @Override
+      public void update(double time) {
+
+      }
+  }
