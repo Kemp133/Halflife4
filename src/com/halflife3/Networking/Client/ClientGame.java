@@ -25,6 +25,7 @@ import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -46,7 +47,14 @@ public class ClientGame extends Application {
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
-    public void getStarted() {
+    //region for menu --lin
+    private Stage window;
+    public ClientGame(Stage Window){
+        window = Window;
+    }
+    //end of region
+
+    public void getStarted() throws Exception {
         Client clientNetwork = new Client();
         clientNetwork.joinGroup();
         clientNetwork.getHostInfo();
@@ -71,7 +79,7 @@ public class ClientGame extends Application {
         }
         //TODO: Create new Players with the received positions
 
-        launch();
+        this.start(window);
     }
 
     @Override
@@ -97,10 +105,15 @@ public class ClientGame extends Application {
         //region to add audio into game
         AudioForGame audio = new AudioForGame();
         audio.getMenu().getItems().add(new MenuItem("back ground music"));
+        audio.getMenu().getItems().add(audio.getMute());
         audio.getSlider1().setHideOnClick(false);
         audio.getMenu().getItems().add(audio.getSlider1());
         audio.getMenuBar().getMenus().add(audio.getMenu());
+        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+        audio.getSlider1().setOnAction(actionEvent -> {audio.volumeControl(audio.getVolume());
         root.getChildren().add(audio.getMenuBar());
+
+
 
         //region Key input listener setup
         KeyHandle handle = new KeyHandle();
@@ -116,9 +129,17 @@ public class ClientGame extends Application {
 
         //region Map loading
         MapRender map = new MapRender(objectManager);
-        map.SetMap("res/map.png");
-        map.loadLevel();
-        //endregion
+            try {
+                map.SetMap("res/map.png");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            try {
+                map.loadLevel();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            //endregion
 
         final long[] startNanoTime = {System.nanoTime()};
 
@@ -245,6 +266,7 @@ public class ClientGame extends Application {
         primaryStage.show();
 
     }
+
 
     @Override
     public void stop() throws Exception {

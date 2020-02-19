@@ -1,24 +1,33 @@
 package GameUI;
 
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 import java.io.File;
 
-public class AudioForGame{
+public class AudioForGame {
     private MenuBar menuBar = new MenuBar();
     private File filename1 = (new File("res/bensound-summer.mp3"));
     private Media media1 = new Media(filename1.toURI().toString());
     private MediaPlayer battle_music = new MediaPlayer(media1);
     private Menu menu = new Menu("Audio Settings");
-    private CustomMenuItem slider1 = new CustomMenuItem(new Slider());
+    private MenuItem mute = new MenuItem("on/off");
+    private Slider volume = new Slider();
+    private CustomMenuItem slider1 = new CustomMenuItem(volume);
 
-    private void volumeControl(Slider volume) {
+
+    public void volumeControl(Slider volume) {
         battle_music.volumeProperty().bind(volume.valueProperty().divide(100));
+    }
+
+    public void swtichMute(){
+        if(battle_music.isMute()){
+            battle_music.play();
+        }
+        else{
+            battle_music.stop();
+        }
     }
 
     public MenuBar getMenuBar() {
@@ -53,4 +62,23 @@ public class AudioForGame{
         this.slider1 = slider1;
     }
 
+    public Slider getVolume() {
+        return volume;
+    }
+
+    public void setVolume(Slider volume) {
+        this.volume = volume;
+    }
+
+    public MenuItem getMute() {
+        return mute;
+    }
+
+    public void setMute(MenuItem mute) {
+        this.mute = mute;
+    }
+
+    public MediaPlayer getbtmusic(){
+        return battle_music;
+    }
 }
