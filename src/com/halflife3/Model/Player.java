@@ -10,7 +10,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Player extends GameObject implements Serializable {
     private static final long serialVersionUID = 6L;
@@ -24,6 +27,8 @@ public class Player extends GameObject implements Serializable {
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
+    protected int health;
+
 
     public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
@@ -55,6 +60,7 @@ public class Player extends GameObject implements Serializable {
         gc.setTransform(rotate);
         gc.drawImage(image, position.getX() , position.getY());
         gc.restore(); // Restore default transform
+
     }
 
     @Override
@@ -74,6 +80,8 @@ public class Player extends GameObject implements Serializable {
 
         velocity.reset();
     }
+
+
 
     public void addVelocity(Vector2 toAdd) {
         velocity = velocity.add(toAdd);
@@ -110,16 +118,6 @@ public class Player extends GameObject implements Serializable {
     public void setRotate(Affine rotate) {
         this.rotate = rotate;
     }
-
-
-}
-
-  class Enemy extends GameObject {
-    protected double width;
-    protected double height;
-    protected Image image;
-    protected int health;
-
     public void setHealth(int health) {
         this.health = health;
     }
@@ -128,45 +126,17 @@ public class Player extends GameObject implements Serializable {
         return health;
     }
 
-    //Initialize a player
-    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life){
-        super(position,velocity,rotation, om);
-        health = life;
+    public void AI_controller(Vector2 p1_position, Vector2 p2_position, Vector2 p3_position, Deque Brick_list){
+        Vector2 closest_position;
+        HashSet<Vector2> position_list = new HashSet<>();
+        position_list.add(p1_position);
+        position_list.add(p2_position);
+        position_list.add(p3_position);
+        for(Vector2 pos: position_list){
 
-    }
+        }
 
-    @Override
-    public Rectangle GetBounds() {
-        //Create rectangle object(one of node in javafx)
-        return new Rectangle(position.getX(), position.getY(), width, height);
-    }
-    //TODO: write the intersects, this checks if the hitbox of GameObject s overlaps with this enemy
-    @Override
-    public boolean intersects(GameObject s) {
-        return false;
-    }
 
-    public void setImage(String file) throws FileNotFoundException {
-        FileInputStream pngFile = new FileInputStream(file);
-        image = new Image(pngFile);
-        width = image.getWidth();
-        height = image.getHeight();
-    }
-
-    @Override
-    public void render(GraphicsContext gc) {
-        gc.drawImage( image, position.getX(), position.getY() );
-    }
-
-    //update the position
-    @Override
-    public void update(double time) {
-        position = position.add(velocity.multiply(time));
-    }
-
-    //adds velocity
-    public void addVelocity(Vector2 toAdd) {
-        velocity = velocity.add(toAdd);
     }
 
     public void moveTo(Vector2 position){
@@ -276,3 +246,14 @@ public class Player extends GameObject implements Serializable {
 
 
 }
+
+
+
+
+
+
+
+
+
+
+

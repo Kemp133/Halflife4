@@ -194,8 +194,10 @@ public class ClientGame extends Application {
                     Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
                             .subtract(player_client_center);
                     Affine rotate = new Affine();
+
                     //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
                     //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
+
                     rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(),direction.getX())), player_client_center.getX(), player_client_center.getY());
                     player_client.setRotate(rotate);
                     //System.out.println(Math.atan2(direction.getY(),direction.getX()));
