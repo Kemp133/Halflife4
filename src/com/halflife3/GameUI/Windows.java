@@ -2,7 +2,6 @@ package com.halflife3.GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
 import com.halflife3.Networking.Client.ClientGame;
-import com.halflife3.Networking.Client.ClientWindow;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -37,13 +36,6 @@ public class Windows extends Application {
     private static final double SCREEN_HEIGHT = 600;
 
     private void addMenu() throws IOException {
-        main_menu.getStartItem().setOnAction(actionEvent -> {
-            try {
-                new ClientWindow(getpStage()).start(getpStage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
         main_menu.getLoadItem().setOnAction(actionEvent->{
             loadgame();
         });
@@ -85,6 +77,14 @@ public class Windows extends Application {
     public void start(Stage primaryStage) {
         try {
             setpStage(primaryStage);
+            main_menu.getStartItem().setOnAction(actionEvent -> {
+                try {
+                    new ClientGame(primaryStage).getStarted();;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
             primaryStage.setTitle("Team HalfLife");
             primaryStage.setResizable(false);
             primaryStage.setMaxHeight(600);
