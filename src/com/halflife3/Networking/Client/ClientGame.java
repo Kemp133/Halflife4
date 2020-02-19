@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+
 import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
@@ -126,6 +127,21 @@ public class ClientGame extends Application {
                     startNanoTime[0] = currentNanoTime;
                     //endregion
 
+                    //region Calculate the radius
+                    Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
+                            player_client.getY() + (player_client.height/2));
+                    Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
+                            .subtract(player_client_center);
+                    Affine rotate = new Affine();
+
+
+                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(),direction.getX()))*32;
+                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(),direction.getX()))*32;
+                    Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
+                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(),direction.getX())), player_client_center.getX(), player_client_center.getY());
+                    player_client.setRotate(rotate);
+                    //endregion
+
                     //region Handles player movement
                     if (handle.input.isKeyReleased(A) && handle.input.isKeyReleased(D))
                         player_client.getVelocity().setX(0);
@@ -150,10 +166,11 @@ public class ClientGame extends Application {
 
                     //region Create a new bullet
                     if (input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                        Vector2 bulletPos = new Vector2(player_client.getX() + player_client.width - 7,
-                                                        player_client.getY() + player_client.height - 12);
+
+                        Vector2 bulletPos =new Vector2(player_client.getX() + player_client.width/2,player_client.getY()+player_client.height/2).add(direction_of_gun);
+                        //Vector2 bulletPos = player_client_center.add(new Vector2(20,20));
                         Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                                                .subtract(bulletPos).normalise().multiply(200);
+                                                .subtract(player_client.getPosition()).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
@@ -204,20 +221,6 @@ public class ClientGame extends Application {
 
                     //region Clears screen
                     graphicsContext.clearRect(0, 0, 800, 600);
-                    //endregion
-
-                    //region Rotation of the player
-                    Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
-                            player_client.getY() + (player_client.height/2));
-                    Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                            .subtract(player_client_center);
-
-                    //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
-                    //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
-
-                    Affine rotate = player_client.getRotate();
-                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
-                    player_client.setRotate(rotate);
                     //endregion
 
                     //region Renders all game objects
