@@ -171,8 +171,6 @@ public class ClientGame extends Application {
                     double bullet_pos_x = Math.cos(Math.atan2(direction.getY(),direction.getX()))*32;
                     double bullet_pos_y = Math.sin(Math.atan2(direction.getY(),direction.getX()))*32;
                     Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
-                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(),direction.getX())), player_client_center.getX(), player_client_center.getY());
-                    player_client.setRotate(rotate);
                     //endregion
 
                     //region Handles player movement
@@ -203,7 +201,7 @@ public class ClientGame extends Application {
                         Vector2 bulletPos =new Vector2(player_client.getX() + player_client.width/2,player_client.getY()+player_client.height/2).add(direction_of_gun);
                         //Vector2 bulletPos = player_client_center.add(new Vector2(20,20));
                         Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                                                .subtract(player_client.getPosition()).normalise().multiply(200);
+                                                .subtract(bulletPos).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
@@ -266,9 +264,6 @@ public class ClientGame extends Application {
                     //region Clears screen
                     graphicsContext.clearRect(0, 0, 800, 600);
                     //endregion
-
-                    //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
-                    //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
 
                     //region Rotation of the player
                     rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
