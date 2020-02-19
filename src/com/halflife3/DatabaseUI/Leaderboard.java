@@ -10,6 +10,8 @@ import javafx.stage.Stage;
 
 import java.sql.*;
 
+//TODO: Fix scene so it shows the table in the middle of the screen and has buttons to be able to exit
+
 public class Leaderboard extends Application {
     private ObservableList<ObservableList> data;
     private TableView tableview;
