@@ -16,6 +16,7 @@ public class Bricks extends GameObject {
 
     public Bricks(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
         super(position,velocity,rotation, om);
+        keys.add("Bricks");
     }
 
     @Override

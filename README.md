@@ -32,3 +32,18 @@ If you do it this way, your VM Options should look something like this:
 <code>
 --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml
 </code> 
+
+---
+
+##Reloading library problem
+When loading the project, there seems to be a weird bug that means you have to navigate to "Project Structure", and then
+in the Libraries section, delete and relink the library files. If this happens to you again, follow the below steps:
+
+1) Delete and reload the affected libraries (e.g. Go to Project Structure [Ctrl-Shift-Alt-S] (not the best shortcut, I know) and then to Libraries)
+2) When you do this, IntelliJ will show you that you've changed the halflife.iml file, even though it's in the .gitignore file. Do not commit this file
+3) Instead, right click on the halflife.iml file and click the "Show In Explorer" option from the menu
+4) When the explorer window opens up, open a git bash terminal and type the following: git rm halflife.iml --cached
+5) When you go back into IntelliJ again, the file should either show up with orange/yellow or red font
+6) When you next commit, make sure that this file isn't in the files you're commiting, if it is then repeat steps 3-5
+7) You should be able to commit and push your code without halflife.iml showing up, nor should it break again when someone else syncs/pulls the code
+8) Profit?
