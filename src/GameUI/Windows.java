@@ -1,8 +1,10 @@
-package GameUI;/*This is the main menu after
+package GameUI;
+/*This is the main menu after
 log-in successfully to the database*/
 
-import com.halflife3.View.Main;
+import com.halflife3.Networking.Client.MainClient;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -27,8 +29,8 @@ public class Windows extends Application {
     private String filepng = null;
     private StackPane pane = new StackPane();
     private LinMenu main_menu = LinMenu.getInstance();
-    private Stage pStage = null;
-
+    private Stage pStage = new Stage();
+    final Stage game_stage = new Stage();
     public Windows() throws FileNotFoundException {
     }
 
@@ -39,9 +41,7 @@ public class Windows extends Application {
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
-                entergameStage();
-            } catch (IOException e) {
-                e.printStackTrace();
+                new Start_game(this).main(null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -86,9 +86,9 @@ public class Windows extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            setpStage(primaryStage);
             primaryStage.setTitle("Team HalfLife");
             primaryStage.setResizable(true);
-            pStage = primaryStage;
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -101,14 +101,9 @@ public class Windows extends Application {
         launch(args);
     }
 
-    public void entergameStage() throws Exception {
-        new Main().start(pStage);
-        pStage.centerOnScreen();
-    }
-
     public void Update() {
-        //get ther
-
+        pStage.close();
+        MainClient.main(null);
     }
 
 
@@ -119,5 +114,14 @@ public class Windows extends Application {
             System.err.println("primary stage not built!");
         }
         return null;
+    }
+
+    public void setpStage(Stage stage) {
+        this.pStage = stage;
+    }
+
+    @Override
+    public void stop(){
+        Platform.exit();
     }
 }
