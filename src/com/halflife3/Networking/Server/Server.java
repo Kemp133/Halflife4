@@ -32,6 +32,7 @@ public class Server implements Runnable {
 
     public void start() {
 //        Fills the positionList with 4 bot players, giving them available starting positions
+
         for (int i = 0; i < 4; i++) {
             Vector2 startPosition = startPositions[i];
             positionAvailable.put(startPosition, true);
@@ -116,8 +117,9 @@ public class Server implements Runnable {
         if (ClientPositionHandlerServer.clientList.isEmpty()) {
             clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
         } else clientSocket.setSoTimeout(0);
-
         try {
+
+
             clientSocket.receive(incPoke);
         } catch (SocketTimeoutException e) {
             running = false;
@@ -126,6 +128,7 @@ public class Server implements Runnable {
             System.out.println("Server closed");
             return;
         }
+
 
         System.out.println(incPoke.getAddress() + " has connected");
         welcoming = false;
@@ -226,20 +229,7 @@ public class Server implements Runnable {
             MulticastSocket multicastSocket = new MulticastSocket();
 
             //region Looks for the Wi-Fi adapter and sets the interface to it
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface net = interfaces.nextElement();
-                if (!net.getName().startsWith("wlan"))
-                    continue;
-
-                Enumeration<InetAddress> addresses = net.getInetAddresses();
-                while(addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr.toString().length() < 17) {
-                        multicastSocket.setInterface(addr);
-                    }
-                }
-            }
+            setWifiInterface(multicastSocket);
             //endregion
 
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
@@ -294,6 +284,28 @@ public class Server implements Runnable {
         }
 
         return o;
+    }
+
+    public static void setWifiInterface(MulticastSocket multicastSocket) {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface net = interfaces.nextElement();
+                if (!net.getName().startsWith("wlan") || !net.isUp())
+                    continue;
+
+                Enumeration<InetAddress> addresses = net.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr.toString().length() < 17) {
+                        multicastSocket.setInterface(addr);
+                        return;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
     }
 
 }
