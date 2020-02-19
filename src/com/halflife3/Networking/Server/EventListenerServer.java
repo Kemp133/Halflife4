@@ -1,9 +1,8 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Model.Player;
-import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
+import com.halflife3.Networking.Packets.PositionPacket;
 
 import java.net.InetAddress;
 
@@ -19,18 +18,17 @@ public class EventListenerServer {
 
             Server.removeConnection(sender);
 
-        } else if (packet instanceof Vector2) {
+        } else if (packet instanceof PositionPacket) {
 
-            Vector2 position = (Vector2) packet;
-            ClientPositionHandlerServer.clientList.get(sender).setPosition(position);
-
-        } else if (packet instanceof Player) {
-
-            Player clientPlayer = (Player) packet;
-            ClientPositionHandlerServer.playerList.add(clientPlayer);
+            PositionPacket pos = (PositionPacket) packet;
+            replacing(pos, sender);
 
         }
 
+    }
+
+    private synchronized void replacing(PositionPacket pos, InetAddress sender) {
+        ClientPositionHandlerServer.positionList.replace(sender.toString(), pos);
     }
 
 }
