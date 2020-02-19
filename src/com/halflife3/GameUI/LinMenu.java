@@ -30,8 +30,12 @@ public class LinMenu extends ContextMenu {
     private Text text = new Text("Game_Name");
 
     public LinMenu() throws FileNotFoundException {
-        FileInputStream input = new FileInputStream("res/button_image.png");
-        Image image = new Image(input);
+        FileInputStream input1 = new FileInputStream("res/join_game.png");
+        FileInputStream input2 = new FileInputStream("res/Audio.png");
+        FileInputStream input3 = new FileInputStream("res/exit.png");
+        Image image1 = new Image(input1);
+        Image image2 = new Image(input2);
+        Image image3 = new Image(input3);
 
         startItem = new MenuItem("new game");
         loadItem = new MenuItem("load game");
@@ -39,9 +43,9 @@ public class LinMenu extends ContextMenu {
         MenuItem audioitem_off = new MenuItem("audio off");
         CustomMenuItem audio = new CustomMenuItem(volume);
         audio.setHideOnClick(false);
-        MenuButton start_m = new MenuButton("Start",new ImageView(image),startItem,loadItem);
-        MenuButton settings_m = new MenuButton("Settings",new ImageView(image),audioItem_on,audioitem_off,audio);
-        Button exit_m = new Button("Exit",new ImageView(image));
+        Button start_m = new Button("",new ImageView(image1));
+        MenuButton settings_m = new MenuButton("",new ImageView(image2),audioItem_on,audioitem_off,audio);
+        Button exit_m = new Button("",new ImageView(image3));
         text.setFont(Font.font("Corbel",100));
         text.setFill(Color.WHITE);
 
