@@ -258,6 +258,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         createNewUser.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
+                incorrectFields.setVisible(false);
                 Scene sceneCreate = new Scene(newUserPane(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
                 stage.setScene(sceneCreate);
                 stage.show();
