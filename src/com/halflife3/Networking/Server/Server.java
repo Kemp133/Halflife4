@@ -1,10 +1,7 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Model.Vector2;
-import com.halflife3.Networking.Packets.AllPlayersPacket;
-import com.halflife3.Networking.Packets.ConnectPacket;
-import com.halflife3.Networking.Packets.UniquePortPacket;
-import com.halflife3.Networking.Packets.WelcomePacket;
+import com.halflife3.Networking.Packets.*;
 
 import java.io.*;
 import java.net.*;
@@ -20,9 +17,8 @@ public class Server implements Runnable {
     public static final int     POSITIONS_PORT      = 5533;
 
     private boolean running = false;
-    private boolean multicastPositions = false;
-    private AllPlayersPacket positionsPacket;
     private static boolean welcoming = true;
+    private PositionListPacket posPacket;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 60000; // milliseconds
@@ -32,26 +28,34 @@ public class Server implements Runnable {
                                                new Vector2(680, 80),
                                                new Vector2(80, 480),
                                                new Vector2(680, 480)};
+    public static String[] botNames = new String[]{"bot0", "bot1", "bot2", "bot3"};
 
     public void start() {
-        for (Vector2 startPosition : startPositions)
+//        Fills the positionList with 4 bot players, giving them available starting positions
+        for (int i = 0; i < 4; i++) {
+            Vector2 startPosition = startPositions[i];
             positionAvailable.put(startPosition, true);
 
-        positionsPacket = new AllPlayersPacket(startPositions);
+            PositionPacket botPacket = new PositionPacket();
+            botPacket.velX = 0;
+            botPacket.velY = 0;
+            botPacket.rotation = 0;
+            botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
+            botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
-        try {
-            clientSocket = new DatagramSocket(LISTENER_PORT);
-        } catch (SocketException e) {
+            ClientPositionHandlerServer.positionList.put(botNames[i], botPacket);
+            ClientPositionHandlerServer.connectedIPs.add(botNames[i]);
+
+        }
+
+        try { clientSocket = new DatagramSocket(LISTENER_PORT); } catch (SocketException e) {
             e.printStackTrace();
         }
 
+        posPacket = new PositionListPacket();
         listenerServer = new EventListenerServer();
         new Thread(this).start();
     }
-
-
-    ///TODO: Figure out how to send the connected clients' positions
-
 
     @Override
     public void run() {
@@ -79,14 +83,13 @@ public class Server implements Runnable {
             clientSocket.close();
         }).start();
 
+//        Multicasts the positionList
         new Thread(() -> {
-
             while (running) {
-                if (multicastPositions) {
-                    multicastPacket(positionsPacket, POSITIONS_PORT);
-                } else waitASecond();
+                posPacket.posList = ClientPositionHandlerServer.positionList;
+                posPacket.connectedIPs = ClientPositionHandlerServer.connectedIPs;
+                multicastPacket(posPacket, POSITIONS_PORT);
             }
-
         }).start();
 
 //        Listens for incoming packets
@@ -129,18 +132,37 @@ public class Server implements Runnable {
 
     public static void addConnection(InetAddress address) {
 
+        //region Checks if Server is full
         if (ClientPositionHandlerServer.clientList.size() >= 4) {
             System.out.println("Server is full");
             return;
         }
+        //endregion
 
         UniquePortPacket portPacket = new UniquePortPacket();
-        //region Sets up a unique portPacket for a client
+        //region Client's UniqueInfo and new positionList entry
         portPacket.setPort(clientPort);
         portPacket.setClientAddress(address);
-        for (Vector2 startPosition : startPositions) {
+        for (int i = 0; i < 4; i++) {
+            Vector2 startPosition = startPositions[i];
             if (positionAvailable.get(startPosition)) {
+//                Sets the start position for the UniqueInfo packet
                 portPacket.setStartPosition(startPosition);
+
+//                Removes the bot holding the [i]th startPosition
+                ClientPositionHandlerServer.positionList.remove(botNames[i]);
+
+//                Adds the player (with the [i]th startPosition) to the positionList
+                PositionPacket playerPacket = new PositionPacket();
+                playerPacket.rotation = 0;
+                playerPacket.orgPosX = playerPacket.spawnX = startPosition.getX();
+                playerPacket.orgPosY = playerPacket.spawnY = startPosition.getY();
+                playerPacket.velX = 0;
+                playerPacket.velY = 0;
+
+                ClientPositionHandlerServer.positionList.put(address.toString(), playerPacket);
+
+//                Disables the [i]th startPosition so that no new players could have it assigned to them
                 positionAvailable.replace(startPosition, false);
                 break;
             }
@@ -152,7 +174,7 @@ public class Server implements Runnable {
 
         multicastPacket(portPacket, GET_PORT_PORT);
 
-        ClientPositionHandlerServer.connectedIPs.add(address);
+        ClientPositionHandlerServer.connectedIPs.add(address.toString());
         ClientPositionHandlerServer.clientList.put(address, connection);
 
         clientPort++;
@@ -164,9 +186,31 @@ public class Server implements Runnable {
             welcoming = true;
         }
         positionAvailable.replace(ClientPositionHandlerServer.clientList.get(address).getSpawnPoint(), true);
+
+        double clientSpawnX = ClientPositionHandlerServer.positionList.get(address.toString()).spawnX;
+        double clientSpawnY = ClientPositionHandlerServer.positionList.get(address.toString()).spawnY;
+
+        //Removes the player from positionList and adds a bot in its stead
+        for (int i = 0; i < 4; i++) {
+            if (clientSpawnX == startPositions[i].getX()) {
+                if (clientSpawnY == startPositions[i].getY()) {
+                    ClientPositionHandlerServer.positionList.remove(address.toString());
+
+                    PositionPacket botPacket = new PositionPacket();
+                    botPacket.velX = 0;
+                    botPacket.velY = 0;
+                    botPacket.rotation = 0;
+                    botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
+                    botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
+
+                    ClientPositionHandlerServer.positionList.put(botNames[i], botPacket);
+                }
+            }
+        }
+
         ClientPositionHandlerServer.clientList.get(address).close();
         ClientPositionHandlerServer.clientList.remove(address);
-        ClientPositionHandlerServer.connectedIPs.remove(address);
+        ClientPositionHandlerServer.connectedIPs.remove(address.toString());
         System.out.println(address + " has disconnected");
     }
 

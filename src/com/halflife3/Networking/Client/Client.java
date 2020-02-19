@@ -3,6 +3,7 @@ package com.halflife3.Networking.Client;
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
+import com.halflife3.Networking.Packets.PositionListPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
 import com.halflife3.Networking.Server.Server;
 
@@ -29,10 +30,13 @@ public class Client implements Runnable {
 //    Client's data
     public static InetAddress clientAddress;
     private static int uniquePort;
-    private EventListenerClient listenerClient;
+    private static EventListenerClient listenerClient;
     public static Vector2 startingPosition;
 
-//isRunning
+//    List of Clients
+    public static PositionListPacket listOfClients;
+
+//    isRunning
     private static boolean running = false;
     //endregion
 
@@ -168,7 +172,8 @@ public class Client implements Runnable {
         }
     }
 
-    public void receivePositions() {
+//    Updates the 'listOfClients' variable
+    public static void receivePositions() {
         try {
             byte[] recBuf = new byte[5000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
@@ -221,7 +226,7 @@ public class Client implements Runnable {
     }
 
 //    Converts a byte array into an object (packet)
-    private Object byteArrayToObject(byte[] buf) {
+    private static Object byteArrayToObject(byte[] buf) {
         Object o = null;
 
         try {

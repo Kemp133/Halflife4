@@ -7,6 +7,7 @@ import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.Model.Interfaces.IUpdateable;
+import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -25,7 +26,6 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-
 import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
@@ -35,8 +35,12 @@ public class ClientGame extends Application {
     private static Pane root;
     private static ObjectManager objectManager;
     private static Player player_client; //Can get IP, Position, stateOfAI
+    private static Player enemy1;
+    private static Player enemy2;
+    private static Player enemy3;
 
-    private final int FPS = 60;
+    private final int FPS = 30;
+    private int bulletLimiter = 6;
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
@@ -52,10 +56,18 @@ public class ClientGame extends Application {
         Vector2 startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
         player_client = new Player(startPos, startVel, (short) 0, objectManager);
-        player_client.setIpOfClient(clientNetwork.getClientAddress());
+        player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
 
-        //TODO: Get the list of connected players and setup their Player GameObjects
+        Client.receivePositions();
+        for (String ip : Client.listOfClients.connectedIPs) {
+            if (!ip.equals(player_client.getIpOfClient())) {
+                PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+
+            }
+
+        }
+        //TODO: Create new Players with the received positions
 
         launch();
     }
@@ -102,7 +114,6 @@ public class ClientGame extends Application {
 
         AnimationTimer game = new AnimationTimer() {
             private long lastUpdate = 0;
-            private int bulletLimiter = 6;
             public void handle(long currentNanoTime) {
                 if (currentNanoTime - lastUpdate > nSecPerFrame) {
                     //region Calculate time since last update.
@@ -134,17 +145,19 @@ public class ClientGame extends Application {
 
                     //region Create a new bullet
                     if (input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                        Vector2 bulletPos = new Vector2(player_client.getX() + player_client.width,
-                                                        player_client.getY() + player_client.height);
+                        Vector2 bulletPos = new Vector2(player_client.getX() + player_client.width - 7,
+                                                        player_client.getY() + player_client.height - 12);
                         Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                                                .subtract(player_client.getPosition()).normalise().multiply(200);
+                                                .subtract(bulletPos).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
-                    //TODO: Get positions of all clients from the Server
+                    Client.receivePositions();
+                    //TODO: Update all players' positions
+
                     //region Updates position of all game objects locally
                     for(IUpdateable go : objectManager.getGameObjects()) {
                         go.update(elapsedTime);
@@ -207,7 +220,7 @@ public class ClientGame extends Application {
 
                     //TODO: Send the client's bullets' positions & velocities to the server
                     //region Sends the client's position now
-                    //Client.sendPacket(player_client, Client.getUniquePort());
+                    Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
                     //endregion
 
                     lastUpdate = currentNanoTime;
