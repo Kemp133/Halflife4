@@ -1,5 +1,6 @@
 package com.halflife3.Model;
 
+import GameUI.AudioForGame;
 import com.halflife3.Controller.ObjectManager;
 
 import javafx.scene.canvas.GraphicsContext;
@@ -19,6 +20,8 @@ public class Bullet extends GameObject {
         try {
             FileInputStream bulletPNG = new FileInputStream("res/bullet.png");
             sprite = new Image(bulletPNG);
+
+            new AudioForGame().getBullet_music().play();
         } catch (Exception e) {
             System.out.println("Error loading image");
         }

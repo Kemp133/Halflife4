@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -40,10 +41,6 @@ public class Windows extends Application {
 
     private static final double SCREEN_WIDTH = 800;
     private static final double SCREEN_HEIGHT = 600;
-
-
-
-
 
     //load game from sql
     private void loadgame() {
@@ -121,6 +118,7 @@ public class Windows extends Application {
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
+                main_menu.Mute();
                 new ClientGame(getpStage()).getStarted();
             } catch (Exception e) {
                 e.printStackTrace();

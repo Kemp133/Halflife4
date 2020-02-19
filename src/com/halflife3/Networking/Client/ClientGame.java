@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Client;
 
+import GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
@@ -75,8 +76,10 @@ public class ClientGame extends Application {
 
         }
         //TODO: Create new Players with the received positions
-
-        launch();
+        if(window != null)
+            this.start(window);
+        else
+            launch();
     }
 
     @Override
@@ -101,15 +104,17 @@ public class ClientGame extends Application {
 
         //region to add audio into game
         AudioForGame audio = new AudioForGame();
-        audio.getMenu().getItems().add(new MenuItem("back ground music"));
         audio.getMenu().getItems().add(audio.getMute());
         audio.getSlider1().setHideOnClick(false);
         audio.getMenu().getItems().add(audio.getSlider1());
         audio.getMenuBar().getMenus().add(audio.getMenu());
+        audio.getBattle_music().setAutoPlay(true);
+        audio.getBattle_music().setMute(false);
+        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
         audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-        audio.getSlider1().setOnAction(actionEvent -> {audio.volumeControl(audio.getVolume());
+        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());
-
+        //end region
 
 
         //region Key input listener setup
@@ -172,6 +177,7 @@ public class ClientGame extends Application {
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
+
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
