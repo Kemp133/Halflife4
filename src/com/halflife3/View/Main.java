@@ -156,6 +156,7 @@ public class Main extends Application {
                 }
             }
         }.start();
+
         root.requestFocus();
         primaryStage.show();
 
