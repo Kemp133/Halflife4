@@ -180,7 +180,7 @@ public class Player extends GameObject implements Serializable {
         this.position = getPath(this.getPosition(), entity.getPosition());
     }
     //this method gets the path between two positions
-    public Vector2 getPath(Vector2 original , Vector2 position){
+    public Vector2 getPath(Vector2 original , Vector2 position){  //
         //create the list
         if(original == position){ return position;}
         //upEmpty?
