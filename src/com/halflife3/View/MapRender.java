@@ -67,22 +67,14 @@ public class MapRender {
                     Bricks_list.add(new_Brick);
                 }
                 else if (!color.equals(Color.WHITE)) {
-                    Vector2 position = new Vector2((xx) * 32, (yy) * 32);
+                    Vector2 position = new Vector2((xx) * 40, (yy) * 40);
                     Vector2 velocity = new Vector2(0, 0);
                     MeleeEnemy new_MeleeEnemy = new MeleeEnemy(position, velocity, (short) 0, om);
+                    new_MeleeEnemy.setImage("res/pixil-frame-0.png");
                     System.err.println(enemyID);
                     enemyID++;
                     Melee_list.add(new_MeleeEnemy);
                 }
-                  /*  while(enemyID < 4){
-                        Vector2 position = new Vector2((300) * 40, (250) * 40);
-                        Vector2 velocity = new Vector2(0, 0);
-                        MeleeEnemy new_MeleeEnemy = new MeleeEnemy(position, velocity, (short) 0, om);
-                        enemyID++;
-                        System.err.println(enemyID);
-                        Melee_list.add(new_MeleeEnemy);
-                    }*/
-               // }
             }
         }
     }
