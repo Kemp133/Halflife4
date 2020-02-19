@@ -1,10 +1,10 @@
-package GameUI;/*This is the main menu after
+package GameUI;
+/*This is the main menu after
 log-in successfully to the database*/
 
-import com.halflife3.Networking.Client.ClientGame;
 import com.halflife3.Networking.Client.MainClient;
-import com.halflife3.Networking.Server.MainServer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -29,8 +29,8 @@ public class Windows extends Application {
     private String filepng = null;
     private StackPane pane = new StackPane();
     private LinMenu main_menu = LinMenu.getInstance();
-    private Stage pStage;
-
+    private Stage pStage = new Stage();
+    final Stage game_stage = new Stage();
     public Windows() throws FileNotFoundException {
     }
 
@@ -41,8 +41,7 @@ public class Windows extends Application {
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
-                pStage.close();
-                MainClient.main(null);
+                new Start_game(this).main(null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -102,14 +101,9 @@ public class Windows extends Application {
         launch(args);
     }
 
-    public void entergameStage() throws Exception {
+    public void Update() {
         pStage.close();
         MainClient.main(null);
-    }
-
-    public void Update() {
-        //get ther
-
     }
 
 
@@ -122,7 +116,12 @@ public class Windows extends Application {
         return null;
     }
 
-    public void setpStage(Stage stage){
+    public void setpStage(Stage stage) {
         this.pStage = stage;
+    }
+
+    @Override
+    public void stop(){
+        Platform.exit();
     }
 }

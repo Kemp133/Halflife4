@@ -1,6 +1,7 @@
 package GameUI;
 
 import com.halflife3.DatabaseUI.Login;
+import com.halflife3.Networking.Server.MainServer;
 import com.halflife3.Networking.Server.Server;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -57,8 +58,7 @@ public class FirstMenu extends Application {
     private void runServer() throws Exception {
         new ServerDisplay().start(pstage);
         pstage.centerOnScreen();
-        Server myServer = new Server();
-        myServer.start();
+        MainServer.main(null);
     }
 
     @Override
