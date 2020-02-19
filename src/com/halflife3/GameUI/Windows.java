@@ -1,23 +1,20 @@
-package GameUI;
-/*This is the main menu after
+package com.halflife3.GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
-import com.halflife3.Networking.Client.ClientGame;
-import javafx.application.Application;
-import javafx.application.Platform;
+import GameUI.Start_game;
+import com.halflife3.Networking.Client.MainClient;
+import javafx.application.*;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 /*The class shows game manu after log-in successfully
 * Function include:
@@ -28,18 +25,29 @@ public class Windows extends Application {
     private String filepng = null;
     private StackPane pane = new StackPane();
     private LinMenu main_menu = LinMenu.getInstance();
-    private Stage pStage = null;
-    static Stage game_stage = new Stage();
-
+    private Stage pStage = new Stage();
+    final Stage game_stage = new Stage();
     public Windows() throws FileNotFoundException {
-    }
-
-    public StackPane getPane(){
-        return this.pane;
     }
 
     private static final double SCREEN_WIDTH = 800;
     private static final double SCREEN_HEIGHT = 600;
+
+    private void addMenu() throws IOException {
+        main_menu.getStartItem().setOnAction(actionEvent -> {
+            try {
+                new Start_game(this).main(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        main_menu.getLoadItem().setOnAction(actionEvent->{
+            loadgame();
+        });
+        VBox manuBar = main_menu.getBar();
+        manuBar.setAlignment(Pos.CENTER);
+        pane.getChildren().add(manuBar);
+    }
 
     //load game from sql
     private void loadgame() {
@@ -72,10 +80,12 @@ public class Windows extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        setpStage(primaryStage);
         try {
+            setpStage(primaryStage);
             primaryStage.setTitle("Team HalfLife");
-            primaryStage.setResizable(true);
+            primaryStage.setResizable(false);
+            primaryStage.setMaxHeight(600);
+            primaryStage.setMaxWidth(800);
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -85,15 +95,14 @@ public class Windows extends Application {
         }
     }
 
-    @Override
-    public void init(){
-
-    }
-
     public static void main(String[] args) throws FileNotFoundException {
-       launch();
+        launch(args);
     }
 
+    public void Update() {
+        pStage.close();
+        MainClient.main(null);
+    }
 
 
     private Stage getpStage() {
@@ -106,28 +115,11 @@ public class Windows extends Application {
     }
 
     public void setpStage(Stage stage) {
-        this.pStage = stage;
+        pStage = stage;
     }
 
     @Override
-        public void stop(){
-           Platform.exit();
-    }
-
-    private void addMenu() throws IOException {
-        main_menu.getStartItem().setOnAction(actionEvent -> {
-            try {
-                main_menu.Mute();
-                new ClientGame(getpStage()).getStarted();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        main_menu.getLoadItem().setOnAction(actionEvent->{
-            loadgame();
-        });
-        VBox manuBar = main_menu.getBar();
-        manuBar.setAlignment(Pos.CENTER);
-        pane.getChildren().add(manuBar);
+    public void stop(){
+        Platform.exit();
     }
 }

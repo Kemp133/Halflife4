@@ -1,4 +1,4 @@
-package GameUI;
+package com.halflife3.GameUI;
 
 import javafx.application.Application;
 import javafx.application.Platform;

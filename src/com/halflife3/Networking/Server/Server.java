@@ -85,10 +85,14 @@ public class Server implements Runnable {
 
 //        Multicasts the positionList
         new Thread(() -> {
+            double serverNanoTime = System.nanoTime();
             while (running) {
-                posPacket.posList = ClientPositionHandlerServer.positionList;
-                posPacket.connectedIPs = ClientPositionHandlerServer.connectedIPs;
-                multicastPacket(posPacket, POSITIONS_PORT);
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/60 * 1e9)) {
+                    posPacket.posList = ClientPositionHandlerServer.positionList;
+                    posPacket.connectedIPs = ClientPositionHandlerServer.connectedIPs;
+                    multicastPacket(posPacket, POSITIONS_PORT);
+                    serverNanoTime = System.nanoTime();
+                }
             }
         }).start();
 
