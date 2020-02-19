@@ -34,8 +34,8 @@ public class Windows extends Application {
     public Windows() throws FileNotFoundException {
     }
 
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+    private static final double SCREEN_WIDTH = 800;
+    private static final double SCREEN_HEIGHT = 600;
 
 
     private void addMenu() throws IOException {
@@ -60,7 +60,7 @@ public class Windows extends Application {
     }
 
     private void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/windows-backgroud.jpg"); //change the backgraoud file plz
+        FileInputStream inputStream = new FileInputStream("res/first_menu.png"); //change the backgraoud file plz
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
