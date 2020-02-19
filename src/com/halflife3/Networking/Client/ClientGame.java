@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Client;
 
+import GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
@@ -8,6 +9,7 @@ import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.Model.Interfaces.IUpdateable;
 import com.halflife3.Networking.Packets.PositionPacket;
+import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
