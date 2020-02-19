@@ -163,9 +163,9 @@ public class Server implements Runnable {
                 playerPacket.orgPosY = playerPacket.spawnY = startPosition.getY();
                 playerPacket.velX = 0;
                 playerPacket.velY = 0;
+                ClientPositionHandlerServer.positionList.put(address.toString(), playerPacket);
                 //endregion
 
-                ClientPositionHandlerServer.positionList.put(address.toString(), playerPacket);
                 ClientPositionHandlerServer.connectedIPs.remove(botNames[i]);
                 ClientPositionHandlerServer.connectedIPs.add(address.toString());
 

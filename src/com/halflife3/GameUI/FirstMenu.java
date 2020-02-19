@@ -23,7 +23,7 @@ import java.io.*;
 
 import static javafx.scene.paint.Color.WHITE;
 
-//The menu set for choose server and clinet
+//The menu set for choose server and client
 public class FirstMenu extends Application implements ICredentialUser {
     private Stage pstage = null;
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
@@ -127,16 +127,16 @@ public class FirstMenu extends Application implements ICredentialUser {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         this.setPstage(stage);
         setMainStage(stage);
         stage.setScene(new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, WHITE));
         mayBeShown();
     }
 
-    public StackPane createContent(){
+    public StackPane createContent() {
         VBox pane = new VBox(100);
-        pane.getChildren().addAll(server_m,client_m);
+        pane.getChildren().addAll(server_m, client_m);
         pane.setAlignment(Pos.CENTER);
         root.getChildren().add(pane);
         return root;
@@ -159,7 +159,7 @@ public class FirstMenu extends Application implements ICredentialUser {
     }
 
     public void mayBeShown() {
-        if(user != null && pstage != null)
+        if (user != null && pstage != null)
             Platform.runLater(() -> pstage.show());
     }
 }

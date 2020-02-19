@@ -47,7 +47,6 @@ public class ClientGame extends Application {
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
-
     public void getStarted() {
 
         enemyList = new HashMap<>();
@@ -82,7 +81,7 @@ public class ClientGame extends Application {
 
         }
 
-            launch();
+        launch();
     }
 
     @Override
@@ -105,7 +104,7 @@ public class ClientGame extends Application {
         root.setBackground(new Background(myBI));
         //endregion
 
-        //region to add audio into game
+        //region Add audio into game
         AudioForGame audio = new AudioForGame();
         audio.getMenu().getItems().add(audio.getMute());
         audio.getSlider1().setHideOnClick(false);
@@ -117,7 +116,7 @@ public class ClientGame extends Application {
         audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
         audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());
-        //end region
+        //endregion
 
 
         //region Key input listener setup
@@ -211,8 +210,9 @@ public class ClientGame extends Application {
                     //endregion
 
                     HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
-                    for (String removeThis : toRemove)
-                        enemyList.get(removeThis).selfDestroy();
+                    if (toRemove != null)
+                        for (String removeThis : toRemove)
+                            enemyList.get(removeThis).selfDestroy();
 
                     //region Updates the position of all enemies
                     for (String ip : Client.listOfClients.connectedIPs) {
