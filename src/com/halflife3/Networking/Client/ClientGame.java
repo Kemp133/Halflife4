@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import static javafx.scene.input.KeyCode.*;
@@ -35,9 +36,7 @@ public class ClientGame extends Application {
     private static Pane root;
     private static ObjectManager objectManager;
     private static Player player_client; //Can get IP, Position, stateOfAI
-    private static Player enemy1;
-    private static Player enemy2;
-    private static Player enemy3;
+    private static HashMap<String, Player> enemyList;
 
     private final int FPS = 30;
     private int bulletLimiter = 6;
@@ -45,6 +44,9 @@ public class ClientGame extends Application {
     //endregion
 
     public void getStarted() {
+
+        enemyList = new HashMap<>();
+
         Client clientNetwork = new Client();
         clientNetwork.joinGroup();
         clientNetwork.getHostInfo();
@@ -63,7 +65,10 @@ public class ClientGame extends Application {
         for (String ip : Client.listOfClients.connectedIPs) {
             if (!ip.equals(player_client.getIpOfClient())) {
                 PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
-
+                Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+                Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
+                Player enemy = new Player(pos, vel, theDoubleValues.rotation, objectManager);
+                enemyList.put(ip, enemy);
             }
 
         }
@@ -155,7 +160,7 @@ public class ClientGame extends Application {
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
-                    Client.receivePositions();
+                    //Client.receivePositions();
                     //TODO: Update all players' positions
 
                     //region Updates position of all game objects locally
@@ -201,20 +206,21 @@ public class ClientGame extends Application {
                     graphicsContext.clearRect(0, 0, 800, 600);
                     //endregion
 
-                    //region Renders all game objects
+                    //region Rotation of the player
                     Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
                             player_client.getY() + (player_client.height/2));
                     Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
                             .subtract(player_client_center);
-                    Affine rotate = new Affine();
 
                     //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
                     //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
 
-                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(),direction.getX())), player_client_center.getX(), player_client_center.getY());
+                    Affine rotate = player_client.getRotate();
+                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
                     player_client.setRotate(rotate);
-                    //System.out.println(Math.atan2(direction.getY(),direction.getX()));
+                    //endregion
 
+                    //region Renders all game objects
                     for (IRenderable go : objectManager.getGameObjects()) {
                         go.render(graphicsContext);
                     }

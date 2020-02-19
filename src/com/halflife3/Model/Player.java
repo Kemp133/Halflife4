@@ -1,8 +1,8 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
+import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.MapRender;
-
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -10,29 +10,33 @@ import javafx.scene.transform.Affine;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.net.InetAddress;
 import java.util.Deque;
 
-public class Player extends GameObject implements Serializable {
-    private static final long serialVersionUID = 6L;
+public class Player extends GameObject {
     public double width = 40;
     public double height = 35;
     public Rectangle rectangle;
     private Image image;
     private Vector2 spawn_point;
     private Vector2 original_position;
-    private InetAddress ipOfClient;
+    private String ipOfClient;
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
+    private PositionPacket packetToSend;
+    protected int health;
 
-    private int health;
-
-    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+    public Player(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
         keys.add("player");
         rectangle = new Rectangle(position.getX(), position.getY(), width, height);
+        rotate = new Affine();
+        packetToSend = new PositionPacket();
+        packetToSend.spawnX = packetToSend.orgPosX = position.getX();
+        packetToSend.spawnY = packetToSend.orgPosY = position.getY();
+        packetToSend.velX = velocity.getX();
+        packetToSend.velY = velocity.getY();
+        packetToSend.rotation = rotation;
     }
 
     @Override
@@ -40,7 +44,6 @@ public class Player extends GameObject implements Serializable {
         return rectangle;
     }
 
-    //TODO: write the intersects
     @Override
     public boolean intersects(GameObject s) {
         return false;
@@ -87,11 +90,11 @@ public class Player extends GameObject implements Serializable {
 
     public void setMoveSpeed(float speed) { moveSpeed = speed; }
 
-    public InetAddress getIpOfClient() {
+    public String getIpOfClient() {
         return ipOfClient;
     }
 
-    public void setIpOfClient(InetAddress ipOfClient) {
+    public void setIpOfClient(String ipOfClient) {
         this.ipOfClient = ipOfClient;
     }
 
@@ -115,6 +118,17 @@ public class Player extends GameObject implements Serializable {
         this.rotate = rotate;
     }
 
+    public Affine getRotate() {
+        return rotate;
+    }
+
+    public PositionPacket getPacketToSend() {
+        return packetToSend;
+    }
+
+    public void setPacketToSend(PositionPacket packetToSend) {
+        this.packetToSend = packetToSend;
+    }
 
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
@@ -225,6 +239,5 @@ public class Player extends GameObject implements Serializable {
     public int getHealth() {
         return health;
     }
-
 
 }
