@@ -7,7 +7,6 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
 
 public abstract class Enemy extends GameObject {
     private double width;
@@ -122,7 +121,7 @@ public abstract class Enemy extends GameObject {
     //TODO: Rewrite the code to find the Vector2 position of the closest Player
     public Vector2 closestPlayerPosition(Player[] playerList) {
 
-        double[] distance = new {getDistance(playerList[0]), getDistance(playerList[1]), getDistance(playerList[2]), getDistance(playerList[3])};
+        double[] distance = {getDistance(playerList[0]), getDistance(playerList[1]), getDistance(playerList[2]), getDistance(playerList[3])};
 
         int closet = FindSmallest(distance);
 
