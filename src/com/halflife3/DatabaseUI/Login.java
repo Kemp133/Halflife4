@@ -8,6 +8,7 @@ import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
@@ -129,7 +130,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         return gridPaneLogin;
     }
 
-    public GridPane loginPane() {
+    public StackPane loginPane() {
         GridPane gridPaneLogin = basePane();
 
         try {
@@ -147,10 +148,19 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         gridPaneLogin.add(createNewUser, 1, 2);
         gridPaneLogin.add(incorrectFields, 0, 3);
 
-        return gridPaneLogin;
+        StackPane stack = new StackPane();
+
+        //TODO: Below is useless while using solution off adding transparent box to image
+        //stack.setStyle("-fx-background-color: transparent;");
+        //stack.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
+
+        stack.getChildren().addAll(gridPaneLogin);
+        stack.setBackground(addBackground());
+
+        return stack;
     }
 
-    public GridPane newUserPane() {
+    public StackPane newUserPane() {
         GridPane gridPaneCreateUser = basePane();
 
         //Arranging all the nodes in the grid
@@ -164,7 +174,15 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         gridPaneCreateUser.add(backButton, 1, 3);
         gridPaneCreateUser.add(incorrectFields, 0, 4);
 
-        return gridPaneCreateUser;
+        StackPane stack = new StackPane();
+
+        //TODO: Below is useless while using solution off adding transparent box to image
+        //stack.setStyle("-fx-background-color: transparent;");
+        //stack.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
+        stack.getChildren().addAll(gridPaneCreateUser);
+        stack.setBackground(addBackground());
+
+        return stack;
     }
 
     private void mayBeHid() {
