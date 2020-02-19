@@ -7,11 +7,14 @@ import javafx.event.*;
 import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import javafx.stage.*;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 
@@ -24,7 +27,9 @@ public class Login extends Preloader {
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
     Button login = new Button();
+
     Button createNewUser = new Button();
+
     Button backButton = new Button();
     Button create = new Button();
     Text name = new Text("Name");
@@ -40,6 +45,72 @@ public class Login extends Preloader {
     private boolean hasLoggedIn = false;
     private ICredentialUser user;
 
+    /*
+This is used by the stackPanes for the two different scene Login and Create Account to add an image to the background
+ */
+    private Background addBackground() {
+        try {
+
+            FileInputStream inputStream = new FileInputStream("res/loginFromGimpVerWithBox.png");
+            Image image = new Image(inputStream);
+
+            BackgroundSize backgroundSize = new BackgroundSize(SCREEN_WIDTH, SCREEN_HEIGHT, false, false, false, true);
+            BackgroundImage backgroundImage = new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
+            Background background = new Background(backgroundImage);
+            return background;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return null;
+    }
+
+    //TODO: Organise code plus fix min/max plus add descriptive code
+    //TODO: Fix bug where button image changes on button press
+    public void buttonProperties() throws FileNotFoundException {
+
+        createNewUser.setMaxHeight(30);
+        createNewUser.setMaxWidth(150);
+
+        FileInputStream iSCreateNew = new FileInputStream("res/button_create-new-account (1).png");
+        Image imageCreateNew = new Image(iSCreateNew, createNewUser.getWidth(), createNewUser.getHeight(), false, true);
+        BackgroundImage cNImage = new BackgroundImage(imageCreateNew, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(createNewUser.getWidth(), createNewUser.getHeight(), true, true, true, false));
+        Background cB = new Background(cNImage);
+        createNewUser.setBackground(cB);
+
+        login.setMaxHeight(30);
+        login.setMaxWidth(150);
+
+        FileInputStream iSLogin = new FileInputStream("res/button_login (1).png");
+        Image imageLogin = new Image(iSLogin, login.getWidth(), login.getHeight(), false, true);
+        BackgroundImage bImageLogin = new BackgroundImage(imageLogin, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(login.getWidth(), login.getHeight(), true, true, true, false));
+        Background newBLogin = new Background(bImageLogin);
+        login.setBackground(newBLogin);
+
+        backButton.setMinHeight(30);
+        backButton.setMinWidth(150);
+
+        FileInputStream iSBack = new FileInputStream("res/button_back.png");
+        Image imageBack = new Image(iSBack, login.getWidth(), login.getHeight(), false, true);
+        BackgroundImage bBack = new BackgroundImage(imageBack, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(backButton.getWidth(), backButton.getHeight(), true, true, true, false));
+        Background newBBack = new Background(bBack);
+        backButton.setBackground(newBBack);
+
+        create.setMinHeight(30);
+        create.setMinWidth(150);
+
+        FileInputStream isCreate = new FileInputStream("res/button_create-user.png");
+        Image imageCreate = new Image(isCreate, login.getWidth(), login.getHeight(), false, true);
+        BackgroundImage bImageCreate = new BackgroundImage(imageCreate, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(create.getWidth(), create.getHeight(), true, true, true, false));
+        Background newBCreate = new Background(bImageCreate);
+        create.setBackground(newBCreate);
+    }
+
     private static GridPane basePane() {
         GridPane gridPaneLogin = new GridPane();
         //Setting size for the pane
@@ -50,7 +121,7 @@ public class Login extends Preloader {
 
         //Setting the vertical and horizontal gaps between the columns
         gridPaneLogin.setVgap(30);
-        gridPaneLogin.setHgap(30);
+        gridPaneLogin.setHgap(90);
 
         //Setting the Grid alignment
         gridPaneLogin.setAlignment(Pos.CENTER);
@@ -60,6 +131,12 @@ public class Login extends Preloader {
 
     public GridPane loginPane() {
         GridPane gridPaneLogin = basePane();
+
+        try {
+            buttonProperties();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         //Arranging all the nodes in the grid
         gridPaneLogin.add(name, 0, 0);
@@ -123,9 +200,9 @@ public class Login extends Preloader {
         create.setMinWidth(150);
 
         //Setting properties of text/textFields
-        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        password.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        confPassword.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        name.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        password.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        confPassword.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
         nameField.setMinHeight(30);
         nameField.setMinWidth(80);
         passwordField.setMinHeight(30);
@@ -177,7 +254,7 @@ public class Login extends Preloader {
             }
         });
 
-        //This will change the scene to show the create new user gridpane
+        //This will change the scene to show the create new user stackpane
         createNewUser.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
@@ -213,7 +290,7 @@ public class Login extends Preloader {
             }
         });
 
-        //This will change the scene to show the login gridpane
+        //This will change the scene to show the login stackpane
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
