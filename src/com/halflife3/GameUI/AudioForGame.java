@@ -1,4 +1,4 @@
-package GameUI;
+package com.halflife3.GameUI;
 
 import javafx.scene.control.*;
 import javafx.scene.media.Media;

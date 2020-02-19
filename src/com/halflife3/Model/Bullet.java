@@ -1,12 +1,11 @@
 package com.halflife3.Model;
 
-import GameUI.AudioForGame;
+import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Controller.ObjectManager;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 

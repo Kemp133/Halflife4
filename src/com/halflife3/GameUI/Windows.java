@@ -1,20 +1,22 @@
 package com.halflife3.GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
-import GameUI.Start_game;
-import com.halflife3.Networking.Client.MainClient;
-import javafx.application.*;
+import com.halflife3.Networking.Client.ClientGame;
+import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.image.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /*The class shows game manu after log-in successfully
 * Function include:
@@ -36,7 +38,7 @@ public class Windows extends Application {
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
-                new Start_game(this).main(null);
+                new ClientGame(getpStage()).getStarted();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -99,10 +101,6 @@ public class Windows extends Application {
         launch(args);
     }
 
-    public void Update() {
-        pStage.close();
-        MainClient.main(null);
-    }
 
 
     private Stage getpStage() {
