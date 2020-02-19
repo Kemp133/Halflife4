@@ -4,7 +4,8 @@ import com.halflife3.Model.GameObject;
 
 import java.util.HashSet;
 
-public class ObjectManager {
+public class ObjectManager  {
+
     private HashSet<GameObject> gameObjects = new HashSet<>();
 
     public ObjectManager() { }

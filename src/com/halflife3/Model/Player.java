@@ -1,6 +1,7 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
+import com.halflife3.Networking.Packets.PositionPacket;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -9,8 +10,6 @@ import javafx.scene.transform.Affine;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.util.LinkedList;
 
 public class Player extends GameObject implements Serializable {
     private static final long serialVersionUID = 6L;
@@ -20,15 +19,24 @@ public class Player extends GameObject implements Serializable {
     private Image image;
     private Vector2 spawn_point;
     private Vector2 original_position;
-    private InetAddress ipOfClient;
+    private String ipOfClient;
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
+    private PositionPacket packetToSend;
+    protected int health;
 
-    public Player(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
+
+    public Player(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
         keys.add("player");
         rectangle = new Rectangle(position.getX(), position.getY(), width, height);
+        packetToSend = new PositionPacket();
+        packetToSend.spawnX = packetToSend.orgPosX = position.getX();
+        packetToSend.spawnY = packetToSend.orgPosY = position.getY();
+        packetToSend.velX = velocity.getX();
+        packetToSend.velY = velocity.getY();
+        packetToSend.rotation = rotation;
     }
 
     @Override
@@ -36,7 +44,6 @@ public class Player extends GameObject implements Serializable {
         return rectangle;
     }
 
-    //TODO: write the intersects
     @Override
     public boolean intersects(GameObject s) {
         return false;
@@ -83,11 +90,11 @@ public class Player extends GameObject implements Serializable {
 
     public void setMoveSpeed(float speed) { moveSpeed = speed; }
 
-    public InetAddress getIpOfClient() {
+    public String getIpOfClient() {
         return ipOfClient;
     }
 
-    public void setIpOfClient(InetAddress ipOfClient) {
+    public void setIpOfClient(String ipOfClient) {
         this.ipOfClient = ipOfClient;
     }
 
@@ -111,7 +118,13 @@ public class Player extends GameObject implements Serializable {
         this.rotate = rotate;
     }
 
+    public PositionPacket getPacketToSend() {
+        return packetToSend;
+    }
 
+    public void setPacketToSend(PositionPacket packetToSend) {
+        this.packetToSend = packetToSend;
+    }
 }
 
   class Enemy extends GameObject {
@@ -129,7 +142,7 @@ public class Player extends GameObject implements Serializable {
     }
 
     //Initialize a player
-    public Enemy(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, int life){
+    public Enemy(Vector2 position, Vector2 velocity, double rotation, ObjectManager om, int life){
         super(position,velocity,rotation, om);
         health = life;
 
@@ -153,21 +166,7 @@ public class Player extends GameObject implements Serializable {
         height = image.getHeight();
     }
 
-    @Override
-    public void render(GraphicsContext gc) {
-        gc.drawImage( image, position.getX(), position.getY() );
-    }
 
-    //update the position
-    @Override
-    public void update(double time) {
-        position = position.add(velocity.multiply(time));
-    }
-
-    //adds velocity
-    public void addVelocity(Vector2 toAdd) {
-        velocity = velocity.add(toAdd);
-    }
 
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
@@ -180,7 +179,7 @@ public class Player extends GameObject implements Serializable {
         this.position = getPath(this.getPosition(), entity.getPosition());
     }
     //this method gets the path between two positions
-    public Vector2 getPath(Vector2 original , Vector2 position){  //
+    public Vector2 getPath(Vector2 original , Vector2 position){
         //create the list
         if(original == position){ return position;}
         //upEmpty?
@@ -222,7 +221,7 @@ public class Player extends GameObject implements Serializable {
         return chosen;
     }
 
-    //Auxillary method for getPath
+    //Auxiliary method for getPath
     public static int FindSmallest (double [] arr1) {
         int index = 0;
         double min = arr1[index];
@@ -238,21 +237,21 @@ public class Player extends GameObject implements Serializable {
     }
 
     //Find closest player
-    public Player closestPlayer(Player[] playerList){
-        LinkedList<Double> playerDistance = null;
-        for (Player player : playerList) {
-            playerDistance.add(getDistance(player));
-        }
-
-        Object[] playerDistanceArr = playerDistance.toArray();
-        double[] playerDistanceArrayDouble = new double[0];
-
-        for(int j = 0; j < playerDistanceArr.length; j++){
-            playerDistanceArrayDouble[j] = (double) playerDistanceArr[j];
-        }
-        int closet = FindSmallest(playerDistanceArrayDouble);
-        return playerList[closet];
-    }
+//    public Player closestPlayer(Player[] playerList){
+//        LinkedList<Double> playerDistance = null;
+//        for (Player player : playerList) {
+//            playerDistance.add(getDistance(player));
+//        }
+//
+//        Object[] playerDistanceArr = playerDistance.toArray();
+//        double[] playerDistanceArrayDouble = new double[0];
+//
+//        for(int j = 0; j < playerDistanceArr.length; j++){
+//            playerDistanceArrayDouble[j] = (double) playerDistanceArr[j];
+//        }
+//        int closet = FindSmallest(playerDistanceArrayDouble);
+//        return playerList[closet];
+//    }
 
     //TODO: create a method that finds walls
     public boolean hasWall(Vector2 location){
@@ -270,9 +269,15 @@ public class Player extends GameObject implements Serializable {
     }
 
     //TODO: overlapping hitbox means damage, if not, move to player
-    public void attackPattern(Player[] playerList){
+    public void attackPattern(Player[] playerList){}
 
-    }
+      @Override
+      public void render(GraphicsContext gc) {
 
+      }
 
-}
+      @Override
+      public void update(double time) {
+
+      }
+  }

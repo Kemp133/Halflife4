@@ -11,9 +11,9 @@ public class MeleeEnemy extends Enemy{
     //TODO: overlapping hitbox means damage, if not, move to player
     @Override
     public void attackPattern(Player[] playerList) {
-        while (health > 0){
-            moveTo(closestPlayer(playerList));
-        }
+//        while (health > 0){
+//            //moveTo(closestPlayerPosition(playerList));
+//        }
         death();
     }
 }

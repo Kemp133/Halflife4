@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Client;
 
+import com.halflife3.Networking.Packets.PositionListPacket;
 import com.halflife3.Networking.Packets.UniquePortPacket;
 
 public class EventListenerClient {
@@ -16,6 +17,10 @@ public class EventListenerClient {
                 Client.setUniquePort(portPacket.getPort());
                 Client.startingPosition = portPacket.getStartPosition();
             }
+
+        } else if (packet instanceof PositionListPacket) {
+
+            Client.listOfClients = (PositionListPacket) packet;
 
         }
 
