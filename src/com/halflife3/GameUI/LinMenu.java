@@ -42,7 +42,7 @@ public class LinMenu extends ContextMenu {
         MenuButton start_m = new MenuButton("Start",new ImageView(image),startItem,loadItem);
         MenuButton settings_m = new MenuButton("Settings",new ImageView(image),audioItem_on,audioitem_off,audio);
         Button exit_m = new Button("Exit",new ImageView(image));
-        text.setFont(Font.font("Corbel",200));
+        text.setFont(Font.font("Corbel",100));
         text.setFill(Color.WHITE);
 
         //adding mouse input
@@ -58,7 +58,7 @@ public class LinMenu extends ContextMenu {
 //        audioitem_off.setOnAction(actionEvent -> Is_mute(true));
 //        audio.setOnAction(actionEvent -> volumeControl(volume));
         exit_m.setOnAction(actionEvent -> Platform.exit());
-        main_manu = new VBox(100);
+        main_manu = new VBox(30);
         main_manu.getChildren().addAll(text,start_m, settings_m, exit_m);
 
     }

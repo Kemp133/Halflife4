@@ -32,7 +32,7 @@ public class Client implements Runnable {
     private EventListenerClient listenerClient;
     public static Vector2 startingPosition;
 
-//    isRunning
+//isRunning
     private static boolean running = false;
     //endregion
 

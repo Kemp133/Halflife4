@@ -7,7 +7,9 @@ import com.halflife3.Model.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import javafx.scene.paint.Color;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
@@ -52,24 +54,27 @@ public class MapRender {
         for (int xx = 0; xx < width; xx++) {
             for (int yy = 0; yy < height; yy++) {
                 int pixels = pixelReader.getArgb(xx, yy);
+                javafx.scene.paint.Color color = pixelReader.getColor(xx,yy);
                 int red = (pixels >> 16) & 0xff;
                 int green = (pixels >> 8) & 0xff;
                 int blue = (pixels) & 0xff;
 
-                if (blue == 0 && green == 0 && red == 0) { // pixels.getColor(xx, yy) == Color.BLACK
+                if (color.equals(Color.BLACK)) { // pixels.getColor(xx, yy) == Color.BLACK
                     Vector2 position = new Vector2((xx) * 40, (yy) * 40);
                     Vector2 velocity = new Vector2(0, 0);
                     Bricks new_Brick = new Bricks(position, velocity, (short) 0, om);
                     new_Brick.setImage("res/block.png");
                     Bricks_list.add(new_Brick);
-                }/*
-                if (blue == 0 && green == 0 && red != 0) {
-                    Vector2 position = new Vector2((xx) * 32, (yy) * 32);
+                }
+                else if (!color.equals(Color.WHITE)) {
+                    Vector2 position = new Vector2((xx) * 40, (yy) * 40);
                     Vector2 velocity = new Vector2(0, 0);
-                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(position, velocity, (short) 0, om, enemyID);
+                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(position, velocity, (short) 0, om);
+                    new_MeleeEnemy.setImage("res/pixil-frame-0.png");
+                    System.err.println(enemyID);
                     enemyID++;
                     Melee_list.add(new_MeleeEnemy);
-                }*/
+                }
             }
         }
     }

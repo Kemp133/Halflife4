@@ -191,7 +191,7 @@ public class Login extends Preloader {
         create.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
-                    if (doesUserExist(getConnection(), nameField.getText())) {
+                    if (doesUserExist(getConnection(), nameField.getText()) == true) {
                         incorrectFields.setText("That username already exists. Please choose another one");
                         incorrectFields.setVisible(true);
                     } else if (!passwordField.getText().equals(passwordFieldConf.getText())){
