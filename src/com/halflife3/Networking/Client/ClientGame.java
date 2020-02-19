@@ -8,7 +8,6 @@ import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.Model.Interfaces.IUpdateable;
 import com.halflife3.Networking.Packets.PositionPacket;
-import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -46,6 +45,13 @@ public class ClientGame extends Application {
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
+    //region for menu --lin
+    private Stage window;
+    public ClientGame(Stage Window){
+        window = Window;
+    }
+    //end of region
+
     public void getStarted() {
 
         enemyList = new HashMap<>();
@@ -80,7 +86,13 @@ public class ClientGame extends Application {
 
         }
 
-        launch();
+        if(window != null) {
+            try { this.start(window); } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else
+            launch();
     }
 
     @Override
@@ -102,6 +114,21 @@ public class ClientGame extends Application {
                 BackgroundSize.DEFAULT);
         root.setBackground(new Background(myBI));
         //endregion
+
+        //region to add audio into game
+        AudioForGame audio = new AudioForGame();
+        audio.getMenu().getItems().add(audio.getMute());
+        audio.getSlider1().setHideOnClick(false);
+        audio.getMenu().getItems().add(audio.getSlider1());
+        audio.getMenuBar().getMenus().add(audio.getMenu());
+        audio.getBattle_music().setAutoPlay(true);
+        audio.getBattle_music().setMute(false);
+        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
+        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+        root.getChildren().add(audio.getMenuBar());
+        //end region
+
 
         //region Key input listener setup
         KeyHandle handle = new KeyHandle();

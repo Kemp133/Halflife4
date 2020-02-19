@@ -1,42 +1,34 @@
 package com.halflife3.DatabaseUI;
 
-import GameUI.Windows;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import com.halflife3.GameUI.interfaces.ICredentialUser;
+import javafx.application.Platform;
+import javafx.application.Preloader;
+import javafx.event.*;
+import javafx.geometry.*;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
+import javafx.scene.text.*;
+import javafx.stage.*;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 
 import java.sql.*;
 
-import java.util.Arrays;
-
-public class Login extends Application {
+public class Login extends Preloader {
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-    private Stage Pstage = null;
     Button login = new Button();
+
     Button createNewUser = new Button();
+
     Button backButton = new Button();
     Button create = new Button();
     Text name = new Text("Name");
@@ -47,7 +39,78 @@ public class Login extends Application {
     PasswordField passwordFieldConf = new PasswordField();
     Text incorrectFields = new Text();
 
-    public GridPane loginPane() {
+    private static Stage preloaderStage = null;
+
+    private boolean hasLoggedIn = false;
+    private ICredentialUser user;
+
+    /*
+This is used by the stackPanes for the two different scene Login and Create Account to add an image to the background
+ */
+    private Background addBackground() {
+        try {
+
+            FileInputStream inputStream = new FileInputStream("res/loginFromGimpVerWithBox.png");
+            Image image = new Image(inputStream);
+
+            BackgroundSize backgroundSize = new BackgroundSize(SCREEN_WIDTH, SCREEN_HEIGHT, false, false, false, true);
+            BackgroundImage backgroundImage = new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
+            Background background = new Background(backgroundImage);
+            return background;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return null;
+    }
+
+    //TODO: Organise code plus fix min/max plus add descriptive code
+    //TODO: Fix bug where button image changes on button press
+    public void buttonProperties() throws FileNotFoundException {
+
+        createNewUser.setMaxHeight(30);
+        createNewUser.setMaxWidth(150);
+
+        FileInputStream iSCreateNew = new FileInputStream("res/button_create-new-account (1).png");
+        Image imageCreateNew = new Image(iSCreateNew, createNewUser.getWidth(), createNewUser.getHeight(), false, true);
+        BackgroundImage cNImage = new BackgroundImage(imageCreateNew, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(createNewUser.getWidth(), createNewUser.getHeight(), true, true, true, false));
+        Background cB = new Background(cNImage);
+        createNewUser.setBackground(cB);
+
+        login.setMaxHeight(30);
+        login.setMaxWidth(150);
+
+        FileInputStream iSLogin = new FileInputStream("res/button_login (1).png");
+        Image imageLogin = new Image(iSLogin, login.getWidth(), login.getHeight(), false, true);
+        BackgroundImage bImageLogin = new BackgroundImage(imageLogin, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(login.getWidth(), login.getHeight(), true, true, true, false));
+        Background newBLogin = new Background(bImageLogin);
+        login.setBackground(newBLogin);
+
+        backButton.setMinHeight(30);
+        backButton.setMinWidth(150);
+
+        FileInputStream iSBack = new FileInputStream("res/button_back.png");
+        Image imageBack = new Image(iSBack, login.getWidth(), login.getHeight(), false, true);
+        BackgroundImage bBack = new BackgroundImage(imageBack, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(backButton.getWidth(), backButton.getHeight(), true, true, true, false));
+        Background newBBack = new Background(bBack);
+        backButton.setBackground(newBBack);
+
+        create.setMinHeight(30);
+        create.setMinWidth(150);
+
+        FileInputStream isCreate = new FileInputStream("res/button_create-user.png");
+        Image imageCreate = new Image(isCreate, login.getWidth(), login.getHeight(), false, true);
+        BackgroundImage bImageCreate = new BackgroundImage(imageCreate, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(create.getWidth(), create.getHeight(), true, true, true, false));
+        Background newBCreate = new Background(bImageCreate);
+        create.setBackground(newBCreate);
+    }
+
+    private static GridPane basePane() {
         GridPane gridPaneLogin = new GridPane();
         //Setting size for the pane
         gridPaneLogin.setMinSize(800, 600);
@@ -57,10 +120,22 @@ public class Login extends Application {
 
         //Setting the vertical and horizontal gaps between the columns
         gridPaneLogin.setVgap(30);
-        gridPaneLogin.setHgap(30);
+        gridPaneLogin.setHgap(90);
 
         //Setting the Grid alignment
         gridPaneLogin.setAlignment(Pos.CENTER);
+
+        return gridPaneLogin;
+    }
+
+    public StackPane loginPane() {
+        GridPane gridPaneLogin = basePane();
+
+        try {
+            buttonProperties();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         //Arranging all the nodes in the grid
         gridPaneLogin.add(name, 0, 0);
@@ -71,24 +146,20 @@ public class Login extends Application {
         gridPaneLogin.add(createNewUser, 1, 2);
         gridPaneLogin.add(incorrectFields, 0, 3);
 
-        return gridPaneLogin;
+        StackPane stack = new StackPane();
+
+        //TODO: Below is useless while using solution off adding transparent box to image
+        //stack.setStyle("-fx-background-color: transparent;");
+        //stack.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
+
+        stack.getChildren().addAll(gridPaneLogin);
+        stack.setBackground(addBackground());
+
+        return stack;
     }
 
-    public GridPane newUserPane() {
-        GridPane gridPaneCreateUser = new GridPane();
-
-        //Setting size for the pane
-        gridPaneCreateUser.setMinSize(800, 600);
-
-        //Setting the padding
-        gridPaneCreateUser.setPadding(new Insets(10, 10, 10, 10));
-
-        //Setting the vertical and horizontal gaps between the columns
-        gridPaneCreateUser.setVgap(30);
-        gridPaneCreateUser.setHgap(30);
-
-        //Setting the Grid alignment
-        gridPaneCreateUser.setAlignment(Pos.CENTER);
+    public StackPane newUserPane() {
+        GridPane gridPaneCreateUser = basePane();
 
         //Arranging all the nodes in the grid
         gridPaneCreateUser.add(name, 0, 0);
@@ -101,15 +172,33 @@ public class Login extends Application {
         gridPaneCreateUser.add(backButton, 1, 3);
         gridPaneCreateUser.add(incorrectFields, 0, 4);
 
-        return gridPaneCreateUser;
+        StackPane stack = new StackPane();
+
+        //TODO: Below is useless while using solution off adding transparent box to image
+        //stack.setStyle("-fx-background-color: transparent;");
+        //stack.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
+        stack.getChildren().addAll(gridPaneCreateUser);
+        stack.setBackground(addBackground());
+
+        return stack;
     }
 
+    private void mayBeHid() {
+        if(hasLoggedIn) {
+            user.setApplicationUser(nameField.getText());
+            Platform.runLater(() -> preloaderStage.hide());
+        }
+    }
 
     @Override
-    public void start(Stage stage) throws Exception {
-        //Setting properties of buttons
+    public void handleStateChangeNotification(StateChangeNotification info) {
+        if(info.getType() == StateChangeNotification.Type.BEFORE_START) {
+            user = (ICredentialUser)info.getApplication();
+            mayBeHid();
+        }
+    }
 
-        Pstage = stage;
+    private void initaliseFields() {
         login.setText("Login");
         login.setMinHeight(30);
         login.setMinWidth(100);
@@ -127,9 +216,9 @@ public class Login extends Application {
         create.setMinWidth(150);
 
         //Setting properties of text/textFields
-        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        password.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        confPassword.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        name.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        password.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        confPassword.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
         nameField.setMinHeight(30);
         nameField.setMinWidth(80);
         passwordField.setMinHeight(30);
@@ -141,8 +230,15 @@ public class Login extends Application {
 
         //Sets text fields to null
         setNullFields();
+    }
 
-        stage.setTitle("Login/Create User");
+    @Override
+    public void start(Stage stage) throws Exception {
+        //Setting properties of buttons
+        preloaderStage = stage;
+        preloaderStage.setTitle("Login/Create User");
+
+        initaliseFields();
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(sceneLogin);
         stage.show();
@@ -151,17 +247,15 @@ public class Login extends Application {
         login.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if (nameField.getText() != null && passwordField.getText() != null) {
-                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText()) == true) {
+                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
                         //TODO: Assign username to 'player' and change to game screen
-                        incorrectFields.setText("Found user - then would log in"); //TODO: delete after above
-                        incorrectFields.setVisible(true); //TODO: Delete after above
-
-                       try {
-                            new Windows().start(Pstage);
-                        } catch (FileNotFoundException ex) {
-                            ex.printStackTrace();
-                        }
-
+                        hasLoggedIn = true;
+                        mayBeHid();
+//                       try {
+//                            new Windows().start(preloaderStage);
+//                        } catch (FileNotFoundException ex) {
+//                            ex.printStackTrace();
+//                        }
                     } else {
                         setNullFields();
                         incorrectFields.setText("Incorrect username and/or password.");
@@ -176,10 +270,11 @@ public class Login extends Application {
             }
         });
 
-        //This will change the scene to show the create new user gridpane
+        //This will change the scene to show the create new user stackpane
         createNewUser.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
+                incorrectFields.setVisible(false);
                 Scene sceneCreate = new Scene(newUserPane(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
                 stage.setScene(sceneCreate);
                 stage.show();
@@ -212,7 +307,7 @@ public class Login extends Application {
             }
         });
 
-        //This will change the scene to show the login gridpane
+        //This will change the scene to show the login stackpane
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
@@ -329,8 +424,8 @@ public class Login extends Application {
         PreparedStatement preparedStatement = null;
         try {
             //Creating a hashed password based on a random salt
-            byte[] randomSalt = returnSalt();
-            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
+//            byte[] randomSalt = returnSalt();
+//            byte[] hashedPassword = hashPassword(randomSalt, passwordEntered);
             //Creating the query
             String query = "INSERT INTO userdatascore (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; // Added a random salt and plaintext password
             //Creating the statement
