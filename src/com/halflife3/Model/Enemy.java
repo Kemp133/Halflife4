@@ -121,20 +121,12 @@ public abstract class Enemy extends GameObject {
 
     //TODO: Rewrite the code to find the Vector2 position of the closest Player
     public Vector2 closestPlayerPosition(Player[] playerList) {
-        LinkedList<Double> playerDistance = new LinkedList<>();
-        for (Player player : playerList) {
-            playerDistance.add(getDistance(player));
-        }
 
-        Object[] playerDistanceArr = playerDistance.toArray();
-        double[] playerDistanceArrayDouble = new double[0];
+        double[] distance = new {getDistance(playerList[0]), getDistance(playerList[1]), getDistance(playerList[2]), getDistance(playerList[3])};
 
-        for(int j = 0; j < playerDistanceArr.length; j++){
-            playerDistanceArrayDouble[j] = (double) playerDistanceArr[j];
-        }
-        int closet = FindSmallest(playerDistanceArrayDouble);
+        int closet = FindSmallest(distance);
 
-        return null;
+        return playerList[closet].getPosition();
     }
 
     //TODO: create a method that checks for walls
