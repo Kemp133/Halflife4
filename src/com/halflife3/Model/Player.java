@@ -1,6 +1,8 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
+import com.halflife3.View.MapRender;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
@@ -10,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.Deque;
 
 public class Player extends GameObject implements Serializable {
     private static final long serialVersionUID = 6L;
@@ -141,11 +144,11 @@ public class Player extends GameObject implements Serializable {
         double ldis = left.squareDistance(position);
 
         double[] shortest = {udis, rdis, ddis, ldis};
-
-        if (isWall(up) || udis == 0)    shortest[0] += 1000000;
-        if (isWall(right) || rdis == 0) shortest[1] += 1000000;
-        if (isWall(down) || ddis == 0)  shortest[2] += 1000000;
-        if (isWall(left) || ldis == 0)  shortest[3] += 1000000;
+//this avoids hitting the wall or moving to itself
+        if (isWall(up, MapRender.get_list()) || udis == 0)    shortest[0] += 1000000;
+        if (isWall(right, MapRender.get_list()) || rdis == 0) shortest[1] += 1000000;
+        if (isWall(down, MapRender.get_list()) || ddis == 0)  shortest[2] += 1000000;
+        if (isWall(left, MapRender.get_list()) || ldis == 0)  shortest[3] += 1000000;
 
         int closestRoute = FindSmallest(shortest);
 
@@ -191,7 +194,13 @@ public class Player extends GameObject implements Serializable {
     }
 
     //TODO: create a method that checks for walls
-    public boolean isWall(Vector2 location){
+    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
+        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
+        for(Bricks wall: listOfWalls){
+            if(scanArea.intersects(wall.GetBounds().getBoundsInLocal())){
+                return true;
+            }
+        }
         return false;
     }
 
