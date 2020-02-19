@@ -41,7 +41,7 @@ public class LinMenu extends ContextMenu {
         audio.setHideOnClick(false);
         MenuButton start_m = new MenuButton("Start",new ImageView(image),startItem,loadItem);
         MenuButton settings_m = new MenuButton("Settings",new ImageView(image),audioItem_on,audioitem_off,audio);
-        Button exit_m = new Button("Exit",new ImageView(image));
+        Button exit_m = new Button("Exit");
         text.setFont(Font.font("Corbel",100));
         text.setFill(Color.WHITE);
 

@@ -1,6 +1,7 @@
 package GameUI;
 
 import com.halflife3.Networking.Client.MainClient;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class Start_game {
@@ -9,8 +10,14 @@ public class Start_game {
         this.stage = stage;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         stage.stop();
-        new Thread(() -> MainClient.main(null)).start();
+        Platform.runLater(
+                new Runnable(){
+                    public void run(){
+                        MainClient.main(null);
+                }
+        }
+        );
     }
 }

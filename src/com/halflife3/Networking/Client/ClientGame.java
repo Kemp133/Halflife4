@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Client;
 
+import GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
@@ -14,6 +15,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -79,6 +81,14 @@ public class ClientGame extends Application {
                 BackgroundSize.DEFAULT);
         root.setBackground(new Background(myBI));
         //endregion
+
+        //region to add audio into game
+        AudioForGame audio = new AudioForGame();
+        audio.getMenu().getItems().add(new MenuItem("back ground music"));
+        audio.getSlider1().setHideOnClick(false);
+        audio.getMenu().getItems().add(audio.getSlider1());
+        audio.getMenuBar().getMenus().add(audio.getMenu());
+        root.getChildren().add(audio.getMenuBar());
 
         //region Key input listener setup
         KeyHandle handle = new KeyHandle();

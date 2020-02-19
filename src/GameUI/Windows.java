@@ -121,7 +121,7 @@ public class Windows extends Application {
     }
 
     @Override
-    public void stop(){
-        Platform.exit();
+        public void stop(){
+           Platform.exit();
     }
 }
