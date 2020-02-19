@@ -20,7 +20,7 @@ public class MapRender {
     private Image image;
     private Deque<Bricks> Bricks_list = new ArrayDeque<>();
     private ObjectManager om;
-    private Deque<MeleeEnemy> Melee_list = new ArrayDeque<>();
+
 
     public MapRender(ObjectManager om) {
         this.om = om;
@@ -33,14 +33,11 @@ public class MapRender {
     public Deque<Bricks> get_list(){
         return Bricks_list;
     }
-    public Deque<MeleeEnemy> getMelee_list(){ return Melee_list; }
+
 
     public void render(GraphicsContext gc) {
         for (Bricks bricks : Bricks_list) {
             bricks.render(gc);
-        }
-        for (MeleeEnemy meleeEnemy : Melee_list){
-            meleeEnemy.render(gc);
         }
     }
 
@@ -53,12 +50,7 @@ public class MapRender {
 
         for (int xx = 0; xx < width; xx++) {
             for (int yy = 0; yy < height; yy++) {
-                int pixels = pixelReader.getArgb(xx, yy);
                 javafx.scene.paint.Color color = pixelReader.getColor(xx,yy);
-                int red = (pixels >> 16) & 0xff;
-                int green = (pixels >> 8) & 0xff;
-                int blue = (pixels) & 0xff;
-
                 if (color.equals(Color.BLACK)) { // pixels.getColor(xx, yy) == Color.BLACK
                     Vector2 position = new Vector2((xx) * 40, (yy) * 40);
                     Vector2 velocity = new Vector2(0, 0);
@@ -66,15 +58,7 @@ public class MapRender {
                     new_Brick.setImage("res/block.png");
                     Bricks_list.add(new_Brick);
                 }
-                else if (!color.equals(Color.WHITE)) {
-                    Vector2 position = new Vector2((xx) * 40, (yy) * 40);
-                    Vector2 velocity = new Vector2(0, 0);
-                    MeleeEnemy new_MeleeEnemy = new MeleeEnemy(position, velocity, (short) 0, om);
-                    new_MeleeEnemy.setImage("res/pixil-frame-0.png");
-                    System.err.println(enemyID);
-                    enemyID++;
-                    Melee_list.add(new_MeleeEnemy);
-                }
+
             }
         }
     }
