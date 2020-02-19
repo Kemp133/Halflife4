@@ -67,6 +67,11 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         this.velocity = velocity;
     }
 
+    public  void setVelocity(double x, double y) {
+        velocity.setX(x);
+        velocity.setY(y);
+    }
+
     public void resetVelocity() {
         velocity.reset();
     }

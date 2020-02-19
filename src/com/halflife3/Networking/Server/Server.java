@@ -156,15 +156,18 @@ public class Server implements Runnable {
 //                Removes the bot holding the [i]th startPosition
                 ClientPositionHandlerServer.positionList.remove(botNames[i]);
 
-//                Adds the player (with the [i]th startPosition) to the positionList
+                //region Adds the player (with the [i]th startPosition) to the positionList
                 PositionPacket playerPacket = new PositionPacket();
                 playerPacket.rotation = 0;
                 playerPacket.orgPosX = playerPacket.spawnX = startPosition.getX();
                 playerPacket.orgPosY = playerPacket.spawnY = startPosition.getY();
                 playerPacket.velX = 0;
                 playerPacket.velY = 0;
+                //endregion
 
                 ClientPositionHandlerServer.positionList.put(address.toString(), playerPacket);
+                ClientPositionHandlerServer.connectedIPs.remove(botNames[i]);
+                ClientPositionHandlerServer.connectedIPs.add(address.toString());
 
 //                Disables the [i]th startPosition so that no new players could have it assigned to them
                 positionAvailable.replace(startPosition, false);
@@ -178,7 +181,6 @@ public class Server implements Runnable {
 
         multicastPacket(portPacket, GET_PORT_PORT);
 
-        ClientPositionHandlerServer.connectedIPs.add(address.toString());
         ClientPositionHandlerServer.clientList.put(address, connection);
 
         clientPort++;
@@ -208,13 +210,14 @@ public class Server implements Runnable {
                     botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
                     ClientPositionHandlerServer.positionList.put(botNames[i], botPacket);
+                    ClientPositionHandlerServer.connectedIPs.remove(address.toString());
+                    ClientPositionHandlerServer.connectedIPs.add(botNames[i]);
                 }
             }
         }
 
         ClientPositionHandlerServer.clientList.get(address).close();
         ClientPositionHandlerServer.clientList.remove(address);
-        ClientPositionHandlerServer.connectedIPs.remove(address.toString());
         System.out.println(address + " has disconnected");
     }
 

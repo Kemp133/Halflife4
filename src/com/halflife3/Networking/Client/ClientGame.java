@@ -8,6 +8,7 @@ import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.Model.Interfaces.IUpdateable;
 import com.halflife3.Networking.Packets.PositionPacket;
+import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -39,6 +40,7 @@ public class ClientGame extends Application {
     private static Player player_client; //Can get IP, Position, stateOfAI
     private static HashMap<String, Player> enemyList;
 
+    public boolean running = false;
     private final int FPS = 30;
     private int bulletLimiter = 6;
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
@@ -72,11 +74,11 @@ public class ClientGame extends Application {
                 try { enemy.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
+                enemy.setIpOfClient(ip);
                 enemyList.put(ip, enemy);
             }
 
         }
-        //TODO: Create new Players with the received positions
 
         launch();
     }
@@ -120,6 +122,17 @@ public class ClientGame extends Application {
         //endregion
 
         final long[] startNanoTime = {System.nanoTime()};
+
+        running = true;
+        new Thread(() -> {
+            double serverNanoTime = System.nanoTime();
+            while (running) {
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/FPS * 1e9)) {
+                    Client.receivePositions();
+                    serverNanoTime = System.nanoTime();
+                }
+            }
+        }).start();
 
         AnimationTimer game = new AnimationTimer() {
             private long lastUpdate = 0;
@@ -180,8 +193,19 @@ public class ClientGame extends Application {
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
-                    //Client.receivePositions();
-                    //TODO: Update all players' positions
+                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
+                    for (String removeThis : toRemove)
+                        enemyList.get(removeThis).selfDestroy();
+
+                    //region Updates the position of all enemies
+                    for (String ip : Client.listOfClients.connectedIPs) {
+                        if (!ip.equals(player_client.getIpOfClient())) {
+                            PositionPacket posPack = Client.listOfClients.posList.get(ip);
+                            enemyList.get(ip).setPosition(posPack.orgPosX, posPack.orgPosY);
+                            enemyList.get(ip).setVelocity(posPack.velX, posPack.velY);
+                        }
+                    }
+                    //endregion
 
                     //region Updates position of all game objects locally
                     for(IUpdateable go : objectManager.getGameObjects()) {
@@ -226,10 +250,10 @@ public class ClientGame extends Application {
                     graphicsContext.clearRect(0, 0, 800, 600);
                     //endregion
 
-                    //region Rotation of the player
                     //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
                     //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
 
+                    //region Rotation of the player
                     rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
                     player_client.setRotate(rotate);
                     //endregion
@@ -260,6 +284,17 @@ public class ClientGame extends Application {
     public void stop() throws Exception {
         super.stop();
         Client.close();
+        running = false;
+    }
+
+    public HashSet<String> getPlayersToDestroy(String[] botNames, HashSet<String> IPs) {
+        HashSet<String> playersToRemove = new HashSet<>();
+
+        for (String bot : botNames)
+            if (!IPs.contains(bot))
+                playersToRemove.add(bot);
+
+        return playersToRemove;
     }
 
     //region Framework to get only some specific game objects
