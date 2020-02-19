@@ -23,6 +23,7 @@ import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,9 +69,11 @@ public class ClientGame extends Application {
                 Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
                 Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
                 Player enemy = new Player(pos, vel, theDoubleValues.rotation, objectManager);
+                try { enemy.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 enemyList.put(ip, enemy);
             }
-
         }
         //TODO: Create new Players with the received positions
 
@@ -172,7 +175,7 @@ public class ClientGame extends Application {
                     //region Collision detection
                     HashSet<GameObject> crash_bullet_list = new HashSet<>();
                     boolean player_hit_block = false;
-                    for (Bricks block : map.get_list()) {
+                    for (Bricks block : MapRender.get_list()) {
                         if (block.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())) {
                             player_hit_block = true;
                         }
@@ -181,7 +184,7 @@ public class ClientGame extends Application {
                     boolean Bullet_hit_player = false;
                     for(GameObject go:objectManager.getGameObjects()){
                         if (go.getKeys().contains("Bullet")){
-                            for(Bricks block : map.get_list()){
+                            for(Bricks block : MapRender.get_list()){
                                 if(go.GetBounds().intersects(block.GetBounds().getBoundsInLocal())){
                                     Bullet_hit_wall = true;
                                     crash_bullet_list.add(go);
@@ -215,7 +218,7 @@ public class ClientGame extends Application {
                     //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
                     //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
 
-                    Affine rotate = player_client.getRotate();
+                    Affine rotate = new Affine();
                     rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
                     player_client.setRotate(rotate);
                     //endregion
