@@ -8,7 +8,6 @@ import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
@@ -22,7 +21,6 @@ import java.security.*;
 import java.sql.*;
 
 public class Login extends Preloader {
-    /*mtest*/
 
     private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
