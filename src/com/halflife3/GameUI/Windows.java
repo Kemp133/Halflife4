@@ -1,23 +1,20 @@
 package com.halflife3.GameUI;/*This is the main menu after
 log-in successfully to the database*/
 
+import GameUI.Start_game;
 import com.halflife3.Networking.Client.MainClient;
-import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.application.*;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 /*The class shows game manu after log-in successfully
 * Function include:
@@ -35,7 +32,6 @@ public class Windows extends Application {
 
     private static final double SCREEN_WIDTH = 800;
     private static final double SCREEN_HEIGHT = 600;
-
 
     private void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
@@ -87,10 +83,13 @@ public class Windows extends Application {
         try {
             setpStage(primaryStage);
             primaryStage.setTitle("Team HalfLife");
-            primaryStage.setResizable(true);
+            primaryStage.setResizable(false);
+            primaryStage.setMaxHeight(600);
+            primaryStage.setMaxWidth(800);
             Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
+
         } catch (Exception e) {
             System.out.println(e.toString());
         }
@@ -116,7 +115,7 @@ public class Windows extends Application {
     }
 
     public void setpStage(Stage stage) {
-        this.pStage = stage;
+        pStage = stage;
     }
 
     @Override

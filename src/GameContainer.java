@@ -1,4 +1,4 @@
-import GameUI.Windows;
+import com.halflife3.GameUI.Windows;
 
 import java.io.FileNotFoundException;
 
