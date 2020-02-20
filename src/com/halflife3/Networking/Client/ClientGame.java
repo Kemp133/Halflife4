@@ -1,6 +1,5 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
@@ -59,12 +58,16 @@ public class ClientGame extends Application {
         objectManager = new ObjectManager();
         input = new Input();
         root = new Pane();
+
         Vector2 startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
         player_client = new Player(startPos, startVel, 0, objectManager);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
 
+        try { Thread.sleep(1000); } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Client.receivePositions();
         for (String ip : Client.listOfClients.connectedIPs) {
             if (!ip.equals(player_client.getIpOfClient())) {
@@ -78,7 +81,6 @@ public class ClientGame extends Application {
                 enemy.setIpOfClient(ip);
                 enemyList.put(ip, enemy);
             }
-
         }
 
         launch();
@@ -105,17 +107,17 @@ public class ClientGame extends Application {
         //endregion
 
         //region Add audio into game
-        AudioForGame audio = new AudioForGame();
-        audio.getMenu().getItems().add(audio.getMute());
-        audio.getSlider1().setHideOnClick(false);
-        audio.getMenu().getItems().add(audio.getSlider1());
-        audio.getMenuBar().getMenus().add(audio.getMenu());
-        audio.getBattle_music().setAutoPlay(true);
-        audio.getBattle_music().setMute(false);
-        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
-        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-        root.getChildren().add(audio.getMenuBar());
+//        AudioForGame audio = new AudioForGame();
+//        audio.getMenu().getItems().add(audio.getMute());
+//        audio.getSlider1().setHideOnClick(false);
+//        audio.getMenu().getItems().add(audio.getSlider1());
+//        audio.getMenuBar().getMenus().add(audio.getMenu());
+//        audio.getBattle_music().setAutoPlay(true);
+//        audio.getBattle_music().setMute(false);
+//        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
+//        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+//        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+//        root.getChildren().add(audio.getMenuBar());
         //endregion
 
         //region Key input listener setup
@@ -138,16 +140,45 @@ public class ClientGame extends Application {
 
         final long[] startNanoTime = {System.nanoTime()};
 
+        //region Updates the position of all enemies
         running = true;
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/FPS * 1e9)) {
                     Client.receivePositions();
+
+                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
+                    if (toRemove != null) {
+                        for (String removeThis : toRemove) {
+                            if (enemyList.containsKey(removeThis)) {
+                                Player nPlayer = enemyList.get(removeThis);
+                                enemyList.remove(removeThis);
+                                for (String ip : Client.listOfClients.connectedIPs) {
+                                    if (!enemyList.containsKey(ip)) {
+                                        enemyList.put(ip, nPlayer);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    for (String ip : Client.listOfClients.connectedIPs) {
+                        if (!ip.equals(player_client.getIpOfClient())) {
+                            PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+                            Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+                            Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
+
+                            enemyList.get(ip).setVelocity(vel);
+                            enemyList.get(ip).setPosition(pos);
+                        }
+                    }
+
                     serverNanoTime = System.nanoTime();
                 }
             }
         }).start();
+        //endregion
 
         AnimationTimer game = new AnimationTimer() {
             private long lastUpdate = 0;
@@ -206,25 +237,6 @@ public class ClientGame extends Application {
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
                     } else if (bulletLimiter > 0) bulletLimiter--;
-                    //endregion
-
-                    //region Updates the position of all enemies
-                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
-                    if (toRemove != null) {
-                        for (String removeThis : toRemove) {
-                            if (enemyList.containsKey(removeThis)) {
-                                enemyList.get(removeThis).selfDestroy();
-                            }
-                        }
-                    }
-
-                    for (String ip : Client.listOfClients.connectedIPs) {
-                        if (!ip.equals(player_client.getIpOfClient())) {
-                            PositionPacket posPack = Client.listOfClients.posList.get(ip);
-                            enemyList.get(ip).setPosition(posPack.orgPosX, posPack.orgPosY);
-                            enemyList.get(ip).setVelocity(posPack.velX, posPack.velY);
-                        }
-                    }
                     //endregion
 
                     //region Updates position of all game objects locally

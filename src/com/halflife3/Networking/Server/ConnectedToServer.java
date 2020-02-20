@@ -14,7 +14,7 @@ public class ConnectedToServer implements Runnable {
     private Vector2 spawnPoint; //Future-proofing for Player in-game death
 
     private boolean running;
-    private DatagramSocket uniqueSocket = null;
+    private DatagramSocket uniqueSocket;
     private EventListenerServer listenerServer;
 
     public ConnectedToServer(InetAddress address, int clientListeningPort, Vector2 spawnPoint) {
@@ -22,9 +22,8 @@ public class ConnectedToServer implements Runnable {
         this.spawnPoint = client_position = spawnPoint;
         listenerServer = new EventListenerServer();
 
-        try { uniqueSocket = new DatagramSocket(clientListeningPort, clientAddress); } catch (SocketException e) {
-            e.printStackTrace();
-        }
+        try { uniqueSocket = new DatagramSocket(clientListeningPort); }
+        catch (SocketException e) { e.printStackTrace(); }
     }
 
     @Override

@@ -23,7 +23,7 @@ public class Server implements Runnable {
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
-    private static int clientPort = 6000;
+    private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
     private static Vector2[] startPositions = {new Vector2(80, 80),
                                                new Vector2(680, 80),
@@ -184,7 +184,7 @@ public class Server implements Runnable {
 
         multicastPacket(portPacket, GET_PORT_PORT);
 
-        ClientPositionHandlerServer.clientList.put(address, connection);
+//        ClientPositionHandlerServer.clientList.put(address, connection);
 
         clientPort++;
         welcoming = true;
