@@ -65,8 +65,6 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         return null;
     }
 
-    //TODO: Organise code plus fix min/max plus add descriptive code
-    //TODO: Fix bug where button image changes on button press
     public void buttonProperties() throws FileNotFoundException {
 
         createNewUser.setMaxHeight(30);
@@ -131,12 +129,6 @@ This is used by the stackPanes for the two different scene Login and Create Acco
     public StackPane loginPane() {
         GridPane gridPaneLogin = basePane();
 
-        try {
-            buttonProperties();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
         //Arranging all the nodes in the grid
         gridPaneLogin.add(name, 0, 0);
         gridPaneLogin.add(nameField, 1, 0);
@@ -198,18 +190,9 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         }
     }
 
-    private void initialiseFields() {
-        login.setMinHeight(30);
-        login.setMinWidth(100);
-
-        createNewUser.setMinHeight(30);
-        createNewUser.setMinWidth(150);
-
-        backButton.setMinHeight(30);
-        backButton.setMinWidth(150);
-
-        create.setMinHeight(30);
-        create.setMinWidth(150);
+    private void initialiseFields() throws FileNotFoundException {
+        //Sets the properties of the buttons
+        buttonProperties();
 
         //Setting properties of text/textFields
         name.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
@@ -259,7 +242,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
                     }
                 }
                 else {
-                    incorrectFields.setText("Please type in a username and password");
+                    incorrectFields.setText("Type in a username and password");
                     incorrectFields.setVisible(true);
 
                 }
