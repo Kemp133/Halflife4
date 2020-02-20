@@ -53,7 +53,7 @@ public class Windows extends Application {
     }
 
    public void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/first_menu.png"); //change the backgraoud file plz
+        FileInputStream inputStream = new FileInputStream("res/MenuBackground.png"); //change the backgraoud file plz
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
@@ -80,7 +80,7 @@ public class Windows extends Application {
         try {
             pane = new StackPane();
             setpStage(primaryStage);
-            primaryStage.setTitle("Team HalfLife");
+            primaryStage.setTitle("Team HalfLife : MAn in black");
             primaryStage.setResizable(false);
             primaryStage.setMaxHeight(600);
             primaryStage.setMaxWidth(800);
