@@ -30,7 +30,7 @@ folder inside of your javafx install location (the path should end in "\lib") an
 If you do it this way, your VM Options should look something like this:
 
 <code>
---module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml
+--module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml,javafx.media
 </code> 
 
 ---
