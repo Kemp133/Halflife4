@@ -47,24 +47,7 @@ public class Client implements Runnable {
             positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
-            //region Sets interface to Wi-Fi and gets the IP address
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface net = interfaces.nextElement();
-                if (!net.getName().startsWith("wlan"))
-                    continue;
-
-                Enumeration<InetAddress> addresses = net.getInetAddresses();
-                while(addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr.toString().length() < 17) {
-                        serverSocket.setInterface(addr);
-                        positionSocket.setInterface(addr);
-                        clientAddress = addr;
-                    }
-                }
-            }
-            //endregion
+            setWifiInterface();
 
             serverSocket.joinGroup(group);
             positionSocket.joinGroup(group);
@@ -253,5 +236,29 @@ public class Client implements Runnable {
 
     public static void setUniquePort(int uniquePort) {
         Client.uniquePort = uniquePort;
+    }
+
+    public void setWifiInterface() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface net = interfaces.nextElement();
+                if (!net.getName().startsWith("wlan") || !net.isUp())
+                    continue;
+
+                Enumeration<InetAddress> addresses = net.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr.toString().length() < 17) {
+                        serverSocket.setInterface(addr);
+                        positionSocket.setInterface(addr);
+                        clientAddress = addr;
+                        return;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
     }
 }

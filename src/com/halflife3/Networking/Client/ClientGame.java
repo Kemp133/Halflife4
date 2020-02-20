@@ -110,11 +110,11 @@ public class ClientGame extends Application {
         audio.getSlider1().setHideOnClick(false);
         audio.getMenu().getItems().add(audio.getSlider1());
         audio.getMenuBar().getMenus().add(audio.getMenu());
-        audio.getBattle_music().setAutoPlay(true);
-        audio.getBattle_music().setMute(false);
-        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
-        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+//        audio.getBattle_music().setAutoPlay(true);
+//        audio.getBattle_music().setMute(false);
+//        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
+//        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+//        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());
         //endregion
 
@@ -209,12 +209,17 @@ public class ClientGame extends Application {
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
-                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
-                    if (toRemove != null)
-                        for (String removeThis : toRemove)
-                            enemyList.get(removeThis).selfDestroy();
-
                     //region Updates the position of all enemies
+                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
+                    if (toRemove != null) {
+                        for (String removeThis : toRemove) {
+                            if (enemyList.containsKey(removeThis)) {
+                                enemyList.get(removeThis).selfDestroy();
+                            }
+                        }
+
+                    }
+
                     for (String ip : Client.listOfClients.connectedIPs) {
                         if (!ip.equals(player_client.getIpOfClient())) {
                             PositionPacket posPack = Client.listOfClients.posList.get(ip);
