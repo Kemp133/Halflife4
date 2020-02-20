@@ -78,6 +78,9 @@ public class ClientGame extends Application {
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
 
+        try { Thread.sleep(3000); } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Client.receivePositions();
         for (String ip : Client.listOfClients.connectedIPs) {
             if (!ip.equals(player_client.getIpOfClient())) {
@@ -113,6 +116,7 @@ public class ClientGame extends Application {
         Scene scene = new Scene(root, 800, 600);
         primaryStage.setScene(scene);
         player_client.setImage("res/Player_pic.png");
+        //TODO: Set differently hued images to all the players
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 
         //region Background setup
@@ -173,12 +177,11 @@ public class ClientGame extends Application {
                     if (toRemove != null) {
                         for (String removeThis : toRemove) {
                             if (enemyList.containsKey(removeThis)) {
-                                //Player nPlayer = enemyList.get(removeThis);
-                                enemyList.get(removeThis).selfDestroy();
+                                Player nPlayer = enemyList.get(removeThis);
                                 enemyList.remove(removeThis);
                                 for (String ip : Client.listOfClients.connectedIPs) {
                                     if (!enemyList.containsKey(ip)) {
-                                        enemyList.put(ip, player_client);
+                                        enemyList.put(ip, nPlayer);
                                     }
                                 }
                             }
@@ -252,7 +255,7 @@ public class ClientGame extends Application {
                         Vector2 bulletPos =new Vector2(player_client.getX() + player_client.width/2,player_client.getY()+player_client.height/2).add(direction_of_gun);
                         //Vector2 bulletPos = player_client_center.add(new Vector2(20,20));
                         Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                                                .subtract(bulletPos).normalise().multiply(200);
+                                                .subtract(player_client.getPosition()).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
