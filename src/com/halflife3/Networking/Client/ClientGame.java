@@ -209,12 +209,17 @@ public class ClientGame extends Application {
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
-                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
-                    if (toRemove != null)
-                        for (String removeThis : toRemove)
-                            enemyList.get(removeThis).selfDestroy();
-
                     //region Updates the position of all enemies
+                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
+                    if (toRemove != null) {
+                        for (String removeThis : toRemove) {
+                            if (enemyList.containsKey(removeThis)) {
+                                enemyList.get(removeThis).selfDestroy();
+                            }
+                        }
+
+                    }
+
                     for (String ip : Client.listOfClients.connectedIPs) {
                         if (!ip.equals(player_client.getIpOfClient())) {
                             PositionPacket posPack = Client.listOfClients.posList.get(ip);
