@@ -40,6 +40,7 @@ public class Windows extends Application {
     public void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
+                main_menu.player.stop();
                 new ClientGame(this.getpStage()).getStarted();
             } catch (Exception e) {
                 e.printStackTrace();

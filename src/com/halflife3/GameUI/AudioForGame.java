@@ -30,7 +30,7 @@ public class AudioForGame {
             battle_music.setMute(false);
         }
         else{
-            battle_music.stop();
+            battle_music.pause();
             battle_music.setMute(true);
         }
     }

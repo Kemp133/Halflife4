@@ -23,6 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -106,7 +107,7 @@ public class ClientGame extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("HalfLife 3");
+        primaryStage.setTitle("HalfLife 3 : Man in Black");  // change for name
         Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
         Scene scene = new Scene(root, 800, 600);
@@ -132,7 +133,10 @@ public class ClientGame extends Application {
         audio.getMenuBar().getMenus().add(audio.getMenu());
         audio.getBattle_music().setAutoPlay(true);
         audio.getBattle_music().setMute(false);
-        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
+        audio.getBattle_music().setOnEndOfMedia(() -> {
+            audio.getBattle_music().seek(Duration.ZERO);
+            audio.getBattle_music().play();
+        });
         audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
         audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());

@@ -28,15 +28,18 @@ public class LinMenu extends ContextMenu {
     Button start_m;
     MenuButton settings_m;
     Button exit_m;
+    ImageView game_name;
 
     public LinMenu() throws FileNotFoundException {
         File audio_path = new File("res/MenuMusic.mp3");
         FileInputStream input1 = new FileInputStream("res/join_game.png");
         FileInputStream input2 = new FileInputStream("res/Audio.png");
         FileInputStream input3 = new FileInputStream("res/exit.png");
+        FileInputStream input4 = new FileInputStream("res/game_name.png");
         Image image1 = new Image(input1);
         Image image2 = new Image(input2);
         Image image3 = new Image(input3);
+        Image image4 = new Image(input4);
         volume = new Slider();
 
         Media media = new Media(audio_path.toURI().toString());
@@ -48,6 +51,7 @@ public class LinMenu extends ContextMenu {
         start_m = new Button("",new ImageView(image1));
         settings_m = new MenuButton("",new ImageView(image2),audioItem_on,audioitem_off,audio);
         exit_m = new Button("",new ImageView(image3));
+        game_name = new ImageView(image4);
 
         player.setAutoPlay(true);
         player.setOnEndOfMedia(() -> {
@@ -60,7 +64,7 @@ public class LinMenu extends ContextMenu {
         audio.setOnAction(actionEvent -> volumeControl(volume));
         exit_m.setOnAction(actionEvent -> Platform.exit());
         main_manu = new VBox(30);
-        main_manu.getChildren().addAll(start_m, settings_m, exit_m);
+        main_manu.getChildren().addAll(game_name,start_m, settings_m, exit_m);
     }
 
 
