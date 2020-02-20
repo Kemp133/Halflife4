@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -24,10 +23,10 @@ public class ServerDisplay extends Application {
 
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         stage.setTitle("Server display");
         System.setOut(new PrintStream(new OutDisplay(textArea)));
-        stage.setScene(new Scene(textArea,SCREEN_WIDTH,SCREEN_HEIGHT, Color.WHITE));
+        stage.setScene(new Scene(textArea, SCREEN_WIDTH, SCREEN_HEIGHT));
         stage.show();
     }
 
@@ -59,7 +58,7 @@ class OutDisplay extends OutputStream {
 
     /*Write the str using system.out into textArea*/
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) {
         final String str = new String(b, off, len, this.charset);
         Platform.runLater(() -> this.control.appendText(str));
     }

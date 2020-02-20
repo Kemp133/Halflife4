@@ -78,9 +78,6 @@ public class ClientGame extends Application {
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
 
-        try { Thread.sleep(3000); } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         Client.receivePositions();
         for (String ip : Client.listOfClients.connectedIPs) {
             if (!ip.equals(player_client.getIpOfClient())) {
@@ -116,7 +113,6 @@ public class ClientGame extends Application {
         Scene scene = new Scene(root, 800, 600);
         primaryStage.setScene(scene);
         player_client.setImage("res/Player_pic.png");
-        //TODO: Set differently hued images to all the players
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
 
         //region Background setup
@@ -178,6 +174,7 @@ public class ClientGame extends Application {
                         for (String removeThis : toRemove) {
                             if (enemyList.containsKey(removeThis)) {
                                 Player nPlayer = enemyList.get(removeThis);
+                                enemyList.get(removeThis).selfDestroy();
                                 enemyList.remove(removeThis);
                                 for (String ip : Client.listOfClients.connectedIPs) {
                                     if (!enemyList.containsKey(ip)) {
@@ -276,25 +273,25 @@ public class ClientGame extends Application {
                             player_hit_block = true;
                         }
                     }
-                    boolean Bullet_hit_wall = false;
-                    boolean Bullet_hit_player = false;
-                    for(GameObject go:objectManager.getGameObjects()){
-                        if (go.getKeys().contains("Bullet")){
-                            for(Bricks block : MapRender.get_list()){
-                                if(go.GetBounds().intersects(block.GetBounds().getBoundsInLocal())){
-                                    Bullet_hit_wall = true;
-                                    crash_bullet_list.add(go);
-                                }
-                            }
-                            if(go.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())){
-                                Bullet_hit_player = true;
-                                crash_bullet_list.add(go);
-                            }
-                        }
-                    }
-                    for(GameObject bullet:crash_bullet_list){
-                        bullet.remove();
-                    }
+//                    boolean Bullet_hit_wall = false;
+//                    boolean Bullet_hit_player = false;
+//                    for(GameObject go:objectManager.getGameObjects()){
+//                        if (go.getKeys().contains("Bullet")){
+//                            for(Bricks block : MapRender.get_list()){
+//                                if(go.GetBounds().intersects(block.GetBounds().getBoundsInLocal())){
+//                                    Bullet_hit_wall = true;
+//                                    crash_bullet_list.add(go);
+//                                }
+//                            }
+//                            if(go.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())){
+//                                Bullet_hit_player = true;
+//                                crash_bullet_list.add(go);
+//                            }
+//                        }
+//                    }
+//                    for(GameObject bullet:crash_bullet_list){
+//                        bullet.remove();
+//                    }
                     //endregion
 
                     //region If a collision happens - moves the player back

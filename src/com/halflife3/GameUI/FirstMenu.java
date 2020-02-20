@@ -1,10 +1,9 @@
 package com.halflife3.GameUI;
 
-import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.DatabaseUI.Login;
+import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.Model.ApplicationUser;
 import com.halflife3.Networking.Server.MainServer;
-import com.halflife3.Networking.Server.Server;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -12,13 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -67,7 +64,7 @@ public class FirstMenu extends Application implements ICredentialUser {
             //load the login page
             try {
                 new Windows().start(pstage);
-            } catch (Exception ex) {
+            } catch (FileNotFoundException ex) {
                 ex.printStackTrace();
             }
         });

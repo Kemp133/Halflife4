@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public class Server implements Runnable {
 
-    //region Variables
     public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
+    //region Variables
     public static final int     MULTICAST_PORT      = 5555;
     public static final int     LISTENER_PORT       = 5544;
     public static final int     GET_PORT_PORT       = 5566;

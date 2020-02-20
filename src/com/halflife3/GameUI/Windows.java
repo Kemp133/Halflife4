@@ -1,5 +1,4 @@
-package com.halflife3.GameUI;/*This is the main menu after
-log-in successfully to the database*/
+package com.halflife3.GameUI;
 
 import com.halflife3.Networking.Client.ClientGame;
 import javafx.application.Application;
@@ -18,10 +17,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/*The class shows game manu after log-in successfully
+/*The class shows game menu after log-in successfully
 * Function include:
 * new game;load game
-* audio setings*/
+* audio settings*/
 public class Windows extends Application {
 
     private StackPane pane;
@@ -47,22 +46,22 @@ public class Windows extends Application {
                 e.printStackTrace();
             }
         });
-        VBox manuBar = main_menu.getBar();
-        manuBar.setAlignment(Pos.CENTER);
-        pane.getChildren().add(manuBar);
+        VBox menuBar = main_menu.getBar();
+        menuBar.setAlignment(Pos.CENTER);
+        pane.getChildren().add(menuBar);
     }
 
    public void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/MenuBackground.png"); //change the backgraoud file plz
+        FileInputStream inputStream = new FileInputStream("res/MenuBackground.png");
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(800);
         imageView.setFitHeight(600);
 
-        Pane backgroud = new Pane(imageView);
+        Pane background = new Pane(imageView);
 
-        pane.getChildren().add(backgroud);
+        pane.getChildren().add(background);
     }
 
     public StackPane createContent() throws FileNotFoundException {
@@ -80,7 +79,7 @@ public class Windows extends Application {
         try {
             pane = new StackPane();
             setpStage(primaryStage);
-            primaryStage.setTitle("Team HalfLife : MAn in black");
+            primaryStage.setTitle("Team HalfLife : Man in black");
             primaryStage.setResizable(false);
             primaryStage.setMaxHeight(600);
             primaryStage.setMaxWidth(800);
