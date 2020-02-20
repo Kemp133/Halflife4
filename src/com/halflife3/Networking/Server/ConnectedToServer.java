@@ -22,9 +22,7 @@ public class ConnectedToServer implements Runnable {
         this.spawnPoint = client_position = spawnPoint;
         listenerServer = new EventListenerServer();
 
-        try {
-            uniqueSocket = new DatagramSocket(clientListeningPort, clientAddress);
-        } catch (SocketException e) {
+        try { uniqueSocket = new DatagramSocket(clientListeningPort, clientAddress); } catch (SocketException e) {
             e.printStackTrace();
         }
     }
@@ -46,32 +44,12 @@ public class ConnectedToServer implements Runnable {
         byte[] posBuf = new byte[5000];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
-        try {
-            uniqueSocket.receive(incPos);
-        } catch (IOException e) {
+        try { uniqueSocket.receive(incPos); } catch (IOException e) {
             return;
         }
 
         Object receivedPosition = byteArrayToObject(posBuf);
         listenerServer.received(receivedPosition, clientAddress);
-    }
-
-    private static byte[] objectToByteArray(Object o) {
-        byte[] sendBuf = null;
-
-        try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-            outstream.flush();
-            outstream.writeObject(o);
-            outstream.flush();
-            sendBuf = byteStream.toByteArray();
-            outstream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return sendBuf;
     }
 
     private Object byteArrayToObject(byte[] buf) {

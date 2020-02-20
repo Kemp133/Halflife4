@@ -61,7 +61,7 @@ public class ClientGame extends Application {
         root = new Pane();
         Vector2 startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
-        player_client = new Player(startPos, startVel, (short) 0, objectManager);
+        player_client = new Player(startPos, startVel, 0, objectManager);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
 
@@ -117,7 +117,6 @@ public class ClientGame extends Application {
 //        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());
         //endregion
-
 
         //region Key input listener setup
         KeyHandle handle = new KeyHandle();
@@ -217,7 +216,6 @@ public class ClientGame extends Application {
                                 enemyList.get(removeThis).selfDestroy();
                             }
                         }
-
                     }
 
                     for (String ip : Client.listOfClients.connectedIPs) {
