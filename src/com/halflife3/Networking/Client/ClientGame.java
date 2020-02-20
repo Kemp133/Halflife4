@@ -225,8 +225,6 @@ public class ClientGame extends Application {
                     double bullet_pos_x = Math.cos(Math.atan2(direction.getY(),direction.getX()))*32;
                     double bullet_pos_y = Math.sin(Math.atan2(direction.getY(),direction.getX()))*32;
                     Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
-                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(),direction.getX())), player_client_center.getX(), player_client_center.getY());
-                    player_client.setRotate(rotate);
                     //endregion
 
                     //region Handles player movement
