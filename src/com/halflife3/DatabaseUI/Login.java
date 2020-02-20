@@ -50,7 +50,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
     private Background addBackground() {
         try {
 
-            FileInputStream inputStream = new FileInputStream("res/Windowspic.png");
+            FileInputStream inputStream = new FileInputStream("res/LoginBackground.png");
             Image image = new Image(inputStream);
 
             BackgroundSize backgroundSize = new BackgroundSize(SCREEN_WIDTH, SCREEN_HEIGHT, false, false, false, true);
@@ -198,20 +198,16 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         }
     }
 
-    private void initaliseFields() {
-        login.setText("Login");
+    private void initialiseFields() {
         login.setMinHeight(30);
         login.setMinWidth(100);
 
-        createNewUser.setText("Create New Account");
         createNewUser.setMinHeight(30);
         createNewUser.setMinWidth(150);
 
-        backButton.setText("Back");
         backButton.setMinHeight(30);
         backButton.setMinWidth(150);
 
-        create.setText("Create User");
         create.setMinHeight(30);
         create.setMinWidth(150);
 
@@ -238,7 +234,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         preloaderStage = stage;
         preloaderStage.setTitle("Login/Create User");
 
-        initaliseFields();
+        initialiseFields();
         Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(sceneLogin);
         stage.show();
