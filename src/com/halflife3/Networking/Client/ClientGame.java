@@ -48,16 +48,16 @@ public class ClientGame extends Application {
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
-    //start region
+    //region
     private Stage window = null;
     private boolean flag = false;
-    public ClientGame(){
-    }
+    public ClientGame(){}
+
     public ClientGame(Stage window){
         this.window = window;
         flag = true;
     }
-    //end region
+    //endregion
 
     public void getStarted() {
 
@@ -78,7 +78,7 @@ public class ClientGame extends Application {
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
 
-        try { Thread.sleep(1000); } catch (InterruptedException e) {
+        try { Thread.sleep(3000); } catch (InterruptedException e) {
             e.printStackTrace();
         }
         Client.receivePositions();
