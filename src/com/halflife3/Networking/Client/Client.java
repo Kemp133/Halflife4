@@ -52,7 +52,7 @@ public class Client implements Runnable {
             serverSocket.joinGroup(group);
             positionSocket.joinGroup(group);
 
-            System.out.println("Joined group: " + group.getHostName() + " with address: " + clientAddress.toString());
+            System.out.println("Joined group: " + Server.MULTICAST_ADDRESS + " with address: " + clientAddress.toString());
         } catch (ConnectException e) {
             System.out.println("Unable to join the group");
         } catch (IOException e) {

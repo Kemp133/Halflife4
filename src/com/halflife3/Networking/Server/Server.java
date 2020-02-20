@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 public class Server implements Runnable {
 
+    //region Variables
     public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
     public static final int     MULTICAST_PORT      = 5555;
     public static final int     LISTENER_PORT       = 5544;
@@ -21,7 +22,7 @@ public class Server implements Runnable {
     private PositionListPacket posPacket;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
-    public final int SERVER_TIMEOUT = 60000; // milliseconds
+    public final int SERVER_TIMEOUT = 3000000; // milliseconds
     private static int clientPort = 6000;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
     private static Vector2[] startPositions = {new Vector2(80, 80),
@@ -29,6 +30,7 @@ public class Server implements Runnable {
                                                new Vector2(80, 480),
                                                new Vector2(680, 480)};
     public static String[] botNames = new String[]{"bot0", "bot1", "bot2", "bot3"};
+    //endregion
 
     public void start() {
 //        Fills the positionList with 4 bot players, giving them available starting positions
@@ -117,18 +119,16 @@ public class Server implements Runnable {
         if (ClientPositionHandlerServer.clientList.isEmpty()) {
             clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
         } else clientSocket.setSoTimeout(0);
-        try {
 
 
-            clientSocket.receive(incPoke);
-        } catch (SocketTimeoutException e) {
+        try { clientSocket.receive(incPoke); }
+        catch (SocketTimeoutException e) {
             running = false;
             return;
         } catch (SocketException e) {
             System.out.println("Server closed");
             return;
         }
-
 
         System.out.println(incPoke.getAddress() + " has connected");
         welcoming = false;
