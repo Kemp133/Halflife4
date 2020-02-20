@@ -252,7 +252,7 @@ public class ClientGame extends Application {
                         Vector2 bulletPos =new Vector2(player_client.getX() + player_client.width/2,player_client.getY()+player_client.height/2).add(direction_of_gun);
                         //Vector2 bulletPos = player_client_center.add(new Vector2(20,20));
                         Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                                                .subtract(player_client.getPosition()).normalise().multiply(200);
+                                                .subtract(bulletPos).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
                         bulletLimiter = 6;
