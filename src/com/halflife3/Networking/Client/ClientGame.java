@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Client;
 
+import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
@@ -22,6 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -45,6 +47,17 @@ public class ClientGame extends Application {
     private int bulletLimiter = 6;
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
+
+    //start region
+    private Stage window = null;
+    private boolean flag = false;
+    public ClientGame(){
+    }
+    public ClientGame(Stage window){
+        this.window = window;
+        flag = true;
+    }
+    //end region
 
     public void getStarted() {
 
@@ -83,12 +96,21 @@ public class ClientGame extends Application {
             }
         }
 
-        launch();
+        if(flag){
+            flag = false;
+            try {
+                this.start(this.window);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else
+            launch();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("HalfLife 3");
+        primaryStage.setTitle("HalfLife 3 : Man in Black");  // change for name
         Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
         Scene scene = new Scene(root, 800, 600);
@@ -107,17 +129,20 @@ public class ClientGame extends Application {
         //endregion
 
         //region Add audio into game
-//        AudioForGame audio = new AudioForGame();
-//        audio.getMenu().getItems().add(audio.getMute());
-//        audio.getSlider1().setHideOnClick(false);
-//        audio.getMenu().getItems().add(audio.getSlider1());
-//        audio.getMenuBar().getMenus().add(audio.getMenu());
-//        audio.getBattle_music().setAutoPlay(true);
-//        audio.getBattle_music().setMute(false);
-//        audio.getMenu().setOnAction(actionEvent -> audio.getBattle_music().play());
-//        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-//        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-//        root.getChildren().add(audio.getMenuBar());
+        AudioForGame audio = new AudioForGame();
+        audio.getMenu().getItems().add(audio.getMute());
+        audio.getSlider1().setHideOnClick(false);
+        audio.getMenu().getItems().add(audio.getSlider1());
+        audio.getMenuBar().getMenus().add(audio.getMenu());
+        audio.getBattle_music().setAutoPlay(true);
+        audio.getBattle_music().setMute(false);
+        audio.getBattle_music().setOnEndOfMedia(() -> {
+            audio.getBattle_music().seek(Duration.ZERO);
+            audio.getBattle_music().play();
+        });
+        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+        root.getChildren().add(audio.getMenuBar());
         //endregion
 
         //region Key input listener setup

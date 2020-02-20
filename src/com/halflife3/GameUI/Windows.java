@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
@@ -23,19 +24,25 @@ import java.io.IOException;
 * audio setings*/
 public class Windows extends Application {
 
-    private StackPane pane = new StackPane();
+    private StackPane pane;
+    public StackPane getPane(){
+        return this.pane;
+    }
     private LinMenu main_menu = new LinMenu();
     private Stage pStage = new Stage();
+
     public Windows() throws FileNotFoundException {
+        String test = "This is a test";
     }
 
-    private static final double SCREEN_WIDTH = 800;
-    private static final double SCREEN_HEIGHT = 600;
+    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
+    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
-    private void addMenu() throws IOException {
+    public void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
             try {
-                new ClientGame(/*getpStage()*/).getStarted();
+                main_menu.player.stop();
+                new ClientGame(this.getpStage()).getStarted();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -45,8 +52,8 @@ public class Windows extends Application {
         pane.getChildren().add(manuBar);
     }
 
-    private void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/first_menu.png"); //change the backgraoud file plz
+   public void addBackground() throws FileNotFoundException {
+        FileInputStream inputStream = new FileInputStream("res/MenuBackground.png"); //change the backgraoud file plz
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
@@ -58,25 +65,26 @@ public class Windows extends Application {
         pane.getChildren().add(backgroud);
     }
 
-    private StackPane createContent() throws FileNotFoundException {
-        addBackground();
+    public StackPane createContent() throws FileNotFoundException {
+        this.addBackground();
         try {
-            addMenu();
+            this.addMenu();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return pane;
+        return this.pane;
     }
 
     @Override
     public void start(Stage primaryStage) {
         try {
+            pane = new StackPane();
             setpStage(primaryStage);
-            primaryStage.setTitle("Team HalfLife");
+            primaryStage.setTitle("Team HalfLife : MAn in black");
             primaryStage.setResizable(false);
             primaryStage.setMaxHeight(600);
             primaryStage.setMaxWidth(800);
-            Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
+            Scene scene = new Scene(this.createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {
@@ -88,7 +96,7 @@ public class Windows extends Application {
         launch(args);
     }
 
-    private Stage getpStage() {
+    public Stage getpStage() {
         try {
             return this.pStage;
         } catch (Exception e) {

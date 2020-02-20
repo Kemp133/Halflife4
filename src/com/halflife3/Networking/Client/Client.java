@@ -205,7 +205,7 @@ public class Client implements Runnable {
             e.printStackTrace();
         }
 
-        return sendBuf;
+         return sendBuf;
     }
 
 //    Converts a byte array into an object (packet)
