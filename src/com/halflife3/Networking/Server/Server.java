@@ -103,12 +103,11 @@ public class Server implements Runnable {
         while (running) {
             if (ClientPositionHandlerServer.clientList.size() < 4) {
                 System.out.println("Listening for clients...");
+                try { connectionListener(); } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            try {
-                connectionListener();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
         }
     }
 
@@ -142,6 +141,7 @@ public class Server implements Runnable {
         //region Checks if Server is full
         if (ClientPositionHandlerServer.clientList.size() >= 4) {
             System.out.println("Server is full");
+            welcoming = false;
             return;
         }
         //endregion
@@ -184,7 +184,7 @@ public class Server implements Runnable {
 
         multicastPacket(portPacket, GET_PORT_PORT);
 
-//        ClientPositionHandlerServer.clientList.put(address, connection);
+        ClientPositionHandlerServer.clientList.put(address, connection);
 
         clientPort++;
         welcoming = true;

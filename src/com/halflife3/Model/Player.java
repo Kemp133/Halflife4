@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.util.Deque;
 
 public class Player extends GameObject {
+    //region Variables
     public double width = 40;
     public double height = 35;
     public Rectangle rectangle;
@@ -25,6 +26,7 @@ public class Player extends GameObject {
     private Affine rotate;
     private PositionPacket packetToSend;
     protected int health;
+    //endregion
 
     public Player(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
@@ -39,6 +41,7 @@ public class Player extends GameObject {
         packetToSend.rotation = rotation;
     }
 
+    //region Overridden super methods
     @Override
     public Rectangle GetBounds() {
         return rectangle;
@@ -71,6 +74,7 @@ public class Player extends GameObject {
         rectangle.setX(position.getX());
         rectangle.setY(position.getY());
     }
+    //endregion
 
     public void collision(boolean if_collision, double time) {
         if (if_collision) {
@@ -86,10 +90,13 @@ public class Player extends GameObject {
         velocity = velocity.add(toAdd);
     }
 
+    //region MoveSpeed getter and setter
     public float getMoveSpeed() { return moveSpeed; }
 
     public void setMoveSpeed(float speed) { moveSpeed = speed; }
+    //endregion
 
+    //region IP getter and setter
     public String getIpOfClient() {
         return ipOfClient;
     }
@@ -97,7 +104,9 @@ public class Player extends GameObject {
     public void setIpOfClient(String ipOfClient) {
         this.ipOfClient = ipOfClient;
     }
+    //endregion
 
+    //region AI getter and setter
     public boolean isAI() {
         return AI;
     }
@@ -105,7 +114,9 @@ public class Player extends GameObject {
     public void setAI(boolean AI) {
         this.AI = AI;
     }
+    //endregion
 
+    //region SpawnPoint getter and setter
     public Vector2 getSpawn_point() {
         return spawn_point;
     }
@@ -113,7 +124,9 @@ public class Player extends GameObject {
     public void setSpawn_point(Vector2 spawn_point) {
         this.spawn_point = spawn_point;
     }
+    //endregion
 
+    //region Rotation getter and setter
     public void setRotate(Affine rotate) {
         this.rotate = rotate;
     }
@@ -121,7 +134,9 @@ public class Player extends GameObject {
     public Affine getRotate() {
         return rotate;
     }
+    //endregion
 
+    //region Packet getter and setter
     public PositionPacket getPacketToSend() {
         packetToSend.velY = velocity.getY();
         packetToSend.velX = velocity.getX();
@@ -133,7 +148,9 @@ public class Player extends GameObject {
     public void setPacketToSend(PositionPacket packetToSend) {
         this.packetToSend = packetToSend;
     }
+    //endregion
 
+    //region AI methods
     public void moveTo(Vector2 position){
         //step 1: find shortest path without walls
         //step 2: move to target
@@ -243,5 +260,5 @@ public class Player extends GameObject {
     public int getHealth() {
         return health;
     }
-
+    //endregion
 }

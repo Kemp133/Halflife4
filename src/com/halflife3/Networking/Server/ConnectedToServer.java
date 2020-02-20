@@ -11,8 +11,7 @@ import java.net.SocketException;
 public class ConnectedToServer implements Runnable {
     private InetAddress clientAddress;
     private Vector2 client_position;
-    private Vector2 spawnPoint; //Future-proofing for Player in-game death
-
+    private Vector2 spawnPoint;
     private boolean running;
     private DatagramSocket uniqueSocket;
     private EventListenerServer listenerServer;
