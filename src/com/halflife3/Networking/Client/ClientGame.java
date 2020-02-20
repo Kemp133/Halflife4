@@ -47,6 +47,17 @@ public class ClientGame extends Application {
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
+    //start region
+    private Stage window = null;
+    private boolean flag = false;
+    public ClientGame(){
+    }
+    public ClientGame(Stage window){
+        this.window = window;
+        flag = true;
+    }
+    //end region
+
     public void getStarted() {
 
         enemyList = new HashMap<>();
@@ -81,7 +92,16 @@ public class ClientGame extends Application {
 
         }
 
-        launch();
+        if(flag){
+            flag = false;
+            try {
+                this.start(this.window);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else
+            launch();
     }
 
     @Override
