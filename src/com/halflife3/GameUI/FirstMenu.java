@@ -3,6 +3,7 @@ package com.halflife3.GameUI;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.DatabaseUI.Login;
 import com.halflife3.Model.ApplicationUser;
+import com.halflife3.Networking.Server.MainServer;
 import com.halflife3.Networking.Server.Server;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -11,7 +12,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -26,9 +29,10 @@ import static javafx.scene.paint.Color.WHITE;
 //The menu set for choose server and client
 public class FirstMenu extends Application implements ICredentialUser {
     private Stage pstage = null;
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+    private static final double SCREEN_WIDTH = 800;
+    private static final double SCREEN_HEIGHT = 600;
     StackPane root = new StackPane();
+    Pane back;
     private Button client_m;
     private Button server_m;
 
@@ -38,11 +42,16 @@ public class FirstMenu extends Application implements ICredentialUser {
     private boolean isMaximised;
 
     public FirstMenu() throws FileNotFoundException {
-        FileInputStream input = new FileInputStream("res/button_image.png");
-        javafx.scene.image.Image image = new Image(input);
+        FileInputStream input1 = new FileInputStream("res/Client.png");
+        FileInputStream input2 = new FileInputStream("res/create_server.png");
+        FileInputStream input3 = new FileInputStream("res/MenuBackground.png");
+        javafx.scene.image.Image image1 = new Image(input1);
+        Image image2 = new Image(input2);
+        Image image3 = new Image(input3);
+        back = new Pane(new ImageView(image3));
 
-        client_m = new Button("Client",new ImageView(image));
-        server_m = new Button("Server",new ImageView(image));
+        client_m = new Button("",new ImageView(image1));
+        server_m = new Button("",new ImageView(image2));
 
         server_m.setOnAction(e->{
             //jump to server main class
@@ -64,11 +73,14 @@ public class FirstMenu extends Application implements ICredentialUser {
         });
     }
 
+    public Pane getBack(){
+        return this.back;
+    }
+
     private void runServer() throws Exception {
         new ServerDisplay().start(pstage);
         pstage.centerOnScreen();
-        Server myServer = new Server();
-        myServer.start();
+        new MainServer().main(null);
     }
 
     public static void main(String[] args) {
@@ -130,12 +142,14 @@ public class FirstMenu extends Application implements ICredentialUser {
     public void start(Stage stage) {
         this.setPstage(stage);
         setMainStage(stage);
-        stage.setScene(new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, WHITE));
+        Scene scene = new Scene(createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+        stage.setScene(scene);
         mayBeShown();
     }
 
     public StackPane createContent() {
-        VBox pane = new VBox(100);
+        VBox pane = new VBox(20);
+        pane.getChildren().add(getBack());
         pane.getChildren().addAll(server_m, client_m);
         pane.setAlignment(Pos.CENTER);
         root.getChildren().add(pane);
