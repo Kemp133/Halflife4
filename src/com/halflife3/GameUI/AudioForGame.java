@@ -4,7 +4,6 @@ import javafx.scene.control.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import javax.swing.*;
 import java.io.File;
 
 public class AudioForGame {
