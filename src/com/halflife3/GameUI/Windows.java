@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
@@ -34,8 +35,8 @@ public class Windows extends Application {
         String test = "This is a test";
     }
 
-    private static final double SCREEN_WIDTH = 800;
-    private static final double SCREEN_HEIGHT = 600;
+    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
+    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
     public void addMenu() throws IOException {
         main_menu.getStartItem().setOnAction(actionEvent -> {
