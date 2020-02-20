@@ -5,9 +5,12 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,8 +22,8 @@ public class LinMenu extends ContextMenu {
     private static LinMenu insatnce = null;
     private VBox main_manu = null;
     private File audio_path = new File("res/MenuMusic.mp3");
-//    private Media media = new Media(audio_path.toURI().toString());
-//    private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
+    private Media media = new Media(audio_path.toURI().toString());
+    private MediaPlayer player = new MediaPlayer(media);        //only set for backgroud music
     private Slider volume = new Slider();
     private MenuItem startItem = null;
     private MenuItem loadItem = null;
@@ -36,7 +39,6 @@ public class LinMenu extends ContextMenu {
         Image image3 = new Image(input3);
 
         startItem = new MenuItem("new game");
-        loadItem = new MenuItem("load game");
         MenuItem audioItem_on = new MenuItem("audio on");
         MenuItem audioitem_off = new MenuItem("audio off");
         CustomMenuItem audio = new CustomMenuItem(volume);
@@ -47,23 +49,26 @@ public class LinMenu extends ContextMenu {
         text.setFont(Font.font("Corbel",100));
         text.setFill(Color.WHITE);
 
-//        player.setAutoPlay(true);
-//        startItem.setOnAction(e->{
-//            if(player.isMute())
-//                player.play();
-//        });
-
-        loadItem.setOnAction(e->{
-
+        player.setAutoPlay(true);
+        player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                player.seek(Duration.ZERO);
+                player.play();
+            }
+        });
+        player.setOnError(() -> System.err.println("Error in playing bgm"));
+        startItem.setOnAction(e->{
+            if(player.isMute())
+                player.play();
         });
 
-//        audioItem_on.setOnAction(actionEvent -> Is_mute(false));
-//        audioitem_off.setOnAction(actionEvent -> Is_mute(true));
-//        audio.setOnAction(actionEvent -> volumeControl(volume));
+        audioItem_on.setOnAction(actionEvent -> Is_mute(false));
+        audioitem_off.setOnAction(actionEvent -> Is_mute(true));
+        audio.setOnAction(actionEvent -> volumeControl(volume));
         exit_m.setOnAction(actionEvent -> Platform.exit());
         main_manu = new VBox(30);
         main_manu.getChildren().addAll(text,start_m, settings_m, exit_m);
-
     }
 
 
@@ -75,17 +80,17 @@ public class LinMenu extends ContextMenu {
         return loadItem;
     }
 
-//    private void Is_mute(boolean b) {
-//        if(b){
-//            player.stop();
-//        }else{
-//            player.play();
-//        }
-//    }
+    private void Is_mute(boolean b) {
+        if(b){
+            player.stop();
+        }else{
+            player.play();
+        }
+    }
 
-//    private void volumeControl(Slider volume) {
-//       player.volumeProperty().bind(volume.valueProperty().divide(100));
-//    }
+    private void volumeControl(Slider volume) {
+       player.volumeProperty().bind(volume.valueProperty().divide(100));
+    }
 
     public static LinMenu getInstance() throws FileNotFoundException {
         //build instance
