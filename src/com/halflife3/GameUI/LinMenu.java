@@ -92,14 +92,6 @@ public class LinMenu extends ContextMenu {
        player.volumeProperty().bind(volume.valueProperty().divide(100));
     }
 
-    public static LinMenu getInstance() throws FileNotFoundException {
-        //build instance
-        if(insatnce == null){
-            insatnce = new LinMenu();
-        }
-        return insatnce;
-    }
-
     public VBox getBar() throws FileNotFoundException {
        if(main_manu == null){
            System.err.println("menuBar equals null");

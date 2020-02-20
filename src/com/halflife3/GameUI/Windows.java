@@ -3,7 +3,6 @@ log-in successfully to the database*/
 
 import com.halflife3.Networking.Client.ClientGame;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -24,11 +23,9 @@ import java.io.IOException;
 * audio setings*/
 public class Windows extends Application {
 
-    private String filepng = null;
     private StackPane pane = new StackPane();
-    private LinMenu main_menu = LinMenu.getInstance();
+    private LinMenu main_menu = new LinMenu();
     private Stage pStage = new Stage();
-    final Stage game_stage = new Stage();
     public Windows() throws FileNotFoundException {
     }
 
@@ -43,17 +40,9 @@ public class Windows extends Application {
                 e.printStackTrace();
             }
         });
-        main_menu.getLoadItem().setOnAction(actionEvent->{
-            loadgame();
-        });
         VBox manuBar = main_menu.getBar();
         manuBar.setAlignment(Pos.CENTER);
         pane.getChildren().add(manuBar);
-    }
-
-    //load game from sql
-    private void loadgame() {
-
     }
 
     private void addBackground() throws FileNotFoundException {
@@ -76,7 +65,6 @@ public class Windows extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return pane;
     }
 
@@ -113,8 +101,4 @@ public class Windows extends Application {
         pStage = stage;
     }
 
-    @Override
-    public void stop(){
-        Platform.exit();
-    }
 }
