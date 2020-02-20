@@ -219,7 +219,7 @@ public class ClientGame extends Application {
                     }
 
                     for (String ip : Client.listOfClients.connectedIPs) {
-                        if (!ip.equals(player_client.getIpOfClient())) {
+                        if (!ip.equals(player_client.getIpOfClient()) && enemyList.get(ip) != null) {
                             PositionPacket posPack = Client.listOfClients.posList.get(ip);
                             enemyList.get(ip).setPosition(posPack.orgPosX, posPack.orgPosY);
                             enemyList.get(ip).setVelocity(posPack.velX, posPack.velY);
