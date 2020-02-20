@@ -31,7 +31,7 @@ public class LinMenu extends ContextMenu {
 
     public LinMenu() throws FileNotFoundException {
         File audio_path = new File("res/MenuMusic.mp3");
-        FileInputStream input1 = new FileInputStream("res/join_game.png");
+        FileInputStream input1 = new FileInputStream("res/joingamebuttongimp.png");
         FileInputStream input2 = new FileInputStream("res/Audio.png");
         FileInputStream input3 = new FileInputStream("res/exit.png");
         Image image1 = new Image(input1);

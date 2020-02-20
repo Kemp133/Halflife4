@@ -57,8 +57,8 @@ public class Windows extends Application {
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(SCREEN_WIDTH);
-        imageView.setFitHeight(SCREEN_HEIGHT);
+        imageView.setFitWidth(800);
+        imageView.setFitHeight(600);
 
         Pane backgroud = new Pane(imageView);
 
