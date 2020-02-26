@@ -30,11 +30,11 @@ public class Server implements Runnable {
                                                new Vector2(80, 480),
                                                new Vector2(680, 480)};
     public static String[] botNames = new String[]{"bot0", "bot1", "bot2", "bot3"};
+    private final int PACKETS_PER_SECOND = 10;
     //endregion
 
     public void start() {
 //        Fills the positionList with 4 bot players, giving them available starting positions
-
         for (int i = 0; i < 4; i++) {
             Vector2 startPosition = startPositions[i];
             positionAvailable.put(startPosition, true);
@@ -90,7 +90,7 @@ public class Server implements Runnable {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/60 * 1e9)) {
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
                     posPacket.posList = ClientPositionHandlerServer.positionList;
                     posPacket.connectedIPs = ClientPositionHandlerServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
