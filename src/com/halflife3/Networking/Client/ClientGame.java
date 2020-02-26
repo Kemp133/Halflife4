@@ -44,8 +44,8 @@ public class ClientGame extends Application {
 
     public boolean running = false;
     private final int FPS = 24;
+    private final int PACKETS_PER_SECOND = 2;
     private int bulletLimiter = 6;
-    private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion
 
     //region
@@ -166,7 +166,7 @@ public class ClientGame extends Application {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/FPS * 1e9)) {
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
                     Client.receivePositions();
 
                     HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
@@ -204,8 +204,9 @@ public class ClientGame extends Application {
 
         AnimationTimer game = new AnimationTimer() {
             private long lastUpdate = 0;
+            private int packetSendCounter = FPS / PACKETS_PER_SECOND;
             public void handle(long currentNanoTime) {
-                if (currentNanoTime - lastUpdate > nSecPerFrame) {
+                if (currentNanoTime - lastUpdate > Math.round(1.0/FPS * 1e9)) {
                     //region Calculate time since last update.
                     double elapsedTime = (currentNanoTime - startNanoTime[0]) / 1000000000.0;
                     startNanoTime[0] = currentNanoTime;
@@ -318,7 +319,10 @@ public class ClientGame extends Application {
 
                     //TODO: Send the client's bullets' positions & velocities to the server
                     //region Sends the client's position now
-                    Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
+                    if (packetSendCounter == 0) {
+                        Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
+                        packetSendCounter = FPS / PACKETS_PER_SECOND;
+                    } else if (packetSendCounter > 0) packetSendCounter--;
                     //endregion
 
                     lastUpdate = currentNanoTime;
