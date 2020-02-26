@@ -43,7 +43,7 @@ public class ClientGame extends Application {
     private static HashMap<String, Player> enemyList;
 
     public boolean running = false;
-    private final int FPS = 20;
+    private final int FPS = 24;
     private int bulletLimiter = 6;
     private long nSecPerFrame = Math.round(1.0/FPS * 1e9);
     //endregion

@@ -11,6 +11,7 @@ import java.util.HashMap;
 public class Server implements Runnable {
 
     public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
+    private final int PACKETS_PER_SECOND = 60;
     //region Variables
     public static final int     MULTICAST_PORT      = 5555;
     public static final int     LISTENER_PORT       = 5544;
@@ -30,7 +31,6 @@ public class Server implements Runnable {
                                                new Vector2(80, 480),
                                                new Vector2(680, 480)};
     public static String[] botNames = new String[]{"bot0", "bot1", "bot2", "bot3"};
-    private final int PACKETS_PER_SECOND = 10;
     //endregion
 
     public void start() {
