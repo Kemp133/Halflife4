@@ -9,6 +9,7 @@ public class EventListenerClient {
 
         if (packet instanceof UniquePortPacket) {
 
+//            System.out.println("Received UniquePortPacket");
             UniquePortPacket portPacket = (UniquePortPacket) packet;
 
 //            "If" for when multiple clients are already connected
@@ -20,6 +21,7 @@ public class EventListenerClient {
 
         } else if (packet instanceof PositionListPacket) {
 
+//            System.out.println("Received PositionListPacket");
             Client.listOfClients = (PositionListPacket) packet;
 
         }

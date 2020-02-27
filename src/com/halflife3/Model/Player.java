@@ -90,6 +90,10 @@ public class Player extends GameObject {
         velocity = velocity.add(toAdd);
     }
 
+    public void resetPosition() {
+        original_position = spawn_point;
+    }
+
     //region MoveSpeed getter and setter
     public float getMoveSpeed() { return moveSpeed; }
 

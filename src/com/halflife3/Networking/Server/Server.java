@@ -10,9 +10,9 @@ import java.util.HashMap;
 
 public class Server implements Runnable {
 
-    public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
     private final int PACKETS_PER_SECOND = 60;
     //region Variables
+    public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
     public static final int     MULTICAST_PORT      = 5555;
     public static final int     LISTENER_PORT       = 5544;
     public static final int     GET_PORT_PORT       = 5566;
@@ -20,6 +20,8 @@ public class Server implements Runnable {
 
     private boolean running = false;
     private static boolean welcoming = true;
+    private static InetAddress multicastGroup;
+    private static MulticastSocket multicastSocket;
     private PositionListPacket posPacket;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
@@ -51,12 +53,18 @@ public class Server implements Runnable {
 
         }
 
-        try { clientSocket = new DatagramSocket(LISTENER_PORT); } catch (SocketException e) {
+        try {
+            clientSocket = new DatagramSocket(LISTENER_PORT);
+            multicastGroup = InetAddress.getByName(MULTICAST_ADDRESS);
+            multicastSocket = new MulticastSocket();
+            setWifiInterface();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         posPacket = new PositionListPacket();
         listenerServer = new EventListenerServer();
+
         new Thread(this).start();
     }
 
@@ -69,9 +77,7 @@ public class Server implements Runnable {
         new Thread(() -> {
             int timeOut = SERVER_TIMEOUT/1000;
             while (running && timeOut > 0) {
-                if (welcoming) {
-                    multicastPacket(new WelcomePacket(), MULTICAST_PORT);
-                }
+                if (welcoming) { multicastPacket(new WelcomePacket(), MULTICAST_PORT); }
 
                 waitASecond();
 
@@ -109,6 +115,8 @@ public class Server implements Runnable {
             }
 
         }
+
+        multicastSocket.close();
     }
 
     private void connectionListener() throws IOException {
@@ -118,7 +126,6 @@ public class Server implements Runnable {
         if (ClientPositionHandlerServer.clientList.isEmpty()) {
             clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
         } else clientSocket.setSoTimeout(0);
-
 
         try { clientSocket.receive(incPoke); }
         catch (SocketTimeoutException e) {
@@ -182,6 +189,7 @@ public class Server implements Runnable {
         ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition());
         new Thread(connection).start();
 
+        try { Thread.sleep(3000); } catch (InterruptedException ignored) { }
         multicastPacket(portPacket, GET_PORT_PORT);
 
         ClientPositionHandlerServer.clientList.put(address, connection);
@@ -226,20 +234,9 @@ public class Server implements Runnable {
 
     public static void multicastPacket(Object o, int mPort) {
         try {
-            MulticastSocket multicastSocket = new MulticastSocket();
-
-            //region Looks for the Wi-Fi adapter and sets the interface to it
-            setWifiInterface(multicastSocket);
-            //endregion
-
-            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
             byte[] sendBuf = objectToByteArray(o);
-            DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, group, mPort);
+            DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);
             multicastSocket.send(packet);
-
-        } catch (UnknownHostException e) {
-            System.err.println("Exception:  " + e);
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -286,7 +283,7 @@ public class Server implements Runnable {
         return o;
     }
 
-    public static void setWifiInterface(MulticastSocket multicastSocket) {
+    public static void setWifiInterface() {
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {

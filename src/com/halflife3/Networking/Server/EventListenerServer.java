@@ -20,8 +20,7 @@ public class EventListenerServer {
 
         } else if (packet instanceof PositionPacket) {
 
-            PositionPacket pos = (PositionPacket) packet;
-            replacing(pos, sender);
+            replacing((PositionPacket) packet, sender);
 
         }
 

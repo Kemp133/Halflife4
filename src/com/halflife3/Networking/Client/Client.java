@@ -13,7 +13,7 @@ import java.util.Enumeration;
 
 import static com.halflife3.Networking.Server.Server.GET_PORT_PORT;
 
-public class Client implements Runnable {
+public class Client {
 
     //region Variables
 //    For "catching" the server
@@ -35,17 +35,15 @@ public class Client implements Runnable {
 
 //    List of Clients
     public static PositionListPacket listOfClients;
-
-//    isRunning
-    private static boolean running = false;
     //endregion
 
 //    Joins the multicast group to listen for multicasted packets
     public void joinGroup() {
         try {
+            group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
+
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
             positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
-            group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
             setWifiInterface();
 
@@ -89,33 +87,18 @@ public class Client implements Runnable {
 //        Gets the unique port to communicate with the server
         getUniqueInfo();
 
-        running = true;
-        new Thread(this).start();
-    }
-
-    @Override
-    public void run() {
-        while(running) {
-            System.out.println("Client running");
-            for (int i = 0; i < 300 && running; i++) {
-                waitASecond();
-            }
-        }
-        System.out.println("Client stopped running");
+        System.out.println("Client running");
     }
 
 //    Sends a disconnect packet to the server and closes the sockets
-    public static void close() {
-        running = false;
+    public static void disconnect() {
 
         //region Sends Disconnect packet to the Server
         DisconnectPacket leave = new DisconnectPacket();
         byte[] tempBuf = objectToByteArray(leave);
 
         DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, uniquePort);
-        try {
-            outSocket.send(dc);
-        } catch (IOException e) {
+        try { outSocket.send(dc); } catch (IOException e) {
             e.printStackTrace();
         }
         //endregion
@@ -145,7 +128,7 @@ public class Client implements Runnable {
 //    Receives and sorts a packet
     public void receivePacket() {
         try {
-            byte[] recBuf = new byte[5000];
+            byte[] recBuf = new byte[3000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);
@@ -158,10 +141,11 @@ public class Client implements Runnable {
 //    Updates the 'listOfClients' variable
     public static void receivePositions() {
         try {
-            byte[] recBuf = new byte[5000];
+            byte[] recBuf = new byte[1000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             positionSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);
+            System.out.println("Received packet length: " + objectToByteArray(o).length);
             listenerClient.received(o);
         } catch (IOException e) {
             e.printStackTrace();
@@ -176,15 +160,6 @@ public class Client implements Runnable {
             outSocket = new DatagramSocket();
             outSocket.send(packet);
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-//    Makes the Thread sleep for 1 second
-    private void waitASecond() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

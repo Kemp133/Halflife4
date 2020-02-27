@@ -1,15 +1,14 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Controller.Input;
 import com.halflife3.Controller.KeyHandle;
 import com.halflife3.Controller.MouseInput;
 import com.halflife3.Controller.ObjectManager;
+import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Model.*;
 import com.halflife3.Model.Interfaces.IRenderable;
 import com.halflife3.Model.Interfaces.IUpdateable;
 import com.halflife3.Networking.Packets.PositionPacket;
-import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -35,194 +34,109 @@ import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
-    //region Variables
+    private final int FPS = 24;
+    private final int INC_PACKETS_PER_SECOND = 2;
+    private final int OUT_PACKETS_PER_SECOND = 12;
+
+    //region Other variables
     static Input input;
     private static Pane root;
+    private static KeyHandle handle;
+    private static Crosshair cursor;
     private static ObjectManager objectManager;
     private static Player player_client; //Can get IP, Position, stateOfAI
-    private static HashMap<String, Player> enemyList;
-
+    private static HashMap<String, Player> playerList;
+    private Stage window = null;
+    private boolean flag = false;
     public boolean running = false;
-    private final int FPS = 24;
-    private final int PACKETS_PER_SECOND = 2;
     private int bulletLimiter = 6;
     //endregion
 
-    //region
-    private Stage window = null;
-    private boolean flag = false;
-    public ClientGame(){}
+    //region ClientGame constructors
+    public ClientGame() {}
 
-    public ClientGame(Stage window){
+    public ClientGame(Stage window) {
         this.window = window;
         flag = true;
     }
     //endregion
 
     public void getStarted() {
-
-        enemyList = new HashMap<>();
-
+        //region Initialise network
         Client clientNetwork = new Client();
         clientNetwork.joinGroup();
         clientNetwork.getHostInfo();
         clientNetwork.start();
+        //endregion
 
+        //region Initialise objects
+        playerList = new HashMap<>();
         objectManager = new ObjectManager();
         input = new Input();
         root = new Pane();
+        //endregion
 
+        //region Initialise this player
         Vector2 startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
         player_client = new Player(startPos, startVel, 0, objectManager);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
-
-        Client.receivePositions();
-        for (String ip : Client.listOfClients.connectedIPs) {
-            if (!ip.equals(player_client.getIpOfClient())) {
-                PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
-                Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
-                Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-                Player enemy = new Player(pos, vel, theDoubleValues.rotation, objectManager);
-                try { enemy.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                enemy.setIpOfClient(ip);
-                enemyList.put(ip, enemy);
-            }
+        try { player_client.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
+            System.out.println("Could not find file in path: 'res/Player_pic.png'");
         }
+        //endregion
 
-        if(flag){
+        //region Wait until Server acknowledges Player connection
+        do {
+            Client.receivePositions();
+        } while (!Client.listOfClients.connectedIPs.contains(player_client.getIpOfClient()));
+        //endregion
+
+        initialisePlayers();
+
+        if (flag) {
             flag = false;
-            try {
-                this.start(this.window);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        else
-            launch();
+            try { this.start(this.window); } catch (Exception e) { e.printStackTrace(); }
+        } else launch();
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("HalfLife 3 : Man in Black");  // change for name
+    public void start(Stage primaryStage) {
+        //region Window setup
+        primaryStage.setTitle("HalfLife 3 : Man in Black");
         Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
         Scene scene = new Scene(root, 800, 600);
         primaryStage.setScene(scene);
-        player_client.setImage("res/Player_pic.png");
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
-
-        //region Background setup
-        FileInputStream bgPNG = new FileInputStream("res/background_image.png");
-        Image image = new Image(bgPNG, 40, 40, true, true);
-        BackgroundImage myBI = new BackgroundImage(image,
-                BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT,
-                BackgroundSize.DEFAULT);
-        root.setBackground(new Background(myBI));
         //endregion
 
-        //region Add audio into game
-        AudioForGame audio = new AudioForGame();
-        audio.getMenu().getItems().add(audio.getMute());
-        audio.getSlider1().setHideOnClick(false);
-        audio.getMenu().getItems().add(audio.getSlider1());
-        audio.getMenuBar().getMenus().add(audio.getMenu());
-        audio.getBattle_music().setAutoPlay(true);
-        audio.getBattle_music().setMute(false);
-        audio.getBattle_music().setOnEndOfMedia(() -> {
-            audio.getBattle_music().seek(Duration.ZERO);
-            audio.getBattle_music().play();
-        });
-        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-        root.getChildren().add(audio.getMenuBar());
-        //endregion
+        gameInit(scene);
 
-        //region Key input listener setup
-        KeyHandle handle = new KeyHandle();
-        root.setOnKeyPressed(handle);
-        root.setOnKeyReleased(handle);
-        root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
-        scene.setCursor(Cursor.NONE);
-        //endregion
-
-        //region Initialise cursor
-        Crosshair cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short)0, objectManager, input);
-        //endregion
-
-        //region Map loading
-        MapRender map = new MapRender(objectManager);
-        map.SetMap("res/map.png");
-        map.loadLevel();
-        //endregion
-
-        final long[] startNanoTime = {System.nanoTime()};
-
-        //region Updates the position of all enemies
+        //region Thread to update the position of all enemies
         running = true;
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
-                    Client.receivePositions();
-
-                    HashSet<String> toRemove = getPlayersToDestroy(Server.botNames, Client.listOfClients.connectedIPs);
-                    if (toRemove != null) {
-                        for (String removeThis : toRemove) {
-                            if (enemyList.containsKey(removeThis)) {
-                                Player nPlayer = enemyList.get(removeThis);
-                                enemyList.get(removeThis).selfDestroy();
-                                enemyList.remove(removeThis);
-                                for (String ip : Client.listOfClients.connectedIPs) {
-                                    if (!enemyList.containsKey(ip)) {
-                                        enemyList.put(ip, nPlayer);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    for (String ip : Client.listOfClients.connectedIPs) {
-                        if (!ip.equals(player_client.getIpOfClient())) {
-                            PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
-                            Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
-                            Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-
-                            enemyList.get(ip).setVelocity(vel);
-                            enemyList.get(ip).setPosition(pos);
-                        }
-                    }
-
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
+                    updateEnemies();
                     serverNanoTime = System.nanoTime();
                 }
             }
         }).start();
         //endregion
 
-        AnimationTimer game = new AnimationTimer() {
+        new AnimationTimer() {
             private long lastUpdate = 0;
-            private int packetSendCounter = FPS / PACKETS_PER_SECOND;
+            private int packetSendCounter = OUT_PACKETS_PER_SECOND;
+            double startNanoTime = System.nanoTime();
+
             public void handle(long currentNanoTime) {
                 if (currentNanoTime - lastUpdate > Math.round(1.0/FPS * 1e9)) {
                     //region Calculate time since last update.
-                    double elapsedTime = (currentNanoTime - startNanoTime[0]) / 1000000000.0;
-                    startNanoTime[0] = currentNanoTime;
-                    //endregion
-
-                    //region Calculate the radius
-                    Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
-                            player_client.getY() + (player_client.height/2));
-                    Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                            .subtract(player_client_center);
-                    Affine rotate = new Affine();
-
-
-                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(),direction.getX()))*32;
-                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(),direction.getX()))*32;
-                    Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
+                    double elapsedTime = (currentNanoTime - startNanoTime) / 1e9;
+                    startNanoTime = currentNanoTime;
                     //endregion
 
                     //region Handles player movement
@@ -247,12 +161,25 @@ public class ClientGame extends Application {
                     }
                     //endregion
 
+                    //region Calculate the rotation
+                    Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
+                                                            player_client.getY() + (player_client.height/2));
+                    Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
+                                            .subtract(player_client_center);
+//                    Player rotation
+                    Affine rotate = new Affine();
+                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
+                    player_client.setRotate(rotate);
+
+                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(),direction.getX()))*32;
+                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(),direction.getX()))*32;
+                    Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
+                    //endregion
+
                     //region Create a new bullet
                     if (input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-
                         Vector2 bulletPos =new Vector2(player_client.getX() + player_client.width/2,player_client.getY()+player_client.height/2).add(direction_of_gun);
-                        //Vector2 bulletPos = player_client_center.add(new Vector2(20,20));
-                        Vector2 bulletVel = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
+                        Vector2 bulletVel = new Vector2(cursor.getX(), cursor.getY())
                                                 .subtract(player_client.getPosition()).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
@@ -267,13 +194,16 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Collision detection
-                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
                     boolean player_hit_block = false;
                     for (Bricks block : MapRender.get_list()) {
                         if (block.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())) {
                             player_hit_block = true;
                         }
                     }
+//                    If a collision happens - moves the player back
+                    player_client.collision(player_hit_block, elapsedTime);
+
+//                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
 //                    boolean Bullet_hit_wall = false;
 //                    boolean Bullet_hit_player = false;
 //                    for(GameObject go:objectManager.getGameObjects()){
@@ -295,62 +225,149 @@ public class ClientGame extends Application {
 //                    }
                     //endregion
 
-                    //region If a collision happens - moves the player back
-                    player_client.collision(player_hit_block, elapsedTime);
+                    //region Sends the client's position
+                    //TODO: Send the client's bullets' velocities to the server
+                    if (packetSendCounter == 0) {
+                        Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
+                        packetSendCounter = OUT_PACKETS_PER_SECOND;
+                    } else if (packetSendCounter > 0) packetSendCounter--;
                     //endregion
 
-                    //region Clears screen
+                    //region Re-renders all game objects
                     graphicsContext.clearRect(0, 0, 800, 600);
-                    //endregion
-
-                    //double degree_of_gun = Math.toDegrees(Math.atan2(direction.getY(),direction.getX())) + Math.toDegrees(Math.atan2(1,3));
-                    //Vector2 direction_of_gun = (Math.cos(degree_of_gun)*9.5, Math.sin(degree_of_gun));
-
-                    //region Rotation of the player
-                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
-                    player_client.setRotate(rotate);
-                    //endregion
-
-                    //region Renders all game objects
                     for (IRenderable go : objectManager.getGameObjects()) {
                         go.render(graphicsContext);
                     }
                     //endregion
 
-                    //TODO: Send the client's bullets' positions & velocities to the server
-                    //region Sends the client's position now
-                    if (packetSendCounter == 0) {
-                        Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
-                        packetSendCounter = FPS / PACKETS_PER_SECOND;
-                    } else if (packetSendCounter > 0) packetSendCounter--;
-                    //endregion
-
                     lastUpdate = currentNanoTime;
                 }
             }
-        };
-        game.start();
+        }.start();
 
         root.requestFocus();
         primaryStage.show();
-
     }
 
     @Override
     public void stop() throws Exception {
-        super.stop();
-        Client.close();
+        System.out.println("Client stopped");
+        Client.disconnect();
         running = false;
+        super.stop();
     }
 
-    public HashSet<String> getPlayersToDestroy(String[] botNames, HashSet<String> IPs) {
-        HashSet<String> playersToRemove = new HashSet<>();
+    private void gameInit(Scene scene) {
+        //region Background setup
+        FileInputStream bgPNG = null;
+        try {
+            bgPNG = new FileInputStream("res/background_image.png");
+            Image image = new Image(bgPNG, 40, 40, true, true);
+            BackgroundImage myBI = new BackgroundImage(image,
+                    BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT,
+                    BackgroundSize.DEFAULT);
+            root.setBackground(new Background(myBI));
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find file in path: 'res/background_image.png'");
+        }
+        //endregion
 
-        for (String bot : botNames)
-            if (!IPs.contains(bot))
-                playersToRemove.add(bot);
+        //region Add audio into game
+        AudioForGame audio = new AudioForGame();
+        audio.getMenu().getItems().add(audio.getMute());
+        audio.getSlider1().setHideOnClick(false);
+        audio.getMenu().getItems().add(audio.getSlider1());
+        audio.getMenuBar().getMenus().add(audio.getMenu());
+        audio.getBattle_music().setAutoPlay(true);
+        audio.getBattle_music().setMute(true); //Mute music by default
+        audio.getBattle_music().setOnEndOfMedia(() -> {
+            audio.getBattle_music().seek(Duration.ZERO);
+            audio.getBattle_music().play();
+        });
+        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+        root.getChildren().add(audio.getMenuBar());
+        //endregion
 
-        return playersToRemove;
+        //region Key input listener setup
+        handle = new KeyHandle();
+        root.setOnKeyPressed(handle);
+        root.setOnKeyReleased(handle);
+        root.addEventHandler(MouseEvent.ANY, new MouseInput(input));
+        scene.setCursor(Cursor.NONE);
+        //endregion
+
+        //region Initialise cursor
+        cursor = new Crosshair(input.mousePosition, new Vector2(0, 0), (short)0, objectManager, input);
+        //endregion
+
+        //region Map loading
+        MapRender map = new MapRender(objectManager);
+        try {
+            map.SetMap("res/map.png");
+            map.loadLevel();
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find file in path 'res/map.png'");
+        }
+        //endregion
+    }
+
+    public void initialisePlayers() {
+        Client.receivePositions();
+        for (String ip : Client.listOfClients.connectedIPs) {
+            if (ip.equals(player_client.getIpOfClient())) {
+                playerList.put(ip, player_client);
+                continue;
+            }
+
+            PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+            Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+            Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
+            Player enemy = new Player(pos, vel, theDoubleValues.rotation, objectManager);
+            try { enemy.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
+                System.out.println("Could not find file in path: 'res/Player_pic.png'");
+            }
+            enemy.setIpOfClient(ip);
+            playerList.put(ip, enemy);
+        }
+    }
+
+    public void updateEnemies() {
+        Client.receivePositions();
+
+        //region Replaces Bots <-> Players
+        for (HashMap.Entry<String, Player> player : playerList.entrySet()) {
+//            If bot name/player IP is stored locally - continue
+            if (Client.listOfClients.connectedIPs.contains(player.getKey()))
+                continue;
+
+//            If server list has been updated - reset the odd player's position and velocity
+            player.getValue().resetPosition();
+            player.getValue().resetVelocity();
+
+//            Find the odd player (bot or disconnected player)
+            for (String newIP : Client.listOfClients.connectedIPs) {
+//                If the player is in both local and server lists - continue
+                if (playerList.containsKey(newIP))
+                    continue;
+
+//                If newIP is in local list but not in the server list
+                player.getValue().setIpOfClient(newIP); //Change the Player gameObject's IP to newIP
+                playerList.put(newIP, player.getValue()); //Put a copy of the old player (with changed IP) as a new entry
+                playerList.remove(player.getKey()); //Delete the old player entry from local list
+            }
+        }
+        //endregion
+
+        for (String ip : Client.listOfClients.connectedIPs) {
+            if (ip.equals(player_client.getIpOfClient()))
+                continue;
+
+            PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+            Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
+            if (playerList.get(ip) != null)
+                playerList.get(ip).setVelocity(vel);
+        }
     }
 
     //region Framework to get only some specific game objects
