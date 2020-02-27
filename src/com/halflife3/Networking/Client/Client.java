@@ -22,6 +22,7 @@ public class Client {
 
 //    For receiving clients' positions
     protected static MulticastSocket positionSocket = null;
+    private static int incPacketSize = 2000;
 
     //    For sending packets to the server
     private static InetAddress hostAddress;
@@ -141,11 +142,11 @@ public class Client {
 //    Updates the 'listOfClients' variable
     public static void receivePositions() {
         try {
-            byte[] recBuf = new byte[1000];
+            byte[] recBuf = new byte[incPacketSize];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             positionSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);
-            System.out.println("Received packet length: " + objectToByteArray(o).length);
+            if (incPacketSize == 2000) incPacketSize = objectToByteArray(o).length+1;
             listenerClient.received(o);
         } catch (IOException e) {
             e.printStackTrace();
@@ -193,6 +194,7 @@ public class Client {
             o = instream.readObject();
             instream.close();
         } catch (IOException | ClassNotFoundException e) {
+            incPacketSize = 2000;
             e.printStackTrace();
         }
 
