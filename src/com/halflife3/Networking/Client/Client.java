@@ -146,7 +146,7 @@ public class Client {
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             positionSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);
-            if (incPacketSize == 2000) incPacketSize = objectToByteArray(o).length+1;
+            if (incPacketSize == 2000) incPacketSize = objectToByteArray(o).length+100;
             listenerClient.received(o);
         } catch (IOException e) {
             e.printStackTrace();
