@@ -35,9 +35,8 @@ import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
-    private final int FPS = 30;
+    private final int FPS = 24;
     private final int INC_PACKETS_PER_SECOND = 60;
-//    private final int OUT_PACKETS_PER_SECOND = 30;
 
     //region Other variables
     static Input input;
@@ -237,34 +236,31 @@ public class ClientGame extends Application {
 //                    If a collision happens - moves the player back
                     player_client.collision(player_hit_block, elapsedTime);
 
-//                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
-//                    boolean Bullet_hit_wall = false;
-//                    boolean Bullet_hit_player = false;
-//                    for(GameObject go:objectManager.getGameObjects()){
-//                        if (go.getKeys().contains("Bullet")){
-//                            for(Bricks block : MapRender.get_list()){
-//                                if(go.GetBounds().intersects(block.GetBounds().getBoundsInLocal())){
-//                                    Bullet_hit_wall = true;
-//                                    crash_bullet_list.add(go);
-//                                }
-//                            }
-//                            if(go.GetBounds().intersects(player_client.circle.getBoundsInLocal())){
-//                                Bullet_hit_player = true;
-//                                crash_bullet_list.add(go);
-//                            }
-//                        }
-//                    }
-//                    for(GameObject bullet:crash_bullet_list){
-//                        bullet.remove();
-//                    }
+                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
+                    boolean Bullet_hit_wall = false;
+                    boolean Bullet_hit_player = false;
+                    for(GameObject go:objectManager.getGameObjects()){
+                        if (go.getKeys().contains("Bullet")){
+                            for(Bricks block : MapRender.get_list()){
+                                if(go.GetBounds().intersects(block.GetBounds().getBoundsInLocal())){
+                                    Bullet_hit_wall = true;
+                                    crash_bullet_list.add(go);
+                                }
+                            }
+                            if(go.GetBounds().intersects(player_client.circle.getBoundsInLocal())){
+                                Bullet_hit_player = true;
+                                crash_bullet_list.add(go);
+                            }
+                        }
+                    }
+                    for(GameObject bullet:crash_bullet_list){
+                        bullet.remove();
+                    }
                     //endregion
 
                     //region Sends the client's position
                     //TODO: Send the client's bullets' velocities to the server
-//                        double x = System.nanoTime();
                     Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
-//                        System.out.println("Time took to send packet: " + (System.nanoTime() - x));
-//                        packetSendCounter = OUT_PACKETS_PER_SECOND;
                     //endregion
 
                     //region Re-renders all game objects
@@ -403,11 +399,9 @@ public class ClientGame extends Application {
                 continue;
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
-            Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-            Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             if (playerList.get(ip) != null) {
-                playerList.get(ip).setVelocity(vel);
-                playerList.get(ip).setPosition(pos);
+                playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+                playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             }
         }
     }

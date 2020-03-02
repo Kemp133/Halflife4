@@ -100,7 +100,6 @@ public class Server implements Runnable {
                     posPacket.posList = ClientPositionHandlerServer.positionList;
                     posPacket.connectedIPs = ClientPositionHandlerServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
-//                    System.out.println("Positions multicasted!");
                     serverNanoTime = System.nanoTime();
                 }
             }

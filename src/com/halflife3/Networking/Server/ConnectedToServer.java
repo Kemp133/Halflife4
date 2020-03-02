@@ -45,11 +45,9 @@ public class ConnectedToServer implements Runnable {
         byte[] posBuf = new byte[lengthOfPackets];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
-        double x = System.nanoTime();
         try { uniqueSocket.receive(incPos); } catch (IOException e) {
             return;
         }
-        System.out.println("Time took to receive packet: " + (System.nanoTime() - x));
 
         Object receivedPosition = byteArrayToObject(posBuf);
         listenerServer.received(receivedPosition, clientAddress);
