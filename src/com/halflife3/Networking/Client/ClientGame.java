@@ -30,13 +30,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static com.halflife3.Networking.Client.Client.listOfClients;
 import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
     private final int FPS = 30;
     private final int INC_PACKETS_PER_SECOND = 60;
-    private final int OUT_PACKETS_PER_SECOND = 30;
+//    private final int OUT_PACKETS_PER_SECOND = 30;
 
     //region Other variables
     static Input input;
@@ -93,7 +94,7 @@ public class ClientGame extends Application {
         //region Wait until Server acknowledges Player connection
         do {
             Client.receivePositions();
-        } while (!Client.listOfClients.connectedIPs.contains(player_client.getIpOfClient()));
+        } while (!listOfClients.connectedIPs.contains(player_client.getIpOfClient()));
         //endregion
 
         initialisePlayers();
@@ -126,6 +127,8 @@ public class ClientGame extends Application {
 //                    double x = System.nanoTime();
                     updateEnemies();
 //                    System.out.println("Time took to update enemy positions: " + (System.nanoTime() - x));
+//                    System.out.println("pos: " + listOfClients.posList.get("/192.168.43.36").orgPosX + "|" + listOfClients.posList.get("/192.168.43.36").orgPosY +
+//                            "    vel: " + listOfClients.posList.get("/192.168.43.36").velX + "|" + listOfClients.posList.get("/192.168.43.36").velY);
                     serverNanoTime = System.nanoTime();
                 }
             }
@@ -134,7 +137,7 @@ public class ClientGame extends Application {
 
         new AnimationTimer() {
             private long lastUpdate = 0;
-            private int packetSendCounter = OUT_PACKETS_PER_SECOND;
+//            private int packetSendCounter = OUT_PACKETS_PER_SECOND;
             double startNanoTime = System.nanoTime();
             Vector2 camera_offset = new Vector2();
 
@@ -258,10 +261,10 @@ public class ClientGame extends Application {
 
                     //region Sends the client's position
                     //TODO: Send the client's bullets' velocities to the server
-                    if (packetSendCounter == 0) {
-                        Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
-                        packetSendCounter = OUT_PACKETS_PER_SECOND;
-                    } else if (packetSendCounter > 0) packetSendCounter--;
+//                        double x = System.nanoTime();
+                    Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
+//                        System.out.println("Time took to send packet: " + (System.nanoTime() - x));
+//                        packetSendCounter = OUT_PACKETS_PER_SECOND;
                     //endregion
 
                     //region Re-renders all game objects
@@ -345,13 +348,13 @@ public class ClientGame extends Application {
 
     public void initialisePlayers() {
         Client.receivePositions();
-        for (String ip : Client.listOfClients.connectedIPs) {
+        for (String ip : listOfClients.connectedIPs) {
             if (ip.equals(player_client.getIpOfClient())) {
                 playerList.put(ip, player_client);
                 continue;
             }
 
-            PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+            PositionPacket theDoubleValues = listOfClients.posList.get(ip);
             Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
             Player enemy = new Player(pos, vel, theDoubleValues.rotation, objectManager);
@@ -374,7 +377,7 @@ public class ClientGame extends Application {
         //region Replaces Bots <-> Players
         for (String player : playerKeys) {
 //            If bot name/player IP is stored locally - continue
-            if (Client.listOfClients.connectedIPs.contains(player))
+            if (listOfClients.connectedIPs.contains(player))
                 continue;
 
 //            If server list has been updated - reset the odd player's position and velocity
@@ -382,7 +385,7 @@ public class ClientGame extends Application {
             playerList.get(player).resetVelocity();
 
 //            Find the odd player (bot or disconnected player)
-            for (String newIP : Client.listOfClients.connectedIPs) {
+            for (String newIP : listOfClients.connectedIPs) {
 //                If the player is in both local and server lists - continue
                 if (playerList.containsKey(newIP))
                     continue;
@@ -395,11 +398,11 @@ public class ClientGame extends Application {
         }
         //endregion
 
-        for (String ip : Client.listOfClients.connectedIPs) {
+        for (String ip : listOfClients.connectedIPs) {
             if (ip.equals(player_client.getIpOfClient()))
                 continue;
 
-            PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+            PositionPacket theDoubleValues = listOfClients.posList.get(ip);
             Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
             Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             if (playerList.get(ip) != null) {

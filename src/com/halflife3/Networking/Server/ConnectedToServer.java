@@ -1,6 +1,7 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Model.Vector2;
+import com.halflife3.Networking.Packets.PositionPacket;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -15,11 +16,13 @@ public class ConnectedToServer implements Runnable {
     private boolean running;
     private DatagramSocket uniqueSocket;
     private EventListenerServer listenerServer;
+    private int lengthOfPackets;
 
     public ConnectedToServer(InetAddress address, int clientListeningPort, Vector2 spawnPoint) {
         clientAddress = address;
         this.spawnPoint = client_position = spawnPoint;
         listenerServer = new EventListenerServer();
+        lengthOfPackets = objectToByteArray(new PositionPacket()).length;
 
         try { uniqueSocket = new DatagramSocket(clientListeningPort); }
         catch (SocketException e) { e.printStackTrace(); }
@@ -39,12 +42,14 @@ public class ConnectedToServer implements Runnable {
     }
 
     private void connectionListener() {
-        byte[] posBuf = new byte[1500];
+        byte[] posBuf = new byte[lengthOfPackets];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
+        double x = System.nanoTime();
         try { uniqueSocket.receive(incPos); } catch (IOException e) {
             return;
         }
+        System.out.println("Time took to receive packet: " + (System.nanoTime() - x));
 
         Object receivedPosition = byteArrayToObject(posBuf);
         listenerServer.received(receivedPosition, clientAddress);
@@ -65,6 +70,24 @@ public class ConnectedToServer implements Runnable {
         }
 
         return o;
+    }
+
+    private static byte[] objectToByteArray(Object o) {
+        byte[] sendBuf = null;
+
+        try {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
+            outstream.flush();
+            outstream.writeObject(o);
+            outstream.flush();
+            sendBuf = byteStream.toByteArray();
+            outstream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sendBuf;
     }
 
     public Vector2 getPosition() {
