@@ -414,8 +414,8 @@ public class ClientGame extends Application {
 
                 Affine rotate = new Affine();
                 rotate.appendRotation(theDoubleValues.degrees,
-                        player_client.getX()- cameraX + 18,
-                        player_client.getY() - cameraY + 18);
+                        theDoubleValues.orgPosX - cameraX + 18,
+                        theDoubleValues.orgPosY - cameraY + 18);
 
                 playerList.get(ip).setRotate(rotate);
                 playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
