@@ -198,12 +198,12 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Calculate the rotation
-                    player_client_center.setX(player_client.getX()-camera_offset.getX() + 18);
-                    player_client_center.setY(player_client.getY()-camera_offset.getY() + 18);
-
-                    direction.setX(input.mousePosition.getX());
-                    direction.setY(input.mousePosition.getY());
-                    direction.subtract(player_client_center);
+                    Vector2 player_client_center =
+                            new Vector2(player_client.getX()-camera_offset.getX() + 18,
+                                    player_client.getY()-camera_offset.getY() + 18);
+                    Vector2 direction =
+                            new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
+                                    .subtract(player_client_center);
 
 //                    Player rotation
                     Affine rotate = new Affine();
