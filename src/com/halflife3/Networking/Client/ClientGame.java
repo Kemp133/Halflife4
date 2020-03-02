@@ -45,7 +45,7 @@ public class ClientGame extends Application {
     private static Crosshair cursor;
     private static ObjectManager objectManager;
     private static Player player_client; //Can get IP, Position, stateOfAI
-    private volatile static HashMap<String, Player> playerList;
+    private static HashMap<String, Player> playerList;
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
@@ -333,17 +333,22 @@ public class ClientGame extends Application {
     }
 
     public void updateEnemies() {
+        ArrayList<String> playerKeys = new ArrayList<>();
+
         Client.receivePositions();
 
+        for (HashMap.Entry<String, Player> player : playerList.entrySet())
+            playerKeys.add(player.getKey());
+
         //region Replaces Bots <-> Players
-        for (HashMap.Entry<String, Player> player : playerList.entrySet()) {
+        for (String player : playerKeys) {
 //            If bot name/player IP is stored locally - continue
-            if (Client.listOfClients.connectedIPs.contains(player.getKey()))
+            if (Client.listOfClients.connectedIPs.contains(player))
                 continue;
 
 //            If server list has been updated - reset the odd player's position and velocity
-            player.getValue().resetPosition();
-            player.getValue().resetVelocity();
+            playerList.get(player).resetPosition();
+            playerList.get(player).resetVelocity();
 
 //            Find the odd player (bot or disconnected player)
             for (String newIP : Client.listOfClients.connectedIPs) {
@@ -352,9 +357,9 @@ public class ClientGame extends Application {
                     continue;
 
 //                If newIP is in local list but not in the server list
-                player.getValue().setIpOfClient(newIP); //Change the Player gameObject's IP to newIP
-                playerList.put(newIP, player.getValue()); //Put a copy of the old player (with changed IP) as a new entry
-                playerList.remove(player.getKey()); //Delete the old player entry from local list
+                playerList.get(player).setIpOfClient(newIP); //Change the Player gameObject's IP to newIP
+                playerList.put(newIP, playerList.get(player)); //Put a copy of the old player (with changed IP) as a new entry
+                playerList.remove(player); //Delete the old player entry from local list
             }
         }
         //endregion
