@@ -45,7 +45,7 @@ public class ClientGame extends Application {
     private static Crosshair cursor;
     private static ObjectManager objectManager;
     private static Player player_client; //Can get IP, Position, stateOfAI
-    private static HashMap<String, Player> playerList;
+    private volatile static HashMap<String, Player> playerList;
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
