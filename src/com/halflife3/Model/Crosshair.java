@@ -40,7 +40,7 @@ public class Crosshair extends GameObject {
     }
 
     @Override
-    public void render(GraphicsContext gc) {
+    public void render(GraphicsContext gc, Vector2 offset) {
         gc.drawImage(sprite, position.getX() - (float)(SPRITE_SIZE / 2), position.getY() - (float)(SPRITE_SIZE / 2));
     }
 

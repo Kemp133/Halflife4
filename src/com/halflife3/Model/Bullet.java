@@ -37,8 +37,8 @@ public class Bullet extends GameObject {
     }
 
     @Override
-    public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, getX(), getY());
+    public void render(GraphicsContext gc, Vector2 offset) {
+        gc.drawImage(sprite, getX()-offset.getX(), getY()-offset.getY());
     }
 
     @Override

@@ -30,8 +30,8 @@ public abstract class Enemy extends GameObject {
     }
 
     @Override
-    public void render(GraphicsContext gc) {
-        gc.drawImage( image, position.getX(), position.getY() );
+    public void render(GraphicsContext gc,Vector2 offset) {
+        gc.drawImage( image, position.getX()-offset.getX() , position.getY()-offset.getY() );
     }
 
     @Override
