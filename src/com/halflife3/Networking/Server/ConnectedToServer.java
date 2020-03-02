@@ -39,7 +39,7 @@ public class ConnectedToServer implements Runnable {
     }
 
     private void connectionListener() {
-        byte[] posBuf = new byte[5000];
+        byte[] posBuf = new byte[1500];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
         try { uniqueSocket.receive(incPos); } catch (IOException e) {

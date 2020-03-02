@@ -142,10 +142,10 @@ public class Player extends GameObject {
 
     //region Packet getter and setter
     public PositionPacket getPacketToSend() {
-        packetToSend.velY = velocity.getY();
-        packetToSend.velX = velocity.getX();
-        packetToSend.orgPosX = position.getX();
-        packetToSend.orgPosY = position.getY();
+        packetToSend.velY = getVelY();
+        packetToSend.velX = getVelX();
+        packetToSend.orgPosX = getX();
+        packetToSend.orgPosY = getY();
         return packetToSend;
     }
 

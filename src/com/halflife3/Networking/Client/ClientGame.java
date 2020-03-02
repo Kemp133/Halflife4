@@ -370,8 +370,11 @@ public class ClientGame extends Application {
 
             PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
             Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-            if (playerList.get(ip) != null)
+            Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+            if (playerList.get(ip) != null) {
                 playerList.get(ip).setVelocity(vel);
+                playerList.get(ip).setPosition(pos);
+            }
         }
     }
 
