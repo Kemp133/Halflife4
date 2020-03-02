@@ -404,7 +404,7 @@ public class ClientGame extends Application {
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
             if (playerList.get(ip) != null) {
-                double cameraX = theDoubleValues.orgPosX - 9*40, cameraY = theDoubleValues.orgPosY - 7*40;
+                double cameraX = player_client.getX() - 9*40, cameraY = player_client.getY() - 7*40;
 
                 if (cameraX < 0) cameraX = 0;
                 else if (cameraX > 25*40) cameraX = 25*40;
@@ -414,8 +414,8 @@ public class ClientGame extends Application {
 
                 Affine rotate = new Affine();
                 rotate.appendRotation(theDoubleValues.degrees,
-                        theDoubleValues.orgPosX - cameraX + 18,
-                        theDoubleValues.orgPosY - cameraY + 18);
+                        player_client.getX()- cameraX + 18,
+                        player_client.getY() - cameraY + 18);
 
                 playerList.get(ip).setRotate(rotate);
                 playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
