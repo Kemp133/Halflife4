@@ -36,7 +36,7 @@ public class ClientGame extends Application {
 
     private final int FPS = 30;
     private final int INC_PACKETS_PER_SECOND = 60;
-    private final int OUT_PACKETS_PER_SECOND = 60;
+    private final int OUT_PACKETS_PER_SECOND = 30;
 
     //region Other variables
     static Input input;
