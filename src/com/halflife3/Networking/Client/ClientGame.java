@@ -50,8 +50,6 @@ public class ClientGame extends Application {
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 6;
-    private Vector2 player_client_center;
-    private Vector2 direction;
     //endregion
 
     //region ClientGame constructors
@@ -76,8 +74,6 @@ public class ClientGame extends Application {
         objectManager = new ObjectManager();
         input = new Input();
         root = new Pane();
-        player_client_center = new Vector2();
-        direction = new Vector2();
         //endregion
 
         //region Initialise this player
@@ -140,7 +136,6 @@ public class ClientGame extends Application {
 
         new AnimationTimer() {
             private long lastUpdate = 0;
-//            private int packetSendCounter = OUT_PACKETS_PER_SECOND;
             double startNanoTime = System.nanoTime();
             Vector2 camera_offset = new Vector2();
 
@@ -152,15 +147,15 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Camera offset
-                    camera_offset.setX(player_client.getPosition().getX() - 9*40);
-                    camera_offset.setY(player_client.getPosition().getY() - 7*40);
-                    if(camera_offset.getX()<0)
+                    camera_offset.setX(player_client.getX() - 9*40);
+                    camera_offset.setY(player_client.getY() - 7*40);
+                    if (camera_offset.getX() < 0)
                         camera_offset.setX(0);
-                    if(camera_offset.getX() > 25*40) //map width subtract half of window width
+                    else if (camera_offset.getX() > 25*40) //map width subtract half of window width
                         camera_offset.setX(25*40);
-                    if(camera_offset.getY() < 0)
+                    if (camera_offset.getY() < 0)
                         camera_offset.setY(0);
-                    if(camera_offset.getY() > 30*40) //map height subtract half of window height
+                    else if (camera_offset.getY() > 30*40) //map height subtract half of window height
                         camera_offset.setY(30*40);
                     //endregion
 
@@ -409,12 +404,22 @@ public class ClientGame extends Application {
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
             if (playerList.get(ip) != null) {
-                playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
-                playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+                double cameraX = theDoubleValues.orgPosX - 9*40, cameraY = theDoubleValues.orgPosY - 7*40;
+
+                if (cameraX < 0) cameraX = 0;
+                else if (cameraX > 25*40) cameraX = 25*40;
+
+                if (cameraY < 0) cameraY = 0;
+                else if (cameraY > 30*40) cameraY = 30*40;
 
                 Affine rotate = new Affine();
-                rotate.appendRotation(theDoubleValues.degrees, theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+                rotate.appendRotation(theDoubleValues.degrees,
+                        theDoubleValues.orgPosX - cameraX + 18,
+                        theDoubleValues.orgPosY - cameraY + 18);
+
                 playerList.get(ip).setRotate(rotate);
+                playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+                playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             }
         }
     }
