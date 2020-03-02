@@ -50,6 +50,8 @@ public class ClientGame extends Application {
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 6;
+    private Vector2 player_client_center;
+    private Vector2 direction;
     //endregion
 
     //region ClientGame constructors
@@ -74,6 +76,8 @@ public class ClientGame extends Application {
         objectManager = new ObjectManager();
         input = new Input();
         root = new Pane();
+        player_client_center = new Vector2();
+        direction = new Vector2();
         //endregion
 
         //region Initialise this player
@@ -194,17 +198,22 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Calculate the rotation
-                    Vector2 player_client_center = new Vector2(player_client.getX()-camera_offset.getX() + 18,
-                                                            player_client.getY()-camera_offset.getY() + 18);
-                    Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
-                                            .subtract(player_client_center);
+                    player_client_center.setX(player_client.getX()-camera_offset.getX() + 18);
+                    player_client_center.setY(player_client.getY()-camera_offset.getY() + 18);
+
+                    direction.setX(input.mousePosition.getX());
+                    direction.setY(input.mousePosition.getY());
+                    direction.subtract(player_client_center);
+
 //                    Player rotation
                     Affine rotate = new Affine();
-                    rotate.appendRotation(Math.toDegrees(Math.atan2(direction.getY(), direction.getX())), player_client_center.getX(), player_client_center.getY());
+                    double degrees = Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+                    rotate.appendRotation(degrees, player_client_center.getX(), player_client_center.getY());
+                    player_client.setDegrees(degrees);
                     player_client.setRotate(rotate);
 
-                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(),direction.getX()))*32;
-                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(),direction.getX()))*32;
+                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
+                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()))*32;
                     Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
                     //endregion
 
@@ -353,7 +362,7 @@ public class ClientGame extends Application {
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
             Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-            Player enemy = new Player(pos, vel, theDoubleValues.rotation, objectManager);
+            Player enemy = new Player(pos, vel, theDoubleValues.degrees, objectManager);
             try { enemy.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
                 System.out.println("Could not find file in path: 'res/Player_pic.png'");
             }
@@ -402,6 +411,10 @@ public class ClientGame extends Application {
             if (playerList.get(ip) != null) {
                 playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+
+                Affine rotate = new Affine();
+                rotate.appendRotation(theDoubleValues.degrees, theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+                playerList.get(ip).setRotate(rotate);
             }
         }
     }

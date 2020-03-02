@@ -27,6 +27,7 @@ public class Player extends GameObject {
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
+    private double degrees;
     private PositionPacket packetToSend;
     protected int health;
     int mode = 0;
@@ -44,7 +45,7 @@ public class Player extends GameObject {
         packetToSend.spawnY = packetToSend.orgPosY = position.getY();
         packetToSend.velX = velocity.getX();
         packetToSend.velY = velocity.getY();
-        packetToSend.rotation = rotation;
+        packetToSend.degrees = this.degrees;
     }
 
     //region Overridden super methods
@@ -121,6 +122,16 @@ public class Player extends GameObject {
         original_position = spawn_point;
     }
 
+    //region Degrees getter and setter
+    public double getDegrees() {
+        return degrees;
+    }
+
+    public void setDegrees(double degrees) {
+        this.degrees = degrees;
+    }
+    //endregion
+
     //region MoveSpeed getter and setter
     public float getMoveSpeed() { return moveSpeed; }
 
@@ -173,6 +184,7 @@ public class Player extends GameObject {
         packetToSend.velX = getVelX();
         packetToSend.orgPosX = getX();
         packetToSend.orgPosY = getY();
+        packetToSend.degrees = getDegrees();
         return packetToSend;
     }
 

@@ -44,7 +44,7 @@ public class Server implements Runnable {
             PositionPacket botPacket = new PositionPacket();
             botPacket.velX = 0;
             botPacket.velY = 0;
-            botPacket.rotation = 0;
+            botPacket.degrees = 0;
             botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
             botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
@@ -168,7 +168,7 @@ public class Server implements Runnable {
 
                 //region Adds the player (with the [i]th startPosition) to the positionList
                 PositionPacket playerPacket = new PositionPacket();
-                playerPacket.rotation = 0;
+                playerPacket.degrees = 0;
                 playerPacket.orgPosX = playerPacket.spawnX = startPosition.getX();
                 playerPacket.orgPosY = playerPacket.spawnY = startPosition.getY();
                 playerPacket.velX = 0;
@@ -216,7 +216,7 @@ public class Server implements Runnable {
                     PositionPacket botPacket = new PositionPacket();
                     botPacket.velX = 0;
                     botPacket.velY = 0;
-                    botPacket.rotation = 0;
+                    botPacket.degrees = 0;
                     botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
                     botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
