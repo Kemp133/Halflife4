@@ -85,6 +85,9 @@ public class ClientGame extends Application {
         try { player_client.setImage("res/Player_pic.png"); } catch (FileNotFoundException e) {
             System.out.println("Could not find file in path: 'res/Player_pic.png'");
         }
+        try { player_client.setImage_w("res/Player_walking.png"); } catch (FileNotFoundException e) {
+            System.out.println("Could not find file in path: 'res/Player_walking.png'");
+        }
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -127,10 +130,13 @@ public class ClientGame extends Application {
         }).start();
         //endregion
 
+
+
         new AnimationTimer() {
             private long lastUpdate = 0;
             private int packetSendCounter = OUT_PACKETS_PER_SECOND;
             double startNanoTime = System.nanoTime();
+            Vector2 camera_offset = new Vector2();
 
             public void handle(long currentNanoTime) {
                 if (currentNanoTime - lastUpdate > Math.round(1.0/FPS * 1e9)) {
@@ -139,20 +145,44 @@ public class ClientGame extends Application {
                     startNanoTime = currentNanoTime;
                     //endregion
 
-                    //region Handles player movement
-                    if (handle.input.isKeyReleased(A) && handle.input.isKeyReleased(D))
-                        player_client.getVelocity().setX(0);
-                    if (handle.input.isKeyReleased(W) && handle.input.isKeyReleased(S))
-                        player_client.getVelocity().setY(0);
+                    //region Camera offset
+                    camera_offset.setX(player_client.getPosition().getX() - 9*40);
+                    camera_offset.setY(player_client.getPosition().getY() - 7*40);
+                    if(camera_offset.getX()<0)
+                        camera_offset.setX(0);
+                    if(camera_offset.getX() > 25*40) //map width subtract half of window width
+                        camera_offset.setX(25*40);
+                    if(camera_offset.getY() < 0)
+                        camera_offset.setY(0);
+                    if(camera_offset.getY() > 30*40) //map height subtract half of window height
+                        camera_offset.setY(30*40);
+                    //endregion
 
-                    if (handle.input.isKeyPressed(A))
+                    //region Handles player movement
+                    if (handle.input.isKeyReleased(A) && handle.input.isKeyReleased(D)) {
+                        player_client.getVelocity().setX(0);
+                        player_client.setIs_moving(false);
+                    }
+                    if (handle.input.isKeyReleased(W) && handle.input.isKeyReleased(S)){
+                        player_client.getVelocity().setY(0);
+                        player_client.setIs_moving(false);
+                    }
+                    if (handle.input.isKeyPressed(A)) {
                         player_client.getVelocity().setX(-100);
-                    if (handle.input.isKeyPressed(D))
+                        player_client.setIs_moving(true);
+                    }
+                    if (handle.input.isKeyPressed(D)) {
                         player_client.getVelocity().setX(100);
-                    if (handle.input.isKeyPressed(W))
+                        player_client.setIs_moving(true);
+                    }
+                    if (handle.input.isKeyPressed(W)) {
                         player_client.getVelocity().setY(-100);
-                    if (handle.input.isKeyPressed(S))
+                        player_client.setIs_moving(true);
+                    }
+                    if (handle.input.isKeyPressed(S)) {
                         player_client.getVelocity().setY(100);
+                        player_client.setIs_moving(true);
+                    }
                     //endregion
 
                     //region Clears bullets on screen
@@ -162,8 +192,8 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Calculate the rotation
-                    Vector2 player_client_center = new Vector2(player_client.getX() + (player_client.width/4),
-                                                            player_client.getY() + (player_client.height/2));
+                    Vector2 player_client_center = new Vector2(player_client.getX()-camera_offset.getX() + 18,
+                                                            player_client.getY()-camera_offset.getY() + 18);
                     Vector2 direction = new Vector2(input.mousePosition.getX(), input.mousePosition.getY())
                                             .subtract(player_client_center);
 //                    Player rotation
@@ -179,7 +209,7 @@ public class ClientGame extends Application {
                     //region Create a new bullet
                     if (input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                         Vector2 bulletPos =new Vector2(player_client.getX() + player_client.width/2,player_client.getY()+player_client.height/2).add(direction_of_gun);
-                        Vector2 bulletVel = new Vector2(cursor.getX(), cursor.getY())
+                        Vector2 bulletVel = new Vector2(cursor.getX()+camera_offset.getX(), cursor.getY()+camera_offset.getY())
                                                 .subtract(player_client.getPosition()).normalise().multiply(200);
 
                         new Bullet(bulletPos, bulletVel, (short)0, objectManager);
@@ -191,12 +221,13 @@ public class ClientGame extends Application {
                     for(IUpdateable go : objectManager.getGameObjects()) {
                         go.update(elapsedTime);
                     }
+
                     //endregion
 
                     //region Collision detection
                     boolean player_hit_block = false;
                     for (Bricks block : MapRender.get_list()) {
-                        if (block.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())) {
+                        if (block.GetBounds().intersects(player_client.circle.getBoundsInLocal())) {
                             player_hit_block = true;
                         }
                     }
@@ -214,7 +245,7 @@ public class ClientGame extends Application {
 //                                    crash_bullet_list.add(go);
 //                                }
 //                            }
-//                            if(go.GetBounds().intersects(player_client.rectangle.getBoundsInLocal())){
+//                            if(go.GetBounds().intersects(player_client.circle.getBoundsInLocal())){
 //                                Bullet_hit_player = true;
 //                                crash_bullet_list.add(go);
 //                            }
@@ -236,7 +267,7 @@ public class ClientGame extends Application {
                     //region Re-renders all game objects
                     graphicsContext.clearRect(0, 0, 800, 600);
                     for (IRenderable go : objectManager.getGameObjects()) {
-                        go.render(graphicsContext);
+                        go.render(graphicsContext,camera_offset);
                     }
                     //endregion
 
@@ -304,7 +335,7 @@ public class ClientGame extends Application {
         //region Map loading
         MapRender map = new MapRender(objectManager);
         try {
-            map.SetMap("res/map.png");
+            map.SetMap("res/soccer.png");
             map.loadLevel();
         } catch (FileNotFoundException e) {
             System.out.println("Could not find file in path 'res/map.png'");

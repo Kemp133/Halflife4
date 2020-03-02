@@ -26,7 +26,7 @@ public class boost extends GameObject {
     }
 
     @Override
-    public void render(GraphicsContext gc) {
+    public void render(GraphicsContext gc, Vector2 offset) {
 
     }
 

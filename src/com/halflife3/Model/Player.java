@@ -5,6 +5,7 @@ import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.MapRender;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 
@@ -16,8 +17,10 @@ public class Player extends GameObject {
     //region Variables
     public double width = 40;
     public double height = 35;
-    public Rectangle rectangle;
+//    public Rectangle rectangle;
+    public Circle circle;
     private Image image;
+    private Image image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
     private String ipOfClient;
@@ -26,12 +29,15 @@ public class Player extends GameObject {
     private Affine rotate;
     private PositionPacket packetToSend;
     protected int health;
+    int mode = 0;
+    boolean is_moving = false;
     //endregion
 
     public Player(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
         super(position, velocity, rotation, om);
         keys.add("player");
-        rectangle = new Rectangle(position.getX(), position.getY(), width, height);
+        //rectangle = new Rectangle(position.getX(), position.getY(), width, height);
+        circle = new Circle(position.getX()+18,position.getY()+18,17);
         rotate = new Affine();
         packetToSend = new PositionPacket();
         packetToSend.spawnX = packetToSend.orgPosX = position.getX();
@@ -43,8 +49,8 @@ public class Player extends GameObject {
 
     //region Overridden super methods
     @Override
-    public Rectangle GetBounds() {
-        return rectangle;
+    public Circle GetBounds() {
+        return circle;
     }
 
     @Override
@@ -59,11 +65,28 @@ public class Player extends GameObject {
         height = image.getHeight();
     }
 
+    public void setImage_w(String file) throws FileNotFoundException {
+        FileInputStream pngFile = new FileInputStream(file);
+        image_w = new Image(pngFile);
+        width = image_w.getWidth();
+        height = image_w.getHeight();
+    }
+
     @Override
-    public void render(GraphicsContext gc) {
+    public void render(GraphicsContext gc, Vector2 offset) {
         gc.save(); // Save default transform
         gc.setTransform(rotate);
-        gc.drawImage(image, position.getX() , position.getY());
+        if((mode % 5) == 0 && is_moving){
+            gc.drawImage(image_w, position.getX()-offset.getX() , position.getY()-offset.getY());
+            mode++;
+        }
+        else {
+            gc.drawImage(image, position.getX()-offset.getX() , position.getY()-offset.getY());
+            if(mode < 11)
+                mode++;
+            else
+                mode = 0;
+        }
         gc.restore(); // Restore default transform
     }
 
@@ -71,16 +94,20 @@ public class Player extends GameObject {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        rectangle.setX(position.getX());
-        rectangle.setY(position.getY());
+        if(original_position.getX() == position.getX() && original_position.getY() == position.getY())
+            is_moving = false;
+//        rectangle.setX(position.getX());
+//        rectangle.setY(position.getY());
+        circle.setCenterX(position.getX()+18);
+        circle.setCenterY(position.getY()+18);
     }
     //endregion
 
     public void collision(boolean if_collision, double time) {
         if (if_collision) {
-            this.position = original_position.subtract(this.velocity.multiply(2*time));
-            rectangle.setX(this.position.getX());
-            rectangle.setY(this.position.getY());
+            this.position = original_position.subtract(this.velocity.multiply(time));
+            circle.setCenterX(position.getX()+18);
+            circle.setCenterY(position.getY()+18);
         }
 
         velocity.reset();
@@ -264,5 +291,10 @@ public class Player extends GameObject {
     public int getHealth() {
         return health;
     }
+
+    public void setIs_moving(boolean is_moving) {
+        this.is_moving = is_moving;
+    }
+
     //endregion
 }

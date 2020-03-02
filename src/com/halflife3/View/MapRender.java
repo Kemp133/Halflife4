@@ -33,11 +33,11 @@ public class MapRender {
     }
 
 
-    public void render(GraphicsContext gc) {
-        for (Bricks bricks : Bricks_list) {
-            bricks.render(gc);
-        }
-    }
+//    public void render(GraphicsContext gc) {
+//        for (Bricks bricks : Bricks_list) {
+//            bricks.render(gc);
+//        }
+//    }
 
     public void loadLevel() throws FileNotFoundException {
         double width = image.getWidth(); //20px
