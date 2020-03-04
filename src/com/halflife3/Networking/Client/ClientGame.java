@@ -35,7 +35,7 @@ import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
-    private final int FPS = 24;
+    private final int FPS = 60;
     private final int INC_PACKETS_PER_SECOND = 60;
 
     //region Other variables
