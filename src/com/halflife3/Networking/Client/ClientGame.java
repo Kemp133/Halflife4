@@ -36,7 +36,7 @@ import static javafx.scene.input.KeyCode.*;
 public class ClientGame extends Application {
 
     private final int FPS = 60;
-    private final int INC_PACKETS_PER_SECOND = 60;
+    private final int INC_PACKETS_PER_SECOND = 90;
 
     //region Other variables
     static Input input;
@@ -123,12 +123,7 @@ public class ClientGame extends Application {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
-//                    double x = System.nanoTime();
                     updateEnemies();
-//                    System.out.println("Time took to update enemy positions: " + (System.nanoTime() - x));
-//                    System.out.println("pos: " + listOfClients.posList.get("/192.168.43.36").orgPosX + "|" + listOfClients.posList.get("/192.168.43.36").orgPosY +
-//                            "    vel: " + listOfClients.posList.get("/192.168.43.36").velX + "|" + listOfClients.posList.get("/192.168.43.36").velY);
-                    serverNanoTime = System.nanoTime();
                 }
             }
         }).start();
@@ -286,8 +281,8 @@ public class ClientGame extends Application {
     @Override
     public void stop() throws Exception {
         System.out.println("Client stopped");
-        Client.disconnect();
         running = false;
+        Client.disconnect();
         super.stop();
     }
 
