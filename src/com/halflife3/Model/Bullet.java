@@ -1,33 +1,21 @@
 package com.halflife3.Model;
 
-import com.halflife3.Controller.ObjectManager;
 //import com.halflife3.GameUI.AudioForGame;
+import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Circle;
 
-import java.io.FileInputStream;
-
-public class Bullet extends GameObject {
-    private Image sprite;
+public class Bullet extends Sprite {
     private Circle circle = new Circle(position.getX()+4,position.getY()+4, 4);
 
-    public Bullet(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
-        super(position, velocity, rotation, om);
+    public Bullet(Vector2 position, Vector2 velocity, short rotation) {
+        super(position, velocity, rotation);
         keys.add("Bullet");
-        try {
-            FileInputStream bulletPNG = new FileInputStream("res/bullet.png");
-            sprite = new Image(bulletPNG);
-
-//            new AudioForGame().getBullet_music().play();
-        } catch (Exception e) {
-            System.out.println("Error loading image");
-        }
+        setSprite("res/bullet.png");
     }
 
-
     @Override
-    public Circle GetBounds() {
+    public Circle getBounds() {
         return circle;
     }
 
@@ -37,8 +25,8 @@ public class Bullet extends GameObject {
     }
 
     @Override
-    public void render(GraphicsContext gc, Vector2 offset) {
-        gc.drawImage(sprite, getX()-offset.getX(), getY()-offset.getY());
+    public void render(GraphicsContext gc) {
+        gc.drawImage(sprite, getPosX() - Camera.GetOffset().getX(), getPosY() - Camera.GetOffset().getY());
     }
 
     @Override
@@ -47,5 +35,4 @@ public class Bullet extends GameObject {
         circle.setCenterX(position.getX()+4);
         circle.setCenterY(position.getY()+4);
     }
-
 }

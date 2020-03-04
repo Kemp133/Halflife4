@@ -1,19 +1,18 @@
 package com.halflife3.Model.ball;
 
-
-import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Model.GameObject;
+import com.halflife3.Model.Sprite;
 import com.halflife3.Model.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Shape;
 
-public class BasicBall extends GameObject{
-    public BasicBall(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
-        super(position, velocity, rotation, om);
+public class BasicBall extends Sprite {
+    public BasicBall(Vector2 position, Vector2 velocity, double rotation) {
+        super(position, velocity, rotation);
     }
 
     @Override
-    public Shape GetBounds() {
+    public Shape getBounds() {
         return null;
     }
 
@@ -23,7 +22,7 @@ public class BasicBall extends GameObject{
     }
 
     @Override
-    public void render(GraphicsContext gc, Vector2 offset) {
+    public void render(GraphicsContext gc) {
 
     }
 

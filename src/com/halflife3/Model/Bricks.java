@@ -1,26 +1,24 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
+import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+public class Bricks extends Sprite {
+    public Rectangle rectangle;
 
-public class Bricks extends GameObject {
-    public double width = 40;
-    public double height = 40;
-    public Rectangle rectangle = new Rectangle(position.getX(), position.getY(), width, height);
-    private Image image;
-
-    public Bricks(Vector2 position, Vector2 velocity, short rotation, ObjectManager om) {
-        super(position,velocity,rotation, om);
+    public Bricks(Vector2 position, Vector2 velocity, short rotation) {
+        super(position,velocity,rotation);
         keys.add("Bricks");
+        //Bricks should only be created in the MapRender class, so remove them from the ObjectManager to stop them polluting the object pool
+        ObjectManager.removeObject(this);
+        setSprite("res/block.png");
+        rectangle = new Rectangle(position.getX(), position.getY(), getWidth(), getHeight());
     }
 
     @Override
-    public Rectangle GetBounds() {
+    public Rectangle getBounds() {
         return rectangle;
     }
 
@@ -29,20 +27,23 @@ public class Bricks extends GameObject {
         return false;
     }
 
-    public void setImage(String file) throws FileNotFoundException {
-        FileInputStream pngFile = new FileInputStream(file);
-        image = new Image(pngFile);
-        width = image.getWidth();
-        height = image.getHeight();
+    @Override
+    public void setSprite(String file){
+        super.setSprite(file);
     }
 
     @Override
-    public void render(GraphicsContext gc,Vector2 offset) {
-        gc.drawImage(image, position.getX()-offset.getX() , position.getY()-offset.getY());
+    public void render(GraphicsContext gc) {
+        gc.drawImage(sprite, position.getX()- Camera.GetOffset().getX() , position.getY() - Camera.GetOffset().getY());
     }
 
     @Override
     public void update(double time) {
         //TODO: If bullet touches the brick and the brick can be destroyed, remove brick
     }
+
+    //region Get Width and Height
+    public double getWidth() { return sprite.getWidth(); }
+    public double getHeight() { return sprite.getHeight(); }
+    //endregion
 }
