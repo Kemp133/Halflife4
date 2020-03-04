@@ -6,23 +6,23 @@ import java.util.HashSet;
 
 public class ObjectManager  {
 
-    private HashSet<GameObject> gameObjects = new HashSet<>();
+    private static HashSet<GameObject> gameObjects = new HashSet<>();
 
     public ObjectManager() { }
 
-    public void addObject(GameObject toAdd) {
+    public static void addObject(GameObject toAdd) {
         gameObjects.add(toAdd);
     }
 
-    public void removeObject(GameObject toRemove) {
+    public static void removeObject(GameObject toRemove) {
         gameObjects.remove(toRemove);
     }
 
-    public HashSet<GameObject> getGameObjects() {
+    public static HashSet<GameObject> getGameObjects() {
         return gameObjects;
     }
 
-    public void setGameObjects(HashSet<GameObject> toSet) {
+    public static void setGameObjects(HashSet<GameObject> toSet) {
         gameObjects = toSet;
     }
 }
