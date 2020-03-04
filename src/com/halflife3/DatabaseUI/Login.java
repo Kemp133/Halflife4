@@ -8,6 +8,8 @@ import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
@@ -261,28 +263,25 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         });
 
         //NEED TO ACCOUNT FOR NON MATCHING PASSWORDS
-        create.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-                if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
-                    if (doesUserExist(getConnection(), nameField.getText()) == true) {
-                        incorrectFields.setText("That username already exists. Please choose another one");
-                        incorrectFields.setVisible(true);
-                    } else if (!passwordField.getText().equals(passwordFieldConf.getText())){
-                        setNullFields();
-                        incorrectFields.setText("Passwords do not match");
-                        incorrectFields.setVisible(true);
-                    } else {
-                        //Insert user and password into table
-                        addNewUser(getConnection(), nameField.getText(), passwordField.getText());
-                        //TODO: Assign username to player and Change to game screen
-                        incorrectFields.setText("User created"); //TODO: delete after above
-                        incorrectFields.setVisible(true); //TODO: delete after above
-                    }
-                }
-                else {
-                    incorrectFields.setText("Please type in a username and password");
+        create.setOnAction(e -> {
+            if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
+                if (doesUserExist(getConnection(), nameField.getText()) == true) {
+                    incorrectFields.setText("That username already exists. Please choose another one");
                     incorrectFields.setVisible(true);
+                } else if (!passwordField.getText().equals(passwordFieldConf.getText())) {
+                    setNullFields();
+                    incorrectFields.setText("Passwords do not match");
+                    incorrectFields.setVisible(true);
+                } else {
+                    //Insert user and password into table
+                    addNewUser(getConnection(), nameField.getText(), passwordField.getText());
+                    //TODO: Assign username to player and Change to game screen
+                    incorrectFields.setText("User created"); //TODO: delete after above
+                    incorrectFields.setVisible(true); //TODO: delete after above
                 }
+            } else {
+                incorrectFields.setText("Please type in a username and password");
+                incorrectFields.setVisible(true);
             }
         });
 
@@ -290,11 +289,91 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 setNullFields();
+                incorrectFields.setVisible(false);
                 Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
                 stage.setScene(sceneLogin);
                 stage.show();
             }
         });
+
+        /*
+        Handles enter key press for both the login and create account scene.
+        For login it will carry out as if login has been pressed
+        For create account it will carry out as if create account has been pressed
+        */
+        stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                if (stage.getScene() == sceneLogin) {
+                    if (nameField.getText() != null && passwordField.getText() != null) {
+                        if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
+                            //TODO: Assign username to 'player' and change to game screen
+                            hasLoggedIn = true;
+                            mayBeHid();
+//                       try {
+//                            new Windows().start(preloaderStage);
+//                        } catch (FileNotFoundException ex) {
+//                            ex.printStackTrace();
+//                        }
+                        } else {
+                            setNullFields();
+                            incorrectFields.setText("Incorrect username and/or password.");
+                            incorrectFields.setVisible(true);
+                        }
+                    }
+                    else {
+                        incorrectFields.setText("Type in a username and password");
+                        incorrectFields.setVisible(true);
+
+                    }
+                } else {
+                    if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
+                        if (doesUserExist(getConnection(), nameField.getText()) == true) {
+                            incorrectFields.setText("That username already exists. Please choose another one");
+                            incorrectFields.setVisible(true);
+                        } else if (!passwordField.getText().equals(passwordFieldConf.getText())) {
+                            setNullFields();
+                            incorrectFields.setText("Passwords do not match");
+                            incorrectFields.setVisible(true);
+                        } else {
+                            //Insert user and password into table
+                            addNewUser(getConnection(), nameField.getText(), passwordField.getText());
+                            //TODO: Assign username to player and Change to game screen
+                            incorrectFields.setText("User created"); //TODO: delete after above
+                            incorrectFields.setVisible(true); //TODO: delete after above
+                        }
+                    } else {
+                        incorrectFields.setText("Please type in a username and password");
+                        incorrectFields.setVisible(true);
+                    }
+                }
+            }
+        });
+
+        /*sceneCreate.addEventHandler(KeyEvent.KEY_PRESSED, event -> {  //TODO: Test doesn't conflict with previous scene on enter button press
+            if (event.getCode() == KeyCode.ENTER) {
+                if (nameField.getText() != null && passwordField.getText() != null) {
+                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
+                        //TODO: Assign username to 'player' and change to game screen
+                        hasLoggedIn = true;
+                        mayBeHid();
+//                       try {
+//                            new Windows().start(preloaderStage);
+//                        } catch (FileNotFoundException ex) {
+//                            ex.printStackTrace();
+//                        }
+                    } else {
+                        setNullFields();
+                        incorrectFields.setText("Incorrect username and/or password.");
+                        incorrectFields.setVisible(true);
+                    }
+                }
+                else {
+                    incorrectFields.setText("Type in a username and password");
+                    incorrectFields.setVisible(true);
+
+                }
+            }
+        });*/
     }
 
     public static Connection getConnection() {

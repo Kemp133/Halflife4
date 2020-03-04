@@ -106,6 +106,7 @@ public class Client {
 
         serverSocket.close();
         outSocket.close();
+        positionSocket.close();
     }
 
 //    Gets the unique port to communicate with the server and a starting position
@@ -148,6 +149,8 @@ public class Client {
             Object o = byteArrayToObject(recBuf);
             if (incPacketSize == 2000) incPacketSize = objectToByteArray(o).length+100;
             listenerClient.received(o);
+        } catch (SocketException ignored) {
+
         } catch (IOException e) {
             e.printStackTrace();
         }

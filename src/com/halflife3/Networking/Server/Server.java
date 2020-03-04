@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class Server implements Runnable {
 
-    private final int PACKETS_PER_SECOND = 60;
+    private final int PACKETS_PER_SECOND = 90;
     //region Variables
     public static final String  MULTICAST_ADDRESS   = "239.255.42.99";
     public static final int     MULTICAST_PORT      = 5555;
