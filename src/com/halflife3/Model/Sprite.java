@@ -1,6 +1,8 @@
 package com.halflife3.Model;
 
 import javafx.scene.image.Image;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 
 import java.io.*;
 
@@ -21,8 +23,12 @@ public abstract class Sprite extends GameObject {
 
 	public Image getSprite() { return sprite; }
 
-	public abstract boolean intersects(GameObject s);
+	public Shape getBounds() {
+		return new Rectangle(position.getX(),position.getY(),getWidth(),getHeight());
+	}
+
 
 	public double getWidth() { return (sprite == null) ? 0 : sprite.getWidth();	}
 	public double getHeight() { return (sprite == null) ? 0 : sprite.getHeight(); }
+
 }
