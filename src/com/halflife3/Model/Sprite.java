@@ -31,5 +31,4 @@ public abstract class Sprite extends GameObject {
 	public double getWidth() { return (sprite == null) ? 0 : sprite.getWidth();	}
 	public double getHeight() { return (sprite == null) ? 0 : sprite.getHeight(); }
 
-	public abstract boolean intersects(GameObject s);
 }
