@@ -14,10 +14,10 @@ public class Boost extends Sprite {
     @Override
     public Shape getBounds() { return null; }
 
-    @Override
-    public boolean intersects(GameObject s) {
-        return false;
-    }
+//    @Override
+//    public boolean intersects(GameObject s) {
+//        return false;
+//    }
 
     @Override
     public void render(GraphicsContext gc) {
