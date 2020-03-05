@@ -1,7 +1,7 @@
 package com.halflife3.Model;
 
-import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Networking.Packets.PositionPacket;
+import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -9,18 +9,16 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.Deque;
 
-public class Player extends GameObject {
+public class Player extends Sprite {
     //region Variables
-    public double width = 40;
-    public double height = 35;
+//    public double width = 40;
+//    public double height = 35;
 //    public Rectangle rectangle;
-    public Circle circle;
-    private Image image;
-    private Image image_w;
+    public  Circle  circle;
+//    private Image image;
+    private Image   image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
     private String ipOfClient;
@@ -34,8 +32,8 @@ public class Player extends GameObject {
     boolean is_moving = false;
     //endregion
 
-    public Player(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
-        super(position, velocity, rotation, om);
+    public Player(Vector2 position, Vector2 velocity, double rotation) {
+        super(position, velocity, rotation);
         keys.add("player");
         //rectangle = new Rectangle(position.getX(), position.getY(), width, height);
         circle = new Circle(position.getX()+18,position.getY()+18,17);
@@ -50,7 +48,7 @@ public class Player extends GameObject {
 
     //region Overridden super methods
     @Override
-    public Circle GetBounds() {
+    public Circle getBounds() {
         return circle;
     }
 
@@ -59,30 +57,16 @@ public class Player extends GameObject {
         return false;
     }
 
-    public void setImage(String file) throws FileNotFoundException {
-        FileInputStream pngFile = new FileInputStream(file);
-        image = new Image(pngFile);
-        width = image.getWidth();
-        height = image.getHeight();
-    }
-
-    public void setImage_w(String file) throws FileNotFoundException {
-        FileInputStream pngFile = new FileInputStream(file);
-        image_w = new Image(pngFile);
-        width = image_w.getWidth();
-        height = image_w.getHeight();
-    }
-
     @Override
-    public void render(GraphicsContext gc, Vector2 offset) {
+    public void render(GraphicsContext gc) {
         gc.save(); // Save default transform
         gc.setTransform(rotate);
         if((mode % 5) == 0 && is_moving){
-            gc.drawImage(image_w, position.getX()-offset.getX() , position.getY()-offset.getY());
+            gc.drawImage(image_w, position.getX() - Camera.GetOffset().getX() , position.getY()-Camera.GetOffset().getY());
             mode++;
         }
         else {
-            gc.drawImage(image, position.getX()-offset.getX() , position.getY()-offset.getY());
+            gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX() , position.getY() - Camera.GetOffset().getY());
             if(mode < 11)
                 mode++;
             else
@@ -97,8 +81,6 @@ public class Player extends GameObject {
         position = position.add(new Vector2(velocity).multiply(time));
         if(original_position.getX() == position.getX() && original_position.getY() == position.getY())
             is_moving = false;
-//        rectangle.setX(position.getX());
-//        rectangle.setY(position.getY());
         circle.setCenterX(position.getX()+18);
         circle.setCenterY(position.getY()+18);
     }
@@ -117,7 +99,6 @@ public class Player extends GameObject {
     public void addVelocity(Vector2 toAdd) {
         velocity = velocity.add(toAdd);
     }
-
     public void resetPosition() {
         original_position = spawn_point;
     }
@@ -134,7 +115,6 @@ public class Player extends GameObject {
 
     //region MoveSpeed getter and setter
     public float getMoveSpeed() { return moveSpeed; }
-
     public void setMoveSpeed(float speed) { moveSpeed = speed; }
     //endregion
 
@@ -142,7 +122,6 @@ public class Player extends GameObject {
     public String getIpOfClient() {
         return ipOfClient;
     }
-
     public void setIpOfClient(String ipOfClient) {
         this.ipOfClient = ipOfClient;
     }
@@ -152,7 +131,6 @@ public class Player extends GameObject {
     public boolean isAI() {
         return AI;
     }
-
     public void setAI(boolean AI) {
         this.AI = AI;
     }
@@ -162,7 +140,6 @@ public class Player extends GameObject {
     public Vector2 getSpawn_point() {
         return spawn_point;
     }
-
     public void setSpawn_point(Vector2 spawn_point) {
         this.spawn_point = spawn_point;
     }
@@ -172,7 +149,6 @@ public class Player extends GameObject {
     public void setRotate(Affine rotate) {
         this.rotate = rotate;
     }
-
     public Affine getRotate() {
         return rotate;
     }
@@ -182,12 +158,11 @@ public class Player extends GameObject {
     public PositionPacket getPacketToSend() {
         packetToSend.velY = getVelY();
         packetToSend.velX = getVelX();
-        packetToSend.orgPosX = getX();
-        packetToSend.orgPosY = getY();
+        packetToSend.orgPosX = getPosX();
+        packetToSend.orgPosY = getPosY();
         packetToSend.degrees = getDegrees();
         return packetToSend;
     }
-
     public void setPacketToSend(PositionPacket packetToSend) {
         this.packetToSend = packetToSend;
     }
@@ -199,13 +174,11 @@ public class Player extends GameObject {
         //step 2: move to target
         this.position = getNextMove(this.position, position);
     }
-
     public void moveTo(GameObject entity){
         //step 1: find shortest path without walls
         //step 2: move to target
         this.position = getNextMove(this.getPosition(), entity.getPosition());
     }
-
     //this method gets the path between two positions
     public Vector2 getNextMove (Vector2 original , Vector2 position) {
 
@@ -275,7 +248,7 @@ public class Player extends GameObject {
     public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
         Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
         for(Bricks wall: listOfWalls){
-            if(scanArea.intersects(wall.GetBounds().getBoundsInLocal())){
+            if(scanArea.intersects(wall.getBounds().getBoundsInLocal())){
                 return true;
             }
         }
@@ -287,7 +260,7 @@ public class Player extends GameObject {
     //TODO: add a death animation
     public void death(){
         if (health == 0){
-            selfDestroy();
+            destroy();
         }
     }
 

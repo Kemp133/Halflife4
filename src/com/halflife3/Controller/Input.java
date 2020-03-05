@@ -8,21 +8,21 @@ import java.util.HashMap;
 
 public class Input {
     //region key maps (pressed, typed, released)
-    public HashMap<KeyCode, Boolean> keysPressed = new HashMap<>();
-    public HashMap<KeyCode, Boolean> keysTyped = new HashMap<>();
-    public HashMap<KeyCode, Boolean> keysReleased = new HashMap<>();
+    public static HashMap<KeyCode, Boolean> keysPressed = new HashMap<>();
+    public static HashMap<KeyCode, Boolean> keysTyped = new HashMap<>();
+    public static HashMap<KeyCode, Boolean> keysReleased = new HashMap<>();
     //endregion
 
     //region mouse maps (pressed, clicked, released)
-    public HashMap<MouseButton, Boolean> mouseButtonPressed = new HashMap<>();
-    public HashMap<MouseButton, Boolean> mouseButtonClicked = new HashMap<>();
-    public HashMap<MouseButton, Boolean> mouseButtonReleased = new HashMap<>();
+    public static HashMap<MouseButton, Boolean> mouseButtonPressed = new HashMap<>();
+    public static HashMap<MouseButton, Boolean> mouseButtonClicked = new HashMap<>();
+    public static HashMap<MouseButton, Boolean> mouseButtonReleased = new HashMap<>();
     //endregion
 
-    public Vector2 mousePosition = new Vector2(0,0);
+    public static Vector2 mousePosition = new Vector2(0,0);
 
     //region static initializer
-    {
+    static {
         for (KeyCode kc : KeyCode.values()) {
             keysPressed.put(kc, false);
             keysTyped.put(kc, false);
@@ -38,30 +38,24 @@ public class Input {
     //endregion
 
     //region isKey methods (Pressed, Typed, up)
-    public boolean isKeyPressed(KeyCode kc) {
+    public static boolean isKeyPressed(KeyCode kc) {
         return keysPressed.get(kc);
     }
-    public boolean isKeyTyped(KeyCode kc) {
+    public static boolean isKeyTyped(KeyCode kc) {
         return keysTyped.get(kc);
     }
-    public boolean isKeyReleased(KeyCode kc) {
+    public static boolean isKeyReleased(KeyCode kc) {
         return keysReleased.get(kc);
     }
     //endregion
 
     //region resetValues (keyboard and mouse maps)
-    public void resetValues() {
-        for (KeyCode kc : KeyCode.values()) {
-            keysPressed.replace(kc, false);
-            keysTyped.replace(kc, false);
-            keysReleased.replace(kc, false);
-        }
+    public static void resetValues() {
+        for (KeyCode kc : KeyCode.values())
+            keysTyped.replace(kc, false);   //Don't need to reset key pressed/released as these are mutually exclusive events which are dealt with in the KeyboardInput handler
 
-        for(MouseButton mb : MouseButton.values()) {
-            mouseButtonPressed.replace(mb, false);
-            mouseButtonClicked.replace(mb, false);
-            mouseButtonReleased.replace(mb, false);
-        }
+        for(MouseButton mb : MouseButton.values())
+            mouseButtonClicked.replace(mb, false); //Don't need to reset mouse pressed/release as these are mutually exclusive events which are dealt with in the MouseInput handler
     }
     //endregion
 }

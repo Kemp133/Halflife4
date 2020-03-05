@@ -1,27 +1,32 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Model.Interfaces.IRenderable;
-import com.halflife3.Model.Interfaces.IUpdateable;
+import com.halflife3.Model.Interfaces.*;
 import javafx.scene.shape.Shape;
 
 import java.util.HashSet;
+import java.util.Iterator;
 
-public abstract class GameObject implements IRenderable, IUpdateable {
+public abstract class GameObject implements IRenderable, IUpdateable, ICollidable {
+    //region Class Fields
     protected Vector2 position;
     protected Vector2 velocity;
     protected double rotation;
-    protected ObjectManager objectManager;
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
-     * to disallow duplicate keys from being added*/
+     * to disallow duplicate keys from being added */
     protected HashSet<String> keys;
+    //endregion
 
-    public GameObject(Vector2 position, Vector2 velocity, double rotation, ObjectManager om) {
+    //region Constructors
+    public GameObject() {
+        ObjectManager.addObject(this);
+    }
+
+    public GameObject(Vector2 position, Vector2 velocity, double rotation) {
         this.position = position;
         this.velocity = velocity;
         this.rotation = rotation;
-        this.objectManager = om;
-        om.addObject(this);
+        ObjectManager.addObject(this);
     }
 
     //An initialiser block
@@ -30,19 +35,11 @@ public abstract class GameObject implements IRenderable, IUpdateable {
         velocity = new Vector2();
         keys = new HashSet<>();
     }
-
-    public boolean containsKey(String key) {
-        return keys.contains(key);
-    }
-
-    /** Potentially going to remove this in favour of an interface at a later point. Using shape so that the shape can
-     * change depending on what its acting as a collider for (e.g. a box or a circle) */
-    public abstract Shape GetBounds();
+    //endregion
 
     //region Position getters and Setters
-    public double getX() { return position.getX(); }
-
-    public double getY() { return position.getY(); }
+    public double getPosX() { return position.getX(); }
+    public double getPosY() { return position.getY(); }
 
     public Vector2 getPosition() { return new Vector2(position); }
 
@@ -58,11 +55,9 @@ public abstract class GameObject implements IRenderable, IUpdateable {
 
     //region Velocity Getters and Setters
     public double getVelX() { return velocity.getX(); }
-
     public double getVelY() { return velocity.getY(); }
 
     public Vector2 getVelocity() { return velocity; }
-
     public void setVelocity(Vector2 velocity) {
         this.velocity = velocity;
     }
@@ -79,33 +74,106 @@ public abstract class GameObject implements IRenderable, IUpdateable {
 
     //region Rotation Getter and Setter
     public double getRotation() { return rotation; }
-
     public void setRotation(double toAdd) {
         rotation = toAdd % 360;
     }
     //endregion
 
-    public abstract boolean intersects(GameObject s);
-
-    //Gives the distance between an entity and this game object
+    //region Get Distance (reference and static variables)
+    /**
+     * Get the distance between this GameObject and the given GameObject
+     * @param entity The GameObject to calculate the distance to
+     * @return The euclidean distance between this object and the passed object
+     */
     public double getDistance(GameObject entity){
         return position.distance(entity.getPosition());
     }
+    /**
+     * A static method to return the distance between two GameObjects
+     * @param a The first GameObject to calculate the distance between
+     * @param b The second GameObject to calculate the distance between
+     * @return The euclidean distance between the two GameObjects
+     */
+    public static double GetDistance(GameObject a, GameObject b) { return Vector2.Distance(a.position, b.position); }
 
-    public double squareDistance(GameObject entity){
+    /**
+     * As getDistance, but without a square root call. Gets the square euclidean distance between this GameObject and the passed GameObject
+     * @param entity The GameObject to calculate the square distance to
+     * @return The square euclidean distance between this object and the passed object
+     */
+    public double getSquareDistance(GameObject entity){
         return position.squareDistance(entity.getPosition());
     }
+    /**
+     * A static method to return the square distance between two GameObjects
+     * @param a The first GameObject to calculate the distance between
+     * @param b The second GameObject to calculate the distance between
+     * @return The square distance between the two passed GameObjects
+     */
+    public static double GetSquareDistance(GameObject a, GameObject b) { return Vector2.SquareDistance(a.position, a.position); }
+    //endregion
 
-    //Method to destroy this game object
-    public void selfDestroy(){
-        objectManager.removeObject(this);
+    //region Destroy (reference and static)
+    /** A method to remove this object from the object manager and clear up it's resources*/
+    public void destroy(){
+        ObjectManager.removeObject(this);
+        position = null;
+        velocity = null;
+        keys = null;//These two signal to the Garbage Collector that the Object is ready to be destroyed (as well as the things the class references)
     }
 
-    public HashSet<String> getKeys() {
-        return keys;
+    /**
+     * A static method to remove a given GameObject from the ObjectManager as well as cleaning up the resources
+     * this GameObject uses
+     * @param toDestroy the GameObject to destroy
+     */
+    public static void Destroy(GameObject toDestroy) {
+        ObjectManager.removeObject(toDestroy);
+        toDestroy.position = null;
+        toDestroy.velocity = null;
+    }
+    //endregion
+
+    //region Keys getter, setter, and containsKey
+    public HashSet<String> getKeys() { return keys; }
+
+    public boolean containsKey(String key) {
+        return keys.contains(key);
+    }
+    //endregion
+
+    //region Overrided method
+    @Override
+    public String toString() {
+        var sb = new StringBuilder();
+        sb.append("Position = ");
+        sb.append(position.toString());
+        sb.append(" | Velocity = ");
+        sb.append(velocity.toString());
+        sb.append(" | Rotation = ");
+        sb.append(rotation);
+        sb.append("\nKeys: [");
+
+        Iterator<String> values = keys.iterator();
+
+        if(values.hasNext())
+            sb.append(values.next());
+        while(values.hasNext()) {
+            sb.append(", ");
+            sb.append(values.next());
+        }
+
+        sb.append("]");
+        return sb.toString(); //The prettiest printer to ever exist!
     }
 
-    public void remove(){
-        objectManager.removeObject(this);
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof GameObject) {
+            return position.equals(((GameObject)obj).position) && velocity.equals(((GameObject)obj).velocity)
+                    && rotation == ((GameObject)obj).rotation && keys.equals(((GameObject) obj).keys);
+        }
+        return false;
     }
+    //endregion
 }

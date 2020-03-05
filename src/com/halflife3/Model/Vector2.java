@@ -1,11 +1,13 @@
 package com.halflife3.Model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Vector2 implements Serializable {
     private static final long serialVersionUID = 4L;
     private double x, y;
 
+    //region Constructors
     public Vector2() {}
 
     public Vector2(double x, double y) {
@@ -17,7 +19,9 @@ public class Vector2 implements Serializable {
         x = toCopy.getX();
         y = toCopy.getY();
     }
+    //endregion
 
+    //region Vector Algebra
     /**
      * A method to add a vector to the current vector
      * @param v The vector to add to the current vector
@@ -61,7 +65,9 @@ public class Vector2 implements Serializable {
         y /= s;
         return this;
     }
+    //endregion
 
+    //region Distance
     /**
      * A method to return the euclidean distance between the current vector and the passed vector
      * @param v The vector to check the distance to
@@ -72,6 +78,14 @@ public class Vector2 implements Serializable {
     }
 
     /**
+     * A static method to return the euclidean distance between two passed vectors
+     * @param a One of the vectors to calculate the distance between
+     * @param b The second vector to calculate the distance between
+     * @return The euclidean distance between the two passed vectors
+     */
+    public static double Distance(Vector2 a, Vector2 b) { return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)); }
+
+    /**
      * A method to return the distance squared between two points. Efficient as it doesn't require a costly square root call
      * @param v The Vector2 to find the squared distance to
      * @return The squared distance between the two points
@@ -80,6 +94,16 @@ public class Vector2 implements Serializable {
         return Math.pow(v.x - x, 2) + Math.pow(v.y - y, 2);
     }
 
+    /**
+     * A static method to return the square euclidean distance between the two passed vectors
+     * @param a The first vector to calculate the distance between
+     * @param b The second vector to calculate the distance between
+     * @return The squared distance between the two given vectors
+     */
+    public static double SquareDistance(Vector2 a, Vector2 b) { return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2); }
+    //endregion
+
+    //region Misc operations
     public double magnitude() {
         return Math.sqrt( Math.pow(x, 2) + Math.pow(y, 2) );
     }
@@ -95,11 +119,7 @@ public class Vector2 implements Serializable {
         x = -x;
         y = -y;
     }
-
-    public void reset(){
-        x = 0;
-        y = 0;
-    }
+    //endregion
 
     //region Getters and Setters for X and Y
     public double getX() {
@@ -117,10 +137,28 @@ public class Vector2 implements Serializable {
     public void setY(double y) {
         this.y = y;
     }
+
+    public void reset(){
+        x = 0;
+        y = 0;
+    }
     //endregion
 
+    //region Overrides For Object Methods (toString, Equals, hashCode)
     @Override
     public String toString() {
-        return (int)x + "|" + (int)y;
+        return "(" + x + "," + y + ")";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Vector2) {
+            return ((Vector2) obj).x == x && ((Vector2) obj).y == y;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(x, y);  }
+    //endregion
 }

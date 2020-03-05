@@ -1,36 +1,17 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.Input;
-import com.halflife3.Controller.ObjectManager;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
-import java.io.FileInputStream;
-
-public class Crosshair extends GameObject {
-
-    Image sprite;
-    Input input;
-
-    final int SPRITE_SIZE = 32;
-
-    public Crosshair(Vector2 position, Vector2 velocity, short rotation, ObjectManager om, Input input) {
-        super(position, velocity, rotation, om);
-        this.input = input;
-    }
-
-    {
-        try {
-            FileInputStream inputted = new FileInputStream("res/crosshair.png");
-            sprite = new Image(inputted);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+public class Crosshair extends Sprite {
+    public Crosshair(Vector2 position, Vector2 velocity, short rotation) {
+        super(position, velocity, rotation);
+        setSprite("res/Crosshair.png");
     }
 
     @Override
-    public Rectangle GetBounds() {
+    public Rectangle getBounds() {
         return null;
     }
 
@@ -40,13 +21,13 @@ public class Crosshair extends GameObject {
     }
 
     @Override
-    public void render(GraphicsContext gc, Vector2 offset) {
-        gc.drawImage(sprite, position.getX() - (float)(SPRITE_SIZE / 2), position.getY() - (float)(SPRITE_SIZE / 2));
+    public void render(GraphicsContext gc) {
+        gc.drawImage(sprite, position.getX() - (float)(getWidth() / 2), position.getY() - (float)(getHeight() / 2));
     }
 
     @Override
     public void update(double time) {
-        position.setX(input.mousePosition.getX());
-        position.setY(input.mousePosition.getY());
+        position.setX(Input.mousePosition.getX());
+        position.setY(Input.mousePosition.getY());
     }
 }
