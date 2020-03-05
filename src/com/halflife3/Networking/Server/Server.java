@@ -125,7 +125,6 @@ public class Server implements Runnable {
     }
 
     private void tomsAI() {
-        int totalBots =0;
         /*if(ClientListServer.connectedIPs.contains(botNames[0])){
             totalBots = 4;
         }else if (ClientListServer.connectedIPs.contains(botNames[1])){
@@ -135,7 +134,9 @@ public class Server implements Runnable {
         }else if (ClientListServer.connectedIPs.contains(botNames[3])){
             totalBots = 1;
         }*/
-        Vector2 of0 =new Vector2(ClientListServer.positionList.get(botNames[0]).orgPosX,ClientListServer.positionList.get(botNames[0]).orgPosY);
+        if (ClientListServer.positionList.get(botNames[0]) == null) return;
+        double test = ClientListServer.positionList.get(botNames[0]).orgPosX;
+        Vector2 of0 = new Vector2(ClientListServer.positionList.get(botNames[0]).orgPosX,ClientListServer.positionList.get(botNames[0]).orgPosY);
         Vector2 of1 = new Vector2(ClientListServer.positionList.get(botNames[1]).orgPosX,ClientListServer.positionList.get(botNames[1]).orgPosY);
         Vector2 of2 = new Vector2(ClientListServer.positionList.get(botNames[2]).orgPosX,ClientListServer.positionList.get(botNames[2]).orgPosY);
         Vector2 of3 = new Vector2(ClientListServer.positionList.get(botNames[3]).orgPosX,ClientListServer.positionList.get(botNames[3]).orgPosY);
@@ -148,15 +149,18 @@ public class Server implements Runnable {
         ClientListServer.positionList.get(botNames[3]).orgPosX = newposi.getX();
         ClientListServer.positionList.get(botNames[3]).orgPosY = newposi.getY();
         //for bot 2
+        /*
         posiList[2] = new Vector2(327680,327680);
         newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
         ClientListServer.positionList.get(botNames[2]).orgPosX = newposi.getX();
         ClientListServer.positionList.get(botNames[2]).orgPosY = newposi.getY();
+        */
         //for bot 1
+        /*
         posiList[1] = new Vector2(327680,327680);
         newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
         ClientListServer.positionList.get(botNames[1]).orgPosX = newposi.getX();
-        ClientListServer.positionList.get(botNames[1]).orgPosY = newposi.getY();
+        ClientListServer.positionList.get(botNames[1]).orgPosY = newposi.getY();*/
         //TODO: Change bot0 position
 
 
