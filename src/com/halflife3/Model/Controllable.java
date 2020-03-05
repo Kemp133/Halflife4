@@ -5,8 +5,8 @@ import javafx.scene.canvas.GraphicsContext;
 public abstract class Controllable extends Sprite {
 	protected String ipOfClient;
 
-	public Controllable(Vector2 position, Vector2 velocity, double rotation) {
-		super(position, velocity, rotation);
+	public Controllable(Vector2 position, Vector2 velocity) {
+		super(position, velocity);
 	}
 
 	//region IP getter and setter

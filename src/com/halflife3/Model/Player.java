@@ -13,13 +13,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Deque;
 
-public class Player extends Sprite {
+public class Player extends Controllable {
     //region Variables
     public  Circle  circle;
     private Image   image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
-    private String ipOfClient;
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
