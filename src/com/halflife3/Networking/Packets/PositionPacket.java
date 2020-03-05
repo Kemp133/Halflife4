@@ -6,6 +6,7 @@ public class PositionPacket implements Serializable {
 
     private static final long serialVersionUID = 8L;
 
-    public double orgPosX, orgPosY, velX, velY, spawnX, spawnY, degrees;
+    public double orgPosX, orgPosY, velX, velY, spawnX, spawnY;
+    public short degrees;
 
 }
