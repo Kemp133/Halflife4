@@ -97,6 +97,7 @@ public class Server implements Runnable {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
+                    tomsAI();
                     posPacket.posList = ClientPositionHandlerServer.positionList;
                     posPacket.connectedIPs = ClientPositionHandlerServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
@@ -117,6 +118,17 @@ public class Server implements Runnable {
         }
 
         multicastSocket.close();
+    }
+
+    private void tomsAI() {
+
+        //TODO: Change bot0 position
+        //bla bla bla 660|80
+
+//        ClientPositionHandlerServer.positionList.get(botNames[0]).orgPosX = tomAIGotThisXValue();
+//        ClientPositionHandlerServer.positionList.get(botNames[0]).orgPosY = tomAIGotThisYValue();
+
+
     }
 
     private void connectionListener() throws IOException {
