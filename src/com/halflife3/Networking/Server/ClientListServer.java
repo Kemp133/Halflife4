@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class ClientPositionHandlerServer {
+public class ClientListServer {
 
     public static HashMap<InetAddress, ConnectedToServer>   clientList      = new HashMap<>();
     public static HashMap<String, PositionPacket>           positionList    = new HashMap<>();
