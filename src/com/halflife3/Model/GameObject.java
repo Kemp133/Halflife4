@@ -1,8 +1,9 @@
 package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Model.Interfaces.*;
-import javafx.scene.shape.Shape;
+import com.halflife3.Model.Interfaces.ICollidable;
+import com.halflife3.Model.Interfaces.IRenderable;
+import com.halflife3.Model.Interfaces.IUpdateable;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,7 +12,6 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     //region Class Fields
     protected Vector2 position;
     protected Vector2 velocity;
-    protected double rotation;
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
      * to disallow duplicate keys from being added */
     protected HashSet<String> keys;
@@ -22,10 +22,9 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
         ObjectManager.addObject(this);
     }
 
-    public GameObject(Vector2 position, Vector2 velocity, double rotation) {
+    public GameObject(Vector2 position, Vector2 velocity) {
         this.position = position;
         this.velocity = velocity;
-        this.rotation = rotation;
         ObjectManager.addObject(this);
     }
 
@@ -69,13 +68,6 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
 
     public void resetVelocity() {
         velocity.reset();
-    }
-    //endregion
-
-    //region Rotation Getter and Setter
-    public double getRotation() { return rotation; }
-    public void setRotation(double toAdd) {
-        rotation = toAdd % 360;
     }
     //endregion
 
@@ -150,8 +142,6 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
         sb.append(position.toString());
         sb.append(" | Velocity = ");
         sb.append(velocity.toString());
-        sb.append(" | Rotation = ");
-        sb.append(rotation);
         sb.append("\nKeys: [");
 
         Iterator<String> values = keys.iterator();
@@ -171,7 +161,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     public boolean equals(Object obj) {
         if(obj instanceof GameObject) {
             return position.equals(((GameObject)obj).position) && velocity.equals(((GameObject)obj).velocity)
-                    && rotation == ((GameObject)obj).rotation && keys.equals(((GameObject) obj).keys);
+                    && keys.equals(((GameObject) obj).keys);
         }
         return false;
     }

@@ -1,19 +1,14 @@
 package com.halflife3.Model;
 
-import com.halflife3.Controller.ObjectManager;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 public abstract class Enemy extends Sprite {
 	private int health;
 
-	public Enemy(Vector2 position, Vector2 velocity, short rotation, int health) {
-		super(position, velocity, rotation);
+	public Enemy(Vector2 position, Vector2 velocity, int health) {
+		super(position, velocity);
 		this.health = health;
 	}
 

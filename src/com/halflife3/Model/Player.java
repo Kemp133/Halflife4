@@ -34,8 +34,8 @@ public class Player extends Sprite {
     boolean is_moving = false;
     //endregion
 
-    public Player(Vector2 position, Vector2 velocity, double rotation) {
-        super(position, velocity, rotation);
+    public Player(Vector2 position, Vector2 velocity) {
+        super(position, velocity);
         keys.add("player");
         //rectangle = new Rectangle(position.getX(), position.getY(), width, height);
         circle = new Circle(position.getX()+18,position.getY()+18,17);

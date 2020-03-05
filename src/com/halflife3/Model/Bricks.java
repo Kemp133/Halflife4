@@ -8,8 +8,8 @@ import javafx.scene.shape.Rectangle;
 public class Bricks extends Sprite {
     public Rectangle rectangle;
 
-    public Bricks(Vector2 position, Vector2 velocity, short rotation) {
-        super(position,velocity,rotation);
+    public Bricks(Vector2 position, Vector2 velocity) {
+        super(position, velocity);
         keys.add("Bricks");
         //Bricks should only be created in the MapRender class, so remove them from the ObjectManager to stop them polluting the object pool
         ObjectManager.removeObject(this);
