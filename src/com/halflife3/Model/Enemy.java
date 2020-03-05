@@ -18,11 +18,6 @@ public abstract class Enemy extends Sprite {
 	}
 
 	@Override
-	public boolean intersects(GameObject s) {
-		return false;
-	}
-
-	@Override
 	public void render(GraphicsContext gc) {
 		gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX(), position.getY() - Camera.GetOffset().getY());
 	}

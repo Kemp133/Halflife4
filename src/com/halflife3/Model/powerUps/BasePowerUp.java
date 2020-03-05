@@ -1,6 +1,5 @@
 package com.halflife3.Model.powerUps;
 
-import com.halflife3.Model.GameObject;
 import com.halflife3.Model.Sprite;
 import com.halflife3.Model.Vector2;
 import javafx.scene.canvas.GraphicsContext;
@@ -10,11 +9,6 @@ public abstract class BasePowerUp extends Sprite {
 
 	public BasePowerUp(Vector2 position, Vector2 velocity) {
 		super(position, velocity);
-	}
-
-	@Override
-	public boolean intersects(GameObject s) {
-		return false;
 	}
 
 	@Override
