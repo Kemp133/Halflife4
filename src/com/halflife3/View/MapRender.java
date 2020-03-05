@@ -48,7 +48,7 @@ public class MapRender {
                 if (color.equals(Color.BLACK)) { // pixels.getColor(xx, yy) == Color.BLACK
                     Vector2 position = new Vector2((xx) * 40, (yy) * 40);
                     Vector2 velocity = new Vector2(0, 0);
-                    Bricks new_Brick = new Bricks(position.subtract(Camera.GetOffset()), velocity, (short) 0);
+                    Bricks new_Brick = new Bricks(position.subtract(Camera.GetOffset()), velocity);
                     new_Brick.setSprite("res/block.png");
                     Bricks_list.add(new_Brick);
                 }

@@ -72,7 +72,7 @@ public class ClientGame extends Application {
         //region Initialise this player
         Vector2 startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
-        player_client = new Player(startPos, startVel, 0);
+        player_client = new Player(startPos, startVel);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
         player_client.setSprite("res/Player_pic.png");
@@ -203,7 +203,7 @@ public class ClientGame extends Application {
                         Vector2 bulletVel = new Vector2(cursor.getPosX() + Camera.GetOffsetX(), cursor.getPosY() + Camera.GetOffsetY())
                                                 .subtract(player_client.getPosition()).normalise().multiply(200);
 
-                        new Bullet(bulletPos, bulletVel, (short)0);
+                        new Bullet(bulletPos, bulletVel);
                         bulletLimiter = 6;
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
@@ -318,7 +318,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise cursor
-        cursor = new Crosshair(Input.mousePosition, new Vector2(0, 0), (short)0);
+        cursor = new Crosshair(Input.mousePosition, new Vector2(0, 0));
         //endregion
 
         //region Map loading
@@ -341,7 +341,7 @@ public class ClientGame extends Application {
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
             Vector2 pos = new Vector2(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-            Player enemy = new Player(pos, vel, theDoubleValues.degrees);
+            Player enemy = new Player(pos, vel);
             enemy.setSprite("res/Player_pic.png");
             enemy.setIpOfClient(ip);
             playerList.put(ip, enemy);

@@ -7,8 +7,8 @@ import javafx.scene.shape.Shape;
 
 public abstract class BasePowerUp extends Sprite {
 
-	public BasePowerUp(Vector2 position, Vector2 velocity, double rotation) {
-		super(position, velocity, rotation);
+	public BasePowerUp(Vector2 position, Vector2 velocity) {
+		super(position, velocity);
 	}
 
 	@Override

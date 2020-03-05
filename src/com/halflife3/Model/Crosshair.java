@@ -5,8 +5,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;
 
 public class Crosshair extends Sprite {
-    public Crosshair(Vector2 position, Vector2 velocity, short rotation) {
-        super(position, velocity, rotation);
+    public Crosshair(Vector2 position, Vector2 velocity) {
+        super(position, velocity);
         setSprite("res/Crosshair.png");
     }
 

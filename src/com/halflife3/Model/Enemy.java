@@ -7,8 +7,8 @@ import javafx.scene.shape.Rectangle;
 public abstract class Enemy extends Sprite {
 	private int health;
 
-	public Enemy(Vector2 position, Vector2 velocity, short rotation, int health) {
-		super(position, velocity, rotation);
+	public Enemy(Vector2 position, Vector2 velocity, int health) {
+		super(position, velocity);
 		this.health = health;
 	}
 

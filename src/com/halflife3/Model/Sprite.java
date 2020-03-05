@@ -9,8 +9,8 @@ import java.io.*;
 public abstract class Sprite extends GameObject {
 	public Image sprite;
 
-	public Sprite(Vector2 position, Vector2 velocity, double rotation) {
-		super(position, velocity, rotation);
+	public Sprite(Vector2 position, Vector2 velocity) {
+		super(position, velocity);
 	}
 
 	public void setSprite(String pathToSprite) {
@@ -31,4 +31,5 @@ public abstract class Sprite extends GameObject {
 	public double getWidth() { return (sprite == null) ? 0 : sprite.getWidth();	}
 	public double getHeight() { return (sprite == null) ? 0 : sprite.getHeight(); }
 
+	public abstract boolean intersects(GameObject s);
 }

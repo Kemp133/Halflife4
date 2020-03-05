@@ -8,8 +8,8 @@ import javafx.scene.shape.Circle;
 public class Bullet extends Sprite {
     private Circle circle = new Circle(position.getX()+4,position.getY()+4, 4);
 
-    public Bullet(Vector2 position, Vector2 velocity, short rotation) {
-        super(position, velocity, rotation);
+    public Bullet(Vector2 position, Vector2 velocity) {
+        super(position, velocity);
         keys.add("Bullet");
         setSprite("res/bullet.png");
     }
