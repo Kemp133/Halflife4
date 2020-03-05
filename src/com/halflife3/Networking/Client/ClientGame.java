@@ -31,7 +31,7 @@ import static javafx.scene.input.KeyCode.*;
 public class ClientGame extends Application {
 
     private final int FPS = 60;
-    private final int INC_PACKETS_PER_SECOND = 90;
+//    private final int INC_PACKETS_PER_SECOND = 90;
 
     //region Other variables
     static Input input;
@@ -113,9 +113,9 @@ public class ClientGame extends Application {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
+//                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
                     updateEnemies();
-                }
+//                }
             }
         }).start();
         //endregion
@@ -325,7 +325,7 @@ public class ClientGame extends Application {
         try {
             MapRender.loadLevel("res/map.png");
         } catch (Exception e) {
-            System.out.println("An Exception occured in the loading of the map!" + Arrays.toString(e.getStackTrace()));
+            System.out.println("An Exception occurred in the loading of the map!" + Arrays.toString(e.getStackTrace()));
         }
         //endregion
     }

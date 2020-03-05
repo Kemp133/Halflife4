@@ -9,6 +9,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Deque;
 
 public class Player extends Sprite {
@@ -44,6 +46,13 @@ public class Player extends Sprite {
         packetToSend.velX = velocity.getX();
         packetToSend.velY = velocity.getY();
         packetToSend.degrees = this.degrees;
+
+        try(FileInputStream fis = new FileInputStream("res/Player_walking.png")) {
+            image_w = new Image(fis);
+        } catch (IOException e) {
+            System.err.println("Image not found!");
+        }
+
     }
 
     //region Overridden super methods
@@ -66,7 +75,7 @@ public class Player extends Sprite {
             mode++;
         }
         else {
-            gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX() , position.getY() - Camera.GetOffset().getY());
+        gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX() , position.getY() - Camera.GetOffset().getY());
             if(mode < 11)
                 mode++;
             else
