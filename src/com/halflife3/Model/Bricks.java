@@ -23,11 +23,6 @@ public class Bricks extends Sprite {
     }
 
     @Override
-    public boolean intersects(GameObject s) {
-        return false;
-    }
-
-    @Override
     public void setSprite(String file){
         super.setSprite(file);
     }

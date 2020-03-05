@@ -1,13 +1,8 @@
 package com.halflife3.Model;
 
-import com.halflife3.Controller.ObjectManager;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 public abstract class Enemy extends Sprite {
 	private int health;
@@ -20,11 +15,6 @@ public abstract class Enemy extends Sprite {
 	@Override
 	public Rectangle getBounds() {
 		return new Rectangle(position.getX(), position.getY(), getWidth(), getHeight());
-	}
-
-	@Override
-	public boolean intersects(GameObject s) {
-		return false;
 	}
 
 	@Override

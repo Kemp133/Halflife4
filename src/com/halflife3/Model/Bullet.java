@@ -20,11 +20,6 @@ public class Bullet extends Sprite {
     }
 
     @Override
-    public boolean intersects(GameObject s) {
-        return false;
-    }
-
-    @Override
     public void render(GraphicsContext gc) {
         gc.drawImage(sprite, getPosX() - Camera.GetOffset().getX(), getPosY() - Camera.GetOffset().getY());
     }

@@ -62,11 +62,6 @@ public class Player extends Sprite {
     }
 
     @Override
-    public boolean intersects(GameObject s) {
-        return false;
-    }
-
-    @Override
     public void render(GraphicsContext gc) {
         gc.save(); // Save default transform
         gc.setTransform(rotate);

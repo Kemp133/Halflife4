@@ -16,11 +16,6 @@ public class Crosshair extends Sprite {
     }
 
     @Override
-    public boolean intersects(GameObject s) {
-        return false;
-    }
-
-    @Override
     public void render(GraphicsContext gc) {
         gc.drawImage(sprite, position.getX() - (float)(getWidth() / 2), position.getY() - (float)(getHeight() / 2));
     }
