@@ -18,16 +18,16 @@ public class Player extends Sprite {
 //    public double width = 40;
 //    public double height = 35;
 //    public Rectangle rectangle;
-    public  Circle  circle;
-//    private Image image;
-    private Image   image_w;
+    public Circle circle;
+    //    private Image image;
+    private Image image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
     private String ipOfClient;
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
-    private double degrees;
+    private short degrees;
     private PositionPacket packetToSend;
     protected int health;
     int mode = 0;
@@ -37,8 +37,7 @@ public class Player extends Sprite {
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         keys.add("player");
-        //rectangle = new Rectangle(position.getX(), position.getY(), width, height);
-        circle = new Circle(position.getX()+18,position.getY()+18,17);
+        circle = new Circle(position.getX() + 18, position.getY() + 18, 17);
         rotate = new Affine();
         packetToSend = new PositionPacket();
         packetToSend.spawnX = packetToSend.orgPosX = position.getX();
@@ -46,13 +45,6 @@ public class Player extends Sprite {
         packetToSend.velX = velocity.getX();
         packetToSend.velY = velocity.getY();
         packetToSend.degrees = this.degrees;
-
-        try(FileInputStream fis = new FileInputStream("res/Player_walking.png")) {
-            image_w = new Image(fis);
-        } catch (IOException e) {
-            System.err.println("Image not found!");
-        }
-
     }
 
     //region Overridden super methods
@@ -66,17 +58,25 @@ public class Player extends Sprite {
         return false;
     }
 
+    public void setSprite2(String pathToSprite) {
+        try (FileInputStream fis = new FileInputStream(pathToSprite)) {
+            image_w = new Image(fis);
+        } catch (IOException e) {
+            System.err.println("Image not found!");
+        }
+
+    }
+
     @Override
     public void render(GraphicsContext gc) {
         gc.save(); // Save default transform
         gc.setTransform(rotate);
-        if((mode % 5) == 0 && is_moving){
-            gc.drawImage(image_w, position.getX() - Camera.GetOffset().getX() , position.getY()-Camera.GetOffset().getY());
+        if ((mode % 5) == 0 && is_moving) {
+            gc.drawImage(image_w, position.getX() - Camera.GetOffset().getX(), position.getY() - Camera.GetOffset().getY());
             mode++;
-        }
-        else {
-        gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX() , position.getY() - Camera.GetOffset().getY());
-            if(mode < 11)
+        } else {
+            gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX(), position.getY() - Camera.GetOffset().getY());
+            if (mode < 11)
                 mode++;
             else
                 mode = 0;
@@ -88,18 +88,18 @@ public class Player extends Sprite {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        if(original_position.getX() == position.getX() && original_position.getY() == position.getY())
+        if (original_position.getX() == position.getX() && original_position.getY() == position.getY())
             is_moving = false;
-        circle.setCenterX(position.getX()+18);
-        circle.setCenterY(position.getY()+18);
+        circle.setCenterX(position.getX() + 18);
+        circle.setCenterY(position.getY() + 18);
     }
     //endregion
 
     public void collision(boolean if_collision, double time) {
         if (if_collision) {
             this.position = original_position.subtract(this.velocity.multiply(time));
-            circle.setCenterX(position.getX()+18);
-            circle.setCenterY(position.getY()+18);
+            circle.setCenterX(position.getX() + 18);
+            circle.setCenterY(position.getY() + 18);
         }
 
         velocity.reset();
@@ -108,29 +108,36 @@ public class Player extends Sprite {
     public void addVelocity(Vector2 toAdd) {
         velocity = velocity.add(toAdd);
     }
+
     public void resetPosition() {
         original_position = spawn_point;
     }
 
     //region Degrees getter and setter
-    public double getDegrees() {
+    public short getDegrees() {
         return degrees;
     }
 
-    public void setDegrees(double degrees) {
+    public void setDegrees(short degrees) {
         this.degrees = degrees;
     }
     //endregion
 
     //region MoveSpeed getter and setter
-    public float getMoveSpeed() { return moveSpeed; }
-    public void setMoveSpeed(float speed) { moveSpeed = speed; }
+    public float getMoveSpeed() {
+        return moveSpeed;
+    }
+
+    public void setMoveSpeed(float speed) {
+        moveSpeed = speed;
+    }
     //endregion
 
     //region IP getter and setter
     public String getIpOfClient() {
         return ipOfClient;
     }
+
     public void setIpOfClient(String ipOfClient) {
         this.ipOfClient = ipOfClient;
     }
@@ -140,6 +147,7 @@ public class Player extends Sprite {
     public boolean isAI() {
         return AI;
     }
+
     public void setAI(boolean AI) {
         this.AI = AI;
     }
@@ -149,6 +157,7 @@ public class Player extends Sprite {
     public Vector2 getSpawn_point() {
         return spawn_point;
     }
+
     public void setSpawn_point(Vector2 spawn_point) {
         this.spawn_point = spawn_point;
     }
@@ -158,6 +167,7 @@ public class Player extends Sprite {
     public void setRotate(Affine rotate) {
         this.rotate = rotate;
     }
+
     public Affine getRotate() {
         return rotate;
     }
@@ -172,29 +182,34 @@ public class Player extends Sprite {
         packetToSend.degrees = getDegrees();
         return packetToSend;
     }
+
     public void setPacketToSend(PositionPacket packetToSend) {
         this.packetToSend = packetToSend;
     }
     //endregion
 
     //region AI methods
-    public void moveTo(Vector2 position){
+    public void moveTo(Vector2 position) {
         //step 1: find shortest path without walls
         //step 2: move to target
         this.position = getNextMove(this.position, position);
     }
-    public void moveTo(GameObject entity){
+
+    public void moveTo(GameObject entity) {
         //step 1: find shortest path without walls
         //step 2: move to target
         this.position = getNextMove(this.getPosition(), entity.getPosition());
     }
-    //this method gets the path between two positions
-    public Vector2 getNextMove (Vector2 original , Vector2 position) {
 
-        if (original == position) { return position; }
+    //this method gets the path between two positions
+    public Vector2 getNextMove(Vector2 original, Vector2 position) {
+
+        if (original == position) {
+            return position;
+        }
 
         Vector2 up = new Vector2(original.getX(), original.getY() + 20);
-        Vector2 right = new Vector2(original.getX() + 20 , original.getY());
+        Vector2 right = new Vector2(original.getX() + 20, original.getY());
         Vector2 down = new Vector2(original.getX(), original.getY() - 20);
         Vector2 left = new Vector2(original.getX() - 20, original.getY());
 
@@ -205,10 +220,10 @@ public class Player extends Sprite {
 
         double[] shortest = {udis, rdis, ddis, ldis};
 //this avoids hitting the wall or moving to itself
-        if (isWall(up, MapRender.get_list()) || udis == 0)    shortest[0] += 1000000;
+        if (isWall(up, MapRender.get_list()) || udis == 0) shortest[0] += 1000000;
         if (isWall(right, MapRender.get_list()) || rdis == 0) shortest[1] += 1000000;
-        if (isWall(down, MapRender.get_list()) || ddis == 0)  shortest[2] += 1000000;
-        if (isWall(left, MapRender.get_list()) || ldis == 0)  shortest[3] += 1000000;
+        if (isWall(down, MapRender.get_list()) || ddis == 0) shortest[2] += 1000000;
+        if (isWall(left, MapRender.get_list()) || ldis == 0) shortest[3] += 1000000;
 
         int closestRoute = FindSmallest(shortest);
 
@@ -235,7 +250,7 @@ public class Player extends Sprite {
         int index = 0;
         double min = arr1[index];
 
-        for (int i=1; i<arr1.length; i++) {
+        for (int i = 1; i < arr1.length; i++) {
             if (arr1[i] < min) {
                 min = arr1[i];
                 index = i;
@@ -254,10 +269,10 @@ public class Player extends Sprite {
     }
 
     //TODO: create a method that checks for walls
-    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
-        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
-        for(Bricks wall: listOfWalls){
-            if(scanArea.intersects(wall.getBounds().getBoundsInLocal())){
+    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls) {
+        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() - 10, 20, 20);
+        for (Bricks wall : listOfWalls) {
+            if (scanArea.intersects(wall.getBounds().getBoundsInLocal())) {
                 return true;
             }
         }
@@ -267,14 +282,14 @@ public class Player extends Sprite {
     //TODO: need to move to specific location, also avoiding the obstacle
 
     //TODO: add a death animation
-    public void death(){
-        if (health == 0){
+    public void death() {
+        if (health == 0) {
             destroy();
         }
     }
 
     //TODO: overlapping hitbox means damage, if not, move to player
-    public void attackPattern(Player[] playerList){
+    public void attackPattern(Player[] playerList) {
         moveTo(closestPlayerPosition(playerList));
     }
 

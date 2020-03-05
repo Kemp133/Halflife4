@@ -76,9 +76,8 @@ public class ClientGame extends Application {
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
         player_client.setSprite("res/Player_pic.png");
-//        try { player_client.setImage_w("res/Player_walking.png"); } catch (FileNotFoundException e) {
-//            System.out.println("Could not find file in path: 'res/Player_walking.png'");
-//        }
+        player_client.setSprite2("res/Player_walking.png");
+
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -187,9 +186,9 @@ public class ClientGame extends Application {
 
 //                    Player rotation
                     Affine rotate = new Affine();
-                    double degrees = Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-                    rotate.appendRotation(degrees, player_client_center.getX(), player_client_center.getY());
-                    player_client.setDegrees(degrees);
+                    short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+                    rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
+                    player_client.setDegrees(deg);
                     player_client.setRotate(rotate);
 
                     double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
@@ -199,7 +198,8 @@ public class ClientGame extends Application {
 
                     //region Create a new bullet
                     if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                        Vector2 bulletPos =new Vector2(player_client.getPosX() + player_client.getWidth() / 2,player_client.getPosY() + player_client.getHeight() / 2).add(direction_of_gun);
+                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getWidth() / 2,
+                                player_client.getPosY() + player_client.getHeight() / 2).add(direction_of_gun);
                         Vector2 bulletVel = new Vector2(cursor.getPosX() + Camera.GetOffsetX(), cursor.getPosY() + Camera.GetOffsetY())
                                                 .subtract(player_client.getPosition()).normalise().multiply(200);
 
