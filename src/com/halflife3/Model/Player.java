@@ -37,7 +37,7 @@ public class Player extends Sprite {
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         keys.add("player");
-        circle = new Circle(position.getX() + 18, position.getY() + 18, 17);
+        circle = new Circle(position.getX() + 20, position.getY() + 18, 17);
         rotate = new Affine();
         packetToSend = new PositionPacket();
         packetToSend.spawnX = packetToSend.orgPosX = position.getX();
@@ -51,11 +51,6 @@ public class Player extends Sprite {
     @Override
     public Circle getBounds() {
         return circle;
-    }
-
-    @Override
-    public boolean intersects(GameObject s) {
-        return false;
     }
 
     public void setSprite2(String pathToSprite) {

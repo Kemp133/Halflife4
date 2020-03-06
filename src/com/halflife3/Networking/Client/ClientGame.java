@@ -178,7 +178,7 @@ public class ClientGame extends Application {
 
                     //region Calculate the rotation
                     Vector2 player_client_center =
-                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + 18,
+                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + 20,
                                     player_client.getPosY() - Camera.GetOffsetY() + 18);
                     Vector2 direction =
                             new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
@@ -190,18 +190,23 @@ public class ClientGame extends Application {
                     rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
                     player_client.setDegrees(deg);
                     player_client.setRotate(rotate);
-
-                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
-                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()))*32;
-                    Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
                     //endregion
 
                     //region Create a new bullet
                     if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getWidth() / 2,
-                                player_client.getPosY() + player_client.getHeight() / 2).add(direction_of_gun);
-                        Vector2 bulletVel = new Vector2(cursor.getPosX() + Camera.GetOffsetX(), cursor.getPosY() + Camera.GetOffsetY())
-                                                .subtract(player_client.getPosition()).normalise().multiply(200);
+                         /*For Math.atan2() -
+                         reverse the coordinates X and Y to get the angle between X=0 and (X|Y) in radians*/
+
+                        double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
+                        double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()))*32;
+                        Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
+
+                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
+                                player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
+
+                        Vector2 bulletVel = new Vector2(Math.cos(Math.atan2(direction.getY(), direction.getX())),
+                                Math.sin(Math.atan2(direction.getY(), direction.getX())))
+                                .multiply(200);
 
                         new Bullet(bulletPos, bulletVel);
                         bulletLimiter = 6;
@@ -217,34 +222,29 @@ public class ClientGame extends Application {
 
                     //region Collision detection
                     boolean player_hit_block = false;
-                    for (Bricks block : MapRender.get_list()) {
-                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal())) {
+                    for (Bricks block : MapRender.get_list())
+                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
                             player_hit_block = true;
-                        }
-                    }
-//                    If a collision happens - moves the player back
+
                     player_client.collision(player_hit_block, elapsedTime);
 
                     HashSet<GameObject> crash_bullet_list = new HashSet<>();
-                    boolean Bullet_hit_wall = false;
-                    boolean Bullet_hit_player = false;
                     for(GameObject go: ObjectManager.getGameObjects()){
-                        if (go.getKeys().contains("Bullet")){
-                            for(Bricks block : MapRender.get_list()){
-                                if(go.getBounds().intersects(block.getBounds().getBoundsInLocal())){
-                                    Bullet_hit_wall = true;
-                                    crash_bullet_list.add(go);
-                                }
-                            }
-                            if(go.getBounds().intersects(player_client.circle.getBoundsInLocal())){
-                                Bullet_hit_player = true;
+                        if (!go.getKeys().contains("Bullet"))
+                            continue;
+
+                        for (Bricks block : MapRender.get_list())
+                            if (go.getBounds().intersects(block.getBounds().getBoundsInLocal()))
                                 crash_bullet_list.add(go);
-                            }
-                        }
+
+                        for (HashMap.Entry<String, Player> enemy : playerList.entrySet())
+                            if (go.getBounds().intersects(enemy.getValue().circle.getBoundsInLocal()))
+                                crash_bullet_list.add(go);
                     }
-                    for(GameObject bullet:crash_bullet_list){
+
+                    for (GameObject bullet : crash_bullet_list)
                         bullet.destroy();
-                    }
+
                     //endregion
 
                     //region Sends the client's position

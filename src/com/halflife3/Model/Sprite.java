@@ -27,8 +27,7 @@ public abstract class Sprite extends GameObject {
 		return new Rectangle(position.getX(),position.getY(),getWidth(),getHeight());
 	}
 
-
 	public double getWidth() { return (sprite == null) ? 0 : sprite.getWidth();	}
-	public double getHeight() { return (sprite == null) ? 0 : sprite.getHeight(); }
 
+	public double getHeight() { return (sprite == null) ? 0 : sprite.getHeight(); }
 }

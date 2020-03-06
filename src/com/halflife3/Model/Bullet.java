@@ -1,6 +1,5 @@
 package com.halflife3.Model;
 
-//import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Circle;
