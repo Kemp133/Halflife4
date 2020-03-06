@@ -20,10 +20,7 @@ import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static com.halflife3.Networking.Client.Client.listOfClients;
 import static javafx.scene.input.KeyCode.*;
@@ -36,9 +33,7 @@ public class ClientGame extends Application {
     //region Other variables
     static Input input;
     private static Pane root;
-    private static KeyHandle handle;
-    private static Crosshair cursor;
-    private static Player player_client; //Can get IP, Position, stateOfAI
+    private static Player player_client;
     private static HashMap<String, Player> playerList;
     private Stage window = null;
     private boolean flag = false;
@@ -77,7 +72,6 @@ public class ClientGame extends Application {
         player_client.setAI(false);
         player_client.setSprite("res/Player_pic.png");
         player_client.setSprite2("res/Player_walking.png");
-
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -112,9 +106,8 @@ public class ClientGame extends Application {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-//                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
+//                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9))
                     updateEnemies();
-//                }
             }
         }).start();
         //endregion
@@ -193,22 +186,22 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Create a new bullet
+                    player_client.setBulletShot(false);
                     if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                          /*For Math.atan2() -
                          reverse the coordinates X and Y to get the angle between X=0 and (X|Y) in radians*/
 
-                        double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
-                        double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()))*32;
-                        Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
+                        double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
+                        double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
+                        Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
 
                         Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
                                 player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
 
-                        Vector2 bulletVel = new Vector2(Math.cos(Math.atan2(direction.getY(), direction.getX())),
-                                Math.sin(Math.atan2(direction.getY(), direction.getX())))
-                                .multiply(200);
+                        Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
                         new Bullet(bulletPos, bulletVel);
+                        player_client.setBulletShot(true);
                         bulletLimiter = 6;
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
@@ -229,7 +222,7 @@ public class ClientGame extends Application {
                     player_client.collision(player_hit_block, elapsedTime);
 
                     HashSet<GameObject> crash_bullet_list = new HashSet<>();
-                    for(GameObject go: ObjectManager.getGameObjects()){
+                    for (GameObject go: ObjectManager.getGameObjects()) {
                         if (!go.getKeys().contains("Bullet"))
                             continue;
 
@@ -237,8 +230,8 @@ public class ClientGame extends Application {
                             if (go.getBounds().intersects(block.getBounds().getBoundsInLocal()))
                                 crash_bullet_list.add(go);
 
-                        for (HashMap.Entry<String, Player> enemy : playerList.entrySet())
-                            if (go.getBounds().intersects(enemy.getValue().circle.getBoundsInLocal()))
+                        for (String ip : listOfClients.connectedIPs)
+                            if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal()))
                                 crash_bullet_list.add(go);
                     }
 
@@ -247,8 +240,7 @@ public class ClientGame extends Application {
 
                     //endregion
 
-                    //region Sends the client's position
-                    //TODO: Send the client's bullets' velocities to the server
+                    //region Sends the client's position and whether they've shot a bullet
                     Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
                     //endregion
 
@@ -294,6 +286,10 @@ public class ClientGame extends Application {
         }
         //endregion
 
+        //region Initialise cursor
+        new Crosshair(Input.mousePosition.subtract(14, 14), new Vector2(0, 0));
+        //endregion
+
         //region Add audio into game
         AudioForGame audio = new AudioForGame();
         audio.getMenu().getItems().add(audio.getMute());
@@ -315,10 +311,6 @@ public class ClientGame extends Application {
         root.addEventHandler(KeyEvent.ANY, new KeyboardInput());
         root.addEventHandler(MouseEvent.ANY, new MouseInput());
         scene.setCursor(Cursor.NONE);
-        //endregion
-
-        //region Initialise cursor
-        cursor = new Crosshair(Input.mousePosition, new Vector2(0, 0));
         //endregion
 
         //region Map loading
@@ -349,14 +341,14 @@ public class ClientGame extends Application {
     }
 
     public void updateEnemies() {
-        ArrayList<String> playerKeys = new ArrayList<>();
-
         Client.receivePositions();
+
+        //region Replaces Bots <-> Players
+        ArrayList<String> playerKeys = new ArrayList<>();
 
         for (HashMap.Entry<String, Player> player : playerList.entrySet())
             playerKeys.add(player.getKey());
 
-        //region Replaces Bots <-> Players
         for (String player : playerKeys) {
 //            If bot name/player IP is stored locally - continue
             if (listOfClients.connectedIPs.contains(player))
@@ -380,30 +372,53 @@ public class ClientGame extends Application {
         }
         //endregion
 
+        //region Updates info of other players/bots
         for (String ip : listOfClients.connectedIPs) {
-            if (ip.equals(player_client.getIpOfClient()))
+            if (ip.equals(player_client.getIpOfClient()) || playerList.get(ip) == null)
                 continue;
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
-            if (playerList.get(ip) != null) {
-                double cameraX = player_client.getPosX() - 9*40, cameraY = player_client.getPosY() - 7*40;
 
-                if (cameraX < 0) cameraX = 0;
-                else if (cameraX > 25*40) cameraX = 25*40;
+            //region Camera Offset
+            double cameraX = player_client.getPosX() - 9*40;
+            double cameraY = player_client.getPosY() - 7*40;
 
-                if (cameraY < 0) cameraY = 0;
-                else if (cameraY > 30*40) cameraY = 30*40;
+            if (cameraX < 0) cameraX = 0;
+            else if (cameraX > 25*40) cameraX = 25*40;
 
-                Affine rotate = new Affine();
-                rotate.appendRotation(theDoubleValues.degrees,
-                        theDoubleValues.orgPosX - cameraX + 18,
-                        theDoubleValues.orgPosY - cameraY + 18);
+            if (cameraY < 0) cameraY = 0;
+            else if (cameraY > 30*40) cameraY = 30*40;
+            //endregion
 
-                playerList.get(ip).setRotate(rotate);
-                playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
-                playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
-            }
+            //region Enemies' rotation/position/velocity
+            Affine rotate = new Affine();
+            rotate.appendRotation(theDoubleValues.degrees,
+                    theDoubleValues.orgPosX - cameraX + 18,
+                    theDoubleValues.orgPosY - cameraY + 18);
+
+            playerList.get(ip).setRotate(rotate);
+            playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+            playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+            //endregion
+
+//            if (!theDoubleValues.bulletShot)
+//                continue;
+
+            //region Enemies' bullets
+            double degreeRadians = Math.toRadians(theDoubleValues.degrees);
+            double bullet_pos_x = Math.cos(degreeRadians);
+            double bullet_pos_y = Math.sin(degreeRadians);
+            Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+
+            Vector2 bulletPos = new Vector2(theDoubleValues.orgPosX + player_client.getHeight() / 2,
+                    theDoubleValues.orgPosY + player_client.getWidth() / 2).add(direction_of_gun);
+
+            Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
+
+            new Bullet(bulletPos, bulletVel);
+            //endregion
         }
+        //endregion
     }
 
     //region Framework to get only some specific game objects

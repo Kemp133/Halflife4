@@ -15,8 +15,8 @@ import java.util.Deque;
 
 public class Player extends Controllable {
     //region Variables
-    public  Circle  circle;
-    private Image   image_w;
+    public Circle circle;
+    private Image image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
     private boolean AI = true;
@@ -26,17 +26,9 @@ public class Player extends Controllable {
     private PositionPacket packetToSend;
     protected int health;
     int mode = 0;
+    boolean bulletShot = false;
     boolean is_moving = false;
     //endregion
-
-
-    public short getDegrees() {
-        return degrees;
-    }
-
-    public void setDegrees(short degrees) {
-        this.degrees = degrees;
-    }
 
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
@@ -86,7 +78,7 @@ public class Player extends Controllable {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        if(original_position.equals(position))
+        if (original_position.equals(position))
             is_moving = false;
         circle.setCenterX(position.getX() + 18);
         circle.setCenterY(position.getY() + 18);
@@ -106,19 +98,44 @@ public class Player extends Controllable {
     public void addVelocity(Vector2 toAdd) {
         velocity = velocity.add(toAdd);
     }
+
     public void resetPosition() {
         original_position = spawn_point;
     }
 
+    public boolean isBulletShot() {
+        return bulletShot;
+    }
+
+    public void setBulletShot(boolean bulletShot) {
+        this.bulletShot = bulletShot;
+    }
+
     //region MoveSpeed getter and setter
-    public float getMoveSpeed() { return moveSpeed; }
-    public void setMoveSpeed(float speed) { moveSpeed = speed; }
+    public float getMoveSpeed() {
+        return moveSpeed;
+    }
+
+    public void setMoveSpeed(float speed) {
+        moveSpeed = speed;
+    }
+    //endregion
+
+    //region Degrees getter and setter
+    public short getDegrees() {
+        return degrees;
+    }
+
+    public void setDegrees(short degrees) {
+        this.degrees = degrees;
+    }
     //endregion
 
     //region AI getter and setter
     public boolean isAI() {
         return AI;
     }
+
     public void setAI(boolean AI) {
         this.AI = AI;
     }
@@ -128,6 +145,7 @@ public class Player extends Controllable {
     public Vector2 getSpawn_point() {
         return spawn_point;
     }
+
     public void setSpawn_point(Vector2 spawn_point) {
         this.spawn_point = spawn_point;
     }
@@ -137,6 +155,7 @@ public class Player extends Controllable {
     public void setRotate(Affine rotate) {
         this.rotate = rotate;
     }
+
     public Affine getRotate() {
         return rotate;
     }
@@ -148,8 +167,10 @@ public class Player extends Controllable {
         packetToSend.velX = getVelX();
         packetToSend.orgPosX = getPosX();
         packetToSend.orgPosY = getPosY();
+        packetToSend.bulletShot = bulletShot;
         return packetToSend;
     }
+
     public void setPacketToSend(PositionPacket packetToSend) {
         this.packetToSend = packetToSend;
     }
@@ -161,15 +182,19 @@ public class Player extends Controllable {
         //step 2: move to target
         this.position = getNextMove(this.position, position);
     }
+
     public void moveTo(GameObject entity) {
         //step 1: find shortest path without walls
         //step 2: move to target
         this.position = getNextMove(this.getPosition(), entity.getPosition());
     }
+
     //this method gets the path between two positions
     public Vector2 getNextMove(Vector2 original, Vector2 position) {
 
-        if (original == position) { return position; }
+        if (original == position) {
+            return position;
+        }
 
         Vector2 up = new Vector2(original.getX(), original.getY() + 20);
         Vector2 right = new Vector2(original.getX() + 20, original.getY());
@@ -183,10 +208,10 @@ public class Player extends Controllable {
 
         double[] shortest = {udis, rdis, ddis, ldis};
 //this avoids hitting the wall or moving to itself
-        if (isWall(up, MapRender.get_list()) || udis == 0)    shortest[0] += 1000000;
+        if (isWall(up, MapRender.get_list()) || udis == 0) shortest[0] += 1000000;
         if (isWall(right, MapRender.get_list()) || rdis == 0) shortest[1] += 1000000;
-        if (isWall(down, MapRender.get_list()) || ddis == 0)  shortest[2] += 1000000;
-        if (isWall(left, MapRender.get_list()) || ldis == 0)  shortest[3] += 1000000;
+        if (isWall(down, MapRender.get_list()) || ddis == 0) shortest[2] += 1000000;
+        if (isWall(left, MapRender.get_list()) || ldis == 0) shortest[3] += 1000000;
 
         int closestRoute = FindSmallest(shortest);
 
@@ -232,10 +257,10 @@ public class Player extends Controllable {
     }
 
     //TODO: create a method that checks for walls
-    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
-        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
-        for(Bricks wall : listOfWalls){
-            if(scanArea.intersects(wall.getBounds().getBoundsInLocal())) {
+    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls) {
+        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() - 10, 20, 20);
+        for (Bricks wall : listOfWalls) {
+            if (scanArea.intersects(wall.getBounds().getBoundsInLocal())) {
                 return true;
             }
         }
