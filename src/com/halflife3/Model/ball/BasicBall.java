@@ -7,12 +7,12 @@ import javafx.scene.canvas.GraphicsContext;
 public class BasicBall extends Sprite {
     public BasicBall(Vector2 position, Vector2 velocity) {
         super(position, velocity);
-        setSprite("res/balls/basicBall.png");
+        setSprite("res/Sprites/Ball.png");
     }
 
     @Override
     public void render(GraphicsContext gc) {
-
+        gc.drawImage(sprite, getPosX() - (getWidth() / 2), getPosY() - (getHeight() / 2));
     }
 
     @Override

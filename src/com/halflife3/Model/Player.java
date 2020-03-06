@@ -22,11 +22,21 @@ public class Player extends Controllable {
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
+    private short degrees;
     private PositionPacket packetToSend;
     protected int health;
     int mode = 0;
     boolean is_moving = false;
     //endregion
+
+
+    public short getDegrees() {
+        return degrees;
+    }
+
+    public void setDegrees(short degrees) {
+        this.degrees = degrees;
+    }
 
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
