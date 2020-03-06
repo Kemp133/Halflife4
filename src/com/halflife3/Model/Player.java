@@ -13,21 +13,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Deque;
 
-public class Player extends Sprite {
+public class Player extends Controllable {
     //region Variables
-//    public double width = 40;
-//    public double height = 35;
-//    public Rectangle rectangle;
-    public Circle circle;
-    //    private Image image;
-    private Image image_w;
+    public  Circle  circle;
+    private Image   image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
-    private String ipOfClient;
     private boolean AI = true;
     private float moveSpeed = 100;
     private Affine rotate;
-    private short degrees;
     private PositionPacket packetToSend;
     protected int health;
     int mode = 0;
@@ -44,7 +38,6 @@ public class Player extends Sprite {
         packetToSend.spawnY = packetToSend.orgPosY = position.getY();
         packetToSend.velX = velocity.getX();
         packetToSend.velY = velocity.getY();
-        packetToSend.degrees = this.degrees;
     }
 
     //region Overridden super methods
@@ -83,7 +76,7 @@ public class Player extends Sprite {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        if (original_position.getX() == position.getX() && original_position.getY() == position.getY())
+        if(original_position.equals(position))
             is_moving = false;
         circle.setCenterX(position.getX() + 18);
         circle.setCenterY(position.getY() + 18);
@@ -103,46 +96,19 @@ public class Player extends Sprite {
     public void addVelocity(Vector2 toAdd) {
         velocity = velocity.add(toAdd);
     }
-
     public void resetPosition() {
         original_position = spawn_point;
     }
 
-    //region Degrees getter and setter
-    public short getDegrees() {
-        return degrees;
-    }
-
-    public void setDegrees(short degrees) {
-        this.degrees = degrees;
-    }
-    //endregion
-
     //region MoveSpeed getter and setter
-    public float getMoveSpeed() {
-        return moveSpeed;
-    }
-
-    public void setMoveSpeed(float speed) {
-        moveSpeed = speed;
-    }
-    //endregion
-
-    //region IP getter and setter
-    public String getIpOfClient() {
-        return ipOfClient;
-    }
-
-    public void setIpOfClient(String ipOfClient) {
-        this.ipOfClient = ipOfClient;
-    }
+    public float getMoveSpeed() { return moveSpeed; }
+    public void setMoveSpeed(float speed) { moveSpeed = speed; }
     //endregion
 
     //region AI getter and setter
     public boolean isAI() {
         return AI;
     }
-
     public void setAI(boolean AI) {
         this.AI = AI;
     }
@@ -152,7 +118,6 @@ public class Player extends Sprite {
     public Vector2 getSpawn_point() {
         return spawn_point;
     }
-
     public void setSpawn_point(Vector2 spawn_point) {
         this.spawn_point = spawn_point;
     }
@@ -162,7 +127,6 @@ public class Player extends Sprite {
     public void setRotate(Affine rotate) {
         this.rotate = rotate;
     }
-
     public Affine getRotate() {
         return rotate;
     }
@@ -174,10 +138,8 @@ public class Player extends Sprite {
         packetToSend.velX = getVelX();
         packetToSend.orgPosX = getPosX();
         packetToSend.orgPosY = getPosY();
-        packetToSend.degrees = getDegrees();
         return packetToSend;
     }
-
     public void setPacketToSend(PositionPacket packetToSend) {
         this.packetToSend = packetToSend;
     }
@@ -189,19 +151,15 @@ public class Player extends Sprite {
         //step 2: move to target
         this.position = getNextMove(this.position, position);
     }
-
     public void moveTo(GameObject entity) {
         //step 1: find shortest path without walls
         //step 2: move to target
         this.position = getNextMove(this.getPosition(), entity.getPosition());
     }
-
     //this method gets the path between two positions
     public Vector2 getNextMove(Vector2 original, Vector2 position) {
 
-        if (original == position) {
-            return position;
-        }
+        if (original == position) { return position; }
 
         Vector2 up = new Vector2(original.getX(), original.getY() + 20);
         Vector2 right = new Vector2(original.getX() + 20, original.getY());
@@ -215,10 +173,10 @@ public class Player extends Sprite {
 
         double[] shortest = {udis, rdis, ddis, ldis};
 //this avoids hitting the wall or moving to itself
-        if (isWall(up, MapRender.get_list()) || udis == 0) shortest[0] += 1000000;
+        if (isWall(up, MapRender.get_list()) || udis == 0)    shortest[0] += 1000000;
         if (isWall(right, MapRender.get_list()) || rdis == 0) shortest[1] += 1000000;
-        if (isWall(down, MapRender.get_list()) || ddis == 0) shortest[2] += 1000000;
-        if (isWall(left, MapRender.get_list()) || ldis == 0) shortest[3] += 1000000;
+        if (isWall(down, MapRender.get_list()) || ddis == 0)  shortest[2] += 1000000;
+        if (isWall(left, MapRender.get_list()) || ldis == 0)  shortest[3] += 1000000;
 
         int closestRoute = FindSmallest(shortest);
 
@@ -264,10 +222,10 @@ public class Player extends Sprite {
     }
 
     //TODO: create a method that checks for walls
-    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls) {
-        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() - 10, 20, 20);
-        for (Bricks wall : listOfWalls) {
-            if (scanArea.intersects(wall.getBounds().getBoundsInLocal())) {
+    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
+        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
+        for(Bricks wall : listOfWalls){
+            if(scanArea.intersects(wall.getBounds().getBoundsInLocal())) {
                 return true;
             }
         }

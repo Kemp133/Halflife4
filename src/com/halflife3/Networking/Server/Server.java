@@ -124,43 +124,47 @@ public class Server implements Runnable {
         multicastSocket.close();
     }
 
-//    private void tomsAI() {
-//        int totalBots =0;
-//        /*if(ClientListServer.connectedIPs.contains(botNames[0])){
-//            totalBots = 4;
-//        }else if (ClientListServer.connectedIPs.contains(botNames[1])){
-//            totalBots = 3;
-//        }else if (ClientListServer.connectedIPs.contains(botNames[2])){
-//            totalBots = 2;
-//        }else if (ClientListServer.connectedIPs.contains(botNames[3])){
-//            totalBots = 1;
-//        }*/
-//        Vector2 of0 =new Vector2(ClientListServer.positionList.get(botNames[0]).orgPosX,ClientListServer.positionList.get(botNames[0]).orgPosY);
-//        Vector2 of1 = new Vector2(ClientListServer.positionList.get(botNames[1]).orgPosX,ClientListServer.positionList.get(botNames[1]).orgPosY);
-//        Vector2 of2 = new Vector2(ClientListServer.positionList.get(botNames[2]).orgPosX,ClientListServer.positionList.get(botNames[2]).orgPosY);
-//        Vector2 of3 = new Vector2(ClientListServer.positionList.get(botNames[3]).orgPosX,ClientListServer.positionList.get(botNames[3]).orgPosY);
-//
-//        Vector2[] posiList = {of0, of1, of2, of3};
-//        //for bot 3
-//        //offset
-//        posiList[3] = new Vector2(327680,327680);
-//        Vector2 newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
-//        ClientListServer.positionList.get(botNames[3]).orgPosX = newposi.getX();
-//        ClientListServer.positionList.get(botNames[3]).orgPosY = newposi.getY();
-//        //for bot 2
-//        posiList[2] = new Vector2(327680,327680);
-//        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
-//        ClientListServer.positionList.get(botNames[2]).orgPosX = newposi.getX();
-//        ClientListServer.positionList.get(botNames[2]).orgPosY = newposi.getY();
-//        //for bot 1
-//        posiList[1] = new Vector2(327680,327680);
-//        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
-//        ClientListServer.positionList.get(botNames[1]).orgPosX = newposi.getX();
-//        ClientListServer.positionList.get(botNames[1]).orgPosY = newposi.getY();
-//        //TODO: Change bot0 position
-//
-//
-//    }
+    private void tomsAI() {
+        /*if(ClientListServer.connectedIPs.contains(botNames[0])){
+            totalBots = 4;
+        }else if (ClientListServer.connectedIPs.contains(botNames[1])){
+            totalBots = 3;
+        }else if (ClientListServer.connectedIPs.contains(botNames[2])){
+            totalBots = 2;
+        }else if (ClientListServer.connectedIPs.contains(botNames[3])){
+            totalBots = 1;
+        }*/
+        if (ClientListServer.positionList.get(botNames[0]) == null) return;
+        double test = ClientListServer.positionList.get(botNames[0]).orgPosX;
+        Vector2 of0 = new Vector2(ClientListServer.positionList.get(botNames[0]).orgPosX,ClientListServer.positionList.get(botNames[0]).orgPosY);
+        Vector2 of1 = new Vector2(ClientListServer.positionList.get(botNames[1]).orgPosX,ClientListServer.positionList.get(botNames[1]).orgPosY);
+        Vector2 of2 = new Vector2(ClientListServer.positionList.get(botNames[2]).orgPosX,ClientListServer.positionList.get(botNames[2]).orgPosY);
+        Vector2 of3 = new Vector2(ClientListServer.positionList.get(botNames[3]).orgPosX,ClientListServer.positionList.get(botNames[3]).orgPosY);
+
+        Vector2[] posiList = {of0, of1, of2, of3};
+        //for bot 3
+        //offset
+        posiList[3] = new Vector2(327680,327680);
+        Vector2 newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
+        ClientListServer.positionList.get(botNames[3]).orgPosX = newposi.getX();
+        ClientListServer.positionList.get(botNames[3]).orgPosY = newposi.getY();
+        //for bot 2
+        /*
+        posiList[2] = new Vector2(327680,327680);
+        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
+        ClientListServer.positionList.get(botNames[2]).orgPosX = newposi.getX();
+        ClientListServer.positionList.get(botNames[2]).orgPosY = newposi.getY();
+        */
+        //for bot 1
+        /*
+        posiList[1] = new Vector2(327680,327680);
+        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
+        ClientListServer.positionList.get(botNames[1]).orgPosX = newposi.getX();
+        ClientListServer.positionList.get(botNames[1]).orgPosY = newposi.getY();*/
+        //TODO: Change bot0 position
+
+
+    }
 
     private void connectionListener() throws IOException {
         byte[] pokeBuf = new byte[objectToByteArray(new ConnectPacket()).length];
