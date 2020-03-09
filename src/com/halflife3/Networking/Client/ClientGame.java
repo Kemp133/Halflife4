@@ -207,10 +207,7 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Updates position of all game objects locally
-                    for(IUpdateable go : ObjectManager.getGameObjects()) {
-                        go.update(elapsedTime);
-                    }
-
+                    editObjectManager(2, elapsedTime, null, null);
                     //endregion
 
                     //region Collision detection
@@ -221,22 +218,7 @@ public class ClientGame extends Application {
 
                     player_client.collision(player_hit_block, elapsedTime);
 
-                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
-                    for (GameObject go: ObjectManager.getGameObjects()) {
-                        if (!go.getKeys().contains("Bullet"))
-                            continue;
-
-                        for (Bricks block : MapRender.get_list())
-                            if (go.getBounds().intersects(block.getBounds().getBoundsInLocal()))
-                                crash_bullet_list.add(go);
-
-                        for (String ip : listOfClients.connectedIPs)
-                            if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal()))
-                                crash_bullet_list.add(go);
-                    }
-
-                    for (GameObject bullet : crash_bullet_list)
-                        bullet.destroy();
+                    editObjectManager(1, 0, null, null);
 
                     //endregion
 
@@ -401,8 +383,8 @@ public class ClientGame extends Application {
             playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             //endregion
 
-//            if (!theDoubleValues.bulletShot)
-//                continue;
+            if (!theDoubleValues.bulletShot)
+                continue;
 
             //region Enemies' bullets
             double degreeRadians = Math.toRadians(theDoubleValues.degrees);
@@ -415,10 +397,43 @@ public class ClientGame extends Application {
 
             Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
-            new Bullet(bulletPos, bulletVel);
+            editObjectManager(0, 0, bulletPos, bulletVel);
             //endregion
         }
         //endregion
+    }
+
+    private synchronized void editObjectManager(int operation, double elapsedTime, Vector2 bp, Vector2 bv) {
+        switch (operation) {
+            case 0 : { //add bullets
+                new Bullet(bp, bv);
+            }
+
+            case 1 : { //remove bullets
+                HashSet<GameObject> crash_bullet_list = new HashSet<>();
+                for (GameObject go: ObjectManager.getGameObjects()) {
+                    if (!go.getKeys().contains("Bullet"))
+                        continue;
+
+                    for (Bricks block : MapRender.get_list())
+                        if (go.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+                            crash_bullet_list.add(go);
+
+                    for (String ip : listOfClients.connectedIPs)
+                        if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal()))
+                            crash_bullet_list.add(go);
+                }
+
+                for (GameObject bullet : crash_bullet_list)
+                    bullet.destroy();
+            }
+
+            case 2 : {//update object positions
+                for(IUpdateable go : ObjectManager.getGameObjects()) {
+                    go.update(elapsedTime);
+                }
+            }
+        }
     }
 
     //region Framework to get only some specific game objects
