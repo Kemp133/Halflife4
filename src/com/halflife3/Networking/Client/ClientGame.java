@@ -38,7 +38,7 @@ public class ClientGame extends Application {
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
-    private int bulletLimiter = 6;
+    private int bulletLimiter = 5;
     private double bulletMillis;
     //endregion
 
@@ -232,9 +232,8 @@ public class ClientGame extends Application {
 
                     MapRender.render(graphicsContext);
 
-                    for (IRenderable go : ObjectManager.getGameObjects()) {
+                    for (IRenderable go : ObjectManager.getGameObjects())
                         go.render(graphicsContext);
-                    }
                     //endregion
 
                     lastUpdate = currentNanoTime;

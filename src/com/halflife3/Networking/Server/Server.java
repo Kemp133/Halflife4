@@ -118,7 +118,6 @@ public class Server implements Runnable {
                     e.printStackTrace();
                 }
             }
-
         }
 
         multicastSocket.close();
@@ -236,7 +235,7 @@ public class Server implements Runnable {
         ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition());
         new Thread(connection).start();
 
-        try { Thread.sleep(3000); } catch (InterruptedException ignored) { }
+        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
         multicastPacket(portPacket, GET_PORT_PORT);
 
         ClientListServer.clientList.put(address, connection);
@@ -279,7 +278,7 @@ public class Server implements Runnable {
         System.out.println(address + " has disconnected");
     }
 
-    public static void multicastPacket(Object o, int mPort) {
+    public synchronized static void multicastPacket(Object o, int mPort) {
         try {
             byte[] sendBuf = objectToByteArray(o);
             DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);

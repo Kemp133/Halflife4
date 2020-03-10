@@ -82,8 +82,7 @@ public class Client {
         listenerClient = new EventListenerClient();
 
 //        Lets the server know the client has connected
-        ConnectPacket join = new ConnectPacket();
-        sendPacket(join, Server.LISTENER_PORT);
+        sendPacket(new ConnectPacket(), Server.LISTENER_PORT);
 
 //        Gets the unique port to communicate with the server
         getUniqueInfo();
