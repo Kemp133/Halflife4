@@ -28,7 +28,7 @@ import static javafx.scene.input.KeyCode.*;
 public class ClientGame extends Application {
 
     private final int FPS = 60;
-//    private final int INC_PACKETS_PER_SECOND = 90;
+    private final int INC_PACKETS_PER_SECOND = 60;
 
     //region Other variables
     static Input input;
@@ -106,8 +106,10 @@ public class ClientGame extends Application {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-//                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9))
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
                     updateEnemies();
+                    serverNanoTime = System.nanoTime();
+                }
             }
         }).start();
         //endregion
@@ -186,11 +188,9 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Create a new bullet
+
                     player_client.setBulletShot(false);
                     if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                         /*For Math.atan2() -
-                         reverse the coordinates X and Y to get the angle between X=0 and (X|Y) in radians*/
-
                         double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                         double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
                         Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
@@ -219,7 +219,6 @@ public class ClientGame extends Application {
                     player_client.collision(player_hit_block, elapsedTime);
 
                     editObjectManager(1, 0, null, null);
-
                     //endregion
 
                     //region Sends the client's position and whether they've shot a bullet
