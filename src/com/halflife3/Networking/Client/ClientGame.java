@@ -27,8 +27,8 @@ import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
-    private final int FPS = 60;
-    private final int INC_PACKETS_PER_SECOND = 60;
+    private final int FPS = 30;
+    private final int INC_PACKETS_PER_SECOND = 30;
 
     //region Other variables
     static Input input;
@@ -39,6 +39,7 @@ public class ClientGame extends Application {
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 6;
+    private double bulletMillis;
     //endregion
 
     //region ClientGame constructors
@@ -107,7 +108,8 @@ public class ClientGame extends Application {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
-                    updateEnemies();
+                bulletMillis = System.currentTimeMillis();
+                updateEnemies();
                     serverNanoTime = System.nanoTime();
                 }
             }
@@ -202,7 +204,7 @@ public class ClientGame extends Application {
 
                         new Bullet(bulletPos, bulletVel);
                         player_client.setBulletShot(true);
-                        bulletLimiter = 6;
+                        bulletLimiter = 5;
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 

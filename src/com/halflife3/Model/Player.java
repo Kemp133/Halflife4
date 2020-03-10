@@ -167,6 +167,7 @@ public class Player extends Controllable {
         packetToSend.velX = getVelX();
         packetToSend.orgPosX = getPosX();
         packetToSend.orgPosY = getPosY();
+        packetToSend.degrees = degrees;
         packetToSend.bulletShot = bulletShot;
         return packetToSend;
     }
