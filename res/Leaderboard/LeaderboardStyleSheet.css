@@ -1,0 +1,46 @@
+/*@font-face {
+  font-family: paladin;
+  src: url("res/PaladinsSemiItalic-Y6Yo.otf"); /*format('truetype');
+}*/
+
+.table-view {
+   -fx-background-color: rgba(176,224,230,0.8);
+}
+
+.table-cell {
+    /*-fx-padding: 0.5em;*/ /*needed*/
+    -fx-border-color: transparent -fx-box-border transparent transparent;
+    -fx-font: 13px "Arial";
+    -fx-text-fill: #212121;
+    -fx-font-weight: bold;
+}
+
+.table-column {
+    -fx-alignment: CENTER;
+}
+
+.column-header {
+    -fx-font: 20px "Arial";
+    -fx-font-weight: bold;
+}
+
+.column-header-background{
+    -fx-background-color: rgba(176,224,230,0.8);
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    /*-fx-border-width: 30 40 50 80;*/
+   /* -fx-background-insets: 500, 0, 0, 0;*/
+    /*-fx-padding: 1 0 0 0;*/
+    -fx-cell-size: 36;
+}
+
+.table-view:row-selection .table-row-cell:filled:hover {
+    -fx-background-color: blue;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+.label {
+    -fx-text-fill: blue;
+}
