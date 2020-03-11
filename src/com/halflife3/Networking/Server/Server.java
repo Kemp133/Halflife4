@@ -100,7 +100,7 @@ public class Server implements Runnable {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
-//                    tomsAI();
+                    tomsAI();
                     posPacket.posList = ClientListServer.positionList;
                     posPacket.connectedIPs = ClientListServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
@@ -125,7 +125,8 @@ public class Server implements Runnable {
     private void tomsAI() {
 
         int totalCharacter = 4;
-        List<Vector2> positions = new LinkedList<Vector2>();
+        List<Vector2> positions = new LinkedList<>();
+        List<Map.Entry<String, PositionPacket>> positions1 = new LinkedList<>();
 
         for(var p : ClientListServer.positionList.entrySet()) {
             PositionPacket pos = p.getValue();
@@ -133,7 +134,9 @@ public class Server implements Runnable {
         }
         Vector2 position1 = positions.get(1);
         AIControlledPlayer bot1 = new AIControlledPlayer(position1,new Vector2(0,0));
-        bot1.moveTo(positions.get(0));
+        bot1.moveTo(positions.get(2));
+        ClientListServer.positionList.get(botNames[1]).orgPosX= bot1.getPosX();
+        ClientListServer.positionList.get(botNames[1]).orgPosY= bot1.getPosY();
         //offset
         //TODO: Change bot0 position
 
