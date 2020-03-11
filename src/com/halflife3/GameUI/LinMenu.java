@@ -41,7 +41,7 @@ public class LinMenu extends ContextMenu {
         audio.setHideOnClick(false);
 
         //Setting the button properties and images for the play button
-        FileInputStream inputJoin = new FileInputStream("res/joingamebuttongimp.png");
+        var inputJoin = new FileInputStream("res/joingamebuttongimp.png");
         Image imageJoin = new Image(inputJoin);
         start_m = new Button();
         start_m.setMinHeight(90);
@@ -52,7 +52,7 @@ public class LinMenu extends ContextMenu {
         start_m.setBackground(newBJoin);
 
         //Setting the button properties and images for the audio button
-        FileInputStream inputAudio = new FileInputStream("res/audiogamebuttongimp.png");
+        var inputAudio = new FileInputStream("res/audiogamebuttongimp.png");
         Image imageAudio = new Image(inputAudio);
         settings_m = new MenuButton("",new ImageView(),audioItem_on,audioitem_off,audio);
         settings_m.setMinHeight(90);
@@ -63,7 +63,7 @@ public class LinMenu extends ContextMenu {
         settings_m.setBackground(newBAudio);
 
         //Setting the button properties and images for the exit button
-        FileInputStream inputExit = new FileInputStream("res/exitgamebuttongimp.png");
+        var inputExit = new FileInputStream("res/exitgamebuttongimp.png");
         Image imageExit = new Image(inputExit);
         exit_m = new Button();
         exit_m.setMinHeight(90);

@@ -146,27 +146,27 @@ public class ClientGame extends Application {
                     //region Handles player movement
                     if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
                         player_client.getVelocity().setX(0);
-                        player_client.setIs_moving(false);
+                        player_client.setMoving(false);
                     }
                     if (Input.isKeyReleased(W) && Input.isKeyReleased(S)){
                         player_client.getVelocity().setY(0);
-                        player_client.setIs_moving(false);
+                        player_client.setMoving(false);
                     }
                     if (Input.isKeyPressed(A)) {
                         player_client.getVelocity().setX(-100);
-                        player_client.setIs_moving(true);
+                        player_client.setMoving(true);
                     }
                     if (Input.isKeyPressed(D)) {
                         player_client.getVelocity().setX(100);
-                        player_client.setIs_moving(true);
+                        player_client.setMoving(true);
                     }
                     if (Input.isKeyPressed(W)) {
                         player_client.getVelocity().setY(-100);
-                        player_client.setIs_moving(true);
+                        player_client.setMoving(true);
                     }
                     if (Input.isKeyPressed(S)) {
                         player_client.getVelocity().setY(100);
-                        player_client.setIs_moving(true);
+                        player_client.setMoving(true);
                     }
                     //endregion
 
@@ -188,8 +188,8 @@ public class ClientGame extends Application {
                     Affine rotate = new Affine();
                     short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
                     rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
-                    player_client.setDegrees(deg);
-                    player_client.setRotate(rotate);
+                    player_client.setRotation(deg);
+                    player_client.setAffine(rotate);
 
                     double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
                     double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()))*32;
@@ -399,7 +399,7 @@ public class ClientGame extends Application {
                         theDoubleValues.orgPosX - cameraX + 18,
                         theDoubleValues.orgPosY - cameraY + 18);
 
-                playerList.get(ip).setRotate(rotate);
+                playerList.get(ip).setAffine(rotate);
                 playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             }

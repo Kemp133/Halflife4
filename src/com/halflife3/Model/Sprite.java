@@ -14,7 +14,7 @@ public abstract class Sprite extends GameObject {
 	}
 
 	public void setSprite(String pathToSprite) {
-		try(FileInputStream fis = new FileInputStream(pathToSprite)) {
+		try(var fis = new FileInputStream(pathToSprite)) {
 			sprite = new Image(fis);
 		} catch (IOException e) {
 			System.err.println("Image not found!");

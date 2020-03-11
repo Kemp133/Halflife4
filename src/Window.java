@@ -42,7 +42,7 @@ public class Window extends Application {
         pane.getChildren().addAll(newGButton, optButton, quit);
 
         //Adds an image to a button
-        FileInputStream input = new FileInputStream("res/button_image.png");
+        var input = new FileInputStream("res/button_image.png");
         Image image = new Image(input);
         ImageView imageView = new ImageView(image);
 
@@ -52,7 +52,7 @@ public class Window extends Application {
     }
 
     private void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/markus-henze-4vVZ8N88Ygs-unsplash.jpg");
+        var inputStream = new FileInputStream("res/markus-henze-4vVZ8N88Ygs-unsplash.jpg");
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);

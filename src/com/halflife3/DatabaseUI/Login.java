@@ -52,7 +52,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
     private Background addBackground() {
         try {
 
-            FileInputStream inputStream = new FileInputStream("res/LoginBackground.png");
+            var inputStream = new FileInputStream("res/LoginBackground.png");
             Image image = new Image(inputStream);
 
             BackgroundSize backgroundSize = new BackgroundSize(SCREEN_WIDTH, SCREEN_HEIGHT, false, false, false, true);
@@ -68,11 +68,10 @@ This is used by the stackPanes for the two different scene Login and Create Acco
     }
 
     public void buttonProperties() throws FileNotFoundException {
-
         createNewUser.setMaxHeight(30);
         createNewUser.setMaxWidth(150);
 
-        FileInputStream iSCreateNew = new FileInputStream("res/button_create-new-account (1).png");
+        var iSCreateNew = new FileInputStream("res/button_create-new-account (1).png");
         Image imageCreateNew = new Image(iSCreateNew, createNewUser.getWidth(), createNewUser.getHeight(), false, true);
         BackgroundImage cNImage = new BackgroundImage(imageCreateNew, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
                 new BackgroundSize(createNewUser.getWidth(), createNewUser.getHeight(), true, true, true, false));
@@ -82,7 +81,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         login.setMaxHeight(30);
         login.setMaxWidth(150);
 
-        FileInputStream iSLogin = new FileInputStream("res/button_login (1).png");
+        var iSLogin = new FileInputStream("res/button_login (1).png");
         Image imageLogin = new Image(iSLogin, login.getWidth(), login.getHeight(), false, true);
         BackgroundImage bImageLogin = new BackgroundImage(imageLogin, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
                 new BackgroundSize(login.getWidth(), login.getHeight(), true, true, true, false));
@@ -92,7 +91,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         backButton.setMinHeight(30);
         backButton.setMinWidth(150);
 
-        FileInputStream iSBack = new FileInputStream("res/button_back.png");
+        var iSBack = new FileInputStream("res/button_back.png");
         Image imageBack = new Image(iSBack, login.getWidth(), login.getHeight(), false, true);
         BackgroundImage bBack = new BackgroundImage(imageBack, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
                 new BackgroundSize(backButton.getWidth(), backButton.getHeight(), true, true, true, false));
@@ -102,7 +101,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         create.setMinHeight(30);
         create.setMinWidth(150);
 
-        FileInputStream isCreate = new FileInputStream("res/button_create-user.png");
+        var isCreate = new FileInputStream("res/button_create-user.png");
         Image imageCreate = new Image(isCreate, login.getWidth(), login.getHeight(), false, true);
         BackgroundImage bImageCreate = new BackgroundImage(imageCreate, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
                 new BackgroundSize(create.getWidth(), create.getHeight(), true, true, true, false));

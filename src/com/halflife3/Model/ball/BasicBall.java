@@ -9,15 +9,12 @@ public class BasicBall extends Sprite {
         super(position, velocity);
         setSprite("res/balls/basicBall.png");
     }
-
     @Override
     public void render(GraphicsContext gc) {
 
     }
-
     @Override
     public void update(double time) {
 
     }
-
 }

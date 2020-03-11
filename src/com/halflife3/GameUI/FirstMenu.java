@@ -39,9 +39,9 @@ public class FirstMenu extends Application implements ICredentialUser {
     private boolean isMaximised;
 
     public FirstMenu() throws FileNotFoundException {
-        FileInputStream input1 = new FileInputStream("res/Client.png");
-        FileInputStream input2 = new FileInputStream("res/create_server.png");
-        FileInputStream input3 = new FileInputStream("res/MenuBackground.png");
+        var input1 = new FileInputStream("res/Client.png");
+        var input2 = new FileInputStream("res/create_server.png");
+        var input3 = new FileInputStream("res/MenuBackground.png");
         javafx.scene.image.Image image1 = new Image(input1);
         Image image2 = new Image(input2);
         Image image3 = new Image(input3);
@@ -87,8 +87,8 @@ public class FirstMenu extends Application implements ICredentialUser {
     }
 
     private static void loadWindowAttributes() {
-        try(FileInputStream fi = new FileInputStream(new File("AppData/config.conf"))) {
-            try(ObjectInputStream oi = new ObjectInputStream(fi)) {
+        try(var fi = new FileInputStream(new File("AppData/config.conf"))) {
+            try(var oi = new ObjectInputStream(fi)) {
                 windowAttributes = (WindowAttributes)oi.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
