@@ -1,6 +1,7 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Model.Bricks;
+import com.halflife3.Model.Enemies.AIControlledPlayer;
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
@@ -8,9 +9,7 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.*;
 import java.net.*;
-import java.util.Deque;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.*;
 
 public class Server implements Runnable {
 
@@ -124,42 +123,18 @@ public class Server implements Runnable {
     }
 
     private void tomsAI() {
-        /*if(ClientListServer.connectedIPs.contains(botNames[0])){
-            totalBots = 4;
-        }else if (ClientListServer.connectedIPs.contains(botNames[1])){
-            totalBots = 3;
-        }else if (ClientListServer.connectedIPs.contains(botNames[2])){
-            totalBots = 2;
-        }else if (ClientListServer.connectedIPs.contains(botNames[3])){
-            totalBots = 1;
-        }*/
-        if (ClientListServer.positionList.get(botNames[0]) == null) return;
-        double test = ClientListServer.positionList.get(botNames[0]).orgPosX;
-        Vector2 of0 = new Vector2(ClientListServer.positionList.get(botNames[0]).orgPosX,ClientListServer.positionList.get(botNames[0]).orgPosY);
-        Vector2 of1 = new Vector2(ClientListServer.positionList.get(botNames[1]).orgPosX,ClientListServer.positionList.get(botNames[1]).orgPosY);
-        Vector2 of2 = new Vector2(ClientListServer.positionList.get(botNames[2]).orgPosX,ClientListServer.positionList.get(botNames[2]).orgPosY);
-        Vector2 of3 = new Vector2(ClientListServer.positionList.get(botNames[3]).orgPosX,ClientListServer.positionList.get(botNames[3]).orgPosY);
 
-        Vector2[] posiList = {of0, of1, of2, of3};
-        //for bot 3
+        int totalCharacter = 4;
+        List<Vector2> positions = new LinkedList<Vector2>();
+
+        for(var p : ClientListServer.positionList.entrySet()) {
+            PositionPacket pos = p.getValue();
+            positions.add(new Vector2(pos.orgPosX, pos.orgPosY));
+        }
+        Vector2 position1 = positions.get(1);
+        AIControlledPlayer bot1 = new AIControlledPlayer(position1,new Vector2(0,0));
+        bot1.moveTo(positions.get(0));
         //offset
-        posiList[3] = new Vector2(327680,327680);
-        Vector2 newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
-        ClientListServer.positionList.get(botNames[3]).orgPosX = newposi.getX();
-        ClientListServer.positionList.get(botNames[3]).orgPosY = newposi.getY();
-        //for bot 2
-        /*
-        posiList[2] = new Vector2(327680,327680);
-        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
-        ClientListServer.positionList.get(botNames[2]).orgPosX = newposi.getX();
-        ClientListServer.positionList.get(botNames[2]).orgPosY = newposi.getY();
-        */
-        //for bot 1
-        /*
-        posiList[1] = new Vector2(327680,327680);
-        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
-        ClientListServer.positionList.get(botNames[1]).orgPosX = newposi.getX();
-        ClientListServer.positionList.get(botNames[1]).orgPosY = newposi.getY();*/
         //TODO: Change bot0 position
 
 
