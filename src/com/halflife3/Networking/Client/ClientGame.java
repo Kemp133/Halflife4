@@ -20,30 +20,26 @@ import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static com.halflife3.Networking.Client.Client.listOfClients;
 import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
-    private final int FPS = 60;
-//    private final int INC_PACKETS_PER_SECOND = 90;
+    private final int FPS = 30;
+    private final int INC_PACKETS_PER_SECOND = 30;
 
     //region Other variables
     static Input input;
     private static Pane root;
-    private static KeyHandle handle;
-    private static Crosshair cursor;
-    private static Player player_client; //Can get IP, Position, stateOfAI
+    private static Player player_client;
     private static HashMap<String, Player> playerList;
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
-    private int bulletLimiter = 6;
+    private int bulletLimiter = 5;
+    private double bulletMillis;
     //endregion
 
     //region ClientGame constructors
@@ -77,7 +73,6 @@ public class ClientGame extends Application {
         player_client.setAI(false);
         player_client.setSprite("res/Player_pic.png");
         player_client.setSprite2("res/Player_walking.png");
-
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -112,9 +107,11 @@ public class ClientGame extends Application {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-//                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
-                    updateEnemies();
-//                }
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
+                bulletMillis = System.currentTimeMillis();
+                updateEnemies();
+                    serverNanoTime = System.nanoTime();
+                }
             }
         }).start();
         //endregion
@@ -178,7 +175,7 @@ public class ClientGame extends Application {
 
                     //region Calculate the rotation
                     Vector2 player_client_center =
-                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + 18,
+                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + 20,
                                     player_client.getPosY() - Camera.GetOffsetY() + 18);
                     Vector2 direction =
                             new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
@@ -190,65 +187,43 @@ public class ClientGame extends Application {
                     rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
                     player_client.setRotation(deg);
                     player_client.setAffine(rotate);
-
-                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()))*32;
-                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()))*32;
-                    Vector2 direction_of_gun = new Vector2(bullet_pos_x, bullet_pos_y);
                     //endregion
 
                     //region Create a new bullet
+
+//                    player_client.setBulletShot(false); TODO: Why this no work???
                     if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getWidth() / 2,
-                                player_client.getPosY() + player_client.getHeight() / 2).add(direction_of_gun);
-                        Vector2 bulletVel = new Vector2(cursor.getPosX() + Camera.GetOffsetX(), cursor.getPosY() + Camera.GetOffsetY())
-                                                .subtract(player_client.getPosition()).normalise().multiply(200);
+                        double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
+                        double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
+                        Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+
+                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
+                                player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
+
+                        Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
                         new Bullet(bulletPos, bulletVel);
-                        bulletLimiter = 6;
+//                        player_client.setBulletShot(true); TODO: Why this no work???
+                        bulletLimiter = 5;
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
                     //region Updates position of all game objects locally
-                    for(IUpdateable go : ObjectManager.getGameObjects()) {
-                        go.update(elapsedTime);
-                    }
-
+                    editObjectManager(2, elapsedTime, null, null);
                     //endregion
 
                     //region Collision detection
                     boolean player_hit_block = false;
-                    for (Bricks block : MapRender.get_list()) {
-                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal())) {
+                    for (Bricks block : MapRender.get_list())
+                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
                             player_hit_block = true;
-                        }
-                    }
-//                    If a collision happens - moves the player back
+
                     player_client.collision(player_hit_block, elapsedTime);
 
-                    HashSet<GameObject> crash_bullet_list = new HashSet<>();
-                    boolean Bullet_hit_wall = false;
-                    boolean Bullet_hit_player = false;
-                    for(GameObject go: ObjectManager.getGameObjects()){
-                        if (go.getKeys().contains("Bullet")){
-                            for(Bricks block : MapRender.get_list()){
-                                if(go.getBounds().intersects(block.getBounds().getBoundsInLocal())){
-                                    Bullet_hit_wall = true;
-                                    crash_bullet_list.add(go);
-                                }
-                            }
-                            if(go.getBounds().intersects(player_client.circle.getBoundsInLocal())){
-                                Bullet_hit_player = true;
-                                crash_bullet_list.add(go);
-                            }
-                        }
-                    }
-                    for(GameObject bullet:crash_bullet_list){
-                        bullet.destroy();
-                    }
+                    editObjectManager(1, 0, null, null);
                     //endregion
 
-                    //region Sends the client's position
-                    //TODO: Send the client's bullets' velocities to the server
+                    //region Sends the client's position and whether they've shot a bullet
                     Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
                     //endregion
 
@@ -257,9 +232,8 @@ public class ClientGame extends Application {
 
                     MapRender.render(graphicsContext);
 
-                    for (IRenderable go : ObjectManager.getGameObjects()) {
+                    for (IRenderable go : ObjectManager.getGameObjects())
                         go.render(graphicsContext);
-                    }
                     //endregion
 
                     lastUpdate = currentNanoTime;
@@ -281,7 +255,7 @@ public class ClientGame extends Application {
 
     private void gameInit(Scene scene) {
         //region Background setup
-        FileInputStream bgPNG = null;
+        FileInputStream bgPNG;
         try {
             bgPNG = new FileInputStream("res/background_image.png");
             Image image = new Image(bgPNG, 40, 40, true, true);
@@ -292,6 +266,10 @@ public class ClientGame extends Application {
         } catch (FileNotFoundException e) {
             System.out.println("Could not find file in path: 'res/background_image.png'");
         }
+        //endregion
+
+        //region Initialise cursor
+        new Crosshair(Input.mousePosition.subtract(new Vector2(14, 14)), new Vector2(0, 0));
         //endregion
 
         //region Add audio into game
@@ -315,10 +293,6 @@ public class ClientGame extends Application {
         root.addEventHandler(KeyEvent.ANY, new KeyboardInput());
         root.addEventHandler(MouseEvent.ANY, new MouseInput());
         scene.setCursor(Cursor.NONE);
-        //endregion
-
-        //region Initialise cursor
-        cursor = new Crosshair(Input.mousePosition, new Vector2(0, 0));
         //endregion
 
         //region Map loading
@@ -349,14 +323,14 @@ public class ClientGame extends Application {
     }
 
     public void updateEnemies() {
-        ArrayList<String> playerKeys = new ArrayList<>();
-
         Client.receivePositions();
+
+        //region Replaces Bots <-> Players
+        ArrayList<String> playerKeys = new ArrayList<>();
 
         for (HashMap.Entry<String, Player> player : playerList.entrySet())
             playerKeys.add(player.getKey());
 
-        //region Replaces Bots <-> Players
         for (String player : playerKeys) {
 //            If bot name/player IP is stored locally - continue
             if (listOfClients.connectedIPs.contains(player))
@@ -380,28 +354,84 @@ public class ClientGame extends Application {
         }
         //endregion
 
+        //region Updates info of other players/bots
         for (String ip : listOfClients.connectedIPs) {
-            if (ip.equals(player_client.getIpOfClient()))
+            if (ip.equals(player_client.getIpOfClient()) || playerList.get(ip) == null)
                 continue;
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
-            if (playerList.get(ip) != null) {
-                double cameraX = player_client.getPosX() - 9*40, cameraY = player_client.getPosY() - 7*40;
 
-                if (cameraX < 0) cameraX = 0;
-                else if (cameraX > 25*40) cameraX = 25*40;
+            //region Camera Offset
+            double cameraX = player_client.getPosX() - 9*40;
+            double cameraY = player_client.getPosY() - 7*40;
 
-                if (cameraY < 0) cameraY = 0;
-                else if (cameraY > 30*40) cameraY = 30*40;
+            if (cameraX < 0) cameraX = 0;
+            else if (cameraX > 25*40) cameraX = 25*40;
 
-                Affine rotate = new Affine();
-                rotate.appendRotation(theDoubleValues.degrees,
-                        theDoubleValues.orgPosX - cameraX + 18,
-                        theDoubleValues.orgPosY - cameraY + 18);
+            if (cameraY < 0) cameraY = 0;
+            else if (cameraY > 30*40) cameraY = 30*40;
+            //endregion
 
-                playerList.get(ip).setAffine(rotate);
-                playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
-                playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+            //region Enemies' rotation/position/velocity
+            Affine rotate = new Affine();
+            rotate.appendRotation(theDoubleValues.degrees,
+                    theDoubleValues.orgPosX - cameraX + 18,
+                    theDoubleValues.orgPosY - cameraY + 18);
+
+            playerList.get(ip).setAffine(rotate);
+            playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+            playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
+            //endregion
+
+//            if (!theDoubleValues.bulletShot) TODO: Why is this not working
+//                continue;
+
+            //region Enemies' bullets
+            double degreeRadians = Math.toRadians(theDoubleValues.degrees);
+            double bullet_pos_x = Math.cos(degreeRadians);
+            double bullet_pos_y = Math.sin(degreeRadians);
+            Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+
+            Vector2 bulletPos = new Vector2(theDoubleValues.orgPosX + player_client.getHeight() / 2,
+                    theDoubleValues.orgPosY + player_client.getWidth() / 2).add(direction_of_gun);
+
+            Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
+
+            editObjectManager(0, 0, bulletPos, bulletVel);
+            //endregion
+        }
+        //endregion
+    }
+
+    private synchronized void editObjectManager(int operation, double elapsedTime, Vector2 bp, Vector2 bv) {
+        switch (operation) {
+            case 0 : { //add bullets
+                new Bullet(bp, bv);
+            }
+
+            case 1 : { //remove bullets
+                HashSet<GameObject> crash_bullet_list = new HashSet<>();
+                for (GameObject go: ObjectManager.getGameObjects()) {
+                    if (!go.getKeys().contains("Bullet"))
+                        continue;
+
+                    for (Bricks block : MapRender.get_list())
+                        if (go.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+                            crash_bullet_list.add(go);
+
+                    for (String ip : listOfClients.connectedIPs)
+                        if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal()))
+                            crash_bullet_list.add(go);
+                }
+
+                for (GameObject bullet : crash_bullet_list)
+                    bullet.destroy();
+            }
+
+            case 2 : {//update object positions
+                for(IUpdateable go : ObjectManager.getGameObjects()) {
+                    go.update(elapsedTime);
+                }
             }
         }
     }

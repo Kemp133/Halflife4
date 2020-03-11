@@ -8,5 +8,6 @@ public class PositionPacket implements Serializable {
 
     public double orgPosX, orgPosY, velX, velY, spawnX, spawnY;
     public short degrees;
+    public boolean bulletShot;
 
 }

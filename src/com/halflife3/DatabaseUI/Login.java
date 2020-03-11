@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import javafx.stage.*;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
@@ -23,9 +24,6 @@ import java.security.*;
 import java.sql.*;
 
 public class Login extends Preloader {
-
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
     Button login = new Button();
 
@@ -46,16 +44,14 @@ public class Login extends Preloader {
     private boolean hasLoggedIn = false;
     private ICredentialUser user;
 
-    /*
-This is used by the stackPanes for the two different scene Login and Create Account to add an image to the background
- */
+    /** This is used by the stackPanes for the two different scenes, Login and Create Account, to add an image to the background */
     private Background addBackground() {
         try {
 
             var inputStream = new FileInputStream("res/LoginBackground.png");
             Image image = new Image(inputStream);
 
-            BackgroundSize backgroundSize = new BackgroundSize(SCREEN_WIDTH, SCREEN_HEIGHT, false, false, false, true);
+            BackgroundSize backgroundSize = new BackgroundSize(800, 600, false, false, false, true);
             BackgroundImage backgroundImage = new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
             Background background = new Background(backgroundImage);
             return background;
@@ -65,6 +61,24 @@ This is used by the stackPanes for the two different scene Login and Create Acco
             System.exit(0);
         }
         return null;
+    }
+
+    private void textProperties() {
+        Font paladinFont = null;
+        try {
+            paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+       /* name.setFont(paladinFont);
+        name.setStyle("-fx-font-size: 20px;");
+        password.setFont(paladinFont);
+        password.setStyle("-fx-font-size: 20px;");
+        confPassword.setFont(paladinFont);
+        confPassword.setStyle("-fx-font-size: 20px;");
+        incorrectFields.setFont(paladinFont);
+        incorrectFields.setStyle("-fx-font-size: 20px;");*/
     }
 
     public void buttonProperties() throws FileNotFoundException {
@@ -112,14 +126,14 @@ This is used by the stackPanes for the two different scene Login and Create Acco
     private static GridPane basePane() {
         GridPane gridPaneLogin = new GridPane();
         //Setting size for the pane
-        gridPaneLogin.setMinSize(800, 600);
+        gridPaneLogin.setMinSize(500, 400);
 
         //Setting the padding
-        gridPaneLogin.setPadding(new Insets(10, 10, 10, 10));
+        //gridPaneLogin.setPadding(new Insets(10, 10, 10, 10));
 
         //Setting the vertical and horizontal gaps between the columns
-        gridPaneLogin.setVgap(30);
-        gridPaneLogin.setHgap(90);
+        gridPaneLogin.setVgap(50);
+        gridPaneLogin.setHgap(60);
 
         //Setting the Grid alignment
         gridPaneLogin.setAlignment(Pos.CENTER);
@@ -127,8 +141,10 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         return gridPaneLogin;
     }
 
-    public StackPane loginPane() {
+    public BorderPane loginPane() {
         GridPane gridPaneLogin = basePane();
+
+        textProperties();
 
         //Arranging all the nodes in the grid
         gridPaneLogin.add(name, 0, 0);
@@ -139,20 +155,47 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         gridPaneLogin.add(createNewUser, 1, 2);
         gridPaneLogin.add(incorrectFields, 0, 3);
 
-        StackPane stack = new StackPane();
+        gridPaneLogin.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
+        gridPaneLogin.setMinSize(500, 400);
 
-        //TODO: Below is useless while using solution off adding transparent box to image
-        //stack.setStyle("-fx-background-color: transparent;");
-        //stack.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
+        //StackPane stack = new StackPane();
 
-        stack.getChildren().addAll(gridPaneLogin);
+        Pane topPane = new Pane();
+        topPane.setMinSize(500, 100);
+        Pane leftPane = new Pane();
+        leftPane.setMinSize(100, 400);
+        Pane rightPane = new Pane();
+        rightPane.setMinSize(100, 400);
+        Pane bottomPane = new Pane();
+        bottomPane.setMinSize(500, 100);
+
+        BorderPane borderPane = new BorderPane();
+
+        borderPane.setMaxSize(800, 600);
+        borderPane.setBackground(addBackground());
+        borderPane.setCenter(gridPaneLogin);
+        borderPane.setTop(topPane);
+        borderPane.setLeft(leftPane);
+        borderPane.setRight(rightPane);
+        borderPane.setBottom(bottomPane);
+
+
+        /*stack.getChildren().addAll(gridPaneLogin);
+        stack.setMaxSize(500, 300);
         stack.setBackground(addBackground());
 
-        return stack;
+        return stack;*/
+
+        File f = new File("res/Login/LoginStyleSheet.css");
+        borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+
+        return borderPane;
     }
 
     public StackPane newUserPane() {
         GridPane gridPaneCreateUser = basePane();
+
+        textProperties();
 
         //Arranging all the nodes in the grid
         gridPaneCreateUser.add(name, 0, 0);
@@ -219,7 +262,9 @@ This is used by the stackPanes for the two different scene Login and Create Acco
         preloaderStage.setTitle("Login/Create User");
 
         initialiseFields();
-        Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
+        Scene sceneLogin = new Scene(loginPane(), 800, 600);
+        File f = new File("res/Login/LoginStyleSheet.css");
+        sceneLogin.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
         stage.setScene(sceneLogin);
         stage.show();
 
@@ -255,7 +300,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
             @Override public void handle(ActionEvent e) {
                 setNullFields();
                 incorrectFields.setVisible(false);
-                Scene sceneCreate = new Scene(newUserPane(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
+                Scene sceneCreate = new Scene(newUserPane(), 800, 600, Color.WHITE);
                 stage.setScene(sceneCreate);
                 stage.show();
             }
@@ -289,7 +334,7 @@ This is used by the stackPanes for the two different scene Login and Create Acco
             @Override public void handle(ActionEvent e) {
                 setNullFields();
                 incorrectFields.setVisible(false);
-                Scene sceneLogin = new Scene(loginPane(), SCREEN_WIDTH, SCREEN_HEIGHT);
+                Scene sceneLogin = new Scene(loginPane(), 800, 600);
                 stage.setScene(sceneLogin);
                 stage.show();
             }

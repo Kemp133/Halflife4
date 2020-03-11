@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'paladins'
+    src: url("res/Font/paladins-font2/PaladinsSemiItalicFont.otf");
+}
+
+.pane {
+    -fx-background-color: rgba(176,224,230,0.8);
+}
+
+.text {
+    /*-fx-font-family: 'PaladinsSemiItalicFont';*/
+    -fx-font-family: "paladins";
+}

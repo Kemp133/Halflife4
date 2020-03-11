@@ -44,6 +44,12 @@ public class Vector2 implements Serializable {
         return this;
     }
 
+    public Vector2 subtract(double x, double y) {
+        this.x -= x;
+        this.y -= y;
+        return this;
+    }
+
     /**
      * A method to multiply a vector by a scalar
      * @param s The scalar to multiply the vector by

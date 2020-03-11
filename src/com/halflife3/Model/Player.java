@@ -12,13 +12,14 @@ import java.io.IOException;
 
 public class Player extends Controllable {
     //region Variables
-    public  Circle  circle;
-    private Image   image_w;
+    public Circle circle;
+    private Image image_w;
     private Vector2 spawn_point;
     private Vector2 original_position;
     private float  moveSpeed = 100;
     protected int  health;
     int mode = 0;
+    boolean bulletShot = false;
     boolean is_moving = false;
     //endregion
 
@@ -70,7 +71,7 @@ public class Player extends Controllable {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        if(original_position.equals(position))
+        if (original_position.equals(position))
             is_moving = false;
         circle.setCenterX(position.getX() + 18);
         circle.setCenterY(position.getY() + 18);
