@@ -44,3 +44,12 @@ to have their libraries unlink and break the solution. The fix is as below:
 6) When you next commit, make sure that this file isn't in the files you're commiting, if it is then repeat steps 3-5
 7) You should be able to commit and push your code without halflife.iml showing up, nor should it break again when someone else syncs/pulls the code
 8) Profit?
+
+---
+
+## Fixing Git
+For some reason, the BasicBall class seems to have tried to kill our Git repo. While fixing Tom's git, this seems to have worked for him.
+
+## <ins>**NOTE: BACKUP YOUR FILES WHICH YOU'VE MADE CHANGES IN, OTHERWISE THIS WILL GET RID OF ALL OF THEM!!!!**</ins>
+<a href="https://stackoverflow.com/questions/1125968/how-do-i-force-git-pull-to-overwrite-local-files">Possible fix for Git problem, check if it applies to you
+before you use it</a>
