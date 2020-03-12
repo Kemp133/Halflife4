@@ -53,3 +53,16 @@ For some reason, the BasicBall class seems to have tried to kill our Git repo. W
 ## <ins>**NOTE: BACKUP YOUR FILES WHICH YOU'VE MADE CHANGES IN, OTHERWISE THIS WILL GET RID OF ALL OF THEM!!!!**</ins>
 <a href="https://stackoverflow.com/questions/1125968/how-do-i-force-git-pull-to-overwrite-local-files">Possible fix for Git problem, check if it applies to you
 before you use it</a>
+
+### How to check if the fix applies to you
+1) Navigate to where the Halflife solution is for you (for me it's C:/Users/Lenovo/IdeaProjects/halflife)
+2) In this file, run <code>git status</code>
+3) If you see the following lines in your terminal, the fix probably applies to you:
+    ```
+    Changes not staged for commit:
+        (use "git add \<file>..." fto update what will be committed)
+        (use "git restore \<file>..." to discard changes in working directory)
+                modified:   src/com/halflife3/Model/Ball/BasicBall.java
+    ```
+4) If you see this, then the fix applies to you. **REMEMBER TO BACK UP YOUR FILES BEFORE YOU DO IT**
+5) If you don't see this, then it's something else. **DO NOT ATTEMPT THIS FIX**
