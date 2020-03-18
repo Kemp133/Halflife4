@@ -1,7 +1,6 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Model.Bricks;
-import com.halflife3.Model.Enemies.AIControlledPlayer;
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
@@ -100,7 +99,7 @@ public class Server implements Runnable {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
-                    tomsAI();
+//                    tomsAI();
                     posPacket.posList = ClientListServer.positionList;
                     posPacket.connectedIPs = ClientListServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
@@ -128,15 +127,16 @@ public class Server implements Runnable {
         List<Vector2> positions = new LinkedList<>();
         List<Map.Entry<String, PositionPacket>> positions1 = new LinkedList<>();
 
-        for(var p : ClientListServer.positionList.entrySet()) {
+        for (var p : ClientListServer.positionList.entrySet()) {
             PositionPacket pos = p.getValue();
             positions.add(new Vector2(pos.orgPosX, pos.orgPosY));
         }
+
         Vector2 position1 = positions.get(1);
-        AIControlledPlayer bot1 = new AIControlledPlayer(position1,new Vector2(0,0));
-        bot1.moveTo(positions.get(2));
-        ClientListServer.positionList.get(botNames[1]).orgPosX= bot1.getPosX();
-        ClientListServer.positionList.get(botNames[1]).orgPosY= bot1.getPosY();
+//        AIControlledPlayer bot1 = new AIControlledPlayer(position1, new Vector2(0,0));
+//        bot1.moveTo(positions.get(2));
+//        ClientListServer.positionList.get(botNames[1]).orgPosX = bot1.getPosX();
+//        ClientListServer.positionList.get(botNames[1]).orgPosY = bot1.getPosY();
         //offset
         //TODO: Change bot0 position
 
@@ -168,7 +168,6 @@ public class Server implements Runnable {
     }
 
     public static void addConnection(InetAddress address) {
-
         //region Checks if Server is full
         if (ClientListServer.clientList.size() >= 4) {
             System.out.println("Server is full");

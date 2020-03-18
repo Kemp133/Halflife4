@@ -78,20 +78,32 @@ public class Player extends Controllable {
     }
     //endregion
 
-    public void collision(boolean if_collision, double time) {
-        if (if_collision) {
-            this.position = original_position.subtract(this.velocity.multiply(time));
-            circle.setCenterX(position.getX() + 18);
-            circle.setCenterY(position.getY() + 18);
-        }
-
+    public void collision( double time) {
+        this.position = original_position.subtract(this.velocity.multiply(time));
+        circle.setCenterX(position.getX() + 18);
+        circle.setCenterY(position.getY() + 18);
         velocity.reset();
     }
 
-    public void addVelocity(Vector2 toAdd) {
-        velocity = velocity.add(toAdd);
-    }
     public void resetPosition() {
         original_position = spawn_point;
     }
+
+    public void setBulletShot(boolean bulletShot) {
+        this.bulletShot = bulletShot;
+    }
+
+    //region Packet getter and setter
+    public PositionPacket getPacketToSend() {
+        packetToSend.velY = getVelY();
+        packetToSend.velX = getVelX();
+        packetToSend.orgPosX = getPosX();
+        packetToSend.orgPosY = getPosY();
+        packetToSend.bulletShot = bulletShot;
+        return packetToSend;
+    }
+    public void setPacketToSend(PositionPacket packetToSend) {
+        this.packetToSend = packetToSend;
+    }
+    //endregion
 }

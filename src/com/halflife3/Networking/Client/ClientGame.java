@@ -39,7 +39,7 @@ public class ClientGame extends Application {
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 5;
-    private double bulletMillis;
+//    private double bulletMillis;
     //endregion
 
     //region ClientGame constructors
@@ -108,7 +108,7 @@ public class ClientGame extends Application {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
-                bulletMillis = System.currentTimeMillis();
+//                bulletMillis = System.currentTimeMillis();
                 updateEnemies();
                     serverNanoTime = System.nanoTime();
                 }
@@ -190,8 +190,7 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Create a new bullet
-
-//                    player_client.setBulletShot(false); TODO: Why this no work???
+                    player_client.setBulletShot(false);
                     if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                         double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                         double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
@@ -203,7 +202,7 @@ public class ClientGame extends Application {
                         Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
                         new Bullet(bulletPos, bulletVel);
-//                        player_client.setBulletShot(true); TODO: Why this no work???
+                        player_client.setBulletShot(true);
                         bulletLimiter = 5;
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
@@ -213,13 +212,14 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Collision detection
-                    boolean player_hit_block = false;
+//                    Player collision
                     for (Bricks block : MapRender.get_list())
-                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
-                            player_hit_block = true;
+                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal())) {
+                            player_client.collision(elapsedTime);
+                            break;
+                        }
 
-                    player_client.collision(player_hit_block, elapsedTime);
-
+//                    Bullet collision
                     editObjectManager(1, 0, null, null);
                     //endregion
 
@@ -383,8 +383,8 @@ public class ClientGame extends Application {
             playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             //endregion
 
-//            if (!theDoubleValues.bulletShot) TODO: Why is this not working
-//                continue;
+            if (!theDoubleValues.bulletShot)
+                continue;
 
             //region Enemies' bullets
             double degreeRadians = Math.toRadians(theDoubleValues.degrees);
@@ -409,7 +409,7 @@ public class ClientGame extends Application {
                 new Bullet(bp, bv);
             }
 
-            case 1 : { //remove bullets
+            case 1 : { //remove bullets if needed
                 HashSet<GameObject> crash_bullet_list = new HashSet<>();
                 for (GameObject go: ObjectManager.getGameObjects()) {
                     if (!go.getKeys().contains("Bullet"))
@@ -429,7 +429,7 @@ public class ClientGame extends Application {
             }
 
             case 2 : {//update object positions
-                for(IUpdateable go : ObjectManager.getGameObjects()) {
+                for (IUpdateable go : ObjectManager.getGameObjects()) {
                     go.update(elapsedTime);
                 }
             }

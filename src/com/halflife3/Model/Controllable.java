@@ -15,19 +15,6 @@ public abstract class Controllable extends Sprite {
 
 	public Controllable(Vector2 position, Vector2 velocity) { super(position, velocity); }
 
-	//region Packet getter and setter
-	public PositionPacket getPacketToSend() {
-		packetToSend.velY = getVelY();
-		packetToSend.velX = getVelX();
-		packetToSend.orgPosX = getPosX();
-		packetToSend.orgPosY = getPosY();
-		return packetToSend;
-	}
-	public void setPacketToSend(PositionPacket packetToSend) {
-		this.packetToSend = packetToSend;
-	}
-	//endregion
-
 	//region IP getter and setter
 	public String getIpOfClient() {	return ipOfClient; }
 	public void setIpOfClient(String ipOfClient) { this.ipOfClient = ipOfClient; }
