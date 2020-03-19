@@ -47,7 +47,6 @@ public class Player extends Controllable {
         } catch (IOException e) {
             System.err.println("Image not found!");
         }
-
     }
 
     @Override
@@ -71,27 +70,38 @@ public class Player extends Controllable {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        if (original_position.equals(position))
-            is_moving = false;
+        is_moving = !original_position.equals(position);
         circle.setCenterX(position.getX() + 18);
         circle.setCenterY(position.getY() + 18);
     }
     //endregion
 
-    public void collision(boolean if_collision, double time) {
-        if (if_collision) {
-            this.position = original_position.subtract(this.velocity.multiply(time));
-            circle.setCenterX(position.getX() + 18);
-            circle.setCenterY(position.getY() + 18);
-        }
-
+    public void collision( double time) {
+        this.position = original_position.subtract(this.velocity.multiply(time));
+        circle.setCenterX(position.getX() + 18);
+        circle.setCenterY(position.getY() + 18);
         velocity.reset();
     }
 
-    public void addVelocity(Vector2 toAdd) {
-        velocity = velocity.add(toAdd);
-    }
     public void resetPosition() {
         original_position = spawn_point;
     }
+
+    public void setBulletShot(boolean bulletShot) {
+        this.bulletShot = bulletShot;
+    }
+
+    //region Packet getter and setter
+    public PositionPacket getPacketToSend() {
+        packetToSend.velY = getVelY();
+        packetToSend.velX = getVelX();
+        packetToSend.orgPosX = getPosX();
+        packetToSend.orgPosY = getPosY();
+        packetToSend.bulletShot = bulletShot;
+        return packetToSend;
+    }
+    public void setPacketToSend(PositionPacket packetToSend) {
+        this.packetToSend = packetToSend;
+    }
+    //endregion
 }

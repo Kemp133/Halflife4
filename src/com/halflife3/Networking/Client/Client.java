@@ -24,7 +24,7 @@ public class Client {
     protected static MulticastSocket positionSocket = null;
     private static int incPacketSize = 2000;
 
-    //    For sending packets to the server
+//    For sending packets to the server
     private static InetAddress hostAddress;
     private static DatagramSocket outSocket;
 
