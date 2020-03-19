@@ -47,7 +47,6 @@ public class Player extends Controllable {
         } catch (IOException e) {
             System.err.println("Image not found!");
         }
-
     }
 
     @Override
@@ -71,8 +70,7 @@ public class Player extends Controllable {
     public void update(double time) {
         original_position = new Vector2(position);
         position = position.add(new Vector2(velocity).multiply(time));
-        if (original_position.equals(position))
-            is_moving = false;
+        is_moving = !original_position.equals(position);
         circle.setCenterX(position.getX() + 18);
         circle.setCenterY(position.getY() + 18);
     }

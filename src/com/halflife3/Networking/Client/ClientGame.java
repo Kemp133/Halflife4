@@ -145,7 +145,7 @@ public class ClientGame extends Application {
                         player_client.getVelocity().setX(0);
                         player_client.setMoving(false);
                     }
-                    if (Input.isKeyReleased(W) && Input.isKeyReleased(S)){
+                    if (Input.isKeyReleased(W) && Input.isKeyReleased(S)) {
                         player_client.getVelocity().setY(0);
                         player_client.setMoving(false);
                     }

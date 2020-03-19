@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Server;
 
+import com.halflife3.Model.AI;
 import com.halflife3.Model.Bricks;
 import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.*;
@@ -34,7 +35,7 @@ public class Server implements Runnable {
                                                new Vector2(680, 80),
                                                new Vector2(80, 480),
                                                new Vector2(680, 480)};
-    public static String[] botNames = new String[]{"bot0", "bot1", "bot2", "bot3"};
+    public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
     //endregion
 
     public void start() {
@@ -50,8 +51,8 @@ public class Server implements Runnable {
             botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
             botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
-            ClientListServer.positionList.put(botNames[i], botPacket);
-            ClientListServer.connectedIPs.add(botNames[i]);
+            ClientListServer.positionList.put(botNamesList.get(i), botPacket);
+            ClientListServer.connectedIPs.add(botNamesList.get(i));
 
         }
 
@@ -99,7 +100,9 @@ public class Server implements Runnable {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
-//                    tomsAI();
+//                    if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
+//                        moveAI();
+
                     posPacket.posList = ClientListServer.positionList;
                     posPacket.connectedIPs = ClientListServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
@@ -121,26 +124,13 @@ public class Server implements Runnable {
         multicastSocket.close();
     }
 
-    private void tomsAI() {
+    private void moveAI() {
+        for (var ip : ClientListServer.connectedIPs) {
+            if (!botNamesList.contains(ip))
+                continue;
 
-        int totalCharacter = 4;
-        List<Vector2> positions = new LinkedList<>();
-        List<Map.Entry<String, PositionPacket>> positions1 = new LinkedList<>();
-
-        for (var p : ClientListServer.positionList.entrySet()) {
-            PositionPacket pos = p.getValue();
-            positions.add(new Vector2(pos.orgPosX, pos.orgPosY));
+            ClientListServer.positionList.replace(ip, AI.getBotMovement(ClientListServer.positionList.get(ip)));
         }
-
-        Vector2 position1 = positions.get(1);
-//        AIControlledPlayer bot1 = new AIControlledPlayer(position1, new Vector2(0,0));
-//        bot1.moveTo(positions.get(2));
-//        ClientListServer.positionList.get(botNames[1]).orgPosX = bot1.getPosX();
-//        ClientListServer.positionList.get(botNames[1]).orgPosY = bot1.getPosY();
-        //offset
-        //TODO: Change bot0 position
-
-
     }
 
     private void connectionListener() throws IOException {
@@ -187,7 +177,7 @@ public class Server implements Runnable {
                 portPacket.setStartPosition(startPosition);
 
 //                Removes the bot holding the [i]th startPosition
-                ClientListServer.positionList.remove(botNames[i]);
+                ClientListServer.positionList.remove(botNamesList.get(i));
 
                 //region Adds the player (with the [i]th startPosition) to the positionList
                 PositionPacket playerPacket = new PositionPacket();
@@ -199,7 +189,7 @@ public class Server implements Runnable {
                 ClientListServer.positionList.put(address.toString(), playerPacket);
                 //endregion
 
-                ClientListServer.connectedIPs.remove(botNames[i]);
+                ClientListServer.connectedIPs.remove(botNamesList.get(i));
                 ClientListServer.connectedIPs.add(address.toString());
 
 //                Disables the [i]th startPosition so that no new players could have it assigned to them
@@ -243,9 +233,9 @@ public class Server implements Runnable {
                     botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
                     botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
-                    ClientListServer.positionList.put(botNames[i], botPacket);
+                    ClientListServer.positionList.put(botNamesList.get(i), botPacket);
                     ClientListServer.connectedIPs.remove(address.toString());
-                    ClientListServer.connectedIPs.add(botNames[i]);
+                    ClientListServer.connectedIPs.add(botNamesList.get(i));
                 }
             }
         }
