@@ -26,13 +26,13 @@ public class Input {
         for (KeyCode kc : KeyCode.values()) {
             keysPressed.put(kc, false);
             keysTyped.put(kc, false);
-            keysReleased.put(kc, false);
+            keysReleased.put(kc, true);
         }
 
         for(MouseButton mb: MouseButton.values()) {
             mouseButtonPressed.put(mb, false);
             mouseButtonClicked.put(mb, false);
-            mouseButtonReleased.put(mb, false);
+            mouseButtonReleased.put(mb, true);
         }
     }
     //endregion

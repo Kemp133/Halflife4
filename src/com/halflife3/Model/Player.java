@@ -13,11 +13,9 @@ import java.io.IOException;
 public class Player extends Controllable {
     //region Variables
     public Circle circle;
-    private Image image_w;
-    private Vector2 spawn_point;
+    private Image sprite2;
     private Vector2 original_position;
-    private float  moveSpeed = 100;
-    protected int  health;
+    protected int health;
     int mode = 0;
     boolean bulletShot = false;
     boolean is_moving = false;
@@ -26,13 +24,13 @@ public class Player extends Controllable {
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         keys.add("player");
-        circle = new Circle(position.getX() + 18, position.getY() + 18, 17);
+        setSprite("res/Player_pic.png");
+        setSprite2("res/Player_walking.png");
+        circle = new Circle(position.getX() + getWidth() / 2,
+                position.getY() + getHeight() / 2,
+                Math.max(getWidth(), getHeight()) / 2 + 1);
         affine = new Affine();
         packetToSend = new PositionPacket();
-        packetToSend.spawnX = packetToSend.orgPosX = position.getX();
-        packetToSend.spawnY = packetToSend.orgPosY = position.getY();
-        packetToSend.velX = velocity.getX();
-        packetToSend.velY = velocity.getY();
     }
 
     //region Overridden super methods
@@ -43,7 +41,7 @@ public class Player extends Controllable {
 
     public void setSprite2(String pathToSprite) {
         try (var fis = new FileInputStream(pathToSprite)) {
-            image_w = new Image(fis);
+            sprite2 = new Image(fis);
         } catch (IOException e) {
             System.err.println("Image not found!");
         }
@@ -51,36 +49,52 @@ public class Player extends Controllable {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.save(); // Save default transform
+        double posX = position.getX() - Camera.GetOffset().getX();
+        double posY = position.getY() - Camera.GetOffset().getY();
+
+        gc.save();
         gc.setTransform(affine);
-        if ((mode % 5) == 0 && is_moving) {
-            gc.drawImage(image_w, position.getX() - Camera.GetOffset().getX(), position.getY() - Camera.GetOffset().getY());
+
+        if (mode % 6 == 0 && is_moving) {
+            gc.drawImage(sprite2, posX, posY);
             mode++;
         } else {
-            gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX(), position.getY() - Camera.GetOffset().getY());
-            if (mode < 11)
-                mode++;
-            else
-                mode = 0;
+            gc.drawImage(sprite, posX, posY);
+            mode = (mode < 10) ? mode + 1 : 0;
         }
-        gc.restore(); // Restore default transform
+
+        gc.restore();
     }
 
     @Override
     public void update(double time) {
         original_position = new Vector2(position);
-        position = position.add(new Vector2(velocity).multiply(time));
+        position.add(new Vector2(velocity).multiply(time));
         is_moving = !original_position.equals(position);
-        circle.setCenterX(position.getX() + 18);
-        circle.setCenterY(position.getY() + 18);
+        circle.setCenterX(position.getX() + getWidth() / 2 + 1);
+        circle.setCenterY(position.getY() + getHeight() / 2 + 1);
     }
     //endregion
 
-    public void collision( double time) {
-        this.position = original_position.subtract(this.velocity.multiply(time));
-        circle.setCenterX(position.getX() + 18);
-        circle.setCenterY(position.getY() + 18);
-        velocity.reset();
+    public void collision(Bricks block, double time) {
+
+        Vector2 dir = new Vector2(block.getPosX() - original_position.getX(),
+                block.getPosY() - original_position.getY());
+
+        if (Math.abs(dir.getX()) < 30 && Math.abs(dir.getY()) < 30) {
+            do {
+                position.add(new Vector2(velocity).multiply(-time));
+                circle.setCenterX(position.getX() + getWidth() / 2 + 1);
+                circle.setCenterY(position.getY() + getHeight() / 2 + 1);
+            } while (block.getBounds().intersects(circle.getBoundsInLocal()));
+            return;
+        }
+
+        if (dir.getX() < -30 && dir.getY() > -30 && dir.getY() < 30 && velocity.getX() < 0) velocity.setX(0);
+        else if (dir.getX() > 30 && dir.getY() > -30 && dir.getY() < 30 && velocity.getX() > 0) velocity.setX(0);
+
+        if (dir.getY() > 30 && dir.getX() > -30 && dir.getX() < 30 && velocity.getY() > 0) velocity.setY(0);
+        else if (dir.getY() < -30 && dir.getX() > -30 && dir.getX() < 30 && velocity.getY() < 0) velocity.setY(0);
     }
 
     public void resetPosition() {
@@ -91,17 +105,13 @@ public class Player extends Controllable {
         this.bulletShot = bulletShot;
     }
 
-    //region Packet getter and setter
     public PositionPacket getPacketToSend() {
         packetToSend.velY = getVelY();
         packetToSend.velX = getVelX();
         packetToSend.orgPosX = getPosX();
         packetToSend.orgPosY = getPosY();
+        packetToSend.degrees = rotation;
         packetToSend.bulletShot = bulletShot;
         return packetToSend;
     }
-    public void setPacketToSend(PositionPacket packetToSend) {
-        this.packetToSend = packetToSend;
-    }
-    //endregion
 }

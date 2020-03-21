@@ -18,8 +18,12 @@ import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 import static com.halflife3.Networking.Client.Client.listOfClients;
@@ -29,6 +33,9 @@ public class ClientGame extends Application {
 
     private final int FPS = 30;
     private final int INC_PACKETS_PER_SECOND = 30;
+    private final int GAME_WINDOW_HEIGHT = 600;
+    private final int GAME_WINDOW_WIDTH = 800;
+    private final int MOVEMENT_SPEED = 100;
 
     //region Other variables
     static Input input;
@@ -39,7 +46,12 @@ public class ClientGame extends Application {
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 5;
-//    private double bulletMillis;
+    private int mapWidth;
+    private int mapHeight;
+    private final int LEFT_END_OF_SCREEN = 9*40;
+    private final int RIGHT_END_OF_SCREEN = 11*40;
+    private final int BOTTOM_OF_SCREEN = 8*40;
+    private final int TOP_OF_SCREEN = 7*40;
     //endregion
 
     //region ClientGame constructors
@@ -71,8 +83,6 @@ public class ClientGame extends Application {
         player_client = new Player(startPos, startVel);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
-        player_client.setSprite("res/Player_pic.png");
-        player_client.setSprite2("res/Player_walking.png");
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -93,9 +103,9 @@ public class ClientGame extends Application {
     public void start(Stage primaryStage) {
         //region Window setup
         primaryStage.setTitle("HalfLife 3 : Man in Black");
-        Canvas canvas = new Canvas(800, 600);
+        Canvas canvas = new Canvas(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
         root.getChildren().add(canvas);
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
         primaryStage.setScene(scene);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         //endregion
@@ -108,8 +118,7 @@ public class ClientGame extends Application {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
-//                bulletMillis = System.currentTimeMillis();
-                updateEnemies();
+                    updateEnemies();
                     serverNanoTime = System.nanoTime();
                 }
             }
@@ -128,65 +137,72 @@ public class ClientGame extends Application {
                     //endregion
 
                     //region Camera offset
-                    Camera.SetOffsetX(player_client.getPosX() - 9*40);
-                    Camera.SetOffsetY(player_client.getPosY() - 7*40);
+                    Camera.SetOffsetX(player_client.getPosX() - LEFT_END_OF_SCREEN);
+                    Camera.SetOffsetY(player_client.getPosY() - TOP_OF_SCREEN);
                     if (Camera.GetOffsetX() < 0)
                         Camera.SetOffsetX(0);
-                    else if (Camera.GetOffsetX() > 25*40) //map width subtract half of window width
-                        Camera.SetOffsetX(25*40);
+                    else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
+                        Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
                     if (Camera.GetOffsetY() < 0)
                         Camera.SetOffsetY(0);
-                    else if (Camera.GetOffsetY() > 30*40) //map height subtract half of window height
-                        Camera.SetOffsetY(30*40);
+                    else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
+                        Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
                     //endregion
 
                     //region Handles player movement
                     if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
                         player_client.getVelocity().setX(0);
-                        player_client.setMoving(false);
                     }
                     if (Input.isKeyReleased(W) && Input.isKeyReleased(S)) {
                         player_client.getVelocity().setY(0);
-                        player_client.setMoving(false);
                     }
                     if (Input.isKeyPressed(A)) {
-                        player_client.getVelocity().setX(-100);
-                        player_client.setMoving(true);
+                        player_client.getVelocity().setX(-MOVEMENT_SPEED);
                     }
                     if (Input.isKeyPressed(D)) {
-                        player_client.getVelocity().setX(100);
-                        player_client.setMoving(true);
+                        player_client.getVelocity().setX(MOVEMENT_SPEED);
                     }
                     if (Input.isKeyPressed(W)) {
-                        player_client.getVelocity().setY(-100);
-                        player_client.setMoving(true);
+                        player_client.getVelocity().setY(-MOVEMENT_SPEED);
                     }
                     if (Input.isKeyPressed(S)) {
-                        player_client.getVelocity().setY(100);
-                        player_client.setMoving(true);
+                        player_client.getVelocity().setY(MOVEMENT_SPEED);
                     }
+                    //endregion
+
+                    //region Calculate the rotation
+                    Vector2 player_client_center =
+                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + player_client.getWidth() / 2,
+                                    player_client.getPosY() - Camera.GetOffsetY() + player_client.getHeight() / 2);
+                    Vector2 direction =
+                            new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
+                                    .subtract(player_client_center);
+
+                    Affine rotate = new Affine();
+                    short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+                    rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
+                    player_client.setRotation(deg);
+                    player_client.setAffine(rotate);
+                    //endregion
+
+                    //region Collision detection
+//                    Player collision
+                    for (Bricks block : MapRender.get_list())
+                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
+                            player_client.collision(block, elapsedTime);
+
+//                    Bullet collision
+                    editObjectManager(1, 0, null, null);
+                    //endregion
+
+                    //region Updates position of all game objects locally (has to go after collision)
+                    editObjectManager(2, elapsedTime, null, null);
                     //endregion
 
                     //region Clears bullets on screen (Commented out, don't want to let players do this)
 //                    if (handle.input.isKeyPressed(C)) {
 //                        objectManager.getGameObjects().removeIf(go -> go.containsKey("Bullet"));
 //                    }
-                    //endregion
-
-                    //region Calculate the rotation
-                    Vector2 player_client_center =
-                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + 20,
-                                    player_client.getPosY() - Camera.GetOffsetY() + 18);
-                    Vector2 direction =
-                            new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
-                                    .subtract(player_client_center);
-
-//                    Player rotation
-                    Affine rotate = new Affine();
-                    short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-                    rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
-                    player_client.setRotation(deg);
-                    player_client.setAffine(rotate);
                     //endregion
 
                     //region Create a new bullet
@@ -207,28 +223,12 @@ public class ClientGame extends Application {
                     } else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
 
-                    //region Updates position of all game objects locally
-                    editObjectManager(2, elapsedTime, null, null);
-                    //endregion
-
-                    //region Collision detection
-//                    Player collision
-                    for (Bricks block : MapRender.get_list())
-                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal())) {
-                            player_client.collision(elapsedTime);
-                            break;
-                        }
-
-//                    Bullet collision
-                    editObjectManager(1, 0, null, null);
-                    //endregion
-
                     //region Sends the client's position and whether they've shot a bullet
                     Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
                     //endregion
 
                     //region Re-renders all game objects
-                    graphicsContext.clearRect(0, 0, 800, 600);
+                    graphicsContext.clearRect(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
 
                     MapRender.render(graphicsContext);
 
@@ -302,6 +302,16 @@ public class ClientGame extends Application {
             System.out.println("An Exception occurred in the loading of the map!" + Arrays.toString(e.getStackTrace()));
         }
         //endregion
+
+        //region Gets width and height of the map
+        try {
+            BufferedImage map = ImageIO.read(new File("res/map.png"));
+            mapWidth = map.getWidth() * 40;
+            mapHeight = map.getHeight() * 40;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //endregion
     }
 
     public void initialisePlayers() {
@@ -362,14 +372,18 @@ public class ClientGame extends Application {
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
 
             //region Camera Offset
-            double cameraX = player_client.getPosX() - 9*40;
-            double cameraY = player_client.getPosY() - 7*40;
+            double cameraX = player_client.getPosX() - LEFT_END_OF_SCREEN;
+            double cameraY = player_client.getPosY() - TOP_OF_SCREEN;
 
-            if (cameraX < 0) cameraX = 0;
-            else if (cameraX > 25*40) cameraX = 25*40;
+            if (cameraX < 0)
+                cameraX = 0;
+            else if (cameraX > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
+                cameraX = mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN;
 
-            if (cameraY < 0) cameraY = 0;
-            else if (cameraY > 30*40) cameraY = 30*40;
+            if (cameraY < 0)
+                cameraY = 0;
+            else if (cameraY > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
+                cameraY = mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN;
             //endregion
 
             //region Enemies' rotation/position/velocity
@@ -407,6 +421,7 @@ public class ClientGame extends Application {
         switch (operation) {
             case 0 : { //add bullets
                 new Bullet(bp, bv);
+                break;
             }
 
             case 1 : { //remove bullets if needed
@@ -426,28 +441,16 @@ public class ClientGame extends Application {
 
                 for (GameObject bullet : crash_bullet_list)
                     bullet.destroy();
+
+                break;
             }
 
             case 2 : {//update object positions
-                for (IUpdateable go : ObjectManager.getGameObjects()) {
+                for (IUpdateable go : ObjectManager.getGameObjects())
                     go.update(elapsedTime);
-                }
+
+                break;
             }
         }
     }
-
-    //region Framework to get only some specific game objects
-    private ArrayList<GameObject> getPlayersAndBullets(HashSet<GameObject> allObjects) {
-        ArrayList<GameObject> playersAndBullets = new ArrayList<>();
-
-        while (allObjects.iterator().hasNext()) {
-            GameObject object = allObjects.iterator().next();
-            if (object.getKeys().contains("player")) {
-                playersAndBullets.add(object);
-            }
-        }
-
-        return playersAndBullets;
-    }
-    //endregion
 }

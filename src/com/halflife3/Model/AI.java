@@ -5,11 +5,25 @@ import com.halflife3.Networking.Server.ClientListServer;
 import com.halflife3.View.MapRender;
 import javafx.scene.shape.Rectangle;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class AI {
 
-	public static PositionPacket getBotMovement(PositionPacket bot) {
+	public AI () {
+		try {
+			BufferedImage bimg = ImageIO.read(new File("res/map.png"));
+			int width          = bimg.getWidth();
+			int height         = bimg.getHeight();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static PositionPacket GetBotMovement(PositionPacket bot) {
 		Set<Map.Entry<String, PositionPacket>> positions = ClientListServer.positionList.entrySet();
 		double shortestDistance = Double.MAX_VALUE;
 		Vector2 botPosition = new Vector2(bot.orgPosX, bot.orgPosY);
@@ -42,23 +56,23 @@ public class AI {
 
 //    TODO: Write A* for AI, make it return a Vector2 velocity value
 	private static Vector2 getNextVelocity(Vector2 from, Vector2 to) {
-		Vector2 up = new Vector2(0, 100);
-		Vector2 right = new Vector2(100, 0);
-		Vector2 down = new Vector2(0, -100);
-		Vector2 left = new Vector2(-100, 0);
+		Vector2 up = new Vector2(from.getX(), from.getY() + 100);
+		Vector2 right = new Vector2(from.getX() + 100, from.getY());
+		Vector2 down = new Vector2(from.getX(), from.getY() - 100);
+		Vector2 left = new Vector2(from.getX() - 100, from.getY());
 
-		double upDist = from.squareDistance(to);
-		double rightDist = from.squareDistance(to);
-		double downDist = from.squareDistance(to);
-		double leftDist = from.squareDistance(to);
+		double upDist = up.squareDistance(to);
+		double rightDist = right.squareDistance(to);
+		double downDist = down.squareDistance(to);
+		double leftDist = left.squareDistance(to);
 
 		ArrayList<Double> distanceList = new ArrayList<>(Arrays.asList(upDist, rightDist, downDist, leftDist));
 
 //		  Avoids hitting walls or moving to one's self
-		if (isWall(up, MapRender.get_list()) || upDist == 0) distanceList.set(0, Double.MAX_VALUE);
-		if (isWall(right, MapRender.get_list()) || rightDist == 0) distanceList.set(1, Double.MAX_VALUE);
-		if (isWall(down, MapRender.get_list()) || downDist == 0) distanceList.set(2, Double.MAX_VALUE);
-		if (isWall(left, MapRender.get_list()) || leftDist == 0) distanceList.set(3, Double.MAX_VALUE);
+		if (isWall(up)) distanceList.set(0, Double.MAX_VALUE);
+		if (isWall(right)) distanceList.set(1, Double.MAX_VALUE);
+		if (isWall(down)) distanceList.set(2, Double.MAX_VALUE);
+		if (isWall(left)) distanceList.set(3, Double.MAX_VALUE);
 
 		switch (findIndexOfSmallest(distanceList)) {
 			case 0:
@@ -90,9 +104,9 @@ public class AI {
 	}
 
 //	  Checks if the object at 'location' is a wall
-	private static boolean isWall(Vector2 location, Deque<Bricks> listOfWalls) {
+	private static boolean isWall(Vector2 location) {
 		Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() - 10, 20, 20);
-		for (Bricks wall : listOfWalls)
+		for (Bricks wall : MapRender.get_list())
 			if (scanArea.intersects(wall.getBounds().getBoundsInLocal()))
 				return true;
 

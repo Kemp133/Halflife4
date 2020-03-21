@@ -31,10 +31,10 @@ public class Server implements Runnable {
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
-    private static Vector2[] startPositions = {new Vector2(80, 80),
-                                               new Vector2(680, 80),
-                                               new Vector2(80, 480),
-                                               new Vector2(680, 480)};
+    private static Vector2[] startPositions = {new Vector2(80, 480),
+                                               new Vector2(80, 720),
+                                               new Vector2(1920, 480),
+                                               new Vector2(1920, 720)};
     public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
     //endregion
 
@@ -75,6 +75,7 @@ public class Server implements Runnable {
     public void run() {
         running = true;
         System.out.println("Multicasting on port: " + MULTICAST_PORT);
+        System.out.println("Listening for clients...");
 
 //        Multicasts WelcomePackets
         new Thread(() -> {
@@ -114,7 +115,6 @@ public class Server implements Runnable {
 //        Listens for incoming packets
         while (running) {
             if (ClientListServer.clientList.size() < 4) {
-                System.out.println("Listening for clients...");
                 try { connectionListener(); } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -129,7 +129,7 @@ public class Server implements Runnable {
             if (!botNamesList.contains(ip))
                 continue;
 
-            ClientListServer.positionList.replace(ip, AI.getBotMovement(ClientListServer.positionList.get(ip)));
+            ClientListServer.positionList.replace(ip, AI.GetBotMovement(ClientListServer.positionList.get(ip)));
         }
     }
 

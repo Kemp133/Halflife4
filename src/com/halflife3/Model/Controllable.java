@@ -6,11 +6,10 @@ import javafx.scene.transform.Affine;
 public abstract class Controllable extends Sprite {
 	protected String         ipOfClient;
 	protected Affine         affine;
-	protected double         rotation;
+	protected short          rotation;
 	protected Vector2        spawn_point;
 	protected PositionPacket packetToSend;
 	protected boolean        AI;
-	protected float          moveSpeed;
 	protected boolean        moving = false;
 
 	public Controllable(Vector2 position, Vector2 velocity) { super(position, velocity); }
@@ -27,8 +26,8 @@ public abstract class Controllable extends Sprite {
 	public Affine getAffine() {
 		return affine;
 	}
-	public double getRotation() { return rotation; }
-	public void setRotation(double rotation) { this.rotation = rotation;}
+	public short getRotation() { return rotation; }
+	public void setRotation(short rotation) { this.rotation = rotation;}
 	//endregion
 
 	//region SpawnPoint getter and setter
@@ -49,13 +48,9 @@ public abstract class Controllable extends Sprite {
 	}
 	//endregion
 
-	//region MoveSpeed getter and setter
-	public float getMoveSpeed() { return moveSpeed; }
-	public void setMoveSpeed(float speed) { moveSpeed = speed; }
-	//endregion
-
 	//region Get and Set Moving
 	public boolean getMoving() { return moving; }
+
 	public void setMoving(boolean moving) { this.moving = moving; }
 	//endregion
 }
