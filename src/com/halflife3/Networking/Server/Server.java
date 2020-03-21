@@ -1,15 +1,15 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Mechanics.AI.AI;
-import com.halflife3.Mechanics.GameObjects.Bricks;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.*;
-import com.halflife3.View.MapRender;
-import javafx.scene.shape.Rectangle;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
 
 public class Server implements Runnable {
 
@@ -36,9 +36,15 @@ public class Server implements Runnable {
                                                new Vector2(1920, 480),
                                                new Vector2(1920, 720)};
     public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
+    private AI ai;
     //endregion
 
     public void start() {
+        ai = new AI();
+        final boolean[] readyAI = {false};
+
+        new Thread(() -> readyAI[0] = ai.setupMap()).start();
+
 //        Fills the positionList with 4 bot players, giving them available starting positions
         for (int i = 0; i < 4; i++) {
             Vector2 startPosition = startPositions[i];
@@ -61,14 +67,16 @@ public class Server implements Runnable {
             multicastGroup = InetAddress.getByName(MULTICAST_ADDRESS);
             multicastSocket = new MulticastSocket();
             setWifiInterface();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
 
         posPacket = new PositionListPacket();
         listenerServer = new EventListenerServer();
 
-        new Thread(this).start();
+        while (!readyAI[0]) try { Thread.sleep(10); } catch (InterruptedException ignored) {}
+
+        moveAI();
+
+//        new Thread(this).start();
     }
 
     @Override
@@ -129,7 +137,11 @@ public class Server implements Runnable {
             if (!botNamesList.contains(ip))
                 continue;
 
-            ClientListServer.positionList.replace(ip, AI.GetBotMovement(ClientListServer.positionList.get(ip)));
+            long before = System.currentTimeMillis();
+            ClientListServer.positionList.replace(ip, ai.getBotMovement(ClientListServer.positionList.get(ip)));
+            long after = System.currentTimeMillis();
+            System.out.println("Time taken (ms): " + (after - before));
+            break;
         }
     }
 
@@ -316,93 +328,5 @@ public class Server implements Runnable {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-    }
-
-    public Vector2 getNextMove (Vector2 original , Vector2 position) {
-
-        if (original == position) { return position; }
-
-        Vector2 up = new Vector2(original.getX(), original.getY() + 20);
-        Vector2 right = new Vector2(original.getX() + 20 , original.getY());
-        Vector2 down = new Vector2(original.getX(), original.getY() - 20);
-        Vector2 left = new Vector2(original.getX() - 20, original.getY());
-
-        double udis = up.squareDistance(position);
-        double rdis = right.squareDistance(position);
-        double ddis = down.squareDistance(position);
-        double ldis = left.squareDistance(position);
-
-        double[] shortest = {udis, rdis, ddis, ldis};
-//this avoids hitting the wall or moving to itself
-        if (isWall(up, MapRender.get_list()) || udis == 0)    shortest[0] += 1000000;
-        if (isWall(right, MapRender.get_list()) || rdis == 0) shortest[1] += 1000000;
-        if (isWall(down, MapRender.get_list()) || ddis == 0)  shortest[2] += 1000000;
-        if (isWall(left, MapRender.get_list()) || ldis == 0)  shortest[3] += 1000000;
-
-        int closestRoute = FindSmallest(shortest);
-
-        Vector2 chosen = null;
-        switch (closestRoute) {
-            case 0:
-                chosen = up;
-                break;
-            case 1:
-                chosen = right;
-                break;
-            case 2:
-                chosen = down;
-                break;
-            case 3:
-                chosen = left;
-                break;
-        }
-
-        return chosen;
-    }
-    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
-        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
-        for(Bricks wall: listOfWalls){
-            if(scanArea.intersects(wall.getBounds().getBoundsInLocal())){
-                return true;
-            }
-        }
-        return false;
-    }
-    public int FindSmallest(double[] arr1) {
-        int index = 0;
-        double min = arr1[index];
-
-        for (int i=1; i<arr1.length; i++) {
-            if (arr1[i] < min) {
-                min = arr1[i];
-                index = i;
-            }
-        }
-        return index;
-    }
-    public Vector2 closestPlayerPosition(Vector2 original , Vector2[] playerList)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-
-        double[] distance = {original.distance(playerList[0]), original.distance(playerList[1]), original.distance(playerList[2]), original.distance(playerList[3])};
-
-        int closet = FindSmallest(distance);
-
-        return playerList[closet];
     }
 }
