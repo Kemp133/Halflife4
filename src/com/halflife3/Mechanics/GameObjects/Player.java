@@ -1,5 +1,6 @@
-package com.halflife3.Model;
+package com.halflife3.Mechanics.GameObjects;
 
+import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;

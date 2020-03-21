@@ -1,6 +1,7 @@
-package com.halflife3.Model;
+package com.halflife3.Mechanics.GameObjects;
 
 import com.halflife3.Controller.Input;
+import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;
 
@@ -17,7 +18,7 @@ public class Crosshair extends Sprite {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, position.getX() - (float)(getWidth() / 2), position.getY() - (float)(getHeight() / 2));
+        gc.drawImage(sprite, position.getX() - getWidth() / 2, position.getY() - getHeight() / 2);
     }
 
     @Override

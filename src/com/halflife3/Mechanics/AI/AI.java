@@ -1,5 +1,7 @@
-package com.halflife3.Model;
+package com.halflife3.Mechanics.AI;
 
+import com.halflife3.Mechanics.GameObjects.Bricks;
+import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.Networking.Server.ClientListServer;
 import com.halflife3.View.MapRender;

@@ -2,8 +2,9 @@ package com.halflife3.Networking.Client;
 
 import com.halflife3.Controller.*;
 import com.halflife3.GameUI.AudioForGame;
-import com.halflife3.Model.*;
-import com.halflife3.Model.Interfaces.*;
+import com.halflife3.Mechanics.*;
+import com.halflife3.Mechanics.GameObjects.*;
+import com.halflife3.Mechanics.Interfaces.*;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;

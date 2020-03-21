@@ -1,7 +1,7 @@
 package com.halflife3.View;
 
-import com.halflife3.Model.Bricks;
-import com.halflife3.Model.Vector2;
+import com.halflife3.Mechanics.GameObjects.Bricks;
+import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;

@@ -1,5 +1,7 @@
-package com.halflife3.Model;
+package com.halflife3.Mechanics.GameObjects;
 
+import com.halflife3.Mechanics.GameObjects.GameObject;
+import com.halflife3.Mechanics.Vector2;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;

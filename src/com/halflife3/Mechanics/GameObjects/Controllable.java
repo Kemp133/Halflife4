@@ -1,5 +1,6 @@
-package com.halflife3.Model;
+package com.halflife3.Mechanics.GameObjects;
 
+import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 import javafx.scene.transform.Affine;
 
@@ -7,7 +8,7 @@ public abstract class Controllable extends Sprite {
 	protected String         ipOfClient;
 	protected Affine         affine;
 	protected short          rotation;
-	protected Vector2        spawn_point;
+	protected Vector2 spawn_point;
 	protected PositionPacket packetToSend;
 	protected boolean        AI;
 	protected boolean        moving = false;

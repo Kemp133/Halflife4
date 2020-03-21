@@ -1,8 +1,8 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Model.AI;
-import com.halflife3.Model.Bricks;
-import com.halflife3.Model.Vector2;
+import com.halflife3.Mechanics.AI.AI;
+import com.halflife3.Mechanics.GameObjects.Bricks;
+import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
 import javafx.scene.shape.Rectangle;

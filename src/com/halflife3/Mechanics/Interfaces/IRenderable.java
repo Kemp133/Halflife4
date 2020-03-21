@@ -1,4 +1,4 @@
-package com.halflife3.Model.Interfaces;
+package com.halflife3.Mechanics.Interfaces;
 
 import javafx.scene.canvas.GraphicsContext;
 
