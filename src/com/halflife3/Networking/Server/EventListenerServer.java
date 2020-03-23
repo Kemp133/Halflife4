@@ -20,14 +20,14 @@ public class EventListenerServer {
 
         } else if (packet instanceof PositionPacket) {
 
-            replacing(sender.toString(), (PositionPacket) packet);
+            replacing((PositionPacket) packet, sender);
 
         }
 
     }
 
-    private static synchronized void replacing(String sender, PositionPacket pos) {
-        ClientListServer.positionList.replace(sender, pos);
+    private synchronized void replacing(PositionPacket pos, InetAddress sender) {
+        ClientListServer.positionList.replace(sender.toString(), pos);
     }
 
 }

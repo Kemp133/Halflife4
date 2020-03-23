@@ -1,6 +1,6 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 
 import java.io.*;
@@ -45,7 +45,9 @@ public class ConnectedToServer implements Runnable {
         byte[] posBuf = new byte[lengthOfPackets];
         DatagramPacket incPos = new DatagramPacket(posBuf, posBuf.length);
 
-        try { uniqueSocket.receive(incPos); } catch (IOException e) { return; }
+        try { uniqueSocket.receive(incPos); } catch (IOException e) {
+            return;
+        }
 
         Object receivedPosition = byteArrayToObject(posBuf);
         listenerServer.received(receivedPosition, clientAddress);

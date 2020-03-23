@@ -52,7 +52,7 @@ public class Windows extends Application {
     }
 
    public void addBackground() throws FileNotFoundException {
-        var inputStream = new FileInputStream("res/MenuBackground.png");
+        FileInputStream inputStream = new FileInputStream("res/MenuBackground.png");
         Image image = new Image(inputStream);
 
         ImageView imageView = new ImageView(image);

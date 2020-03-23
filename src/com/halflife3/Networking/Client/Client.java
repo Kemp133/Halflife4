@@ -1,6 +1,6 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
 import com.halflife3.Networking.Packets.PositionListPacket;
@@ -24,7 +24,7 @@ public class Client {
     protected static MulticastSocket positionSocket = null;
     private static int incPacketSize = 2000;
 
-//    For sending packets to the server
+    //    For sending packets to the server
     private static InetAddress hostAddress;
     private static DatagramSocket outSocket;
 

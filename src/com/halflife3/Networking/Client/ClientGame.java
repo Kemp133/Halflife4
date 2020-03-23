@@ -2,29 +2,29 @@ package com.halflife3.Networking.Client;
 
 import com.halflife3.Controller.*;
 import com.halflife3.GameUI.AudioForGame;
-import com.halflife3.Mechanics.*;
-import com.halflife3.Mechanics.GameObjects.*;
-import com.halflife3.Mechanics.Interfaces.*;
+import com.halflife3.Model.*;
+import com.halflife3.Model.Interfaces.*;
+import com.halflife3.Model.ball.BasicBall;
 import com.halflife3.Networking.Packets.PositionPacket;
+import com.halflife3.Networking.Server.ClientListServer;
 import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.*;
 import javafx.scene.canvas.*;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import javax.swing.text.html.HTMLDocument;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 
 import static com.halflife3.Networking.Client.Client.listOfClients;
@@ -32,31 +32,28 @@ import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
 
-    private final int FPS = 30;
-    private final int INC_PACKETS_PER_SECOND = 30;
-    private final int GAME_WINDOW_HEIGHT = 600;
-    private final int GAME_WINDOW_WIDTH = 800;
-    private final int MOVEMENT_SPEED = 100;
+    private final int FPS = 60;
+    private final int INC_PACKETS_PER_SECOND = 120;
 
     //region Other variables
     static Input input;
     private static Pane root;
     private static Player player_client;
+    private static BasicBall ball;
     private static HashMap<String, Player> playerList;
+    private static ProgressBar pbs[];
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 5;
-    private int mapWidth;
-    private int mapHeight;
-    private final int LEFT_END_OF_SCREEN = 9*40;
-    private final int RIGHT_END_OF_SCREEN = 11*40;
-    private final int BOTTOM_OF_SCREEN = 8*40;
-    private final int TOP_OF_SCREEN = 7*40;
+    private double bulletMillis;
+    private Vector2 ball_origin_position;
+
     //endregion
 
     //region ClientGame constructors
-    public ClientGame() {}
+    public ClientGame() {
+    }
 
     public ClientGame(Stage window) {
         this.window = window;
@@ -74,9 +71,12 @@ public class ClientGame extends Application {
 
         //region Initialise objects
         playerList = new HashMap<>();
+        pbs = new ProgressBar[4];
         input = new Input();
         root = new Pane();
-        //endregion
+
+
+        //end region
 
         //region Initialise this player
         Vector2 startPos = clientNetwork.getStartingPosition();
@@ -84,6 +84,12 @@ public class ClientGame extends Application {
         player_client = new Player(startPos, startVel);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
         player_client.setAI(false);
+        player_client.setSprite("res/Player_pic.png");
+        player_client.setSprite2("res/Player_walking.png");
+        //endregion
+
+        //region initial ball
+        ball = new BasicBall(new Vector2(200, 200), new Vector2(0, 0));
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -93,10 +99,15 @@ public class ClientGame extends Application {
         //endregion
 
         initialisePlayers();
+        initialisePlayers();
 
         if (flag) {
             flag = false;
-            try { this.start(this.window); } catch (Exception e) { e.printStackTrace(); }
+            try {
+                this.start(this.window);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else launch();
     }
 
@@ -104,26 +115,40 @@ public class ClientGame extends Application {
     public void start(Stage primaryStage) {
         //region Window setup
         primaryStage.setTitle("HalfLife 3 : Man in Black");
-        Canvas canvas = new Canvas(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+        Canvas canvas = new Canvas(800, 600);
         root.getChildren().add(canvas);
-        Scene scene = new Scene(root, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+        Scene scene = new Scene(root, 800, 600);
         primaryStage.setScene(scene);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         //endregion
 
         gameInit(scene);
+        for (int i = 0; i < 4; i++) {
+            pbs[i] = new ProgressBar(0);
+            pbs[i].setStyle("-fx-accent: green; -fx-padding: 0.00em;");
+            // -fx-border:0px; -fx-height:3px;-fx-weight:40;
+            pbs[i].setPrefHeight(10);
+            pbs[i].setPrefWidth(50);
+            root.getChildren().add(pbs[i]);
+        }
+
 
         //region Thread to update the position of all enemies
         running = true;
+
+
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
+                if (System.nanoTime() - serverNanoTime > Math.round(1.0 / INC_PACKETS_PER_SECOND * 1e9)) {
+                    bulletMillis = System.currentTimeMillis();
                     updateEnemies();
                     serverNanoTime = System.nanoTime();
                 }
             }
         }).start();
+
+
         //endregion
 
         new AnimationTimer() {
@@ -131,73 +156,57 @@ public class ClientGame extends Application {
             double startNanoTime = System.nanoTime();
 
             public void handle(long currentNanoTime) {
-                if (currentNanoTime - lastUpdate > Math.round(1.0/FPS * 1e9)) {
+                if (currentNanoTime - lastUpdate > Math.round(1.0 / FPS * 1e9)) {
                     //region Calculate time since last update.
                     double elapsedTime = (currentNanoTime - startNanoTime) / 1e9;
                     startNanoTime = currentNanoTime;
                     //endregion
-
+                    //region record ball origin position
+                    ball_origin_position = ball.getPosition();
+                    //endregion
                     //region Camera offset
-                    Camera.SetOffsetX(player_client.getPosX() - LEFT_END_OF_SCREEN);
-                    Camera.SetOffsetY(player_client.getPosY() - TOP_OF_SCREEN);
+                    Camera.SetOffsetX(player_client.getPosX() - 9 * 40);
+                    Camera.SetOffsetY(player_client.getPosY() - 7 * 40);
                     if (Camera.GetOffsetX() < 0)
                         Camera.SetOffsetX(0);
-                    else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
-                        Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
+                    else if (Camera.GetOffsetX() > 25 * 40) //map width subtract half of window width
+                        Camera.SetOffsetX(25 * 40);
                     if (Camera.GetOffsetY() < 0)
                         Camera.SetOffsetY(0);
-                    else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
-                        Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
+                    else if (Camera.GetOffsetY() > 30 * 40) //map height subtract half of window height
+                        Camera.SetOffsetY(30 * 40);
                     //endregion
 
                     //region Handles player movement
-                    if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
-                        player_client.getVelocity().setX(0);
-                    }
-                    if (Input.isKeyReleased(W) && Input.isKeyReleased(S)) {
-                        player_client.getVelocity().setY(0);
-                    }
-                    if (Input.isKeyPressed(A)) {
-                        player_client.getVelocity().setX(-MOVEMENT_SPEED);
-                    }
-                    if (Input.isKeyPressed(D)) {
-                        player_client.getVelocity().setX(MOVEMENT_SPEED);
-                    }
-                    if (Input.isKeyPressed(W)) {
-                        player_client.getVelocity().setY(-MOVEMENT_SPEED);
-                    }
-                    if (Input.isKeyPressed(S)) {
-                        player_client.getVelocity().setY(MOVEMENT_SPEED);
-                    }
-                    //endregion
 
-                    //region Calculate the rotation
-                    Vector2 player_client_center =
-                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + player_client.getWidth() / 2,
-                                    player_client.getPosY() - Camera.GetOffsetY() + player_client.getHeight() / 2);
-                    Vector2 direction =
-                            new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
-                                    .subtract(player_client_center);
+                    if (player_client.stand == 0) {
 
-                    Affine rotate = new Affine();
-                    short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-                    rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
-                    player_client.setRotation(deg);
-                    player_client.setAffine(rotate);
-                    //endregion
+                        if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
+                            player_client.getVelocity().setX(0);
+                            player_client.setIs_moving(false);
+                        }
+                        if (Input.isKeyReleased(W) && Input.isKeyReleased(S)) {
+                            player_client.getVelocity().setY(0);
+                            player_client.setIs_moving(false);
+                        }
+                        if (Input.isKeyPressed(A)) {
+                            player_client.getVelocity().setX(-player_client.getMoveSpeed());
+                            player_client.setIs_moving(true);
+                        }
+                        if (Input.isKeyPressed(D)) {
+                            player_client.getVelocity().setX(player_client.getMoveSpeed());
+                            player_client.setIs_moving(true);
+                        }
+                        if (Input.isKeyPressed(W)) {
+                            player_client.getVelocity().setY(-player_client.getMoveSpeed());
+                            player_client.setIs_moving(true);
+                        }
+                        if (Input.isKeyPressed(S)) {
+                            player_client.getVelocity().setY(player_client.getMoveSpeed());
+                            player_client.setIs_moving(true);
+                        }
+                    }
 
-                    //region Collision detection
-//                    Player collision
-                    for (Bricks block : MapRender.get_list())
-                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
-                            player_client.collision(block, elapsedTime);
-
-//                    Bullet collision
-                    editObjectManager(1, 0, null, null);
-                    //endregion
-
-                    //region Updates position of all game objects locally (has to go after collision)
-                    editObjectManager(2, elapsedTime, null, null);
                     //endregion
 
                     //region Clears bullets on screen (Commented out, don't want to let players do this)
@@ -206,30 +215,148 @@ public class ClientGame extends Application {
 //                    }
                     //endregion
 
+                    //region Calculate the rotation
+                    Vector2 player_client_center =
+                            new Vector2(player_client.getPosX() - Camera.GetOffsetX() + 20,
+                                    player_client.getPosY() - Camera.GetOffsetY() + 18);
+                    Vector2 direction =
+                            new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
+                                    .subtract(player_client_center);
+
+
+//                    Player rotation
+                    Affine rotate = new Affine();
+                    short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+                    rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
+                    player_client.setDegrees(deg);
+                    player_client.setRotate(rotate);
+                    //endregion
+
                     //region Create a new bullet
+
                     player_client.setBulletShot(false);
-                    if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
+                    if (Input.mouseButtonPressed.get(MouseButton.PRIMARY)&& bulletLimiter == 0) {
                         double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                         double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-                        Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+                        if(!player_client.hold_ball) {
+                            Vector2 direction_of_gun = new Vector2(bullet_pos_x * 32, bullet_pos_y * 32);
 
-                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
-                                player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
+                           Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
+                                   player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
 
-                        Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
+                           Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
-                        new Bullet(bulletPos, bulletVel);
-                        player_client.setBulletShot(true);
+                           new Bullet(bulletPos, bulletVel);
+                           player_client.setBulletShot(true);
+                        }
+                       else{
+                            ball.setVelocity(new Vector2(bullet_pos_x, bullet_pos_y).multiply(200));
+                            ball.setAcc(new Vector2(ball.getVelocity()).divide(100));
+                            player_client.hold_ball = false;
+
+                        }
                         bulletLimiter = 5;
-                    } else if (bulletLimiter > 0) bulletLimiter--;
+                    }else if (bulletLimiter > 0) bulletLimiter--;
                     //endregion
+
+                    //region Updates position of all game objects locally
+                    editObjectManager(2, elapsedTime, null, null);
+                    //endregion
+
+                    //region deal with ball object
+                    //ball bounce
+                    for (GameObject go : ObjectManager.getGameObjects()) {
+                        if (!go.getKeys().contains("Ball"))
+                            continue;
+                        for (Bricks block : MapRender.get_list()) {
+                            //no collision = 0, change x = 1, change y = 2.
+                            if (go.getBounds().intersects(block.getBounds().getBoundsInLocal())) {
+                                Vector2 object_center = new Vector2(block.getPosX() + 20, block.getPosY() + 20);
+                                Vector2 ball_center = new Vector2(go.getPosX() + 12, go.getPosY() + 12);
+                                Vector2 relevant_pos = new Vector2(ball_center.subtract(object_center));
+                                double rel_x = relevant_pos.getX();
+                                double rel_y = relevant_pos.getY();
+                                if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) || (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) || (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) || (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0))
+                                    ball.collision(2,elapsedTime);
+                                else
+                                    ball.collision(1,elapsedTime);
+                            }
+                        }
+//                        for (String ip : listOfClients.connectedIPs)
+//                            if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal())) {
+//                                playerList.get(ip).hold_ball = true;
+//                                //send the server, this player start to update the ball
+//                            }
+                        if(go.getBounds().intersects(player_client.circle.getBoundsInLocal())){
+                            player_client.hold_ball = true;
+                            /*TODO: send server this player start to update the ball
+                            *  Server should tell other player to set their hold_ball to false(maybe one of them is in charge of updating ball atm)*/
+                        }
+
+                    }
+                    //TODO: Receive which player is updating the ball
+                    //
+                    //if player hold the ball bind the ball with the player
+                    if(player_client.hold_ball){
+                        //set the ball according to the player position.
+                        double ball_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
+                        double ball_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
+                        Vector2 direction_of_ball = new Vector2(ball_pos_x * 35, ball_pos_y * 35);
+                        Vector2 ballPos = new Vector2(player_client.circle.getCenterX()-13,
+                                player_client.circle.getCenterY()-10).add(direction_of_ball);
+                        ball.setPosition(ballPos);
+                        for (Bricks block : MapRender.get_list())
+                            if (block.getBounds().intersects(ball.circle.getBoundsInLocal()))
+                               ball.setPosition(ball_origin_position);
+                        ball.circle.setCenterX(ball.getPosition().getX() + 12);
+                        ball.circle.setCenterY(ball.getPosition().getY() + 12);
+
+
+
+
+
+                        //TODO: update ball position to server
+                    }
+
+
+                    if(player_client.update_ball){
+                        //TODO: send server the ball position
+                    }
+                    else{
+                        //TODO: receive ball position from server and update ball in local
+                    }
+                    //endregion
+
+                    //region Collision detection
+                    boolean player_hit_block = false;
+                    for (Bricks block : MapRender.get_list())
+                        if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
+                            player_hit_block = true;
+
+                    player_client.collision(player_hit_block, elapsedTime);
+
+                    editObjectManager(1, 0, null, null);
+                    //endregion
+
+                    //region set progressbar
+                    int id = 0;
+                    for (String ip : playerList.keySet()) {
+                        pbs[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
+                        pbs[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY());
+                        pbs[id].setProgress(playerList.get(ip).stand / 200F);
+                        id++;
+                        //endregion
+
+
+                    }
+
 
                     //region Sends the client's position and whether they've shot a bullet
                     Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
                     //endregion
 
                     //region Re-renders all game objects
-                    graphicsContext.clearRect(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+                    graphicsContext.clearRect(0, 0, 800, 600);
 
                     MapRender.render(graphicsContext);
 
@@ -256,7 +383,7 @@ public class ClientGame extends Application {
 
     private void gameInit(Scene scene) {
         //region Background setup
-        FileInputStream bgPNG;
+        FileInputStream bgPNG = null;
         try {
             bgPNG = new FileInputStream("res/background_image.png");
             Image image = new Image(bgPNG, 40, 40, true, true);
@@ -270,24 +397,24 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise cursor
-        new Crosshair(Input.mousePosition.subtract(new Vector2(14, 14)), new Vector2(0, 0));
+        new Crosshair(Input.mousePosition.subtract(14, 14), new Vector2(0, 0));
         //endregion
 
         //region Add audio into game
-        AudioForGame audio = new AudioForGame();
-        audio.getMenu().getItems().add(audio.getMute());
-        audio.getSlider1().setHideOnClick(false);
-        audio.getMenu().getItems().add(audio.getSlider1());
-        audio.getMenuBar().getMenus().add(audio.getMenu());
-        audio.getBattle_music().setAutoPlay(true);
-        audio.getBattle_music().setMute(true); //Mute music by default
-        audio.getBattle_music().setOnEndOfMedia(() -> {
-            audio.getBattle_music().seek(Duration.ZERO);
-            audio.getBattle_music().play();
-        });
-        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
-        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-        root.getChildren().add(audio.getMenuBar());
+//        AudioForGame audio = new AudioForGame();
+//        audio.getMenu().getItems().add(audio.getMute());
+//        audio.getSlider1().setHideOnClick(false);
+//        audio.getMenu().getItems().add(audio.getSlider1());
+//        audio.getMenuBar().getMenus().add(audio.getMenu());
+//        audio.getBattle_music().setAutoPlay(true);
+//        audio.getBattle_music().setMute(true); //Mute music by default
+//        audio.getBattle_music().setOnEndOfMedia(() -> {
+//            audio.getBattle_music().seek(Duration.ZERO);
+//            audio.getBattle_music().play();
+//        });
+//        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+//        audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
+//        root.getChildren().add(audio.getMenuBar());
         //endregion
 
         //region Key input listener setup
@@ -296,6 +423,7 @@ public class ClientGame extends Application {
         scene.setCursor(Cursor.NONE);
         //endregion
 
+
         //region Map loading
         try {
             MapRender.loadLevel("res/map.png");
@@ -303,20 +431,11 @@ public class ClientGame extends Application {
             System.out.println("An Exception occurred in the loading of the map!" + Arrays.toString(e.getStackTrace()));
         }
         //endregion
-
-        //region Gets width and height of the map
-        try {
-            BufferedImage map = ImageIO.read(new File("res/map.png"));
-            mapWidth = map.getWidth() * 40;
-            mapHeight = map.getHeight() * 40;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //endregion
     }
 
     public void initialisePlayers() {
         Client.receivePositions();
+
         for (String ip : listOfClients.connectedIPs) {
             if (ip.equals(player_client.getIpOfClient())) {
                 playerList.put(ip, player_client);
@@ -330,6 +449,7 @@ public class ClientGame extends Application {
             enemy.setSprite("res/Player_pic.png");
             enemy.setIpOfClient(ip);
             playerList.put(ip, enemy);
+
         }
     }
 
@@ -372,29 +492,14 @@ public class ClientGame extends Application {
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
 
-            //region Camera Offset
-            double cameraX = player_client.getPosX() - LEFT_END_OF_SCREEN;
-            double cameraY = player_client.getPosY() - TOP_OF_SCREEN;
-
-            if (cameraX < 0)
-                cameraX = 0;
-            else if (cameraX > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
-                cameraX = mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN;
-
-            if (cameraY < 0)
-                cameraY = 0;
-            else if (cameraY > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
-                cameraY = mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN;
-            //endregion
-
             //region Enemies' rotation/position/velocity
             Affine rotate = new Affine();
             rotate.appendRotation(theDoubleValues.degrees,
-                    theDoubleValues.orgPosX - cameraX + 18,
-                    theDoubleValues.orgPosY - cameraY + 18);
+                    theDoubleValues.orgPosX - Camera.GetOffsetX() + 18,
+                    theDoubleValues.orgPosY - Camera.GetOffsetY() + 18);
 
-            playerList.get(ip).setAffine(rotate);
-            playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+            playerList.get(ip).setRotate(rotate);
+            //playerList.get(ip).setVelocity(theDoubleValues.velX, theDoubleValues.velY);
             playerList.get(ip).setPosition(theDoubleValues.orgPosX, theDoubleValues.orgPosY);
             //endregion
 
@@ -405,29 +510,30 @@ public class ClientGame extends Application {
             double degreeRadians = Math.toRadians(theDoubleValues.degrees);
             double bullet_pos_x = Math.cos(degreeRadians);
             double bullet_pos_y = Math.sin(degreeRadians);
-            Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+            Vector2 direction_of_gun = new Vector2(bullet_pos_x * 32, bullet_pos_y * 32);
 
             Vector2 bulletPos = new Vector2(theDoubleValues.orgPosX + player_client.getHeight() / 2,
                     theDoubleValues.orgPosY + player_client.getWidth() / 2).add(direction_of_gun);
 
-            Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
+            Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(300);
 
             editObjectManager(0, 0, bulletPos, bulletVel);
+
             //endregion
         }
         //endregion
     }
 
-    private synchronized void editObjectManager(int operation, double elapsedTime, Vector2 bp, Vector2 bv) {
+    private synchronized void
+    editObjectManager(int operation, double elapsedTime, Vector2 bp, Vector2 bv) {
         switch (operation) {
-            case 0 : { //add bullets
+            case 0: { //add bullets
                 new Bullet(bp, bv);
-                break;
             }
 
-            case 1 : { //remove bullets if needed
+            case 1: { //remove bullets
                 HashSet<GameObject> crash_bullet_list = new HashSet<>();
-                for (GameObject go: ObjectManager.getGameObjects()) {
+                for (GameObject go : ObjectManager.getGameObjects()) {
                     if (!go.getKeys().contains("Bullet"))
                         continue;
 
@@ -436,22 +542,46 @@ public class ClientGame extends Application {
                             crash_bullet_list.add(go);
 
                     for (String ip : listOfClients.connectedIPs)
-                        if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal()))
+                        if (go.getBounds().intersects(playerList.get(ip).circle.getBoundsInLocal())) {
                             crash_bullet_list.add(go);
+                            //deal with the hit
+                            if (playerList.get(ip).stand == 0) {
+                                playerList.get(ip).stand = 200;
+                                playerList.get(ip).setVelocity(new Vector2(go.getVelocity()));
+                                playerList.get(ip).setAcc(new Vector2(playerList.get(ip).getVelocity()).divide(42));
+                                System.out.println(playerList.get(ip).getAcc());
+                                System.out.println(playerList.get(ip).getVelocity());
+
+                            }
+                        }
                 }
 
                 for (GameObject bullet : crash_bullet_list)
                     bullet.destroy();
-
-                break;
             }
 
-            case 2 : {//update object positions
-                for (IUpdateable go : ObjectManager.getGameObjects())
+            case 2: {// object positions
+                for (IUpdateable go : ObjectManager.getGameObjects()) {
                     go.update(elapsedTime);
-
-                break;
+                }
             }
+
+
         }
     }
+
+    //region Framework to get only some specific game objects
+    private ArrayList<GameObject> getPlayersAndBullets(HashSet<GameObject> allObjects) {
+        ArrayList<GameObject> playersAndBullets = new ArrayList<>();
+
+        while (allObjects.iterator().hasNext()) {
+            GameObject object = allObjects.iterator().next();
+            if (object.getKeys().contains("player")) {
+                playersAndBullets.add(object);
+            }
+        }
+
+        return playersAndBullets;
+    }
+    //endregion
 }

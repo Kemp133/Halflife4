@@ -1,4 +1,4 @@
-package com.halflife3.Mechanics.Interfaces;
+package com.halflife3.Model.Interfaces;
 
 @FunctionalInterface
 public interface IUpdateable {

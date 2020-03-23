@@ -1,13 +1,14 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Mechanics.AI.AI;
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Model.Bricks;
+import com.halflife3.Model.Vector2;
 import com.halflife3.Networking.Packets.*;
+import com.halflife3.View.MapRender;
+import javafx.scene.shape.Rectangle;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Deque;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -31,20 +32,14 @@ public class Server implements Runnable {
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
-    private static Vector2[] startPositions = {new Vector2(80, 480),
-                                               new Vector2(80, 720),
-                                               new Vector2(1920, 480),
-                                               new Vector2(1920, 720)};
-    public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
-    private AI ai;
+    private static Vector2[] startPositions = {new Vector2(80, 80),
+                                               new Vector2(680, 80),
+                                               new Vector2(80, 480),
+                                               new Vector2(680, 480)};
+    public static String[] botNames = new String[]{"bot0", "bot1", "bot2", "bot3"};
     //endregion
 
     public void start() {
-        ai = new AI();
-        final boolean[] readyAI = {false};
-
-        new Thread(() -> readyAI[0] = ai.setupMap()).start();
-
 //        Fills the positionList with 4 bot players, giving them available starting positions
         for (int i = 0; i < 4; i++) {
             Vector2 startPosition = startPositions[i];
@@ -57,8 +52,8 @@ public class Server implements Runnable {
             botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
             botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
-            ClientListServer.positionList.put(botNamesList.get(i), botPacket);
-            ClientListServer.connectedIPs.add(botNamesList.get(i));
+            ClientListServer.positionList.put(botNames[i], botPacket);
+            ClientListServer.connectedIPs.add(botNames[i]);
 
         }
 
@@ -67,14 +62,12 @@ public class Server implements Runnable {
             multicastGroup = InetAddress.getByName(MULTICAST_ADDRESS);
             multicastSocket = new MulticastSocket();
             setWifiInterface();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         posPacket = new PositionListPacket();
         listenerServer = new EventListenerServer();
-
-        while (!readyAI[0]) try { Thread.sleep(10); } catch (InterruptedException ignored) {}
-
-//        moveAI();
 
         new Thread(this).start();
     }
@@ -83,7 +76,6 @@ public class Server implements Runnable {
     public void run() {
         running = true;
         System.out.println("Multicasting on port: " + MULTICAST_PORT);
-        System.out.println("Listening for clients...");
 
 //        Multicasts WelcomePackets
         new Thread(() -> {
@@ -109,9 +101,7 @@ public class Server implements Runnable {
             double serverNanoTime = System.nanoTime();
             while (running) {
                 if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
-//                    if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
-//                        moveAI();
-
+//                    tomsAI();
                     posPacket.posList = ClientListServer.positionList;
                     posPacket.connectedIPs = ClientListServer.connectedIPs;
                     multicastPacket(posPacket, POSITIONS_PORT);
@@ -123,6 +113,7 @@ public class Server implements Runnable {
 //        Listens for incoming packets
         while (running) {
             if (ClientListServer.clientList.size() < 4) {
+                System.out.println("Listening for clients...");
                 try { connectionListener(); } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -132,17 +123,46 @@ public class Server implements Runnable {
         multicastSocket.close();
     }
 
-    private void moveAI() {
-        for (var ip : ClientListServer.connectedIPs) {
-            if (!botNamesList.contains(ip))
-                continue;
+    private void tomsAI() {
+        /*if(ClientListServer.connectedIPs.contains(botNames[0])){
+            totalBots = 4;
+        }else if (ClientListServer.connectedIPs.contains(botNames[1])){
+            totalBots = 3;
+        }else if (ClientListServer.connectedIPs.contains(botNames[2])){
+            totalBots = 2;
+        }else if (ClientListServer.connectedIPs.contains(botNames[3])){
+            totalBots = 1;
+        }*/
+        if (ClientListServer.positionList.get(botNames[0]) == null) return;
+        double test = ClientListServer.positionList.get(botNames[0]).orgPosX;
+        Vector2 of0 = new Vector2(ClientListServer.positionList.get(botNames[0]).orgPosX,ClientListServer.positionList.get(botNames[0]).orgPosY);
+        Vector2 of1 = new Vector2(ClientListServer.positionList.get(botNames[1]).orgPosX,ClientListServer.positionList.get(botNames[1]).orgPosY);
+        Vector2 of2 = new Vector2(ClientListServer.positionList.get(botNames[2]).orgPosX,ClientListServer.positionList.get(botNames[2]).orgPosY);
+        Vector2 of3 = new Vector2(ClientListServer.positionList.get(botNames[3]).orgPosX,ClientListServer.positionList.get(botNames[3]).orgPosY);
 
-            long before = System.currentTimeMillis();
-            ClientListServer.positionList.replace(ip, ai.getBotMovement(ClientListServer.positionList.get(ip)));
-            long after = System.currentTimeMillis();
-            System.out.println("Time taken (ms): " + (after - before));
-            break;
-        }
+        Vector2[] posiList = {of0, of1, of2, of3};
+        //for bot 3
+        //offset
+        posiList[3] = new Vector2(327680,327680);
+        Vector2 newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
+        ClientListServer.positionList.get(botNames[3]).orgPosX = newposi.getX();
+        ClientListServer.positionList.get(botNames[3]).orgPosY = newposi.getY();
+        //for bot 2
+        /*
+        posiList[2] = new Vector2(327680,327680);
+        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
+        ClientListServer.positionList.get(botNames[2]).orgPosX = newposi.getX();
+        ClientListServer.positionList.get(botNames[2]).orgPosY = newposi.getY();
+        */
+        //for bot 1
+        /*
+        posiList[1] = new Vector2(327680,327680);
+        newposi = getNextMove(of3,closestPlayerPosition(of3,posiList));
+        ClientListServer.positionList.get(botNames[1]).orgPosX = newposi.getX();
+        ClientListServer.positionList.get(botNames[1]).orgPosY = newposi.getY();*/
+        //TODO: Change bot0 position
+
+
     }
 
     private void connectionListener() throws IOException {
@@ -170,6 +190,7 @@ public class Server implements Runnable {
     }
 
     public static void addConnection(InetAddress address) {
+
         //region Checks if Server is full
         if (ClientListServer.clientList.size() >= 4) {
             System.out.println("Server is full");
@@ -189,7 +210,7 @@ public class Server implements Runnable {
                 portPacket.setStartPosition(startPosition);
 
 //                Removes the bot holding the [i]th startPosition
-                ClientListServer.positionList.remove(botNamesList.get(i));
+                ClientListServer.positionList.remove(botNames[i]);
 
                 //region Adds the player (with the [i]th startPosition) to the positionList
                 PositionPacket playerPacket = new PositionPacket();
@@ -201,7 +222,7 @@ public class Server implements Runnable {
                 ClientListServer.positionList.put(address.toString(), playerPacket);
                 //endregion
 
-                ClientListServer.connectedIPs.remove(botNamesList.get(i));
+                ClientListServer.connectedIPs.remove(botNames[i]);
                 ClientListServer.connectedIPs.add(address.toString());
 
 //                Disables the [i]th startPosition so that no new players could have it assigned to them
@@ -245,9 +266,9 @@ public class Server implements Runnable {
                     botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
                     botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
 
-                    ClientListServer.positionList.put(botNamesList.get(i), botPacket);
+                    ClientListServer.positionList.put(botNames[i], botPacket);
                     ClientListServer.connectedIPs.remove(address.toString());
-                    ClientListServer.connectedIPs.add(botNamesList.get(i));
+                    ClientListServer.connectedIPs.add(botNames[i]);
                 }
             }
         }
@@ -328,5 +349,93 @@ public class Server implements Runnable {
         } catch (SocketException e) {
             e.printStackTrace();
         }
+    }
+
+    public Vector2 getNextMove (Vector2 original , Vector2 position) {
+
+        if (original == position) { return position; }
+
+        Vector2 up = new Vector2(original.getX(), original.getY() + 20);
+        Vector2 right = new Vector2(original.getX() + 20 , original.getY());
+        Vector2 down = new Vector2(original.getX(), original.getY() - 20);
+        Vector2 left = new Vector2(original.getX() - 20, original.getY());
+
+        double udis = up.squareDistance(position);
+        double rdis = right.squareDistance(position);
+        double ddis = down.squareDistance(position);
+        double ldis = left.squareDistance(position);
+
+        double[] shortest = {udis, rdis, ddis, ldis};
+//this avoids hitting the wall or moving to itself
+        if (isWall(up, MapRender.get_list()) || udis == 0)    shortest[0] += 1000000;
+        if (isWall(right, MapRender.get_list()) || rdis == 0) shortest[1] += 1000000;
+        if (isWall(down, MapRender.get_list()) || ddis == 0)  shortest[2] += 1000000;
+        if (isWall(left, MapRender.get_list()) || ldis == 0)  shortest[3] += 1000000;
+
+        int closestRoute = FindSmallest(shortest);
+
+        Vector2 chosen = null;
+        switch (closestRoute) {
+            case 0:
+                chosen = up;
+                break;
+            case 1:
+                chosen = right;
+                break;
+            case 2:
+                chosen = down;
+                break;
+            case 3:
+                chosen = left;
+                break;
+        }
+
+        return chosen;
+    }
+    public boolean isWall(Vector2 location, Deque<Bricks> listOfWalls){
+        Rectangle scanArea = new Rectangle(location.getX() - 10, location.getY() -10 , 20 , 20);
+        for(Bricks wall: listOfWalls){
+            if(scanArea.intersects(wall.getBounds().getBoundsInLocal())){
+                return true;
+            }
+        }
+        return false;
+    }
+    public int FindSmallest(double[] arr1) {
+        int index = 0;
+        double min = arr1[index];
+
+        for (int i=1; i<arr1.length; i++) {
+            if (arr1[i] < min) {
+                min = arr1[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+    public Vector2 closestPlayerPosition(Vector2 original , Vector2[] playerList)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+
+        double[] distance = {original.distance(playerList[0]), original.distance(playerList[1]), original.distance(playerList[2]), original.distance(playerList[3])};
+
+        int closet = FindSmallest(distance);
+
+        return playerList[closet];
     }
 }

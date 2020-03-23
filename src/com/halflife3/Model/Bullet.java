@@ -1,6 +1,5 @@
-package com.halflife3.Mechanics.GameObjects;
+package com.halflife3.Model;
 
-import com.halflife3.Mechanics.Vector2;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Circle;
