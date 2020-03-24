@@ -26,7 +26,7 @@ public class EventListenerServer {
 
     }
 
-    private static synchronized void replacing(String sender, PositionPacket pos) {
+    public static synchronized void replacing(String sender, PositionPacket pos) {
         ClientListServer.positionList.replace(sender, pos);
     }
 

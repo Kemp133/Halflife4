@@ -25,7 +25,7 @@ public class Server implements Runnable {
     private static boolean welcoming = true;
     private static InetAddress multicastGroup;
     private static MulticastSocket multicastSocket;
-    private PositionListPacket posPacket;
+    private PositionListPacket posListPacket;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
@@ -36,14 +36,14 @@ public class Server implements Runnable {
                                                new Vector2(1920, 480),
                                                new Vector2(1920, 720)};
     public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
-    private AI ai;
+    private AI botAI;
     //endregion
 
     public void start() {
-        ai = new AI();
+        botAI = new AI();
         final boolean[] readyAI = {false};
 
-        new Thread(() -> readyAI[0] = ai.setupMap()).start();
+        new Thread(() -> readyAI[0] = botAI.setupMap()).start();
 
 //        Fills the positionList with 4 bot players, giving them available starting positions
         for (int i = 0; i < 4; i++) {
@@ -69,10 +69,10 @@ public class Server implements Runnable {
             setWifiInterface();
         } catch (IOException e) { e.printStackTrace(); }
 
-        posPacket = new PositionListPacket();
+        posListPacket = new PositionListPacket();
         listenerServer = new EventListenerServer();
 
-        while (!readyAI[0]) try { Thread.sleep(10); } catch (InterruptedException ignored) {}
+        while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
 
 //        moveAI();
 
@@ -112,9 +112,9 @@ public class Server implements Runnable {
 //                    if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
 //                        moveAI();
 
-                    posPacket.posList = ClientListServer.positionList;
-                    posPacket.connectedIPs = ClientListServer.connectedIPs;
-                    multicastPacket(posPacket, POSITIONS_PORT);
+                    posListPacket.posList = ClientListServer.positionList;
+                    posListPacket.connectedIPs = ClientListServer.connectedIPs;
+                    multicastPacket(posListPacket, POSITIONS_PORT);
                     serverNanoTime = System.nanoTime();
                 }
             }
@@ -138,10 +138,11 @@ public class Server implements Runnable {
                 continue;
 
             long before = System.currentTimeMillis();
-            ClientListServer.positionList.replace(ip, ai.getBotMovement(ClientListServer.positionList.get(ip)));
+            System.out.print(ip + ": ");
+            EventListenerServer.replacing(ip, botAI.getBotMovement(ClientListServer.positionList.get(ip)));
             long after = System.currentTimeMillis();
-            System.out.println("Time taken (ms): " + (after - before));
-            break;
+            System.out.println("Time taken (ms): " + (after - before) + '\n');
+//            break;
         }
     }
 
