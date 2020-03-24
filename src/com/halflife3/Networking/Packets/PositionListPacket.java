@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 public class PositionListPacket implements Serializable {
 
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 9L;
     public HashMap<String, PositionPacket>  posList         = new HashMap<>();
     public HashSet<String>                  connectedIPs    = new HashSet<>();
 

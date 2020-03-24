@@ -1,4 +1,4 @@
-package com.halflife3.GameUI;
+package com.halflife3.Model;
 
 public class ApplicationUser {
     public String username;

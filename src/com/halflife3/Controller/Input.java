@@ -1,6 +1,6 @@
 package com.halflife3.Controller;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Model.Vector2;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 
@@ -26,13 +26,13 @@ public class Input {
         for (KeyCode kc : KeyCode.values()) {
             keysPressed.put(kc, false);
             keysTyped.put(kc, false);
-            keysReleased.put(kc, true);
+            keysReleased.put(kc, false);
         }
 
         for(MouseButton mb: MouseButton.values()) {
             mouseButtonPressed.put(mb, false);
             mouseButtonClicked.put(mb, false);
-            mouseButtonReleased.put(mb, true);
+            mouseButtonReleased.put(mb, false);
         }
     }
     //endregion

@@ -1,10 +1,9 @@
-package com.halflife3.Mechanics.GameObjects;
+package com.halflife3.Model;
 
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Mechanics.Interfaces.ICollidable;
-import com.halflife3.Mechanics.Interfaces.IRenderable;
-import com.halflife3.Mechanics.Interfaces.IUpdateable;
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Model.Interfaces.ICollidable;
+import com.halflife3.Model.Interfaces.IRenderable;
+import com.halflife3.Model.Interfaces.IUpdateable;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,6 +12,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     //region Class Fields
     protected Vector2 position;
     protected Vector2 velocity;
+    protected Vector2 acc;
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
      * to disallow duplicate keys from being added */
     protected HashSet<String> keys;
@@ -27,6 +27,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
         this.position = position;
         this.velocity = velocity;
         ObjectManager.addObject(this);
+        this.acc = new Vector2(0,0);
     }
 
     //An initialiser block
@@ -57,7 +58,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     public double getVelX() { return velocity.getX(); }
     public double getVelY() { return velocity.getY(); }
 
-    public Vector2 getVelocity() { return velocity; }
+    public Vector2 getVelocity() { return this.velocity; }
     public void setVelocity(Vector2 velocity) {
         this.velocity = velocity;
     }
@@ -165,6 +166,14 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
                     && keys.equals(((GameObject) obj).keys);
         }
         return false;
+    }
+
+    public void setAcc(Vector2 acc) {
+        this.acc = acc;
+    }
+
+    public Vector2 getAcc() {
+        return acc;
     }
     //endregion
 }

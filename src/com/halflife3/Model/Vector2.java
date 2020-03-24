@@ -1,11 +1,11 @@
-package com.halflife3.Mechanics;
+package com.halflife3.Model;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 public class Vector2 implements Serializable {
+    private static final long serialVersionUID = 4L;
     private double x, y;
-    private static final long serialVersionUID = 7L;
 
     //region Constructors
     public Vector2() {}
