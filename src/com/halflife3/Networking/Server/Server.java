@@ -74,9 +74,9 @@ public class Server implements Runnable {
 
         while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
 
-//        moveAI();
+        moveAI(System.nanoTime()/1e9);
 
-        new Thread(this).start();
+//        new Thread(this).start();
     }
 
     @Override
@@ -108,9 +108,9 @@ public class Server implements Runnable {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/PACKETS_PER_SECOND * 1e9)) {
+                if (System.nanoTime() - serverNanoTime > Math.round(1e9/PACKETS_PER_SECOND)) {
 //                    if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
-//                        moveAI();
+//                        moveAI((System.nanoTime() - serverNanoTime)/1e9);
 
                     posListPacket.posList = ClientListServer.positionList;
                     posListPacket.connectedIPs = ClientListServer.connectedIPs;
@@ -132,7 +132,7 @@ public class Server implements Runnable {
         multicastSocket.close();
     }
 
-    private void moveAI() {
+    private void moveAI(double time) {
         for (var ip : ClientListServer.connectedIPs) {
             if (!botNamesList.contains(ip))
                 continue;
@@ -142,7 +142,6 @@ public class Server implements Runnable {
             EventListenerServer.replacing(ip, botAI.getBotMovement(ClientListServer.positionList.get(ip)));
             long after = System.currentTimeMillis();
             System.out.println("Time taken (ms): " + (after - before) + '\n');
-//            break;
         }
     }
 

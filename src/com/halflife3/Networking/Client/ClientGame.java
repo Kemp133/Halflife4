@@ -131,7 +131,7 @@ public class ClientGame extends Application {
             double startNanoTime = System.nanoTime();
 
             public void handle(long currentNanoTime) {
-                if (currentNanoTime - lastUpdate > Math.round(1.0/FPS * 1e9)) {
+                if (currentNanoTime - lastUpdate > Math.round(1e9/FPS)) {
                     //region Calculate time since last update.
                     double elapsedTime = (currentNanoTime - startNanoTime) / 1e9;
                     startNanoTime = currentNanoTime;

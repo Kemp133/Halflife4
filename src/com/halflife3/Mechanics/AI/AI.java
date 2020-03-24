@@ -170,6 +170,10 @@ public class AI {
 		}
 		//endregion
 
+		//region Selects the center of the map
+		toGoTo = new Vector2(25*40, 15*40);
+		//endregion
+
 		return toGoTo;
 	}
 
