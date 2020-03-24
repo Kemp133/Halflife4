@@ -1,6 +1,6 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.Model.Vector2;
+import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
 import com.halflife3.Networking.Packets.PositionListPacket;

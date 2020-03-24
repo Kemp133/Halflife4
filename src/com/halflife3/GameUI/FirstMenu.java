@@ -2,7 +2,6 @@ package com.halflife3.GameUI;
 
 import com.halflife3.DatabaseUI.Login;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
-import com.halflife3.Model.ApplicationUser;
 import com.halflife3.Networking.Server.MainServer;
 import javafx.application.Application;
 import javafx.application.Platform;

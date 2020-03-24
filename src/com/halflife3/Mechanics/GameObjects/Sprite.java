@@ -1,5 +1,6 @@
-package com.halflife3.Model;
+package com.halflife3.Mechanics.GameObjects;
 
+import com.halflife3.Mechanics.Vector2;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -14,11 +15,9 @@ public abstract class Sprite extends GameObject {
 	}
 
 	public void setSprite(String pathToSprite) {
-		try(FileInputStream fis = new FileInputStream(pathToSprite)) {
+		try (var fis = new FileInputStream(pathToSprite)) {
 			sprite = new Image(fis);
-		} catch (IOException e) {
-			System.err.println("Image not found!");
-		}
+		} catch (IOException e) { System.err.println("Image not found!"); }
 	}
 
 	public Image getSprite() { return sprite; }
