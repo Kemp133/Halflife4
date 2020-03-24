@@ -74,9 +74,9 @@ public class Server implements Runnable {
 
         while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
 
-        moveAI(System.nanoTime()/1e9);
+//        moveAI(System.nanoTime()/1e9);
 
-//        new Thread(this).start();
+        new Thread(this).start();
     }
 
     @Override

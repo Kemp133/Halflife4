@@ -14,19 +14,21 @@ public class BasicBall extends Sprite {
         super(position, velocity);
         setSprite("res/Sprites/Ball/Ball.png");
         keys.add("Ball");
-        circle = new Circle(position.getX() + 12, position.getY() + 12, 12);
+        circle = new Circle(position.getX() + getWidth() / 2,
+                position.getY() + getHeight() / 2,
+                Math.max(getWidth(), getHeight()) / 2 + 1);
     }
 
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, getPosX() - Camera.GetOffset().getX(), getPosY() - Camera.GetOffset().getY());
+        gc.drawImage(sprite, getPosX() - Camera.GetOffsetX(), getPosY() - Camera.GetOffsetY());
     }
 
     @Override
     public void update(double time) {
         original_position = new Vector2(position);
-        if (velocity.getX()*(velocity.getX() - acc.getX()) > 0)
+        if (velocity.getX() * (velocity.getX() - acc.getX()) > 0)
             velocity.setX(velocity.getX() - acc.getX());
         else
             velocity.setX(0);
