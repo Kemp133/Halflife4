@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Server;
 
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.UniquePortPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
@@ -45,7 +46,7 @@ public class Server implements Runnable {
             packet.msg = "Welcome to the server!";
             while (running && timeOut > 0) {
                 if (welcoming) { multicastPacket(packet, MULTICAST_PORT); }
-                waitASecond();
+                NetworkingUtilities.waitASecond();
 
                 if (ClientPositionHandlerServer.clientList.isEmpty()) {
                     if (timeOut <= 3)
@@ -70,7 +71,7 @@ public class Server implements Runnable {
     }
 
     private void connectionListener() throws IOException {
-        byte[] pokeBuf = new byte[objectToByteArray(new ConnectPacket()).length];
+        byte[] pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
         DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
         if (ClientPositionHandlerServer.clientList.isEmpty()) {
@@ -87,7 +88,7 @@ public class Server implements Runnable {
         System.out.println(incPoke.getAddress() + " has connected");
         welcoming = false;
 
-        Object receivedPoke = byteArrayToObject(pokeBuf);
+        Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
         listenerServer.received(receivedPoke, incPoke.getAddress());
     }
 
@@ -134,7 +135,7 @@ public class Server implements Runnable {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
 //          Creates a byte array of the object
-            byte[] sendBuf = objectToByteArray(o);
+            byte[] sendBuf = NetworkingUtilities.objectToByteArray(o);
 
             DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, group, mPort);
             multicastSocket.send(packet);
@@ -146,46 +147,4 @@ public class Server implements Runnable {
             e.printStackTrace();
         }
     }
-
-    public static void waitASecond() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static byte[] objectToByteArray(Object o) {
-        byte[] sendBuf = null;
-
-        try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-            outstream.flush();
-            outstream.writeObject(o);
-            outstream.flush();
-            sendBuf = byteStream.toByteArray();
-            outstream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return sendBuf;
-    }
-
-    private Object byteArrayToObject(byte[] buf) {
-        Object o = null;
-
-        try {
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
-            o = instream.readObject();
-            instream.close();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return o;
-    }
-
 }

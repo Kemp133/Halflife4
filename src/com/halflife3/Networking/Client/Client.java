@@ -1,9 +1,8 @@
 package com.halflife3.Networking.Client;
 
 import com.halflife3.Model.Vector2;
-import com.halflife3.Networking.Packets.ConnectPacket;
-import com.halflife3.Networking.Packets.DisconnectPacket;
-import com.halflife3.Networking.Packets.WelcomePacket;
+import com.halflife3.Networking.NetworkingUtilities;
+import com.halflife3.Networking.Packets.*;
 import com.halflife3.Networking.Server.Server;
 
 import java.io.*;
@@ -69,7 +68,7 @@ public class Client implements Runnable {
     public void getHostInfo() {
         try {
 //            Receives the welcome (Test) packet
-            byte[] firstBuf = new byte[objectToByteArray(new WelcomePacket()).length];
+            byte[] firstBuf = new byte[NetworkingUtilities.objectToByteArray(new WelcomePacket()).length];
             DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
             System.out.println("Looking for host...");
             serverSocket.receive(firstPacket);
@@ -90,7 +89,7 @@ public class Client implements Runnable {
 
 //        Lets the server know the client has connected
         ConnectPacket join = new ConnectPacket();
-        byte[] tempBuf = objectToByteArray(join);
+        byte[] tempBuf = NetworkingUtilities.objectToByteArray(join);
         DatagramPacket poke = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, Server.LISTENER_PORT);
         try {
             outSocket = new DatagramSocket();
@@ -112,7 +111,7 @@ public class Client implements Runnable {
         while(running) {
             System.out.println("Client running");
             for (int i = 10; i > 0; i--)
-                waitASecond();
+                 NetworkingUtilities.waitASecond();
         }
 
         running = false;
@@ -122,7 +121,7 @@ public class Client implements Runnable {
 //    Sends a disconnect packet to the server and closes the sockets
     public void close() {
         DisconnectPacket leave = new DisconnectPacket();
-        byte[] tempBuf = objectToByteArray(leave);
+        byte[] tempBuf = NetworkingUtilities.objectToByteArray(leave);
 
         DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, uniquePort);
         try {
@@ -159,54 +158,10 @@ public class Client implements Runnable {
             byte[] recBuf = new byte[5000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
-            Object o = byteArrayToObject(recBuf);
+            Object o = NetworkingUtilities.byteArrayToObject(recBuf);
             listenerClient.received(o);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-//    Makes the Thread sleep for 1 second
-    private void waitASecond() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-//    Converts an object (packet) into a byte array
-    private byte[] objectToByteArray(Object o) {
-        byte[] sendBuf = null;
-
-        try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-            outstream.flush();
-            outstream.writeObject(o);
-            outstream.flush();
-            sendBuf = byteStream.toByteArray();
-            outstream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return sendBuf;
-    }
-
-//    Converts a byte array into an object (packet)
-    private Object byteArrayToObject(byte[] buf) {
-        Object o = null;
-
-        try {
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
-            o = instream.readObject();
-            instream.close();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return o;
     }
 }
