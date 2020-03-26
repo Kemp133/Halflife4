@@ -10,5 +10,5 @@ public class WindowAttributes implements Serializable {
         public boolean decorated;
         public boolean isModal;
         public String iconPath;
-    }
+}
 

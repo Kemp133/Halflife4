@@ -15,21 +15,15 @@ import java.nio.charset.Charset;
 /*get the outputStream from console and display them into a javafx windows
 * This class is called after the server button is clicked*/
 public class ServerDisplay extends Application {
-
-    private static final double SCREEN_WIDTH = 800;
-    private static final double SCREEN_HEIGHT = 600;
-
     private TextArea textArea = new TextArea();
-
 
     @Override
     public void start(Stage stage) {
         stage.setTitle("Server display");
         System.setOut(new PrintStream(new OutDisplay(textArea)));
-        stage.setScene(new Scene(textArea, SCREEN_WIDTH, SCREEN_HEIGHT));
+        stage.setScene(new Scene(textArea, FirstMenu.SCREEN_WIDTH, FirstMenu.SCREEN_HEIGHT));
         stage.show();
     }
-
 }
 
 class OutDisplay extends OutputStream {

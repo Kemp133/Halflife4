@@ -10,80 +10,33 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 /*The class shows game menu after log-in successfully
 * Function include:
-* new game;load game
+* new game
+* load game
 * audio settings*/
 public class Windows extends Application {
-
     private StackPane pane;
-    public StackPane getPane(){
-        return this.pane;
-    }
     private LinMenu main_menu = new LinMenu();
     private Stage pStage = new Stage();
 
-    public Windows() throws FileNotFoundException {
-        String test = "This is a test";
-    }
-
-    private static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    private static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
-
-    public void addMenu() throws IOException {
-        main_menu.getStartItem().setOnAction(actionEvent -> {
-            try {
-                main_menu.player.stop();
-                new ClientGame(this.getpStage()).getStarted();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        VBox menuBar = main_menu.getBar();
-        menuBar.setAlignment(Pos.CENTER);
-        pane.getChildren().add(menuBar);
-    }
-
-   public void addBackground() throws FileNotFoundException {
-        FileInputStream inputStream = new FileInputStream("res/MenuBackground.png");
-        Image image = new Image(inputStream);
-
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(800);
-        imageView.setFitHeight(600);
-
-        Pane background = new Pane(imageView);
-
-        pane.getChildren().add(background);
-    }
-
-    public StackPane createContent() throws FileNotFoundException {
-        this.addBackground();
-        try {
-            this.addMenu();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return this.pane;
-    }
+    public Windows() throws FileNotFoundException {} //This needs to be here, can't be helped
 
     @Override
     public void start(Stage primaryStage) {
         try {
             pane = new StackPane();
-            setpStage(primaryStage);
+            setPStage(primaryStage);
             primaryStage.setTitle("Team HalfLife : Man in black");
             primaryStage.setResizable(false);
-            primaryStage.setMaxHeight(600);
-            primaryStage.setMaxWidth(800);
-            Scene scene = new Scene(this.createContent(), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
+            primaryStage.setMaxHeight(FirstMenu.SCREEN_HEIGHT);
+            primaryStage.setMaxWidth(FirstMenu.SCREEN_WIDTH);
+            Scene scene = new Scene(createContent(), FirstMenu.SCREEN_WIDTH, FirstMenu.SCREEN_HEIGHT, Color.WHITE);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {
@@ -91,20 +44,45 @@ public class Windows extends Application {
         }
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public StackPane createContent() throws FileNotFoundException {
+        addBackground();
+        addMenu();
+
+        return pane;
     }
 
-    public Stage getpStage() {
+    public void addBackground() throws FileNotFoundException {
+        var inputStream = new FileInputStream("res/MenuBackground.png");
+        var image = new Image(inputStream);
+        var imageView = new ImageView(image);
+        imageView.setFitWidth(FirstMenu.SCREEN_WIDTH);
+        imageView.setFitHeight(FirstMenu.SCREEN_HEIGHT);
+        var background = new Pane(imageView);
+        pane.getChildren().add(background);
+    }
+
+    public void addMenu() {
+        main_menu.startGameButton().setOnAction(actionEvent -> {
+            try {
+                main_menu.player.stop();
+                new ClientGame(getPStage()).getStarted();
+            } catch (Exception e) { e.printStackTrace(); }
+        });
+
+        VBox menuBar = main_menu.getBar();
+        menuBar.setAlignment(Pos.CENTER);
+        pane.getChildren().add(menuBar);
+    }
+
+    public Stage getPStage() {
         try {
-            return this.pStage;
-        } catch (Exception e) {
-            System.err.println("primary stage not built!");
-        }
+            return pStage;
+        } catch (Exception e) { System.err.println("Primary stage not built!"); }
+
         return null;
     }
 
-    public void setpStage(Stage stage) {
+    public void setPStage(Stage stage) {
         pStage = stage;
     }
 
