@@ -149,10 +149,10 @@ public class FirstMenu extends Application implements ICredentialUser {
     @Override
     public void setApplicationUser(String username) {
         user = new ApplicationUser();
-        user.username = username;
-        user.isValidSession = true;
-        mayBeShown();
-    }
+    user.username = username;
+    user.isValidSession = true;
+    mayBeShown();
+}
 
     private void mayBeShown() {
         if (user != null && pStage != null)
