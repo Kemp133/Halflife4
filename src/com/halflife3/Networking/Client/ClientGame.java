@@ -156,7 +156,7 @@ public class ClientGame extends Application {
         }).start();
         //endregion
 
-        System.out.println("Client running");
+        System.out.println("Game running");
 
         new AnimationTimer() {
             private long lastUpdate = 0;
@@ -206,21 +206,6 @@ public class ClientGame extends Application {
                 player_client.setAffine(rotate);
                 //endregion
 
-                //region Checks if the player is holding the ball
-                if (ball.getBounds().intersects(player_client.circle.getBoundsInLocal()) && !ballShot)
-                    player_client.holdsBall = true;
-
-                if (player_client.holdsBall) {
-                    double ball_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
-                    double ball_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-                    Vector2 direction_of_ball = new Vector2(ball_pos_x * 35, ball_pos_y * 35);
-                    Vector2 ballPos = new Vector2(player_client.circle.getCenterX()-13,
-                            player_client.circle.getCenterY()-10).add(direction_of_ball);
-                    ball.setPosition(ballPos);
-                    ballShot = false;
-                }
-                //endregion
-
                 //region Handles player movement
                 if (player_client.stand == 0) {
                     if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
@@ -246,7 +231,7 @@ public class ClientGame extends Application {
 
                 //region Shoots a bullet or the ball
                 player_client.setBulletShot(false);
-                if (ballShot) ballShot = false;
+                ballShot = false;
                 if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                     double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                     double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
@@ -274,6 +259,20 @@ public class ClientGame extends Application {
                     }
                     bulletLimiter = 5;
                 } else if (bulletLimiter > 0) bulletLimiter--;
+                //endregion
+
+                //region Checks if the player is holding the ball
+                if (ball.getBounds().intersects(player_client.circle.getBoundsInLocal()) && !ballShot)
+                    player_client.holdsBall = true;
+
+                if (player_client.holdsBall) {
+                    double ball_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
+                    double ball_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
+                    Vector2 direction_of_ball = new Vector2(ball_pos_x * 35, ball_pos_y * 35);
+                    Vector2 ballPos = new Vector2(player_client.circle.getCenterX()-13,
+                            player_client.circle.getCenterY()-10).add(direction_of_ball);
+                    ball.setPosition(ballPos);
+                }
                 //endregion
 
                 //region Collision detection
@@ -326,7 +325,7 @@ public class ClientGame extends Application {
 
     @Override
     public void stop() throws Exception {
-        System.out.println("Client stopped");
+        System.out.println("Game exited");
         running = false;
         Client.disconnect();
         super.stop();

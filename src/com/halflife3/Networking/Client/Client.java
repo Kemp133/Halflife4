@@ -41,6 +41,7 @@ public class Client {
 //    Joins the multicast group to listen for multicasted packets
     public void joinGroup() {
         try {
+            System.out.println("Searching for a multicast group...");
             group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
 
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
@@ -71,8 +72,11 @@ public class Client {
 //            Gets the server's address
             hostAddress = firstPacket.getAddress();
 
-            System.out.println("Host found: " + hostAddress);
-            System.out.println("Waiting for unique port...");
+            new Thread(() -> {
+                try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
+                System.out.println("Host found: " + hostAddress);
+                System.out.println("Waiting for unique port...");
+            }).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
