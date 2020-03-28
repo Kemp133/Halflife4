@@ -103,7 +103,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise ball
-        ball = new BasicBall(new Vector2(25*40, 15*40), new Vector2(0, 0));
+        ball = new BasicBall(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -135,8 +135,8 @@ public class ClientGame extends Application {
         //region Initialise stun bars
         for (int i = 0; i < 4; i++) {
             stunBar[i] = new ProgressBar(0);
-            stunBar[i].setStyle("-fx-accent: green; -fx-padding: 0.00em;");
-            stunBar[i].setPrefHeight(10);
+            stunBar[i].setStyle("-fx-accent: green;");
+            stunBar[i].setPrefHeight(8);
             stunBar[i].setPrefWidth(40);
             root.getChildren().add(stunBar[i]);
         }
@@ -154,6 +154,8 @@ public class ClientGame extends Application {
             }
         }).start();
         //endregion
+
+        System.out.println("Client running");
 
         new AnimationTimer() {
             private long lastUpdate = 0;
@@ -226,14 +228,14 @@ public class ClientGame extends Application {
                         player_client.collision(block, elapsedTime);
 
 //                Bullet collision
-                editObjectManager(1, 0, null, null);
+                editObjectManager(1, 0, null, null, null);
 
 //                Ball collision
                 ballWallBounce();
                 //endregion
 
                 //region Updates position of all game objects locally (has to go after collision)
-                editObjectManager(2, elapsedTime, null, null);
+                editObjectManager(2, elapsedTime, null, null, null);
                 //endregion
 
                 //region Clears bullets on screen (Commented out, don't want to let players do this)
@@ -268,7 +270,8 @@ public class ClientGame extends Application {
                         Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
                                 player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
 
-                        editObjectManager(0, 0, bulletPos, shotVelocity);
+                        editObjectManager
+                                (0, 0, bulletPos, shotVelocity, player_client.getIpOfClient());
                         player_client.setBulletShot(true);
                     } else {
                         ball.setVelocity(shotVelocity);
@@ -283,7 +286,7 @@ public class ClientGame extends Application {
                 int id = 0;
                 for (String ip : playerList.keySet()) {
                     stunBar[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
-                    stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 10);
+                    stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 12);
                     stunBar[id].setProgress(playerList.get(ip).stand / STUN_DURATION);
                     id++;
                 }
@@ -400,10 +403,7 @@ public class ClientGame extends Application {
         Client.receivePositions();
 
         //region Replaces Bots <-> Players
-        ArrayList<String> playerKeys = new ArrayList<>();
-
-        for (HashMap.Entry<String, Player> player : playerList.entrySet())
-            playerKeys.add(player.getKey());
+        ArrayList<String> playerKeys = new ArrayList<>(playerList.keySet());
 
         for (String player : playerKeys) {
 //            If bot name/player IP is stored locally - continue
@@ -461,9 +461,13 @@ public class ClientGame extends Application {
 
             Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
-            editObjectManager(0, 0, bulletPos, bulletVel);
+            editObjectManager(0, 0, bulletPos, bulletVel, "enemy");
             //endregion
         }
+        //endregion
+
+        //region Updates the ball's position
+
         //endregion
     }
 
@@ -489,10 +493,11 @@ public class ClientGame extends Application {
         }
     }
 
-    private synchronized void editObjectManager(int operation, double elapsedTime, Vector2 bp, Vector2 bv) {
+    private synchronized void editObjectManager
+            (int operation, double elapsedTime, Vector2 bp, Vector2 bv, String shooter) {
         switch (operation) {
             case 0 : { //add bullets
-                new Bullet(bp, bv);
+                new Bullet(bp, bv, shooter);
             }
 
             case 1 : { //remove bullets if needed
@@ -506,6 +511,9 @@ public class ClientGame extends Application {
                             crash_bullet_list.add(bullet);
 
                     for (String ip : listOfClients.connectedIPs) {
+                        if (((Bullet) bullet).getShooterName().equals(ip))
+                            continue;
+
                         Player player = playerList.get(ip);
                         if (bullet.getBounds().intersects(player.circle.getBoundsInLocal())) {
                             crash_bullet_list.add(bullet);

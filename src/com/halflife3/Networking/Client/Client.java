@@ -87,7 +87,7 @@ public class Client {
 //        Gets the unique port to communicate with the server
         getUniqueInfo();
 
-        System.out.println("Client running");
+        System.out.println("Client connection set up");
     }
 
 //    Sends a disconnect packet to the server and closes the sockets

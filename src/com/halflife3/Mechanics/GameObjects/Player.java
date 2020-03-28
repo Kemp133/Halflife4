@@ -83,7 +83,6 @@ public class Player extends Controllable {
     }
     //endregion
 
-
     public void setMoving(boolean is_moving) {
         this.isMoving = is_moving;
     }

@@ -7,10 +7,12 @@ import javafx.scene.shape.Circle;
 
 public class Bullet extends Sprite {
     private Circle circle;
+    private String shooterName;
 
-    public Bullet(Vector2 position, Vector2 velocity) {
+    public Bullet(Vector2 position, Vector2 velocity, String shooterName) {
         super(position, velocity);
         keys.add("Bullet");
+        this.shooterName = shooterName;
         circle = new Circle(position.getX() + getWidth() / 2,
                 position.getY() + getHeight() / 2,
                 Math.max(getWidth(), getHeight()) / 2 + 1);
@@ -30,7 +32,15 @@ public class Bullet extends Sprite {
     @Override
     public void update(double time) {
         position = position.add(new Vector2(velocity).multiply(time));
-        circle.setCenterX(position.getX()+4);
-        circle.setCenterY(position.getY()+4);
+        circle.setCenterX(position.getX() + getWidth() / 2);
+        circle.setCenterY(position.getY() + getHeight() / 2);
+    }
+
+    public String getShooterName() {
+        return shooterName;
+    }
+
+    public void setShooterName(String shooterName) {
+        this.shooterName = shooterName;
     }
 }

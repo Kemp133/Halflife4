@@ -3,6 +3,7 @@ package com.halflife3.Networking.Server;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.*;
+import javafx.scene.image.Image;
 
 import java.io.*;
 import java.net.*;
@@ -45,10 +46,9 @@ public class Server implements Runnable {
 
         new Thread(() -> readyAI[0] = botAI.setupMap()).start();
 
-//        Fills the positionList with 4 bot players, giving them available starting positions
+        //region Fills the positionList with 4 bot players, giving them available starting positions
         for (int i = 0; i < 4; i++) {
-            Vector2 startPosition = startPositions[i];
-            positionAvailable.put(startPosition, true);
+            positionAvailable.put(startPositions[i], true);
 
             PositionPacket botPacket = new PositionPacket();
             botPacket.velX = 0;
@@ -59,22 +59,41 @@ public class Server implements Runnable {
 
             ClientListServer.positionList.put(botNamesList.get(i), botPacket);
             ClientListServer.connectedIPs.add(botNamesList.get(i));
-
         }
+        //endregion
 
+        //region Adds the ball to the positionList
+        try {
+            Image mapImage = new Image(new FileInputStream("res/map.png"));
+            int mapWidthMiddle = (int) mapImage.getWidth() / 2;
+            int mapHeightMiddle = (int) mapImage.getHeight() / 2;
+
+            PositionPacket ballPacket = new PositionPacket();
+            ballPacket.velX = 0;
+            ballPacket.velY = 0;
+            ballPacket.degrees = 0;
+            ballPacket.orgPosX = ballPacket.spawnX = mapWidthMiddle;
+            ballPacket.orgPosY = ballPacket.spawnY = mapHeightMiddle;
+
+            ClientListServer.positionList.put("ball", ballPacket);
+        } catch (FileNotFoundException e) { System.out.println("Could not find file 'res/map.png'"); }
+        //endregion
+
+        //region Sets up the communication sockets
         try {
             clientSocket = new DatagramSocket(LISTENER_PORT);
             multicastGroup = InetAddress.getByName(MULTICAST_ADDRESS);
             multicastSocket = new MulticastSocket();
             setWifiInterface();
         } catch (IOException e) { e.printStackTrace(); }
+        //endregion
 
         posListPacket = new PositionListPacket();
         listenerServer = new EventListenerServer();
 
         while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
 
-//        moveAI(System.nanoTime()/1e9);
+//        moveAI(0);
 
         new Thread(this).start();
     }
