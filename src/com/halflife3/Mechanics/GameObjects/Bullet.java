@@ -6,11 +6,14 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Circle;
 
 public class Bullet extends Sprite {
-    private Circle circle = new Circle(position.getX()+4,position.getY()+4, 4);
+    private Circle circle;
 
     public Bullet(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         keys.add("Bullet");
+        circle = new Circle(position.getX() + getWidth() / 2,
+                position.getY() + getHeight() / 2,
+                Math.max(getWidth(), getHeight()) / 2 + 1);
         setSprite("res/bullet.png");
     }
 

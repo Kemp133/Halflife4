@@ -15,19 +15,21 @@ import java.util.Comparator;
 public class AI {
 	private final int ONE_MOVE = 40;
 	private Node[][] map = null;
+	private int mapWidth = 0;
+	private int mapHeight = 0;
 
 	public boolean setupMap() {
 		try {
 			Image mapImage = new Image(new FileInputStream("res/map.png"));
-			int width = (int) mapImage.getWidth();
-			int height = (int) mapImage.getHeight();
+			mapWidth = (int) mapImage.getWidth();
+			mapHeight = (int) mapImage.getHeight();
 
-			map = new Node[height][width];
+			map = new Node[mapHeight][mapWidth];
 
 			PixelReader px = mapImage.getPixelReader();
 
-			for (int i = 0; i < height; i++) {
-				for (int j = 0; j < width; j++) {
+			for (int i = 0; i < mapHeight; i++) {
+				for (int j = 0; j < mapWidth; j++) {
 					Color color = px.getColor(j,i);
 					map[i][j] = new Node(new Vector2((i * ONE_MOVE), (j * ONE_MOVE)));
 					if (color.equals(Color.BLACK))
@@ -35,8 +37,8 @@ public class AI {
 				}
 			}
 
-			for (int i = 1; i < height - 1; i++) {
-				for (int j = 1; j < width - 1; j++) {
+			for (int i = 1; i < mapHeight - 1; i++) {
+				for (int j = 1; j < mapWidth - 1; j++) {
 					map[i][j].addChild(map[i][j+1]);
 					map[i][j].addChild(map[i+1][j]);
 					map[i][j].addChild(map[i][j-1]);
@@ -52,7 +54,7 @@ public class AI {
 	}
 
 	public PositionPacket getBotMovement(PositionPacket bot) {
-		Vector2 toGoTo = whereToGo(bot);
+		Vector2 toGoTo = mapCenter(); //mapCenter() or closestEnemy(bot)
 
 		Node botNode = map[(int) (bot.orgPosY) / 40][(int) (bot.orgPosX) / 40];
 		Node endNode = map[(int) (toGoTo.getY()) / 40][(int) (toGoTo.getX()) / 40];
@@ -140,7 +142,7 @@ public class AI {
 
 		q = closedList.remove(closedList.size() - 1);
 
-		while (!q.position.equals(Start.position)/* && pathEndToStart.size() < 3*/) {
+		while (!q.position.equals(Start.position)) {
 			q = q.getParent();
 			pathEndToStart.add(q);
 		}
@@ -148,10 +150,10 @@ public class AI {
 		return pathEndToStart;
 	}
 
-	private Vector2 whereToGo(PositionPacket bot) {
+	private Vector2 closestEnemy(PositionPacket bot) {
+		//region Selects the closest enemy to go to next
 		Vector2 toGoTo = new Vector2();
 
-		//region Selects the closest enemy to go to next
 		var positions = ClientListServer.positionList.entrySet();
 		double shortestDistance = Double.MAX_VALUE;
 		for (var enemyEntry : positions) {
@@ -168,13 +170,14 @@ public class AI {
 				toGoTo.setY(enemyPacket.orgPosY);
 			}
 		}
-		//endregion
-
-		//region Selects the center of the map
-		toGoTo = new Vector2(25*40, 15*40);
-		//endregion
 
 		return toGoTo;
+		//endregion
 	}
 
+	private Vector2 mapCenter() {
+		//region Selects the center of the map
+		return new Vector2(mapWidth * 20, mapHeight * 20);
+		//endregion
+	}
 }

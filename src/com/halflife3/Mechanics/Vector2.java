@@ -33,6 +33,12 @@ public class Vector2 implements Serializable {
         return this;
     }
 
+    public Vector2 add(double x, double y) {
+        this.x += x;
+        this.y += y;
+        return this;
+    }
+
     /**
      * A method to subtract a vector from the current vector
      * @param v The vector to subtract from the current one
