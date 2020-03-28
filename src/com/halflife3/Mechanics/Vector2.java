@@ -33,6 +33,12 @@ public class Vector2 implements Serializable {
         return this;
     }
 
+    /**
+     * A method to add two values to the components of the current vector
+     * @param x The value to add to the x component of the current vector
+     * @param y The value to add to the y component of the current vector
+     * @return The vector with the values added to the corresponding components
+     */
     public Vector2 add(double x, double y) {
         this.x += x;
         this.y += y;
@@ -50,6 +56,12 @@ public class Vector2 implements Serializable {
         return this;
     }
 
+    /**
+     * A method to subtract two values from the components of the current vector
+     * @param x The value to subtract from the x component of the current vector
+     * @param y The value to subtract from the y component of the current vector
+     * @return The vector with the values subtracted from the corresponding components
+     */
     public Vector2 subtract(double x, double y) {
         this.x -= x;
         this.y -= y;
@@ -116,10 +128,24 @@ public class Vector2 implements Serializable {
     //endregion
 
     //region Misc operations
-    public double magnitude() {
-        return Math.sqrt( Math.pow(x, 2) + Math.pow(y, 2) );
-    }
 
+    /**
+     * A method to calculate the magnitude of the vector
+     * @return The magnitude of the given vector
+     */
+    public double magnitude() { return Math.sqrt( Math.pow(x, 2) + Math.pow(y, 2) ); }
+
+    /**
+     * A static method to calculate the magnitude of the given vector
+     * @param v The vector to calculate the magnitude of
+     * @return The magnitude of the given <code>Vector2</code>
+     */
+    public double Magnitude(Vector2 v) {return Math.sqrt(Math.pow(v.x, 2) + Math.pow(v.y, 2));}
+
+    /**
+     * A method to normalise the current <code>Vector2</code>
+     * @return The normalised value of the current <code>Vector2</code>
+     */
     public Vector2 normalise() {
         double mag = magnitude();
         x /= mag;
@@ -127,6 +153,19 @@ public class Vector2 implements Serializable {
         return this;
     }
 
+    /**
+     * A static method to normalise the given <code>Vector2</code>
+     * @param v The vector to normalise
+     * @return The normalised form of the given <code>Vector2</code>
+     */
+    public static Vector2 Normalise(Vector2 v) {
+        double mag = v.magnitude();
+        v.x /= mag;
+        v.y /= mag;
+        return v;
+    }
+
+    /** A method to reverse the direction of the current vector */
     public void reverse(){
         x = -x;
         y = -y;
@@ -134,22 +173,31 @@ public class Vector2 implements Serializable {
     //endregion
 
     //region Getters and Setters for X and Y
+    /** A method to retrieve the x value of the current <code>Vector2</code>*/
     public double getX() {
         return x;
     }
 
+    /** A method to retrieve the y value of the current <code>Vector2</code>*/
     public double getY() {
         return y;
     }
 
+    /** A method to set the x value of the current <code>Vector2</code>
+     * @param x The x value to set the current x component to
+     */
     public void setX(double x) {
         this.x = x;
     }
 
+    /** A method to retrieve the x value of the current <code>Vector2</code>
+     * @param y The y value to set the current y component to
+     */
     public void setY(double y) {
         this.y = y;
     }
 
+    /** A method to reset the current <code>Vector2</code> */
     public void reset(){
         x = 0;
         y = 0;
