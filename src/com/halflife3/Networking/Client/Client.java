@@ -72,6 +72,7 @@ public class Client {
             hostAddress = firstPacket.getAddress();
 
             System.out.println("Host found: " + hostAddress);
+            System.out.println("Waiting for unique port...");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,7 +88,7 @@ public class Client {
 //        Gets the unique port to communicate with the server
         getUniqueInfo();
 
-        System.out.println("Client connection set up");
+        System.out.println("Client connection set up. Starting game...");
     }
 
 //    Sends a disconnect packet to the server and closes the sockets

@@ -32,8 +32,9 @@ public class BasicBall extends Sprite {
         velocity.setX((velocity.getX() * velX > 0) ? velX : 0);
         velocity.setY((velocity.getY() * velY > 0) ? velY : 0);
 
-        acceleration.setX(acceleration.getX() < 0 ? acceleration.getX() - 1 : acceleration.getX() + 1);
-        acceleration.setY(acceleration.getY() < 0 ? acceleration.getY() - 1 : acceleration.getY() + 1);
+        float accInc = 0.5f;
+        acceleration.setX(acceleration.getX() < 0 ? acceleration.getX() - accInc : acceleration.getX() + accInc);
+        acceleration.setY(acceleration.getY() < 0 ? acceleration.getY() - accInc : acceleration.getY() + accInc);
 
         position.add(new Vector2(velocity).multiply(time));
         circle.setCenterX(position.getX() + getWidth() / 2);
@@ -43,23 +44,23 @@ public class BasicBall extends Sprite {
     public void collision(int bounce) {
         switch (bounce) {
             case 1 : {
-//                position = original_position;
                 velocity.setX(-velocity.getX());
                 acceleration.setX(-acceleration.getX());
+                return;
             }
 
             case 2 : {
-//                position = original_position;
                 velocity.setY(-velocity.getY());
                 acceleration.setY(-acceleration.getY());
+                return;
             }
 
             case 3 : {
-//                position = original_position;
                 velocity.setX(0);
                 velocity.setY(0);
                 acceleration.setX(0);
                 acceleration.setY(0);
+                return;
             }
         }
 

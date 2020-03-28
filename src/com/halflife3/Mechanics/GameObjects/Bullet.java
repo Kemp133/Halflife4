@@ -39,8 +39,4 @@ public class Bullet extends Sprite {
     public String getShooterName() {
         return shooterName;
     }
-
-    public void setShooterName(String shooterName) {
-        this.shooterName = shooterName;
-    }
 }
