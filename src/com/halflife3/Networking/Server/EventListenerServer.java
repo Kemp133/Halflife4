@@ -20,13 +20,13 @@ public class EventListenerServer {
 
         } else if (packet instanceof PositionPacket) {
 
-            replacing(sender.toString(), (PositionPacket) packet);
+            replaceEntry(sender.toString(), (PositionPacket) packet);
 
         }
 
     }
 
-    public static synchronized void replacing(String sender, PositionPacket pos) {
+    public static synchronized void replaceEntry(String sender, PositionPacket pos) {
         ClientListServer.positionList.replace(sender, pos);
     }
 

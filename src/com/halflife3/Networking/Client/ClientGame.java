@@ -42,11 +42,12 @@ import static com.halflife3.Networking.Client.Client.listOfClients;
 import static javafx.scene.input.KeyCode.*;
 
 public class ClientGame extends Application {
-    private final int FPS = 30;
-    private final int GAME_WINDOW_HEIGHT = 600;
-    private final int GAME_WINDOW_WIDTH = 800;
-    private final int MOVEMENT_SPEED = 120;
-    public static final float STUN_DURATION = 100;
+    private         final int   FPS                 = 30;
+    private         final int   GAME_WINDOW_HEIGHT  = 600;
+    private         final int   GAME_WINDOW_WIDTH   = 800;
+    private         final int   MOVEMENT_SPEED      = 120;
+    public static   final int   SHOT_SPEED          = 240;
+    public static   final float STUN_DURATION       = 100;
 
     //region Other variables
     static Input input;
@@ -58,7 +59,7 @@ public class ClientGame extends Application {
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
-    private int bulletLimiter = FPS / 4;
+    private int bulletLimiter = 0;
     private int mapWidth;
     private int mapHeight;
     private final int RIGHT_END_OF_SCREEN = 11*40;
@@ -142,13 +143,8 @@ public class ClientGame extends Application {
         //region Thread to update the position of all enemies and the ball
         running = true;
         new Thread(() -> {
-            double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime < 1e9 / FPS * 1.07)
-                    continue;
-
                 updateEnemies();
-                serverNanoTime = System.nanoTime();
             }
         }).start();
         //endregion
@@ -156,10 +152,8 @@ public class ClientGame extends Application {
         System.out.println("Game running");
 
         new AnimationTimer() {
-            private long lastUpdate = 0;
-            double startNanoTime = System.nanoTime();
-            boolean ballShot = false;
-//            double fpsCounter = 0;
+            long lastUpdate = System.nanoTime();
+//            int fpsCounter = 0;
 //            double second = 1;
 
             public void handle(long currentNanoTime) {
@@ -167,8 +161,7 @@ public class ClientGame extends Application {
                     return;
 
                 //region Calculate time since last update.
-                double elapsedTime = (currentNanoTime - startNanoTime) / 1e9;
-                startNanoTime = currentNanoTime;
+                double elapsedTime = (currentNanoTime - lastUpdate) / 1e9;
                 lastUpdate = currentNanoTime;
                 //endregion
 
@@ -223,26 +216,53 @@ public class ClientGame extends Application {
                 }
                 //endregion
 
+                //region Collision detection
+//                Player collision
+                for (Bricks block : MapRender.GetList())
+                    if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
+                        thisPlayer.collision(block, elapsedTime);
+
+//                Bullet collision
+                editObjectManager(1, 0, null, null, null);
+
+//                Ball collision
+//                ballWallBounce();
+                //endregion
+
+                //region Updates position of all game objects locally (has to go after collision)
+                editObjectManager(2, elapsedTime, null, null, null);
+                //endregion
+
+                //region Checks if the player is holding the ball
+                var playerCenter = new Vector2(thisPlayer.circle.getCenterX(), thisPlayer.circle.getCenterY());
+                var ballPos = new Vector2(ball.getPosition());
+                var nextBallPos = new Vector2(ballPos).add(new Vector2(ball.getVelocity()).multiply(elapsedTime));
+                boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
+                boolean ballMovingAway = playerCenter.distance(ballPos) < playerCenter.distance(nextBallPos);
+
+                thisPlayer.setHoldsBall(playerIsTouchingTheBall/* && !ballMovingAway*/);
+
+                //endregion
+
                 //region Shoots a bullet or the ball
                 thisPlayer.setBulletShot(false);
-                ballShot = false;
                 if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                     double bulletX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                     double bulletY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-                    Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
+                    Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
 
-                    if (thisPlayer.holdsBall) { // Shoots the ball
-                        boolean inWall = false;
+                    if (thisPlayer.isHoldingBall()) { // Shoots the ball
+                        boolean ballInWall = false;
                         for (Bricks block : MapRender.GetList())
-                            if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal()))
-                                inWall = true;
+                            if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal())) {
+                                ballInWall = true;
+                                break;
+                            }
 
-                        if (!inWall) {
+                        if (!ballInWall) {
                             ball.setVelocity(new Vector2(shotVelocity).multiply(1.5));
                             ball.setAcceleration(new Vector2(shotVelocity).divide(100));
-                            thisPlayer.holdsBall = false;
-                            ballShot = true;
-                            ball.isHeld = false;
+                            thisPlayer.setBulletShot(true);
                         }
                     } else { // Shoots a bullet
                         Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
@@ -255,38 +275,6 @@ public class ClientGame extends Application {
                     }
                     bulletLimiter = FPS / 5;
                 } else if (bulletLimiter > 0) bulletLimiter--;
-                //endregion
-
-                //region Checks if the player is holding the ball
-                if (ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()) && !ballShot)
-                    thisPlayer.holdsBall = true;
-
-                if (thisPlayer.holdsBall) {
-                    ball.isHeld = true;
-                    double ballX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
-                    double ballY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-                    Vector2 ballDir = new Vector2(ballX * 35, ballY * 35);
-                    Vector2 ballPos = new Vector2(thisPlayer.circle.getCenterX() - thisPlayer.getWidth() / 3,
-                            thisPlayer.circle.getCenterY() - thisPlayer.getHeight() / 3).add(ballDir);
-                    ball.setPosition(ballPos);
-                }
-                //endregion
-
-                //region Collision detection
-//                Player collision
-                for (Bricks block : MapRender.GetList())
-                    if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
-                        thisPlayer.collision(block, elapsedTime);
-
-//                Bullet collision
-                editObjectManager(1, 0, null, null, null);
-
-//                Ball collision
-                ballWallBounce();
-                //endregion
-
-                //region Updates position of all game objects locally (has to go after collision)
-                editObjectManager(2, elapsedTime, null, null, null);
                 //endregion
 
                 //region Re-renders all game objects
@@ -308,7 +296,7 @@ public class ClientGame extends Application {
                 }
                 //endregion
 
-                //region Sends the client's position and whether they've shot a bullet
+                //region Sends the client's position, whether they've shot a bullet and if they're holding the ball
                 Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
                 //endregion
 
@@ -437,58 +425,53 @@ public class ClientGame extends Application {
         }
         //endregion
 
-        //region Updates info of *other* players/bots
-        boolean shouldBallBeHeld = false;
-        for (String ip : listOfClients.connectedIPs) {
+        //region Updates info of *other* players/bots and the ball
+        for (String ip : listOfClients.posList.keySet()) {
             Player enemy = playerList.get(ip);
-            if (ip.equals(thisPlayer.getIpOfClient()) || enemy == null)
+            if (ip.equals(thisPlayer.getIpOfClient()))
                 continue;
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
 
-            if (theDoubleValues.holdsBall) shouldBallBeHeld = true;
+            //region Rotation / Position / Velocity
+            if (!ip.equals("ball")) {
+                Affine rotate = new Affine();
+                rotate.appendRotation(theDoubleValues.degrees,
+                        theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
+                        theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
 
-            //region Enemies' rotation/position/velocity
-            Affine rotate = new Affine();
-            rotate.appendRotation(theDoubleValues.degrees,
-                    theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
-                    theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
-
-            enemy.setAffine(rotate);
-            enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
-            enemy.setPosition(theDoubleValues.posX, theDoubleValues.posY);
+                enemy.setAffine(rotate);
+                enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+                enemy.setPosition(theDoubleValues.posX, theDoubleValues.posY);
+            } else {
+                ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+                ball.setPosition(theDoubleValues.posX, theDoubleValues.posY);
+            }
             //endregion
 
+            //region Enemies' bullet shots
             if (!theDoubleValues.bulletShot)
                 continue;
 
-            //region Enemies' bullets
             double degreeRadians = Math.toRadians(theDoubleValues.degrees);
-            double bullet_pos_x = Math.cos(degreeRadians);
-            double bullet_pos_y = Math.sin(degreeRadians);
-            Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+            double bulletX = Math.cos(degreeRadians);
+            double bulletY = Math.sin(degreeRadians);
+            Vector2 shotVel = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
 
+            Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
             Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
-                    theDoubleValues.posY + thisPlayer.getWidth() / 2).add(direction_of_gun);
+                    theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
 
-            Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
-
-            editObjectManager(0, 0, bulletPos, bulletVel, "enemy");
+            editObjectManager(0, 0, bulletPos, shotVel, "enemy");
+            theDoubleValues.bulletShot = false;
             //endregion
         }
-        ball.isHeld = shouldBallBeHeld;
-        //endregion
-
-        //region Updates the ball's position
-        PositionPacket ballPos = listOfClients.posList.get("ball");
-        ball.setPosition(ballPos.posX, ballPos.posY);
-        ball.setVelocity(ballPos.velX, ballPos.velY);
         //endregion
     }
 
     private void ballWallBounce() {
         for (Bricks block : MapRender.GetList()) {
-            if (!ball.getBounds().intersects(block.getBounds().getBoundsInLocal()) || thisPlayer.holdsBall)
+            if (!ball.getBounds().intersects(block.getBounds().getBoundsInLocal()) || thisPlayer.isHoldingBall())
                 continue;
 
             Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
@@ -510,9 +493,8 @@ public class ClientGame extends Application {
         }
     }
 
-    private synchronized void editObjectManager
-            (int operation, double elapsedTime, Vector2 bp, Vector2 bv, String shooter) {
-        switch (operation) {
+    private synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
+        switch (op) {
             case 0 : { //add bullets
                 new Bullet(bp, bv, shooter);
                 break;
@@ -553,7 +535,7 @@ public class ClientGame extends Application {
 
             case 2 : { //update object positions
                 for (IUpdateable go : ObjectManager.getGameObjects())
-                    go.update(elapsedTime);
+                    go.update(time);
                 break;
             } //Update object positions
         }

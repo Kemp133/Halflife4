@@ -22,14 +22,13 @@ public class Player extends Controllable {
     public float stand = 0;
     private boolean bulletShot = false;
     private boolean isMoving = false;
-    public boolean holdsBall;
+    private boolean holdsBall = false;
     //endregion
 
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         acceleration = new Vector2(0,0);
         keys.add("player");
-        holdsBall = false;
         setSprite("res/Player_pic.png");
         setSprite2("res/Player_walking.png");
         circle = new Circle(position.getX() + getWidth() / 2,
@@ -122,6 +121,14 @@ public class Player extends Controllable {
 
     public void setBulletShot(boolean bulletShot) {
         this.bulletShot = bulletShot;
+    }
+
+    public boolean isHoldingBall() {
+        return holdsBall;
+    }
+
+    public void setHoldsBall(boolean holdsBall) {
+        this.holdsBall = holdsBall;
     }
 
     public PositionPacket getPacketToSend() {

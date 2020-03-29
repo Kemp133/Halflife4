@@ -17,7 +17,7 @@ public class BasicBall extends Sprite {
         position.subtract(getWidth() / 2, getHeight() / 2);
         circle = new Circle(position.getX(),
                 position.getY(),
-                Math.max(getWidth(), getHeight()) / 2 + 5);
+                Math.max(getWidth(), getHeight()) / 2);
     }
 
     @Override
@@ -46,18 +46,21 @@ public class BasicBall extends Sprite {
     public void collision(int bounce) {
         switch (bounce) {
             case 1 : {
+                position = original_position;
                 velocity.setX(-velocity.getX());
                 acceleration.setX(-acceleration.getX());
                 break;
             }
 
             case 2 : {
+                position = original_position;
                 velocity.setY(-velocity.getY());
                 acceleration.setY(-acceleration.getY());
                 break;
             }
 
             case 3 : {
+                position = original_position;
                 velocity.setX(0);
                 velocity.setY(0);
                 acceleration.setX(0);
