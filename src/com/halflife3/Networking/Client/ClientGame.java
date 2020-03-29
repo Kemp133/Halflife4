@@ -45,7 +45,7 @@ public class ClientGame extends Application {
     private final int FPS = 30;
     private final int GAME_WINDOW_HEIGHT = 600;
     private final int GAME_WINDOW_WIDTH = 800;
-    private final int MOVEMENT_SPEED = 100;
+    private final int MOVEMENT_SPEED = 120;
     public static final float STUN_DURATION = 100;
 
     //region Other variables
@@ -58,11 +58,11 @@ public class ClientGame extends Application {
     private Stage window = null;
     private boolean flag = false;
     public boolean running = false;
-    private int bulletLimiter = 5;
+    private int bulletLimiter = FPS / 4;
     private int mapWidth;
     private int mapHeight;
-    private final int LEFT_END_OF_SCREEN = 9*40;
     private final int RIGHT_END_OF_SCREEN = 11*40;
+    private final int LEFT_END_OF_SCREEN = 9*40;
     private final int BOTTOM_OF_SCREEN = 8*40;
     private final int TOP_OF_SCREEN = 7*40;
     //endregion
@@ -229,7 +229,7 @@ public class ClientGame extends Application {
                 if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
                     double bulletX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                     double bulletY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-                    Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(200);
+                    Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
 
                     if (thisPlayer.holdsBall) { // Shoots the ball
                         boolean inWall = false;
@@ -242,6 +242,7 @@ public class ClientGame extends Application {
                             ball.setAcceleration(new Vector2(shotVelocity).divide(100));
                             thisPlayer.holdsBall = false;
                             ballShot = true;
+                            ball.isHeld = false;
                         }
                     } else { // Shoots a bullet
                         Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
@@ -252,12 +253,12 @@ public class ClientGame extends Application {
                                 (0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
                         thisPlayer.setBulletShot(true);
                     }
-                    bulletLimiter = 5;
+                    bulletLimiter = FPS / 5;
                 } else if (bulletLimiter > 0) bulletLimiter--;
                 //endregion
 
                 //region Checks if the player is holding the ball
-                if (ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()) && !ball.isHeld)
+                if (ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()) && !ballShot)
                     thisPlayer.holdsBall = true;
 
                 if (thisPlayer.holdsBall) {
@@ -437,6 +438,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Updates info of *other* players/bots
+        boolean shouldBallBeHeld = false;
         for (String ip : listOfClients.connectedIPs) {
             Player enemy = playerList.get(ip);
             if (ip.equals(thisPlayer.getIpOfClient()) || enemy == null)
@@ -444,7 +446,7 @@ public class ClientGame extends Application {
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
 
-            if (theDoubleValues.holdsBall) ball.isHeld = true;
+            if (theDoubleValues.holdsBall) shouldBallBeHeld = true;
 
             //region Enemies' rotation/position/velocity
             Affine rotate = new Affine();
@@ -474,6 +476,7 @@ public class ClientGame extends Application {
             editObjectManager(0, 0, bulletPos, bulletVel, "enemy");
             //endregion
         }
+        ball.isHeld = shouldBallBeHeld;
         //endregion
 
         //region Updates the ball's position
