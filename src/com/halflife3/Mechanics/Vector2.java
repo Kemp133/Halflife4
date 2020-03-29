@@ -166,9 +166,10 @@ public class Vector2 implements Serializable {
     }
 
     /** A method to reverse the direction of the current vector */
-    public void reverse(){
+    public Vector2 reverse(){
         x = -x;
         y = -y;
+        return this;
     }
     //endregion
 
@@ -207,7 +208,7 @@ public class Vector2 implements Serializable {
     //region Overrides For Object Methods (toString, Equals, hashCode)
     @Override
     public String toString() {
-        return "(" + x + "," + y + ")";
+        return "(" + x + ", " + y + ")";
     }
 
     @Override
