@@ -14,7 +14,7 @@ public class Vector2Test {
 	//region Vector Addition
 	@Test
 	@DisplayName("Adding a vector to another vector")
-	void AddVectorAndVector() {
+	public void AddVectorAndVector() {
 		Vector2 v1 = new Vector2(x1, y1);
 		Vector2 v2 = new Vector2(x2, y2);
 		Vector2 expected = new Vector2(x1 + x2, y1 + y2);
@@ -24,7 +24,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Adding component values to a vector")
-	void AddValuesAndVector() {
+	public void AddValuesAndVector() {
 		Vector2 v1 = new Vector2(x1, y1);
 		Vector2 expected = new Vector2(x1 + x2, y1 + y2);
 
@@ -35,7 +35,7 @@ public class Vector2Test {
 	//region Vector Subtraction
 	@Test
 	@DisplayName("Subtracting a vector from another vector")
-	void SubtractVectorFromVector() {
+	public void SubtractVectorFromVector() {
 		Vector2 v1 = new Vector2(x1, y1);
 		Vector2 v2 = new Vector2(x2, y2);
 		Vector2 expected = new Vector2(x1 - x2, y1 - y2);
@@ -45,7 +45,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Subtracting component values from a vector")
-	void SubtractValuesFromVector() {
+	public void SubtractValuesFromVector() {
 		Vector2 v1 = new Vector2(x1, y1);
 		Vector2 expected = new Vector2(x1 - x2, y1 - y2);
 
@@ -56,7 +56,7 @@ public class Vector2Test {
 	//region Vector Multiplication
 	@Test
 	@DisplayName("Multiplying a vector by a scalar")
-	void MultiplyVectorByScalar() {
+	public void MultiplyVectorByScalar() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x1, y1);
 		Vector2 expected1 = new Vector2(x1 * x2, y1 * x2);
 		Vector2 expected2 = new Vector2(x1 * y2, y1 * y2);
@@ -72,7 +72,7 @@ public class Vector2Test {
 	//region Vector Division
 	@Test
 	@DisplayName("Dividing a vector by a scalar")
-	void DivideVectorByScalar() {
+	public void DivideVectorByScalar() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x1, y1);
 		Vector2 expected1 = new Vector2(x1 / x2, y1 / x2);
 		Vector2 expected2 = new Vector2(x1 / y2, y1 / y2);
@@ -88,7 +88,7 @@ public class Vector2Test {
 	//region Distance Between Vectors
 	@Test
 	@DisplayName("Getting euclidean distance of vectors")
-	void GetVectorDistance() {
+	public void GetVectorDistance() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		double expected = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 
@@ -101,7 +101,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Getting euclidean distance of vectors")
-	void GetSquareVectorDistance() {
+	public void GetSquareVectorDistance() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		double expected = Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
 
@@ -116,7 +116,7 @@ public class Vector2Test {
 	//region Vector Magnitude
 	@Test
 	@DisplayName("Getting magnitude of vector")
-	void GetVectorMagnitude() {
+	public void GetVectorMagnitude() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		double expected1 = Math.sqrt(Math.pow(x1, 2) + Math.pow(y1, 2));
 		double expected2 = Math.sqrt(Math.pow(x2, 2) + Math.pow(y2, 2));
@@ -132,7 +132,7 @@ public class Vector2Test {
 	//region Vector Normalisation
 	@Test
 	@DisplayName("Getting normalised vector")
-	void GetNormalisedVector() {
+	public void GetNormalisedVector() {
 		Vector2 v1        = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		double  mag1      = CalculateMagnitude(x1, y1), mag2 = CalculateMagnitude(x2, y2);
 		Vector2 expected1 = new Vector2(x1 / mag1, y1/mag1), expected2 = new Vector2(x2 / mag2, y2/mag2);
@@ -148,7 +148,7 @@ public class Vector2Test {
 	//region Vector Mirroring
 	@Test
 	@DisplayName("Getting reversed vector")
-	void GetReversedVector() {
+	public void GetReversedVector() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		Vector2 expected1 = new Vector2(-x1, -y1), expected2 = new Vector2(-x2, -y2);
 
@@ -163,7 +163,7 @@ public class Vector2Test {
 	//region Get/Set components
 	@Test
 	@DisplayName("Get x from vector")
-	void GetXFromVector() {
+	public void GetXFromVector() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 
 		assertAll(
@@ -175,7 +175,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Set x in vectors")
-	void SetXInVector() {
+	public void SetXInVector() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		double x3 = 100, x4 = 10000;
 		Vector2 expected1 = new Vector2(x3, y1), expected2 = new Vector2(x4, y2);
@@ -193,7 +193,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Get y from vectors")
-	void GetYFromVector() {
+	public void GetYFromVector() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 
 		assertAll(
@@ -205,7 +205,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Set y in vectors")
-	void SetYInVector() {
+	public void SetYInVector() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		double y3 = -100, y4 = -10000;
 		Vector2 expected1 = new Vector2(x1, y3), expected2 = new Vector2(x2, y4);
@@ -225,7 +225,7 @@ public class Vector2Test {
 	//region Overridden Methods
 	@Test
 	@DisplayName("Testing toString method of the vectors")
-	void VectorToString() {
+	public void VectorToString() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		String expected1 = GetToStringRepresentation(x1, y1), expected2 = GetToStringRepresentation(x2, y2);
 
@@ -241,7 +241,7 @@ public class Vector2Test {
 
 	@Test
 	@DisplayName("Testing equals method of the vectors")
-	void VectorEquals() {
+	public void VectorEquals() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2), v3 = new Vector2(x1, y1);
 
 		assertAll(
@@ -256,7 +256,7 @@ public class Vector2Test {
 	//region Deep Copy
 	@Test
 	@DisplayName("Vector deep copy")
-	void VectorDeepCopy() {
+	public void VectorDeepCopy() {
 		Vector2 v1 = new Vector2(x1, y2);
 		Vector2 v2 = new Vector2(v1);
 
