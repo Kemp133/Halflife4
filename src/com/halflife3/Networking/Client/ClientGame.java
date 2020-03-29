@@ -51,7 +51,7 @@ public class ClientGame extends Application {
     //region Other variables
     static Input input;
     private static Pane root;
-    private static Player player_client;
+    private static Player thisPlayer;
     private static HashMap<String, Player> playerList;
     private static ProgressBar[] stunBar;
     private static BasicBall ball;
@@ -94,15 +94,15 @@ public class ClientGame extends Application {
         //region Initialise this player
         Vector2 startPos = new Vector2(25*40, 22*40);//clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
-        player_client = new Player(startPos, startVel);
-        player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
-        player_client.setAI(false);
+        thisPlayer = new Player(startPos, startVel);
+        thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
+        thisPlayer.setAI(false);
         //endregion
 
         //region Wait until Server acknowledges Player connection
         do {
             Client.receivePositions();
-        } while (!listOfClients.connectedIPs.contains(player_client.getIpOfClient()));
+        } while (!listOfClients.connectedIPs.contains(thisPlayer.getIpOfClient()));
         //endregion
 
         initialisePlayers();
@@ -173,8 +173,8 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Camera offset
-                Camera.SetOffsetX(player_client.getPosX() - LEFT_END_OF_SCREEN);
-                Camera.SetOffsetY(player_client.getPosY() - TOP_OF_SCREEN);
+                Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
+                Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
                 if (Camera.GetOffsetX() < 0)
                     Camera.SetOffsetX(0);
                 else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
@@ -187,8 +187,8 @@ public class ClientGame extends Application {
 
                 //region Calculate the rotation
                 Vector2 player_client_center =
-                        new Vector2(player_client.getPosX() - Camera.GetOffsetX() + player_client.getWidth() / 2,
-                                player_client.getPosY() - Camera.GetOffsetY() + player_client.getHeight() / 2);
+                        new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
+                                thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
                 Vector2 direction =
                         new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
                                 .subtract(player_client_center);
@@ -196,76 +196,77 @@ public class ClientGame extends Application {
                 Affine rotate = new Affine();
                 short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
                 rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
-                player_client.setDegrees(deg);
-                player_client.setAffine(rotate);
+                thisPlayer.setDegrees(deg);
+                thisPlayer.setAffine(rotate);
                 //endregion
 
                 //region Handles player movement
-                if (player_client.stand == 0) {
+                if (thisPlayer.stand == 0) {
                     if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
-                        player_client.getVelocity().setX(0);
+                        thisPlayer.getVelocity().setX(0);
                     }
                     if (Input.isKeyReleased(W) && Input.isKeyReleased(S)) {
-                        player_client.getVelocity().setY(0);
+                        thisPlayer.getVelocity().setY(0);
                     }
                     if (Input.isKeyPressed(A)) {
-                        player_client.getVelocity().setX(-MOVEMENT_SPEED);
+                        thisPlayer.getVelocity().setX(-MOVEMENT_SPEED);
                     }
                     if (Input.isKeyPressed(D)) {
-                        player_client.getVelocity().setX(MOVEMENT_SPEED);
+                        thisPlayer.getVelocity().setX(MOVEMENT_SPEED);
                     }
                     if (Input.isKeyPressed(W)) {
-                        player_client.getVelocity().setY(-MOVEMENT_SPEED);
+                        thisPlayer.getVelocity().setY(-MOVEMENT_SPEED);
                     }
                     if (Input.isKeyPressed(S)) {
-                        player_client.getVelocity().setY(MOVEMENT_SPEED);
+                        thisPlayer.getVelocity().setY(MOVEMENT_SPEED);
                     }
                 }
                 //endregion
 
                 //region Shoots a bullet or the ball
-                player_client.setBulletShot(false);
+                thisPlayer.setBulletShot(false);
                 ballShot = false;
                 if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
-                    double bullet_pos_x = Math.cos(Math.atan2(direction.getY(), direction.getX()));
-                    double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-                    Vector2 shotVelocity = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
+                    double bulletX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
+                    double bulletY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
+                    Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(200);
 
-                    if (player_client.holdsBall) { // Shoots the ball
+                    if (thisPlayer.holdsBall) { // Shoots the ball
                         boolean inWall = false;
                         for (Bricks block : MapRender.GetList())
                             if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal()))
                                 inWall = true;
+
                         if (!inWall) {
                             ball.setVelocity(new Vector2(shotVelocity).multiply(1.5));
                             ball.setAcceleration(new Vector2(shotVelocity).divide(100));
-                            player_client.holdsBall = false;
+                            thisPlayer.holdsBall = false;
                             ballShot = true;
                         }
                     } else { // Shoots a bullet
-                        Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
-                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
-                                player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
+                        Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
+                        Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
+                                thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
 
                         editObjectManager
-                                (0, 0, bulletPos, shotVelocity, player_client.getIpOfClient());
-                        player_client.setBulletShot(true);
+                                (0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
+                        thisPlayer.setBulletShot(true);
                     }
                     bulletLimiter = 5;
                 } else if (bulletLimiter > 0) bulletLimiter--;
                 //endregion
 
                 //region Checks if the player is holding the ball
-                if (ball.getBounds().intersects(player_client.circle.getBoundsInLocal()) && !ball.isHeld)
-                    player_client.holdsBall = true;
+                if (ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()) && !ball.isHeld)
+                    thisPlayer.holdsBall = true;
 
-                if (player_client.holdsBall) {
+                if (thisPlayer.holdsBall) {
                     ball.isHeld = true;
                     double ballX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                     double ballY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
                     Vector2 ballDir = new Vector2(ballX * 35, ballY * 35);
-                    Vector2 ballPos = new Vector2(player_client.circle.getCenterX() - player_client.getWidth() / 3,
-                            player_client.circle.getCenterY() - player_client.getHeight() / 3).add(ballDir);
+                    Vector2 ballPos = new Vector2(thisPlayer.circle.getCenterX() - thisPlayer.getWidth() / 3,
+                            thisPlayer.circle.getCenterY() - thisPlayer.getHeight() / 3).add(ballDir);
                     ball.setPosition(ballPos);
                 }
                 //endregion
@@ -273,8 +274,8 @@ public class ClientGame extends Application {
                 //region Collision detection
 //                Player collision
                 for (Bricks block : MapRender.GetList())
-                    if (block.getBounds().intersects(player_client.circle.getBoundsInLocal()))
-                        player_client.collision(block, elapsedTime);
+                    if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
+                        thisPlayer.collision(block, elapsedTime);
 
 //                Bullet collision
                 editObjectManager(1, 0, null, null, null);
@@ -307,7 +308,7 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Sends the client's position and whether they've shot a bullet
-                Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
+                Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
                 //endregion
 
                 //region FPS counter
@@ -392,8 +393,8 @@ public class ClientGame extends Application {
     public void initialisePlayers() {
         Client.receivePositions();
         for (String ip : listOfClients.connectedIPs) {
-            if (ip.equals(player_client.getIpOfClient())) {
-                playerList.put(ip, player_client);
+            if (ip.equals(thisPlayer.getIpOfClient())) {
+                playerList.put(ip, thisPlayer);
                 continue;
             }
 
@@ -438,7 +439,7 @@ public class ClientGame extends Application {
         //region Updates info of *other* players/bots
         for (String ip : listOfClients.connectedIPs) {
             Player enemy = playerList.get(ip);
-            if (ip.equals(player_client.getIpOfClient()) || enemy == null)
+            if (ip.equals(thisPlayer.getIpOfClient()) || enemy == null)
                 continue;
 
             PositionPacket theDoubleValues = listOfClients.posList.get(ip);
@@ -448,8 +449,8 @@ public class ClientGame extends Application {
             //region Enemies' rotation/position/velocity
             Affine rotate = new Affine();
             rotate.appendRotation(theDoubleValues.degrees,
-                    theDoubleValues.posX - Camera.GetOffsetX() + player_client.getWidth() / 2,
-                    theDoubleValues.posY - Camera.GetOffsetY() + player_client.getHeight() / 2);
+                    theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
+                    theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
 
             enemy.setAffine(rotate);
             enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
@@ -465,8 +466,8 @@ public class ClientGame extends Application {
             double bullet_pos_y = Math.sin(degreeRadians);
             Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
 
-            Vector2 bulletPos = new Vector2(theDoubleValues.posX + player_client.getHeight() / 2,
-                    theDoubleValues.posY + player_client.getWidth() / 2).add(direction_of_gun);
+            Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
+                    theDoubleValues.posY + thisPlayer.getWidth() / 2).add(direction_of_gun);
 
             Vector2 bulletVel = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
@@ -484,7 +485,7 @@ public class ClientGame extends Application {
 
     private void ballWallBounce() {
         for (Bricks block : MapRender.GetList()) {
-            if (!ball.getBounds().intersects(block.getBounds().getBoundsInLocal()) || player_client.holdsBall)
+            if (!ball.getBounds().intersects(block.getBounds().getBoundsInLocal()) || thisPlayer.holdsBall)
                 continue;
 
             Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
