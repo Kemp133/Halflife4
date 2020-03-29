@@ -4,8 +4,9 @@ import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.GameObjects.BasicBall;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.*;
-import javafx.scene.image.Image;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ public class Server implements Runnable {
             botPacket.velX = 0;
             botPacket.velY = 0;
             botPacket.degrees = 0;
-            botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
-            botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
+            botPacket.posX = botPacket.spawnX = startPositions[i].getX();
+            botPacket.posY = botPacket.spawnY = startPositions[i].getY();
 
             ClientListServer.positionList.put(botNamesList.get(i), botPacket);
             ClientListServer.connectedIPs.add(botNamesList.get(i));
@@ -66,21 +67,20 @@ public class Server implements Runnable {
 
         //region Adds the ball to the positionList
         try {
-            Image mapImage = new Image(new FileInputStream("res/map.png"));
-            int mapWidthMiddle = (int) mapImage.getWidth() / 2;
-            int mapHeightMiddle = (int) mapImage.getHeight() / 2;
+            BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
+            int mapWidthMiddle = mapImage.getWidth() * 20;
+            int mapHeightMiddle = mapImage.getHeight() * 20;
 
             theBall = new BasicBall(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
 
             PositionPacket ballPacket = new PositionPacket();
             ballPacket.velX = 0;
             ballPacket.velY = 0;
-            ballPacket.degrees = 0;
-            ballPacket.orgPosX = ballPacket.spawnX = mapWidthMiddle;
-            ballPacket.orgPosY = ballPacket.spawnY = mapHeightMiddle;
+            ballPacket.posX = ballPacket.spawnX = mapWidthMiddle;
+            ballPacket.posY = ballPacket.spawnY = mapHeightMiddle;
 
             ClientListServer.positionList.put("ball", ballPacket);
-        } catch (FileNotFoundException e) { System.out.println("Could not find file 'res/map.png'"); }
+        } catch (IOException e) { e.printStackTrace(); }
         //endregion
 
         //region Sets up the communication sockets
@@ -217,8 +217,8 @@ public class Server implements Runnable {
                 //region Adds the player (with the [i]th startPosition) to the positionList
                 PositionPacket playerPacket = new PositionPacket();
                 playerPacket.degrees = 0;
-                playerPacket.orgPosX = playerPacket.spawnX = startPosition.getX();
-                playerPacket.orgPosY = playerPacket.spawnY = startPosition.getY();
+                playerPacket.posX = playerPacket.spawnX = startPosition.getX();
+                playerPacket.posY = playerPacket.spawnY = startPosition.getY();
                 playerPacket.velX = 0;
                 playerPacket.velY = 0;
                 ClientListServer.positionList.put(address.toString(), playerPacket);
@@ -265,8 +265,8 @@ public class Server implements Runnable {
                     botPacket.velX = 0;
                     botPacket.velY = 0;
                     botPacket.degrees = 0;
-                    botPacket.orgPosX = botPacket.spawnX = startPositions[i].getX();
-                    botPacket.orgPosY = botPacket.spawnY = startPositions[i].getY();
+                    botPacket.posX = botPacket.spawnX = startPositions[i].getX();
+                    botPacket.posY = botPacket.spawnY = startPositions[i].getY();
 
                     ClientListServer.positionList.put(botNamesList.get(i), botPacket);
                     ClientListServer.connectedIPs.remove(address.toString());

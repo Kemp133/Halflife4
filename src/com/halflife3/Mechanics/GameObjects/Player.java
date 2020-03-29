@@ -125,12 +125,13 @@ public class Player extends Controllable {
     }
 
     public PositionPacket getPacketToSend() {
-        packetToSend.velY = getVelY();
+        packetToSend.posX = getPosX();
+        packetToSend.posY = getPosY();
         packetToSend.velX = getVelX();
-        packetToSend.orgPosX = getPosX();
-        packetToSend.orgPosY = getPosY();
-        packetToSend.degrees = rotation;
+        packetToSend.velY = getVelY();
+        packetToSend.degrees = degrees;
         packetToSend.bulletShot = bulletShot;
+        packetToSend.holdsBall = holdsBall;
         return packetToSend;
     }
 }

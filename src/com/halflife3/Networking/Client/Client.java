@@ -147,7 +147,7 @@ public class Client {
 //    Updates the 'listOfClients' variable
     public static void receivePositions() {
         try {
-            byte[] recBuf = new byte[1500];
+            byte[] recBuf = new byte[incPacketSize];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             positionSocket.receive(packet);
             Object o = byteArrayToObject(recBuf);

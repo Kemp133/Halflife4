@@ -4,11 +4,11 @@ import com.halflife3.Mechanics.Vector2;
 import javafx.scene.transform.Affine;
 
 public abstract class Controllable extends Sprite {
-	protected String        ipOfClient;
-	protected Affine        affine;
-	protected short         rotation;
-	protected Vector2 		spawn_point;
-	protected boolean       AI;
+	protected String    ipOfClient;
+	protected Affine    affine;
+	protected short 	degrees;
+	protected Vector2 	spawn_point;
+	protected boolean   AI;
 
 	public Controllable(Vector2 position, Vector2 velocity) { super(position, velocity); }
 
@@ -23,9 +23,9 @@ public abstract class Controllable extends Sprite {
 
 	public Affine getAffine() { return affine; }
 
-	public void setRotation(short rotation) { this.rotation = rotation;}
+	public void setDegrees(short degrees) { this.degrees = degrees;}
 
-	public short getRotation() { return rotation; }
+	public short getDegrees() { return degrees; }
 	//endregion
 
 	//region SpawnPoint getter and setter

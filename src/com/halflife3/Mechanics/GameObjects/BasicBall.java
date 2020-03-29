@@ -8,6 +8,7 @@ import javafx.scene.shape.Circle;
 public class BasicBall extends Sprite {
     public Circle circle;
     Vector2 original_position;
+    public boolean isHeld = false;
 
     public BasicBall(Vector2 position, Vector2 velocity) {
         super(position, velocity);

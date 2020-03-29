@@ -56,12 +56,12 @@ public class AI {
 	public PositionPacket getBotMovement(PositionPacket bot) {
 		Vector2 toGoTo = mapCenter(); //mapCenter() or closestEnemy(bot)
 
-		Node botNode = map[(int) (bot.orgPosY) / 40][(int) (bot.orgPosX) / 40];
+		Node botNode = map[(int) (bot.posY) / 40][(int) (bot.posX) / 40];
 		Node endNode = map[(int) (toGoTo.getY()) / 40][(int) (toGoTo.getX()) / 40];
 
 		System.out.println(botNode);
 		System.out.println("Target bot: " + endNode);
-		System.out.println("Path taken:  Start: " + bot.orgPosX + "|" + bot.orgPosY);
+		System.out.println("Path taken:  Start: " + bot.posX + "|" + bot.posY);
 		for (Node step : aStar(endNode, botNode))
 			System.out.println("    " + step);
 
@@ -158,16 +158,16 @@ public class AI {
 		double shortestDistance = Double.MAX_VALUE;
 		for (var enemyEntry : positions) {
 			PositionPacket enemyPacket = enemyEntry.getValue();
-			if (enemyPacket.orgPosX == bot.orgPosX && enemyPacket.orgPosY == bot.orgPosY)
+			if (enemyPacket.posX == bot.posX && enemyPacket.posY == bot.posY)
 				continue;
 
-			double distance = Math.pow(bot.orgPosX - enemyPacket.orgPosX, 2) +
-					Math.pow(bot.orgPosY - enemyPacket.orgPosY, 2);
+			double distance = Math.pow(bot.posX - enemyPacket.posX, 2) +
+					Math.pow(bot.posY - enemyPacket.posY, 2);
 
 			if (distance < shortestDistance) {
 				shortestDistance = distance;
-				toGoTo.setX(enemyPacket.orgPosX);
-				toGoTo.setY(enemyPacket.orgPosY);
+				toGoTo.setX(enemyPacket.posX);
+				toGoTo.setY(enemyPacket.posY);
 			}
 		}
 
