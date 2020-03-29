@@ -13,9 +13,10 @@ public class BasicBall extends Sprite {
         super(position, velocity);
         setSprite("res/Sprites/Ball/Ball.png");
         keys.add("Ball");
-        circle = new Circle(position.getX() + getWidth() / 2,
-                position.getY() + getHeight() / 2,
-                Math.max(getWidth(), getHeight()) / 2 + 1);
+        position.subtract(getWidth() / 2, getHeight() / 2);
+        circle = new Circle(position.getX(),
+                position.getY(),
+                Math.max(getWidth(), getHeight()) / 2 + 5);
     }
 
     @Override
@@ -46,13 +47,13 @@ public class BasicBall extends Sprite {
             case 1 : {
                 velocity.setX(-velocity.getX());
                 acceleration.setX(-acceleration.getX());
-                return;
+                break;
             }
 
             case 2 : {
                 velocity.setY(-velocity.getY());
                 acceleration.setY(-acceleration.getY());
-                return;
+                break;
             }
 
             case 3 : {
@@ -60,7 +61,7 @@ public class BasicBall extends Sprite {
                 velocity.setY(0);
                 acceleration.setX(0);
                 acceleration.setY(0);
-                return;
+                break;
             }
         }
 

@@ -41,11 +41,9 @@ import java.util.HashSet;
 
 import static com.halflife3.Networking.Client.Client.listOfClients;
 import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCode.S;
 
 public class ClientGame extends Application {
     private final int FPS = 30;
-    private final int INC_PACKETS_PER_SECOND = 30;
     private final int GAME_WINDOW_HEIGHT = 600;
     private final int GAME_WINDOW_WIDTH = 800;
     private final int MOVEMENT_SPEED = 100;
@@ -95,7 +93,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise this player
-        Vector2 startPos = clientNetwork.getStartingPosition();
+        Vector2 startPos = new Vector2(25*40, 22*40);//clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
         player_client = new Player(startPos, startVel);
         player_client.setIpOfClient(clientNetwork.getClientAddress().toString());
@@ -139,8 +137,8 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise ball
-//        ball = new BasicBall(new Vector2(mapWidth / 2f - 40, mapHeight / 2f - 40), new Vector2(0, 0));
-        ball = new BasicBall(new Vector2(player_client.getPosX(), player_client.getPosY() - 80), new Vector2(0, 0));
+        ball = new BasicBall(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
+//        ball = new BasicBall(new Vector2(player_client.getPosX(), player_client.getPosY() - 80), new Vector2(0, 0));
         //endregion
 
         //region Thread to update the position of all enemies
@@ -148,10 +146,11 @@ public class ClientGame extends Application {
         new Thread(() -> {
             double serverNanoTime = System.nanoTime();
             while (running) {
-                if (System.nanoTime() - serverNanoTime > Math.round(1.0/ INC_PACKETS_PER_SECOND * 1e9)) {
-                    updateEnemies();
-                    serverNanoTime = System.nanoTime();
-                }
+                if (System.nanoTime() - serverNanoTime < 1e9 / FPS * 1.07)
+                    continue;
+
+                updateEnemies();
+                serverNanoTime = System.nanoTime();
             }
         }).start();
         //endregion
@@ -162,14 +161,17 @@ public class ClientGame extends Application {
             private long lastUpdate = 0;
             double startNanoTime = System.nanoTime();
             boolean ballShot = false;
+            double fpsCounter = 0;
+            double second = 1; //nanoseconds
 
             public void handle(long currentNanoTime) {
-                if (currentNanoTime - lastUpdate < Math.round(1e9/FPS))
+                if (currentNanoTime - lastUpdate < 1e9/(FPS * 1.07))
                     return;
 
                 //region Calculate time since last update.
                 double elapsedTime = (currentNanoTime - startNanoTime) / 1e9;
                 startNanoTime = currentNanoTime;
+                lastUpdate = currentNanoTime;
                 //endregion
 
                 //region Camera offset
@@ -237,15 +239,7 @@ public class ClientGame extends Application {
                     double bullet_pos_y = Math.sin(Math.atan2(direction.getY(), direction.getX()));
                     Vector2 shotVelocity = new Vector2(bullet_pos_x, bullet_pos_y).multiply(200);
 
-                    if (!player_client.holdsBall) {
-                        Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
-                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
-                                player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
-
-                        editObjectManager
-                                (0, 0, bulletPos, shotVelocity, player_client.getIpOfClient());
-                        player_client.setBulletShot(true);
-                    } else {
+                    if (player_client.holdsBall) { // Shoots the ball
                         boolean inWall = false;
                         for (Bricks block : MapRender.get_list())
                             if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal()))
@@ -256,6 +250,14 @@ public class ClientGame extends Application {
                             player_client.holdsBall = false;
                             ballShot = true;
                         }
+                    } else { // Shoots a bullet
+                        Vector2 direction_of_gun = new Vector2(bullet_pos_x*32, bullet_pos_y*32);
+                        Vector2 bulletPos = new Vector2(player_client.getPosX() + player_client.getHeight() / 2,
+                                player_client.getPosY() + player_client.getWidth() / 2).add(direction_of_gun);
+
+                        editObjectManager
+                                (0, 0, bulletPos, shotVelocity, player_client.getIpOfClient());
+                        player_client.setBulletShot(true);
                     }
                     bulletLimiter = 5;
                 } else if (bulletLimiter > 0) bulletLimiter--;
@@ -315,7 +317,15 @@ public class ClientGame extends Application {
                 Client.sendPacket(player_client.getPacketToSend(), Client.getUniquePort());
                 //endregion
 
-                lastUpdate = currentNanoTime;
+                //region FPS counter
+                second -= elapsedTime;
+                fpsCounter++;
+                if (second < 0) {
+                    System.out.println("FPS: " + fpsCounter);
+                    second = 1;
+                    fpsCounter = 0;
+                }
+                //endregion
             }
         }.start();
 
@@ -502,6 +512,10 @@ public class ClientGame extends Application {
                     rel_x > -33 && rel_x < 33 && rel_y > -38 && rel_y < 0 && ball.getVelY() > 0) {
                 ball.collision(2);
             }
+
+//            System.out.println("Block " + block.getPosition() + ": " + rel_x + "|" + rel_y);
+//
+//            block.setSprite("res/block_marked.png");
         }
     }
 

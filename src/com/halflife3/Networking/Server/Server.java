@@ -1,6 +1,7 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Mechanics.AI.AI;
+import com.halflife3.Mechanics.GameObjects.BasicBall;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.*;
 import javafx.scene.image.Image;
@@ -38,6 +39,7 @@ public class Server implements Runnable {
                                                new Vector2(1920, 720)};
     public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
     private AI botAI;
+    private BasicBall theBall;
     //endregion
 
     public void start() {
@@ -67,6 +69,8 @@ public class Server implements Runnable {
             Image mapImage = new Image(new FileInputStream("res/map.png"));
             int mapWidthMiddle = (int) mapImage.getWidth() / 2;
             int mapHeightMiddle = (int) mapImage.getHeight() / 2;
+
+            theBall = new BasicBall(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
 
             PositionPacket ballPacket = new PositionPacket();
             ballPacket.velX = 0;
