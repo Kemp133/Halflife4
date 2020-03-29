@@ -505,16 +505,10 @@ public class ClientGame extends Application {
             double rel_x = relevantPos.getX();
             double rel_y = relevantPos.getY();
 
-            if ((rel_x > 0 && rel_x < 38 && rel_y > -33 && rel_y < 33 && ball.getVelX() < 0) ||
-                    rel_x > -38 && rel_x < 0 && rel_y > -33 && rel_y < 33 && ball.getVelX() > 0) {
-                ball.collision(1);
-            } else if ((rel_x > -33 && rel_x < 33 && rel_y > 0 && rel_y < 38 && ball.getVelY() < 0) ||
-                    rel_x > -33 && rel_x < 33 && rel_y > -38 && rel_y < 0 && ball.getVelY() > 0) {
+            if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) || (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) || (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) || (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0))
                 ball.collision(2);
-            }
-
-//            System.out.println("Block " + block.getPosition() + ": " + rel_x + "|" + rel_y);
-//
+            else
+                ball.collision(1);
 //            block.setSprite("res/block_marked.png");
         }
     }

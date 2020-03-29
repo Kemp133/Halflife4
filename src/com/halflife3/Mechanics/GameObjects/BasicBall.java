@@ -43,6 +43,7 @@ public class BasicBall extends Sprite {
     }
 
     public void collision(int bounce) {
+        this.position = original_position;
         switch (bounce) {
             case 1 : {
                 velocity.setX(-velocity.getX());
