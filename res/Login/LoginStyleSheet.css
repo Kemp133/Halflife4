@@ -1,13 +1,29 @@
-@font-face {
+/*@font-face {
     font-family: 'paladins'
     src: url("res/Font/paladins-font2/PaladinsSemiItalicFont.otf");
-}
+}*/
 
 .pane {
     -fx-background-color: rgba(176,224,230,0.8);
 }
 
-.text {
-    /*-fx-font-family: 'PaladinsSemiItalicFont';*/
+/*.text {
+    /*-fx-font-family: 'PaladinsSemiItalicFont';
     -fx-font-family: "paladins";
+}*/
+
+.text-input {
+    -fx-text-fill: black;
+    -fx-font-size: 15px;
+}
+
+.button {
+    /*-fx-background-color: #3c7fb1, linear-gradient(#fafdfe, #e8f5fc), linear-gradient(#eaf6fd 0%, #d9f0fc 49%, #bee6fd 50%, #a7d9f5 100%);*/
+    -fx-background-color: #000099, linear-gradient(#e5e5ff, #ccccff), linear-gradient(#9999ff 0%, #6666ff 49%, #3232ff 50%, #0000FF 100%);
+    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 3,2,1;
+    -fx-padding: 3 30 3 30;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
 }
