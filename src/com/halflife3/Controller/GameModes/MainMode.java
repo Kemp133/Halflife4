@@ -6,7 +6,8 @@ import java.util.HashMap;
 
 public class MainMode extends GameMode implements ITimeLimit {
 	protected Timer  timer;
-	protected double score;
+	protected double scoreLimit;
+	protected HashMap<Integer, Double> scores;
 
 	protected HashMap<Integer, String> teams;
 
@@ -18,6 +19,8 @@ public class MainMode extends GameMode implements ITimeLimit {
 
 	public MainMode (String GameModeName, boolean CanRespawn, double score) {
 		super(GameModeName);
+//		this.CanRespawn = CanRespawn;
+		this.scoreLimit = score;
 	}
 
 	@Override
@@ -32,11 +35,15 @@ public class MainMode extends GameMode implements ITimeLimit {
 
 	@Override
 	void finished () {
-
+		//Send packet to end the game
+		//Set up game to await for the won/lost packet
 	}
 
 	@Override
-	boolean won () {
+	boolean won (int team) {
+		//Send team with id of @team the won packet
+		//Send everybody else the lost packet
+
 		return false;
 	}
 
@@ -47,12 +54,12 @@ public class MainMode extends GameMode implements ITimeLimit {
 
 	@Override
 	public boolean timeLimitReached (double delta) {
-		return false;
+		return timer.getHasFinished();
 	}
 
-	//region Get/Set Score
-	public double getScore () { return score; }
+	//region Get/Set Scores
+	public double getTeamScore (int team) { return scores.get(team); }
 
-	public void setScore (double score) { this.score = score; }
+	public void setTeamScore (int team, double score) { this.scores.put(team, score); }
 	//endregion
 }

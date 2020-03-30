@@ -2,7 +2,7 @@ package com.halflife3.Controller.GameModes;
 
 public abstract class GameMode {
 	protected String GameModeName;
-	protected boolean CanRespawn;
+//	protected boolean CanRespawn;
 
 	public GameMode(String GameModeName) {
 		this.GameModeName = GameModeName;
@@ -11,7 +11,7 @@ public abstract class GameMode {
 	abstract void initialise();
 	abstract void gameLoop();
 	abstract void finished();
-	abstract boolean won();
+	abstract boolean won(int team);
 	abstract boolean lost();
 
 	//region Get/Set GameModeName
@@ -19,8 +19,8 @@ public abstract class GameMode {
 	public void setGameModeName(String gameModeName) { GameModeName = gameModeName; }
 	//endregion
 
-	//region Get/Set CanRespawn
-	public boolean getCanRespawn () { return CanRespawn; }
-	public void setCanRespawn (boolean canRespawn) { CanRespawn = canRespawn; }
-	//endregion
+//	//region Get/Set CanRespawn
+//	public boolean getCanRespawn () { return CanRespawn; }
+//	public void setCanRespawn (boolean canRespawn) { CanRespawn = canRespawn; }
+//	//endregion/
 }
