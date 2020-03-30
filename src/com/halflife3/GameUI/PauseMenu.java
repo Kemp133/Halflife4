@@ -24,7 +24,7 @@ public class PauseMenu extends Application {
     public void start(Stage stage) throws Exception {
 
         //press button to enter pause:
-        Button pauseButton = new Button("Pause");
+        Button pauseButton = new Button("Try pressing escape!");
         Pane pane = new Pane();
         pane.setMinSize(600, 400);
         BorderPane root = new BorderPane(pane, null, null, pauseButton, new Label(""+pause));
