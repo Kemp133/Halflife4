@@ -273,7 +273,7 @@ public class Vector2Test {
 
 	//region Useful known good methods
 	/**
-	 * This method is used as an analogue for the method in the Vector2 class, and is known to work
+	 * This method is used as an analogue for the method in the {@code Vector2} class, and is known to work
 	 * @param x First component
 	 * @param y Second component
 	 * @return The magnitude of the given components
@@ -287,7 +287,7 @@ public class Vector2Test {
 	 * this representation ever changes so tests are easier to modify
 	 * @param x The x value of the vector
 	 * @param y The y value of the vector
-	 * @return The desired representation which toString in Vector2 should provide
+	 * @return The desired representation which toString in {@code Vector2} should provide
 	 */
 	private String GetToStringRepresentation(double x, double y) {
 		return "(" + x + ", " + y + ")";

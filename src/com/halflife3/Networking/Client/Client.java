@@ -48,7 +48,9 @@ public class Client {
             serverSocket = new MulticastSocket(Server.MULTICAST_PORT);
             positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
 
-            setWifiInterface();
+            clientAddress = NetworkingUtilities.setWifiInterface();
+            serverSocket.setInterface(clientAddress);
+            positionSocket.setInterface(clientAddress);
 
             serverSocket.joinGroup(group);
             positionSocket.joinGroup(group);
@@ -56,6 +58,11 @@ public class Client {
             System.out.println("Joined group: " + Server.MULTICAST_ADDRESS + " with address: " + clientAddress.toString());
         } catch (ConnectException e) {
             System.out.println("Unable to join the group");
+            NetworkingUtilities.CreateErrorMessage(
+                    "Unable To Join The Group",
+                    "The connection to the group was unsuccessful",
+                    "Message: " + e.getMessage()
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -204,29 +211,5 @@ public class Client {
 
     public static void setUniquePort(int uniquePort) {
         Client.uniquePort = uniquePort;
-    }
-
-    public void setWifiInterface() {
-        try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface net = interfaces.nextElement();
-                if (!net.getName().startsWith("wlan") || !net.isUp())
-                    continue;
-
-                Enumeration<InetAddress> addresses = net.getInetAddresses();
-                while(addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr.toString().length() < 17) {
-                        serverSocket.setInterface(addr);
-                        positionSocket.setInterface(addr);
-                        clientAddress = addr;
-                        return;
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
     }
 }

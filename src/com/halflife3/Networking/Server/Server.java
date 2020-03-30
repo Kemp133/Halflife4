@@ -5,6 +5,7 @@ import com.halflife3.Mechanics.GameObjects.BasicBall;
 import com.halflife3.Mechanics.GameObjects.Bricks;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.ClientGame;
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
 
@@ -56,14 +57,7 @@ public class Server implements Runnable {
         //region Fills the positionList with 4 bot players, giving them available starting positions
         for (int i = 0; i < 4; i++) {
             positionAvailable.put(startPositions[i], true);
-
-            PositionPacket botPacket = new PositionPacket();
-            botPacket.velX = 0;
-            botPacket.velY = 0;
-            botPacket.degrees = 0;
-            botPacket.posX = botPacket.spawnX = startPositions[i].getX();
-            botPacket.posY = botPacket.spawnY = startPositions[i].getY();
-
+            PositionPacket botPacket = newBotPacket(i);
             ClientListServer.positionList.put(botNamesList.get(i), botPacket);
             ClientListServer.connectedIPs.add(botNamesList.get(i));
         }
@@ -94,8 +88,15 @@ public class Server implements Runnable {
             clientSocket = new DatagramSocket(LISTENER_PORT);
             multicastGroup = InetAddress.getByName(MULTICAST_ADDRESS);
             multicastSocket = new MulticastSocket();
-            setWifiInterface();
-        } catch (IOException e) { e.printStackTrace(); }
+            multicastSocket.setInterface(NetworkingUtilities.setWifiInterface());
+        } catch (SocketException e) {
+            NetworkingUtilities.CreateErrorMessage(
+                    "Error Setting Network Interface",
+                    "Network interface could not be set",
+                    e.getMessage()
+            );
+        }
+        catch (IOException e) { e.printStackTrace(); }
         //endregion
 
         //region Loads the map
@@ -107,9 +108,7 @@ public class Server implements Runnable {
 
 //        Wait until the AI is done loading the map
         while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
-
 //        moveAI(0);
-
         new Thread(this).start();
     }
 
@@ -271,7 +270,7 @@ public class Server implements Runnable {
     }
 
     private void connectionListener() throws IOException {
-        byte[] pokeBuf = new byte[objectToByteArray(new ConnectPacket()).length];
+        byte[] pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
         DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
         if (ClientListServer.clientList.isEmpty()) {
@@ -290,7 +289,7 @@ public class Server implements Runnable {
         System.out.println(incPoke.getAddress() + " has connected");
         welcoming = false;
 
-        Object receivedPoke = byteArrayToObject(pokeBuf);
+        Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
         listenerServer.received(receivedPoke, incPoke.getAddress());
     }
 
@@ -363,12 +362,7 @@ public class Server implements Runnable {
                 if (clientSpawnY == startPositions[i].getY()) {
                     ClientListServer.positionList.remove(address.toString());
 
-                    PositionPacket botPacket = new PositionPacket();
-                    botPacket.velX = 0;
-                    botPacket.velY = 0;
-                    botPacket.degrees = 0;
-                    botPacket.posX = botPacket.spawnX = startPositions[i].getX();
-                    botPacket.posY = botPacket.spawnY = startPositions[i].getY();
+                    PositionPacket botPacket = newBotPacket(i);
 
                     ClientListServer.positionList.put(botNamesList.get(i), botPacket);
                     ClientListServer.connectedIPs.remove(address.toString());
@@ -382,9 +376,24 @@ public class Server implements Runnable {
         System.out.println(address + " has disconnected");
     }
 
+    /**
+     * A method to create a PositionPacket for a new bot
+     * @param index The index of the start position to get the position values of
+     * @return The newly created {@code PositionPacket}
+     */
+    public static PositionPacket newBotPacket(int index) {
+        PositionPacket pp = new PositionPacket();
+        pp.velX = 0;
+        pp.velY = 0;
+        pp.degrees = 0;
+        pp.posX = pp.spawnX = startPositions[index].getX();
+        pp.posY = pp.spawnY = startPositions[index].getY();
+        return pp;
+    }
+
     public synchronized static void multicastPacket(Object o, int mPort) {
         try {
-            byte[] sendBuf = objectToByteArray(o);
+            byte[] sendBuf = NetworkingUtilities.objectToByteArray(o);
             DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);
             multicastSocket.send(packet);
         } catch (IOException e) {
@@ -396,61 +405,6 @@ public class Server implements Runnable {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static byte[] objectToByteArray(Object o) {
-        byte[] sendBuf = null;
-
-        try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-            outstream.flush();
-            outstream.writeObject(o);
-            outstream.flush();
-            sendBuf = byteStream.toByteArray();
-            outstream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return sendBuf;
-    }
-
-    private Object byteArrayToObject(byte[] buf) {
-        Object o = null;
-
-        try {
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
-            o = instream.readObject();
-            instream.close();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return o;
-    }
-
-    public static void setWifiInterface() {
-        try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface net = interfaces.nextElement();
-                if (!net.getName().startsWith("wlan") || !net.isUp())
-                    continue;
-
-                Enumeration<InetAddress> addresses = net.getInetAddresses();
-                while(addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr.toString().length() < 17) {
-                        multicastSocket.setInterface(addr);
-                        return;
-                    }
-                }
-            }
-        } catch (SocketException e) {
             e.printStackTrace();
         }
     }

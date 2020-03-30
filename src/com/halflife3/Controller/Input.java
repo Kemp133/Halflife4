@@ -23,7 +23,7 @@ public class Input {
 	private HashMap<MouseButton, Boolean> mouseButtonReleased = new HashMap<>();
 	//endregion
 
-	/** A Vector2 to store the position of the mouse on the screen */
+	/** A {@code Vector2} to store the position of the mouse on the screen */
 	private Vector2 mousePosition = new Vector2();
 
 	//region initializer
