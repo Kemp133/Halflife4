@@ -53,6 +53,7 @@ public class PauseMenu extends Application {
             Button toDesktop = new Button("Quit to Desktop");
             pauseRoot.getChildren().add(toDesktop);
 
+            //actual stage of the pause menu
             Stage popupStage = new Stage(StageStyle.TRANSPARENT);
             popupStage.initOwner(stage);
             popupStage.initModality(Modality.APPLICATION_MODAL);
