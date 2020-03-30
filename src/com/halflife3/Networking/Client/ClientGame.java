@@ -323,46 +323,6 @@ public class ClientGame extends Application {
         }.start();
 
         //if esc is pressed --> enter pause menu
-        root.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if(keyEvent.getCode()== KeyCode.ESCAPE){
-                    //set background effect
-                    root.setEffect(new GaussianBlur());
-                    //setting up vbox for buttons
-                    //we will have 1 line of description with 4 buttons, that 5 rows
-                    VBox pauseRoot = new VBox(5);
-                    pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
-                    pauseRoot.setAlignment(Pos.CENTER);
-                    pauseRoot.setPadding(new Insets(20));
-                    //actual stuff in the rows
-                    pauseRoot.getChildren().add(new Label("Paused"));
-                    //Button 1
-                    Button returnToGame = new Button("Return to game");
-                    pauseRoot.getChildren().add(returnToGame);
-                    //Button 2
-                    Button options = new Button("Options");
-                    pauseRoot.getChildren().add(options);
-                    //Button 3
-                    Button toMainMenu = new Button("Quit to Main Menu");
-                    pauseRoot.getChildren().add(toMainMenu);
-                    //Button 4
-                    Button toDesktop = new Button("Quit to Desktop");
-                    pauseRoot.getChildren().add(toDesktop);
-                    //actual stage of the pause menu
-                    Stage popupStage = new Stage(StageStyle.TRANSPARENT);
-                    popupStage.initOwner(window);
-                    popupStage.initModality(Modality.APPLICATION_MODAL);
-                    popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
-                    //Button function 1:resume
-                    returnToGame.setOnAction(event-> {
-                        root.setEffect(null);
-                        popupStage.hide();
-                    });
-                    popupStage.show();
-                }
-            }
-        });
 
         root.requestFocus();
         primaryStage.show();
@@ -409,7 +369,7 @@ public class ClientGame extends Application {
         });
         audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
         audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-        root.getChildren().add(audio.getMenuBar());
+        //root.getChildren().add(audio.getMenuBar());
         //endregion
 
         //region Key input listener setup
@@ -428,6 +388,62 @@ public class ClientGame extends Application {
             mapWidth = map.getWidth() * 40;
             mapHeight = map.getHeight() * 40;
         } catch (IOException e) { e.printStackTrace(); }
+
+        //the pause menu
+        root.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if(keyEvent.getCode()== KeyCode.ESCAPE){
+                    //set background effect
+                    root.setEffect(new GaussianBlur());
+                    //setting up vbox for buttons
+                    //we will have 1 line of description with 4 buttons, that 5 rows
+                    VBox pauseRoot = new VBox(6);
+                    pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+                    pauseRoot.setAlignment(Pos.CENTER);
+                    pauseRoot.setPadding(new Insets(20));
+                    //actual stuff in the rows
+                    pauseRoot.getChildren().add(new Label("Paused"));
+                    //Button 1
+                    Button returnToGame = new Button("Return to game");
+                    pauseRoot.getChildren().add(returnToGame);
+                    //Button 2
+                    /*
+                    Button options = new Button("Options");
+                    pauseRoot.getChildren().add(options);
+                    */
+                    //button 2.5
+                    Button sound = new Button("Audio On/Off");
+                    pauseRoot.getChildren().add(sound);
+                    //Button 3
+                    Button toMainMenu = new Button("Quit to Main Menu");
+                    pauseRoot.getChildren().add(toMainMenu);
+                    //Button 4
+                    Button toDesktop = new Button("Quit to Desktop");
+                    pauseRoot.getChildren().add(toDesktop);
+                    //actual stage of the pause menu
+                    Stage popupStage = new Stage(StageStyle.TRANSPARENT);
+                    popupStage.initOwner(window);
+                    popupStage.initModality(Modality.APPLICATION_MODAL);
+                    popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
+                    //Button function 1:resume
+                    returnToGame.setOnAction(event-> {
+                        root.setEffect(null);
+                        popupStage.hide();
+                    });
+                    //Button function 2: options(audio)
+                    sound.setOnAction(actionEvent -> {
+                        audio.swtichMute();
+                    });
+                    toMainMenu.setOnAction(actionEvent -> {
+
+                    });
+                    toDesktop.setOnAction(actionEvent -> {
+                    });
+                    popupStage.show();
+                }
+            }
+        });
         //endregion
     }
 
