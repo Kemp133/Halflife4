@@ -1,6 +1,7 @@
 package com.halflife3.Networking.Client;
 
 import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
 import com.halflife3.Networking.Packets.PositionListPacket;
@@ -64,7 +65,7 @@ public class Client {
     public void getHostInfo() {
         try {
 //            Receives the Welcome packet
-            byte[] firstBuf = new byte[objectToByteArray(new WelcomePacket()).length];
+            byte[] firstBuf = new byte[NetworkingUtilities.objectToByteArray(new WelcomePacket()).length];
             DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
             System.out.println("Looking for host...");
             serverSocket.receive(firstPacket);
@@ -100,7 +101,7 @@ public class Client {
 
         //region Sends Disconnect packet to the Server
         DisconnectPacket leave = new DisconnectPacket();
-        byte[] tempBuf = objectToByteArray(leave);
+        byte[] tempBuf = NetworkingUtilities.objectToByteArray(leave);
 
         DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, uniquePort);
         try { outSocket.send(dc); } catch (IOException e) {
@@ -137,7 +138,7 @@ public class Client {
             byte[] recBuf = new byte[3000];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
-            Object o = byteArrayToObject(recBuf);
+            Object o = NetworkingUtilities.byteArrayToObject(recBuf);
             listenerClient.received(o);
         } catch (IOException e) {
             e.printStackTrace();
@@ -150,8 +151,8 @@ public class Client {
             byte[] recBuf = new byte[incPacketSize];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             positionSocket.receive(packet);
-            Object o = byteArrayToObject(recBuf);
-            if (incPacketSize == 2000) incPacketSize = objectToByteArray(o).length+100;
+            Object o = NetworkingUtilities.byteArrayToObject(recBuf);
+            if (incPacketSize == 2000) incPacketSize = NetworkingUtilities.objectToByteArray(o).length + 100;
             listenerClient.received(o);
         } catch (SocketException ignored) {
 
@@ -162,7 +163,7 @@ public class Client {
 
 //    Sends a packet to the Server
     public static void sendPacket(Object objectToSend, int port) {
-        byte[] tempBuf = objectToByteArray(objectToSend);
+        byte[] tempBuf = NetworkingUtilities.objectToByteArray(objectToSend);
         DatagramPacket packet = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, port);
         try {
             outSocket = new DatagramSocket();
@@ -172,41 +173,24 @@ public class Client {
         }
     }
 
-//    Converts an object (packet) into a byte array
-    private static byte[] objectToByteArray(Object o) {
-        byte[] sendBuf = null;
-
-        try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            ObjectOutputStream outstream = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-            outstream.flush();
-            outstream.writeObject(o);
-            outstream.flush();
-            sendBuf = byteStream.toByteArray();
-            outstream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-         return sendBuf;
-    }
-
-//    Converts a byte array into an object (packet)
-    private static Object byteArrayToObject(byte[] buf) {
-        Object o = null;
-
-        try {
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
-            o = instream.readObject();
-            instream.close();
-        } catch (IOException | ClassNotFoundException e) {
-            incPacketSize = 2000;
-            e.printStackTrace();
-        }
-
-        return o;
-    }
+    //region Old objectToByteArray Method (just in case)
+    //    Converts a byte array into an object (packet)
+//    private static Object byteArrayToObject(byte[] buf) {
+//        Object o = null;
+//
+//        try {
+//            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
+//            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
+//            o = instream.readObject();
+//            instream.close();
+//        } catch (IOException | ClassNotFoundException e) {
+//            incPacketSize = 2000;
+//            e.printStackTrace();
+//        }
+//
+//        return o;
+//    }
+    //endregion
 
     public InetAddress getClientAddress() { return clientAddress; }
 

@@ -7,9 +7,9 @@ import javafx.scene.input.MouseButton;
 import java.util.HashMap;
 
 public class Input {
-	public static Input instance;
+	public static Input instance; //Used as part of singleton design of this class
 
-	private Input () {} //We do not want to be able to create an instance of the input class ourself
+	private Input () {} //We do not want to be able to create an instance of this class
 
 	//region key maps (pressed, typed, released)
 	private HashMap<KeyCode, Boolean> keysPressed  = new HashMap<>();
@@ -59,9 +59,7 @@ public class Input {
 		keysPressed.put(kc, true);
 		keysReleased.put(kc, false);
 	}
-
 	public void setKeyTyped (KeyCode kc) { keysTyped.put(kc, true); }
-
 	public void setKeyReleased (KeyCode kc) {
 		keysReleased.put(kc, true);
 		keysPressed.put(kc, false);
