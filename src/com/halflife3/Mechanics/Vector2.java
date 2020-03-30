@@ -198,6 +198,16 @@ public class Vector2 implements Serializable {
         this.y = y;
     }
 
+    /**
+     * A method to set both x and y at the same time
+     * @param x The x value to set
+     * @param y The y value to set
+     */
+    public void setXY(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
     /** A method to reset the current <code>Vector2</code> */
     public void reset(){
         x = 0;

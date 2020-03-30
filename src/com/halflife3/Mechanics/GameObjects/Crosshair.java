@@ -23,7 +23,7 @@ public class Crosshair extends Sprite {
 
     @Override
     public void update(double time) {
-        position.setX(Input.mousePosition.getX());
-        position.setY(Input.mousePosition.getY());
+        position.setX(Input.getInstance().getMousePosition().getX());
+        position.setY(Input.getInstance().getMousePosition().getY());
     }
 }

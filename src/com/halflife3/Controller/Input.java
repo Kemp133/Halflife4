@@ -46,11 +46,9 @@ public class Input {
 	public boolean isKeyPressed (KeyCode kc) {
 		return keysPressed.get(kc);
 	}
-
 	public boolean isKeyTyped (KeyCode kc) {
 		return keysTyped.get(kc);
 	}
-
 	public boolean isKeyReleased (KeyCode kc) {
 		return keysReleased.get(kc);
 	}
@@ -75,32 +73,29 @@ public class Input {
 	    mouseButtonPressed.put(mb, true);
 	    mouseButtonReleased.put(mb, false);
     }
-    public void setMouseButtonClicked(MouseButton mb) { mouseButtonClicked.put(mb, true); }
-    public void setMouseButtonReleased(MouseButton mb) {
+    public void setButtonClicked(MouseButton mb) { mouseButtonClicked.put(mb, true); }
+    public void setButtonReleased(MouseButton mb) {
 	    mouseButtonReleased.put(mb, true);
-	    mouseButtonPressed.put(mb, true);
+	    mouseButtonPressed.put(mb, false);
     }
     //endregion
 
 	//region isButton methods (Pressed, Clicked, Released)
 	public boolean isButtonPressed (MouseButton mb) { return mouseButtonPressed.get(mb); }
-
 	public boolean isButtonClicked (MouseButton mb) { return mouseButtonClicked.get(mb); }
-
 	public boolean isButtonReleased (MouseButton mb) { return mouseButtonReleased.get(mb); }
 	//endregion
 
 	//region Get/Set mousePosition
 	public Vector2 getMousePosition () { return mousePosition; }
-
 	public void setMousePosition (Vector2 mousePosition) { this.mousePosition = mousePosition; }
+	public void setMousePosition(double x, double y) { mousePosition.setXY(x, y); }
 	//endregion
 
 	//region resetValues (keyboard and mouse maps)
 	public void resetValues () {
 		for (KeyCode kc : KeyCode.values())
 			keysTyped.replace(kc, false);   //Don't need to reset key pressed/released as these are mutually exclusive events which are dealt with in the KeyboardInput handler
-
 		for (MouseButton mb : MouseButton.values())
 			mouseButtonClicked.replace(mb, false); //Don't need to reset mouse pressed/release as these are mutually exclusive events which are dealt with in the MouseInput handler
 	}
