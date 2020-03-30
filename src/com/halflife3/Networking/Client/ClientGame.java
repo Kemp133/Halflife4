@@ -1,13 +1,9 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.Controller.Input;
-import com.halflife3.Controller.KeyboardInput;
-import com.halflife3.Controller.MouseInput;
-import com.halflife3.Controller.ObjectManager;
+import com.halflife3.Controller.*;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Mechanics.GameObjects.*;
-import com.halflife3.Mechanics.Interfaces.IRenderable;
-import com.halflife3.Mechanics.Interfaces.IUpdateable;
+import com.halflife3.Mechanics.Interfaces.*;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.Camera;
@@ -30,13 +26,8 @@ import javafx.util.Duration;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.io.*;
+import java.util.*;
 
 import static com.halflife3.Networking.Client.Client.listOfClients;
 import static javafx.scene.input.KeyCode.*;
@@ -50,10 +41,10 @@ public class ClientGame extends Application {
     public static   final float STUN_DURATION       = 100;
 
     //region Other variables
-    static Input input;
     private static Pane root;
     private static Player thisPlayer;
     private static HashMap<String, Player> playerList;
+    private Input input = Input.getInstance(); //Now a singleton pattern (nowhere close to as many statics)
     private static ProgressBar[] stunBar;
     private static BasicBall ball;
     private Stage window = null;
@@ -88,7 +79,6 @@ public class ClientGame extends Application {
         //region Initialise objects
         playerList = new HashMap<>();
         stunBar = new ProgressBar[4];
-        input = new Input();
         root = new Pane();
         //endregion
 
@@ -183,7 +173,7 @@ public class ClientGame extends Application {
                         new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
                                 thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
                 Vector2 direction =
-                        new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
+                        new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY())
                                 .subtract(player_client_center);
 
                 Affine rotate = new Affine();
@@ -195,22 +185,22 @@ public class ClientGame extends Application {
 
                 //region Handles player movement
                 if (thisPlayer.stand == 0) {
-                    if (Input.isKeyReleased(A) && Input.isKeyReleased(D)) {
+                    if (input.isKeyReleased(A) && input.isKeyReleased(D)) {
                         thisPlayer.getVelocity().setX(0);
                     }
-                    if (Input.isKeyReleased(W) && Input.isKeyReleased(S)) {
+                    if (input.isKeyReleased(W) && input.isKeyReleased(S)) {
                         thisPlayer.getVelocity().setY(0);
                     }
-                    if (Input.isKeyPressed(A)) {
+                    if (input.isKeyPressed(A)) {
                         thisPlayer.getVelocity().setX(-MOVEMENT_SPEED);
                     }
-                    if (Input.isKeyPressed(D)) {
+                    if (input.isKeyPressed(D)) {
                         thisPlayer.getVelocity().setX(MOVEMENT_SPEED);
                     }
-                    if (Input.isKeyPressed(W)) {
+                    if (input.isKeyPressed(W)) {
                         thisPlayer.getVelocity().setY(-MOVEMENT_SPEED);
                     }
-                    if (Input.isKeyPressed(S)) {
+                    if (input.isKeyPressed(S)) {
                         thisPlayer.getVelocity().setY(MOVEMENT_SPEED);
                     }
                 }
@@ -246,7 +236,7 @@ public class ClientGame extends Application {
 
                 //region Shoots a bullet or the ball
                 thisPlayer.setBulletShot(false);
-                if (Input.mouseButtonPressed.get(MouseButton.PRIMARY) && bulletLimiter == 0) {
+                if (input.isButtonPressed(MouseButton.PRIMARY) && bulletLimiter == 0) {
                     double bulletX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
                     double bulletY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
                     Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
@@ -340,7 +330,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise cursor
-        new Crosshair(Input.mousePosition.subtract(new Vector2(14, 14)), new Vector2(0, 0));
+        new Crosshair(input.getMousePosition().subtract(new Vector2(14, 14)), new Vector2(0, 0));
         //endregion
 
         //region Add audio into game
