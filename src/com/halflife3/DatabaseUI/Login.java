@@ -540,6 +540,7 @@ public class Login extends Preloader {
         boolean returnValue = false;
         String saltCheck = "";
         String securedPassword = "";
+        byte[] securedPassword2 = new byte[0];
 
         PreparedStatement saltStatement = null;
         ResultSet rs = null;
@@ -548,32 +549,42 @@ public class Login extends Preloader {
         try {
             //Retrieving the salt from the table based on the username given
             //Creating the query
-            String querySalt = "SELECT salt FROM userdatascore WHERE \"name\" = '" + username + "'";
+            String querySalt = "SELECT * FROM userdatascore WHERE \"name\" = '" + username + "'";
             //Creating the statement
             saltStatement = c.prepareStatement(querySalt);
+            //Executing the query
             rs = saltStatement.executeQuery();
             while (rs.next()) {
+                String testName = rs.getString(2);
                 saltCheck = rs.getString("salt");
-                System.out.println("Salt retrieved: " + saltCheck);
+                securedPassword2 = rs.getBytes("password");
+                System.out.println("Salt retrieved: " + saltCheck + " name: " + testName + " password: " + new String(securedPassword2));
             }
+            System.out.println("username passed: " + username + " password passed: " + passwordEntered);
+            securedPassword = new String(securedPassword2);
 
-            //Creating the query
+            /*Creating the query
             String queryDetails = "SELECT * FROM userdatascore WHERE \"name\" = '" + username + "'";
             //Creating the statement
             preparedStatement = c.prepareStatement(queryDetails);
             //Executing the query
             rsDetails = preparedStatement.executeQuery();
-            //Returns true if user details are correct and false if they aren't
             while (rsDetails.next()) {
-                securedPassword = rs.getString(4);
+                System.out.println("here");
+                securedPassword = rs.getString(5);
                 System.out.println("Password retrieved: " + securedPassword);
-            }
+            }*/
 
             // Generating new secure password with the salt retrieved from the database associated with the username
-            String newSecurePassword = Password.generateSecurePassword(passwordEntered, saltCheck);
+            //String newSecurePassword = Password.generateSecurePassword(passwordEntered, saltCheck);
 
             // Check if two passwords are equal and returns true if they are
-            return returnValue = newSecurePassword.equalsIgnoreCase(securedPassword);
+            //return returnValue = newSecurePassword.equalsIgnoreCase(securedPassword);
+
+            //Code to check password while hashed password is broken
+            System.out.println("Password entered: "+ passwordEntered);
+            System.out.println("SecuredPassword: " + securedPassword);
+            return returnValue = securedPassword.equals(passwordEntered);
 
         } catch (SQLException e) {
             e.printStackTrace();
