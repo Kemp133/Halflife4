@@ -27,6 +27,8 @@ public class Server implements Runnable {
     public static final int     GET_PORT_PORT       = 5566;
     public static final int     POSITIONS_PORT      = 5533;
 
+
+    private  int goal_width = 4;
     private boolean running = false;
     private static boolean welcoming = true;
     private static InetAddress multicastGroup;
@@ -45,6 +47,8 @@ public class Server implements Runnable {
     private AI botAI;
     private BasicBall theBall;
     private PositionPacket ballPacket;
+    private int mapWidth;
+    private  int mapHeight;
     //endregion
 
     public void start() {
@@ -74,6 +78,8 @@ public class Server implements Runnable {
             BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
             int mapWidthMiddle = mapImage.getWidth() * 20;
             int mapHeightMiddle = mapImage.getHeight() * 20;
+            mapWidth = mapImage.getWidth() * 40;
+            mapHeight = mapImage.getHeight() * 40;
 
             theBall = new BasicBall(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
 
@@ -225,7 +231,11 @@ public class Server implements Runnable {
         ballPacket.velX = theBall.getVelX();
         ballPacket.velY = theBall.getVelY();
         EventListenerServer.replaceEntry("ball", ballPacket);
-
+        //check if goal
+        if(theBall.getPosX()>mapWidth-goal_width*40 || theBall.getPosX()<goal_width*40){
+            theBall.setPosition(new Vector2(mapWidth/2,mapHeight/2));
+            theBall.resetVelocity();
+        }
         //region Sends the position list packet to all clients
         posListPacket.posList = ClientListServer.positionList;
         posListPacket.connectedIPs = ClientListServer.connectedIPs;

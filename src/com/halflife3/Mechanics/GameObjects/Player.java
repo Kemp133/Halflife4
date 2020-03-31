@@ -20,7 +20,7 @@ public class Player extends Controllable {
     private PositionPacket packetToSend;
     private int mode = 0;
     public float stand = 0;
-    private boolean bulletShot = false;
+    public boolean bulletShot = false;
     private boolean isMoving = false;
     private boolean holdsBall = false;
     //endregion

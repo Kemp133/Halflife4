@@ -57,10 +57,23 @@ public class ClientGame extends Application {
     private static ProgressBar[] stunBar;
     private static BasicBall ball;
     private Stage window = null;
+
+
+    //L for left and R for Right
+    private char side;
+    //The width of the goal area
+    private boolean goal = false;
+    private double original_ball_x;
+    private int goal_width = 4;
+    private int your_score = 0;
+    private int enemy_score = 0;
+    private boolean win;
+    private static HashMap<Integer, Image> score_sprite;
+
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 0;
-    private int mapWidth;
+    public int mapWidth;
     private int mapHeight;
     private final int RIGHT_END_OF_SCREEN = 11*40;
     private final int LEFT_END_OF_SCREEN = 9*40;
@@ -87,13 +100,14 @@ public class ClientGame extends Application {
 
         //region Initialise objects
         playerList = new HashMap<>();
+        score_sprite = new HashMap<>();
         stunBar = new ProgressBar[4];
         input = new Input();
         root = new Pane();
         //endregion
 
         //region Initialise this player
-        Vector2 startPos = new Vector2(25*40, 22*40);//clientNetwork.getStartingPosition();
+        Vector2 startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
         thisPlayer = new Player(startPos, startVel);
         thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
@@ -124,6 +138,12 @@ public class ClientGame extends Application {
         primaryStage.setScene(scene);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         gameInit(scene);// << BG, cursor, audio, key input, map loading
+        //Set the team of this player
+        if(thisPlayer.getPosX()<mapWidth/2)
+            side = 'L';
+        else
+            side = 'R';
+        System.out.println(side);
         //endregion
 
         //region Initialise stun bars
@@ -164,6 +184,8 @@ public class ClientGame extends Application {
                 double elapsedTime = (currentNanoTime - lastUpdate) / 1e9;
                 lastUpdate = currentNanoTime;
                 //endregion
+
+                //TODO: Check the goal status
 
                 //region Camera offset
                 Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
@@ -234,14 +256,16 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Checks if the player is holding the ball
+                //TODO: don't need to check let the server deal with it
                 var playerCenter = new Vector2(thisPlayer.circle.getCenterX(), thisPlayer.circle.getCenterY());
                 var ballPos = new Vector2(ball.getPosition());
                 var nextBallPos = new Vector2(ballPos).add(new Vector2(ball.getVelocity()).multiply(elapsedTime));
                 boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
                 boolean ballMovingAway = playerCenter.distance(ballPos) < playerCenter.distance(nextBallPos);
 
-                thisPlayer.setHoldsBall(playerIsTouchingTheBall/* && !ballMovingAway*/);
-
+                if(playerIsTouchingTheBall){
+                    thisPlayer.setHoldsBall(true/* && !ballMovingAway*/);
+                }
                 //endregion
 
                 //region Shoots a bullet or the ball
@@ -298,7 +322,30 @@ public class ClientGame extends Application {
 
                 //region Sends the client's position, whether they've shot a bullet and if they're holding the ball
                 Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
+                if(thisPlayer.bulletShot){
+                    thisPlayer.setHoldsBall(false);
+                }
                 //endregion
+
+                //Check if goal
+
+                //TODO:
+                if((side == 'L' && original_ball_x - ball.getPosX() > mapWidth/4) ||(side=='R' && original_ball_x - ball.getPosX() < -mapWidth/4)) {
+                    your_score++;
+                    goal = true;
+                    System.out.println("goal");
+                }
+                if((side == 'R' && original_ball_x - ball.getPosX() > mapWidth/4) ||(side=='L' && original_ball_x - ball.getPosX() < -mapWidth/4)){
+                    enemy_score++;
+                    System.out.println("goal");
+                    goal = true;
+                }
+                original_ball_x = ball.getPosX();
+                //Show the score
+                graphicsContext.drawImage(score_sprite.get(your_score), GAME_WINDOW_WIDTH/2-40, 40);
+                graphicsContext.drawImage(score_sprite.get(-1), GAME_WINDOW_WIDTH/2 + 10, 40);
+                graphicsContext.drawImage(score_sprite.get(enemy_score), GAME_WINDOW_WIDTH/2+40, 40);
+
 
                 //region FPS counter
 //                second -= elapsedTime;
@@ -375,6 +422,17 @@ public class ClientGame extends Application {
             BufferedImage map = ImageIO.read(new File("res/map.png"));
             mapWidth = map.getWidth() * 40;
             mapHeight = map.getHeight() * 40;
+            original_ball_x = mapWidth/2;
+            Image zero = new Image(new FileInputStream("res/numbers/0.png"));
+            score_sprite.put(0,zero);
+            Image one = new Image(new FileInputStream("res/numbers/1.png"));
+            score_sprite.put(1,one);
+            Image two = new Image(new FileInputStream("res/numbers/2.png"));
+            score_sprite.put(2,two);
+            Image three = new Image(new FileInputStream("res/numbers/3.png"));
+            score_sprite.put(3,three);
+            Image vs = new Image(new FileInputStream("res/numbers/vs.png"));
+            score_sprite.put(-1,vs);
         } catch (IOException e) { e.printStackTrace(); }
         //endregion
     }
@@ -444,8 +502,11 @@ public class ClientGame extends Application {
                 enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 enemy.setPosition(theDoubleValues.posX, theDoubleValues.posY);
             } else {
+
+
                 ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 ball.setPosition(theDoubleValues.posX, theDoubleValues.posY);
+
             }
             //endregion
 
