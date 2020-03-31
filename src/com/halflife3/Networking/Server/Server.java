@@ -11,11 +11,11 @@ import com.halflife3.View.MapRender;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 public class Server implements Runnable {
@@ -39,11 +39,11 @@ public class Server implements Runnable {
     private final int GOAL_WIDTH = 2;
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
-    private static Vector2[] startPositions = {new Vector2(80, 480),
-                                               new Vector2(80, 720),
+    private static Vector2[] startPositions = {new Vector2(160, 600),
+                                               new Vector2(1840, 600)/*,
                                                new Vector2(1920, 480),
-                                               new Vector2(1920, 720)};
-    public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1", "bot2", "bot3"));
+                                               new Vector2(1920, 720)*/};
+    public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1"/*, "bot2", "bot3"*/));
     private AI botAI;
     private BasicBall theBall;
     private PositionPacket ballPacket;
@@ -58,8 +58,8 @@ public class Server implements Runnable {
 
         new Thread(() -> readyAI[0] = botAI.setupMap()).start();
 
-        //region Fills the positionList with 4 bot players, giving them available starting positions
-        for (int i = 0; i < 4; i++) {
+        //region Fills the positionList with bot players, giving them available starting positions
+        for (int i = 0; i < startPositions.length; i++) {
             positionAvailable.put(startPositions[i], true);
             PositionPacket botPacket = newBotPacket(i);
             ClientListServer.positionList.put(botNamesList.get(i), botPacket);
@@ -175,7 +175,7 @@ public class Server implements Runnable {
 
 //        Listens for incoming packets
         while (running) {
-            if (ClientListServer.clientList.size() < 4) {
+            if (ClientListServer.clientList.size() < startPositions.length) {
                 try {
                     connectionListener();
                 } catch (IOException e) { e.printStackTrace(); }
@@ -230,9 +230,11 @@ public class Server implements Runnable {
         //endregion
 
         //region Ball collision
-        if (!theBall.isHeld && PreviousBallVel.equals(theBall.getVelocity()) ) ballWallBounce();
-        //endregion
+        if (!theBall.isHeld && PreviousBallVel.equals(theBall.getVelocity()))
+            ballWallBounce();
         PreviousBallVel = theBall.getVelocity();
+        //endregion
+
         //region Update ballPacket
         ballPacket.posX = theBall.getPosX();
         ballPacket.posY = theBall.getPosY();
