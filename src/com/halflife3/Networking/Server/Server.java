@@ -27,7 +27,6 @@ public class Server implements Runnable {
     public static final int     GET_PORT_PORT       = 5566;
     public static final int     POSITIONS_PORT      = 5533;
 
-    private  int goal_width = 4;
     private boolean running = false;
     private static boolean welcoming = true;
     private static InetAddress multicastGroup;
@@ -36,6 +35,7 @@ public class Server implements Runnable {
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
+    private final int GOAL_WIDTH = 4;
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
     private static Vector2[] startPositions = {new Vector2(80, 480),
@@ -146,8 +146,8 @@ public class Server implements Runnable {
 //        Multicasts the positionList
         new Thread(() -> {
             long lastUpdate = System.nanoTime();
-            int fpsCounter = 0;
-            double second = 1.0;
+//            int fpsCounter = 0;
+//            double second = 1.0;
             double elapsedTime;
 
             while (running) {
@@ -241,11 +241,13 @@ public class Server implements Runnable {
         EventListenerServer.replaceEntry("ball", ballPacket);
         //endregion
 
-        //check if goal
-        if(theBall.getPosX()>mapWidth-goal_width*40 || theBall.getPosX()<goal_width*40){
-            theBall.setPosition(new Vector2(mapWidth/2,mapHeight/2));
+        //region Check if a goal has been scored
+        if (theBall.getPosX() > mapWidth - GOAL_WIDTH * 40 || theBall.getPosX() < GOAL_WIDTH * 40) {
+            theBall.setPosition(new Vector2(mapWidth/2f,mapHeight/2f));
             theBall.resetVelocity();
         }
+        //endregion
+
         //region Sends the position list packet to all clients
         posListPacket.posList = ClientListServer.positionList;
         posListPacket.connectedIPs = ClientListServer.connectedIPs;

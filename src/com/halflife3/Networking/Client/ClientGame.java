@@ -14,7 +14,6 @@ import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -67,11 +66,9 @@ public class ClientGame extends Application {
     private static ProgressBar[] stunBar;
     private static BasicBall ball;
     private Stage window = null;
-    //L for left and R for Right
     private char side;
-    //The width of the goal area
     private boolean goal = false;
-    private double original_ball_x;
+    private double ballPreviousX;
     private int goal_width = 4;
     private int your_score = 0;
     private int enemy_score = 0;
@@ -120,6 +117,7 @@ public class ClientGame extends Application {
         thisPlayer = new Player(startPos, startVel);
         thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
         thisPlayer.setAI(false);
+        side = (thisPlayer.getPosX() < mapWidth / 2f) ? 'L' : 'R'; // Sets the team of this player
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -146,12 +144,6 @@ public class ClientGame extends Application {
         primaryStage.setScene(scene);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         gameInit(scene);// << BG, cursor, audio, key input, map loading
-        //Set the team of this player
-        if(thisPlayer.getPosX()<mapWidth/2)
-            side = 'L';
-        else
-            side = 'R';
-        System.out.println(side);
         //endregion
 
         //region Initialise stun bars
@@ -166,15 +158,12 @@ public class ClientGame extends Application {
 
         //region Initialise ball
         ball = new BasicBall(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
+        ballPreviousX = mapWidth / 2f;
         //endregion
 
         //region Thread to update the position of all enemies and the ball
         running = true;
-        new Thread(() -> {
-            while (running) {
-                updateEnemies();
-            }
-        }).start();
+        new Thread(() -> { while (running) updateEnemies(); }).start();
         //endregion
 
         System.out.println("Game running");
@@ -268,7 +257,6 @@ public class ClientGame extends Application {
                 boolean ballMovingAway = playerCenter.distance(ballPos) < playerCenter.distance(nextBallPos);
 
                 thisPlayer.setHoldsBall(playerIsTouchingTheBall && !ballMovingAway);
-
                 //endregion
 
                 //region Shoots a bullet or the ball
@@ -325,30 +313,31 @@ public class ClientGame extends Application {
 
                 //region Sends the client's position, whether they've shot a bullet and if they're holding the ball
                 Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
-                if(thisPlayer.bulletShot){
-                    thisPlayer.setHoldsBall(false);
-                }
+                if (thisPlayer.bulletShot) thisPlayer.setHoldsBall(false);
                 //endregion
 
-                //Check if goal
-
-                //TODO:
-                if((side == 'L' && original_ball_x - ball.getPosX() > mapWidth/4) ||(side=='R' && original_ball_x - ball.getPosX() < -mapWidth/4)) {
+                //region Checks if a goal has been scored
+                if ((side == 'L' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
+                        (side == 'R' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)) {
                     your_score++;
                     goal = true;
-                    System.out.println("goal");
-                }
-                if((side == 'R' && original_ball_x - ball.getPosX() > mapWidth/4) ||(side=='L' && original_ball_x - ball.getPosX() < -mapWidth/4)){
+                    System.out.println("Goal for YOUR team!");
+                } else if ((side == 'R' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
+                        (side=='L' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)){
                     enemy_score++;
-                    System.out.println("goal");
+                    System.out.println("Goal for the ENEMY team!");
                     goal = true;
                 }
-                original_ball_x = ball.getPosX();
-                //Show the score
-                graphicsContext.drawImage(score_sprite.get(your_score), GAME_WINDOW_WIDTH/2-40, 40);
-                graphicsContext.drawImage(score_sprite.get(-1), GAME_WINDOW_WIDTH/2 + 10, 40);
-                graphicsContext.drawImage(score_sprite.get(enemy_score), GAME_WINDOW_WIDTH/2+40, 40);
+                ballPreviousX = ball.getPosX();
+                //endregion
 
+                //region Renders the score text
+                graphicsContext.drawImage(score_sprite.get(your_score), GAME_WINDOW_WIDTH / 2f - 40, 40);
+                graphicsContext.drawImage(score_sprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
+                graphicsContext.drawImage(score_sprite.get(enemy_score), GAME_WINDOW_WIDTH / 2f + 40, 40);
+                //endregion
+
+                //TODO: If ESC is pressed -> Open Pause Menu
 
                 //region FPS counter
 //                second -= elapsedTime;
@@ -361,8 +350,6 @@ public class ClientGame extends Application {
                 //endregion
             }
         }.start();
-
-        //if esc is pressed --> enter pause menu
 
         root.requestFocus();
         primaryStage.show();
@@ -380,16 +367,17 @@ public class ClientGame extends Application {
         //region Background setup
         try {
             Image image = new Image(new FileInputStream("res/Space.png"));
-            BackgroundSize bgSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
-            BackgroundImage myBI = new BackgroundImage(image, null, null, null, bgSize);
+            var bgSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO,
+                    false, false, true, true);
+            var myBI = new BackgroundImage(image, null, null, null, bgSize);
             root.setBackground(new Background(myBI));
         } catch (FileNotFoundException e) {
-            System.out.println("Could not find file in path: 'res/background_image.png'");
+            System.out.println("Could not find file in path: 'res/Space.png'");
         }
         //endregion
 
         //region Initialise cursor
-        new Crosshair(Input.mousePosition.subtract(new Vector2(14, 14)), new Vector2(0, 0));
+        new Crosshair(Input.mousePosition, new Vector2(0, 0));
         //endregion
 
         //region Add audio into game
@@ -424,72 +412,78 @@ public class ClientGame extends Application {
             BufferedImage map = ImageIO.read(new File("res/map.png"));
             mapWidth = map.getWidth() * 40;
             mapHeight = map.getHeight() * 40;
-            original_ball_x = mapWidth/2;
-            Image zero = new Image(new FileInputStream("res/numbers/0.png"));
-            score_sprite.put(0,zero);
-            Image one = new Image(new FileInputStream("res/numbers/1.png"));
-            score_sprite.put(1,one);
-            Image two = new Image(new FileInputStream("res/numbers/2.png"));
-            score_sprite.put(2,two);
-            Image three = new Image(new FileInputStream("res/numbers/3.png"));
-            score_sprite.put(3,three);
-            Image vs = new Image(new FileInputStream("res/numbers/vs.png"));
-            score_sprite.put(-1,vs);
         } catch (IOException e) { e.printStackTrace(); }
+        //endregion
 
-        //the pause menu
-        root.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if(keyEvent.getCode()== KeyCode.ESCAPE){
-                    //set background effect
-                    root.setEffect(new GaussianBlur());
-                    //setting up vbox for buttons
-                    //we will have 1 line of description with 4 buttons, that 5 rows
-                    VBox pauseRoot = new VBox(6);
-                    pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
-                    pauseRoot.setAlignment(Pos.CENTER);
-                    pauseRoot.setPadding(new Insets(20));
-                    //actual stuff in the rows
-                    pauseRoot.getChildren().add(new Label("Paused"));
-                    //Button 1
-                    Button returnToGame = new Button("Return to game");
-                    pauseRoot.getChildren().add(returnToGame);
-                    //Button 2
-                    /*
-                    Button options = new Button("Options");
-                    pauseRoot.getChildren().add(options);
-                    */
-                    //button 2.5
-                    Button sound = new Button("Audio On/Off");
-                    pauseRoot.getChildren().add(sound);
-                    //Button 3
-                    Button toMainMenu = new Button("Quit to Main Menu");
-                    pauseRoot.getChildren().add(toMainMenu);
-                    //Button 4
-                    Button toDesktop = new Button("Quit to Desktop");
-                    pauseRoot.getChildren().add(toDesktop);
-                    //actual stage of the pause menu
-                    Stage popupStage = new Stage(StageStyle.TRANSPARENT);
-                    popupStage.initOwner(window);
-                    popupStage.initModality(Modality.APPLICATION_MODAL);
-                    popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
-                    //Button function 1:resume
-                    returnToGame.setOnAction(event-> {
-                        root.setEffect(null);
-                        popupStage.hide();
-                    });
-                    //Button function 2: options(audio)
-                    sound.setOnAction(actionEvent -> {
-                        audio.swtichMute();
-                    });
-                    toMainMenu.setOnAction(actionEvent -> {
+        //region Adds score sprites
+        try {
+            score_sprite.put(-1, new Image(new FileInputStream("res/numbers/vs.png")));
+            score_sprite.put(0, new Image(new FileInputStream("res/numbers/0.png")));
+            score_sprite.put(1, new Image(new FileInputStream("res/numbers/1.png")));
+            score_sprite.put(2, new Image(new FileInputStream("res/numbers/2.png")));
+            score_sprite.put(3, new Image(new FileInputStream("res/numbers/3.png")));
+        } catch (FileNotFoundException e) { e.printStackTrace(); }
+        //endregion
 
-                    });
-                    toDesktop.setOnAction(actionEvent -> {
-                    });
-                    popupStage.show();
-                }
+        //region Pause menu
+        root.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                //Blurs the background
+                root.setEffect(new GaussianBlur());
+
+                //VBox - pane with buttons
+                VBox pauseRoot = new VBox(6);
+                pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+                pauseRoot.setAlignment(Pos.CENTER);
+                pauseRoot.setPadding(new Insets(20));
+                pauseRoot.getChildren().add(new Label("Paused"));
+
+                //Stage of the pause menu
+                Stage popupStage = new Stage(StageStyle.TRANSPARENT);
+                popupStage.initOwner(window);
+                popupStage.initModality(Modality.APPLICATION_MODAL);
+                popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
+
+                //region ReturnToGame button
+                Button returnToGame = new Button("Return to game");
+                pauseRoot.getChildren().add(returnToGame);
+                returnToGame.setOnAction(event-> {
+                    root.setEffect(null);
+                    popupStage.hide();
+                });
+                //endregion
+
+                //region Options button
+//                Button options = new Button("Options");
+//                pauseRoot.getChildren().add(options);
+//                options.setOnAction(actionEvent -> {
+//
+//                });
+                //endregion
+
+                //region Audio button
+                Button sound = new Button("Audio On/Off");
+                pauseRoot.getChildren().add(sound);
+                sound.setOnAction(actionEvent -> audio.swtichMute());
+                //endregion
+
+                //region ToMainMenu button
+                Button toMainMenu = new Button("Quit to Main Menu");
+                pauseRoot.getChildren().add(toMainMenu);
+                toMainMenu.setOnAction(actionEvent -> {
+
+                });
+                //endregion
+
+                //region ToDesktop button
+                Button toDesktop = new Button("Quit to Desktop");
+                pauseRoot.getChildren().add(toDesktop);
+                toDesktop.setOnAction(actionEvent -> {
+
+                });
+                //endregion
+
+                popupStage.show();
             }
         });
         //endregion
@@ -583,30 +577,6 @@ public class ClientGame extends Application {
             //endregion
         }
         //endregion
-    }
-
-    private void ballWallBounce() {
-        for (Bricks block : MapRender.GetList()) {
-            if (!ball.getBounds().intersects(block.getBounds().getBoundsInLocal()) || thisPlayer.isHoldingBall())
-                continue;
-
-            Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
-                    block.getPosY() + block.getHeight() / 2);
-            Vector2 ballCenter = new Vector2(ball.getPosX() + ball.getWidth() / 2,
-                    ball.getPosY() + ball.getHeight() / 2);
-
-            Vector2 relevantPos = new Vector2(ballCenter).subtract(brickCenter);
-            double rel_x = relevantPos.getX();
-            double rel_y = relevantPos.getY();
-
-            if ((rel_x > 0 && rel_x < 38 && rel_y > -33 && rel_y < 33 && ball.getVelX() < 0) ||
-                    rel_x > -38 && rel_x < 0 && rel_y > -33 && rel_y < 33 && ball.getVelX() > 0) {
-                ball.collision(1);
-            } else if ((rel_x > -33 && rel_x < 33 && rel_y > 0 && rel_y < 38 && ball.getVelY() < 0) ||
-                    rel_x > -33 && rel_x < 33 && rel_y > -38 && rel_y < 0 && ball.getVelY() > 0) {
-                ball.collision(2);
-            }
-        }
     }
 
     private synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {

@@ -9,6 +9,7 @@ public class Crosshair extends Sprite {
     public Crosshair(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         setSprite("res/Crosshair.png");
+        position.subtract(getWidth() / 2, getHeight() / 2);
     }
 
     @Override
