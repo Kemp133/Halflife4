@@ -20,8 +20,6 @@ public abstract class Sprite extends GameObject {
 		} catch (IOException e) { System.err.println("Image not found!"); }
 	}
 
-	public Image getSprite() { return sprite; }
-
 	public Shape getBounds() {
 		return new Rectangle(position.getX(),position.getY(),getWidth(),getHeight());
 	}

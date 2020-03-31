@@ -6,15 +6,22 @@ import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Random;
+
 public class Bricks extends Sprite {
     public Rectangle rectangle;
 
     public Bricks(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         keys.add("Bricks");
-        //Bricks should only be created in the MapRender class, so remove them from the ObjectManager to stop them polluting the object pool
+        //Bricks should only be created in the MapRender class,
+        // so remove them from the ObjectManager to stop them polluting the object pool
         ObjectManager.removeObject(this);
-        setSprite("res/block.png");
+        ArrayList<String> blockNames = pathList();
+        setSprite(blockNames.get((new Random()).nextInt(blockNames.size())));
         rectangle = new Rectangle(position.getX(), position.getY(), getWidth(), getHeight());
     }
 
@@ -30,7 +37,8 @@ public class Bricks extends Sprite {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, position.getX()- Camera.GetOffset().getX() , position.getY() - Camera.GetOffset().getY());
+        gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX(),
+                position.getY() - Camera.GetOffset().getY());
     }
 
     @Override
@@ -38,8 +46,15 @@ public class Bricks extends Sprite {
         //TODO: If bullet touches the brick and the brick can be destroyed, remove brick
     }
 
-    //region Get Width and Height
-    public double getWidth() { return sprite.getWidth(); }
-    public double getHeight() { return sprite.getHeight(); }
-    //endregion
+    private ArrayList<String> pathList() {
+        ArrayList<String> paths = new ArrayList<>();
+
+        File directory = new File("res\\Sprites\\Bricks");
+        int fileCount = Objects.requireNonNull(directory.list()).length;
+
+        for (int i = 1; i <= fileCount; i++)
+            paths.add(String.format("res/Sprites/Bricks/block%d.png", i));
+
+        return paths;
+    }
 }

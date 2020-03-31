@@ -34,8 +34,7 @@ public class MapRender {
                 for (int y = 0; y < mapImage.getHeight(); y++) {
                     if (pixelReader.getColor(x, y).equals(Color.BLACK)) {
                         Vector2 position = new Vector2(x * 40, y * 40);
-                        Bricks new_Brick = new Bricks(position.subtract(Camera.GetOffset()), zero);
-                        new_Brick.setSprite("res/block.png");
+                        Bricks new_Brick = new Bricks(position, zero);
                         Bricks_list.add(new_Brick);
                     }
                 }

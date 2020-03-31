@@ -171,9 +171,9 @@ public class Server implements Runnable {
 //        Listens for incoming packets
         while (running) {
             if (ClientListServer.clientList.size() < 4) {
-                try { connectionListener(); } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                try {
+                    connectionListener();
+                } catch (IOException e) { e.printStackTrace(); }
             }
         }
 
@@ -181,9 +181,12 @@ public class Server implements Runnable {
     }
 
     private void gameFrame(double elapsedTime) {
+        //region Move AI controlled players
 //        if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
 //            moveAI(elapsedTime);
+        //endregion
 
+        //region Ball's position and velocity
         for (String ip : ClientListServer.positionList.keySet()) {
             PositionPacket playerWithBall = ClientListServer.positionList.get(ip);
 
@@ -194,7 +197,7 @@ public class Server implements Runnable {
             double degreeRadians = Math.toRadians(playerWithBall.degrees);
             double ballX = Math.cos(degreeRadians);
             double ballY = Math.sin(degreeRadians);
-            Vector2 ballDir = new Vector2(ballX * 35, ballY * 35);
+            Vector2 ballDir = new Vector2(ballX * 30, ballY * 30);
             Vector2 ballPos = new Vector2(playerWithBall.posX + 6, playerWithBall.posY + 6).add(ballDir);
             theBall.setPosition(ballPos);
             theBall.isHeld = true;
@@ -215,18 +218,25 @@ public class Server implements Runnable {
 
             break;
         }
+        //endregion
 
+        //region Ball collision
         if (!theBall.isHeld) ballWallBounce();
+        //endregion
 
+        //region Update objects
         theBall.update(elapsedTime);
+        //endregion
 
+        //region Update ballPacket
         ballPacket.posX = theBall.getPosX();
         ballPacket.posY = theBall.getPosY();
         ballPacket.velX = theBall.getVelX();
         ballPacket.velY = theBall.getVelY();
         EventListenerServer.replaceEntry("ball", ballPacket);
+        //endregion
 
-        //region Sends the position list packet to all clients
+        //region Send the position list packet to all clients
         posListPacket.posList = ClientListServer.positionList;
         posListPacket.connectedIPs = ClientListServer.connectedIPs;
         multicastPacket(posListPacket, POSITIONS_PORT);

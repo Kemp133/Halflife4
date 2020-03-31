@@ -179,16 +179,16 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Calculate the rotation
-                Vector2 player_client_center =
+                Vector2 playerClientCenter =
                         new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
                                 thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
                 Vector2 direction =
                         new Vector2(Input.mousePosition.getX(), Input.mousePosition.getY())
-                                .subtract(player_client_center);
+                                .subtract(playerClientCenter);
 
                 Affine rotate = new Affine();
                 short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-                rotate.appendRotation(deg, player_client_center.getX(), player_client_center.getY());
+                rotate.appendRotation(deg, playerClientCenter.getX(), playerClientCenter.getY());
                 thisPlayer.setDegrees(deg);
                 thisPlayer.setAffine(rotate);
                 //endregion
@@ -224,9 +224,6 @@ public class ClientGame extends Application {
 
 //                Bullet collision
                 editObjectManager(1, 0, null, null, null);
-
-//                Ball collision
-//                ballWallBounce();
                 //endregion
 
                 //region Updates position of all game objects locally (has to go after collision)
@@ -240,7 +237,7 @@ public class ClientGame extends Application {
                 boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
                 boolean ballMovingAway = playerCenter.distance(ballPos) < playerCenter.distance(nextBallPos);
 
-                thisPlayer.setHoldsBall(playerIsTouchingTheBall/* && !ballMovingAway*/);
+                thisPlayer.setHoldsBall(playerIsTouchingTheBall && !ballMovingAway);
 
                 //endregion
 
@@ -260,8 +257,8 @@ public class ClientGame extends Application {
                             }
 
                         if (!ballInWall) {
-                            ball.setVelocity(new Vector2(shotVelocity).multiply(1.5));
-                            ball.setAcceleration(new Vector2(shotVelocity).divide(100));
+//                            ball.setVelocity(new Vector2(shotVelocity).multiply(1.5));
+//                            ball.setAcceleration(new Vector2(shotVelocity).divide(100));
                             thisPlayer.setBulletShot(true);
                         }
                     } else { // Shoots a bullet
@@ -326,13 +323,10 @@ public class ClientGame extends Application {
 
     private void gameInit(Scene scene) {
         //region Background setup
-        FileInputStream bgPNG;
         try {
-            bgPNG = new FileInputStream("res/background_image.png");
-            Image image = new Image(bgPNG, 40, 40, true, true);
-            BackgroundImage myBI = new BackgroundImage(image,
-                    BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT,
-                    BackgroundSize.DEFAULT);
+            Image image = new Image(new FileInputStream("res/Space.png"));
+            BackgroundSize bgSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
+            BackgroundImage myBI = new BackgroundImage(image, null, null, null, bgSize);
             root.setBackground(new Background(myBI));
         } catch (FileNotFoundException e) {
             System.out.println("Could not find file in path: 'res/background_image.png'");
@@ -467,30 +461,6 @@ public class ClientGame extends Application {
             //endregion
         }
         //endregion
-    }
-
-    private void ballWallBounce() {
-        for (Bricks block : MapRender.GetList()) {
-            if (!ball.getBounds().intersects(block.getBounds().getBoundsInLocal()) || thisPlayer.isHoldingBall())
-                continue;
-
-            Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
-                    block.getPosY() + block.getHeight() / 2);
-            Vector2 ballCenter = new Vector2(ball.getPosX() + ball.getWidth() / 2,
-                    ball.getPosY() + ball.getHeight() / 2);
-
-            Vector2 relevantPos = new Vector2(ballCenter).subtract(brickCenter);
-            double rel_x = relevantPos.getX();
-            double rel_y = relevantPos.getY();
-
-            if ((rel_x > 0 && rel_x < 38 && rel_y > -33 && rel_y < 33 && ball.getVelX() < 0) ||
-                    rel_x > -38 && rel_x < 0 && rel_y > -33 && rel_y < 33 && ball.getVelX() > 0) {
-                ball.collision(1);
-            } else if ((rel_x > -33 && rel_x < 33 && rel_y > 0 && rel_y < 38 && ball.getVelY() < 0) ||
-                    rel_x > -33 && rel_x < 33 && rel_y > -38 && rel_y < 0 && ball.getVelY() > 0) {
-                ball.collision(2);
-            }
-        }
     }
 
     private synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
