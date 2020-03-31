@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 public class Database {
 
-    public static void main(String[] args) {
+    public static void main() {
         Connection c = null;
         try {
             Class.forName("org.postgresql.Driver");

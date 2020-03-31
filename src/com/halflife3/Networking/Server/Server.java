@@ -36,6 +36,7 @@ public class Server implements Runnable {
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
+    private final int GOAL_WIDTH = 2;
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
     private static Vector2[] startPositions = {new Vector2(80, 480),
@@ -46,6 +47,9 @@ public class Server implements Runnable {
     private AI botAI;
     private BasicBall theBall;
     private PositionPacket ballPacket;
+    private int mapWidth;
+    private int mapHeight;
+    private Vector2 PreviousBallVel = new Vector2(0,0);
     //endregion
 
     public void start() {
@@ -68,6 +72,8 @@ public class Server implements Runnable {
             BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
             int mapWidthMiddle = mapImage.getWidth() * 20;
             int mapHeightMiddle = mapImage.getHeight() * 20;
+            mapWidth = mapWidthMiddle * 2;
+            mapHeight = mapHeightMiddle * 2;
 
             theBall = new BasicBall(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
 
@@ -140,8 +146,8 @@ public class Server implements Runnable {
 //        Multicasts the positionList
         new Thread(() -> {
             long lastUpdate = System.nanoTime();
-            int fpsCounter = 0;
-            double second = 1.0;
+//            int fpsCounter = 0;
+//            double second = 1.0;
             double elapsedTime;
 
             while (running) {
@@ -170,9 +176,9 @@ public class Server implements Runnable {
 //        Listens for incoming packets
         while (running) {
             if (ClientListServer.clientList.size() < 4) {
-                try { connectionListener(); } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                try {
+                    connectionListener();
+                } catch (IOException e) { e.printStackTrace(); }
             }
         }
 
@@ -180,9 +186,12 @@ public class Server implements Runnable {
     }
 
     private void gameFrame(double elapsedTime) {
+        //region Move AI controlled players
 //        if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
 //            moveAI(elapsedTime);
+        //endregion
 
+        //region Ball's position and velocity
         for (String ip : ClientListServer.positionList.keySet()) {
             PositionPacket playerWithBall = ClientListServer.positionList.get(ip);
 
@@ -214,16 +223,30 @@ public class Server implements Runnable {
 
             break;
         }
+        //endregion
 
-        if (!theBall.isHeld) ballWallBounce();
-
+        //region Update objects
         theBall.update(elapsedTime);
+        //endregion
 
+        //region Ball collision
+        if (!theBall.isHeld && PreviousBallVel.equals(theBall.getVelocity()) ) ballWallBounce();
+        //endregion
+        PreviousBallVel = theBall.getVelocity();
+        //region Update ballPacket
         ballPacket.posX = theBall.getPosX();
         ballPacket.posY = theBall.getPosY();
         ballPacket.velX = theBall.getVelX();
         ballPacket.velY = theBall.getVelY();
         EventListenerServer.replaceEntry("ball", ballPacket);
+        //endregion
+
+        //region Check if a goal has been scored
+        if (theBall.getPosX() > mapWidth - GOAL_WIDTH * 40 || theBall.getPosX() < GOAL_WIDTH * 40) {
+            theBall.setPosition(new Vector2(mapWidth/2f,mapHeight/2f));
+            theBall.resetVelocity();
+        }
+        //endregion
 
         //region Sends the position list packet to all clients
         posListPacket.posList = ClientListServer.positionList;
@@ -246,12 +269,13 @@ public class Server implements Runnable {
             double rel_x = relevantPos.getX();
             double rel_y = relevantPos.getY();
 
-            if ((rel_x > 0 && rel_x < 38 && rel_y > -33 && rel_y < 33 && theBall.getVelX() < 0) ||
-                    rel_x > -38 && rel_x < 0 && rel_y > -33 && rel_y < 33 && theBall.getVelX() > 0) {
-                theBall.collision(1);
-            } else if ((rel_x > -33 && rel_x < 33 && rel_y > 0 && rel_y < 38 && theBall.getVelY() < 0) ||
-                    rel_x > -33 && rel_x < 33 && rel_y > -38 && rel_y < 0 && theBall.getVelY() > 0) {
+            if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) ||
+                    (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) ||
+                    (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) ||
+                    (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0)) {
                 theBall.collision(2);
+            } else {
+                theBall.collision(1);
             }
         }
     }

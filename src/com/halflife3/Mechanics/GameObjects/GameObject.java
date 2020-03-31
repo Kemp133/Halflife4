@@ -20,10 +20,6 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     //endregion
 
     //region Constructors
-    public GameObject() {
-        ObjectManager.addObject(this);
-    }
-
     public GameObject(Vector2 position, Vector2 velocity) {
         this.position = position;
         this.velocity = velocity;
@@ -137,7 +133,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     }
     //endregion
 
-    //region Overrided method
+    //region Overridden method
     @Override
     public String toString() {
         var sb = new StringBuilder();

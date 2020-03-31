@@ -18,9 +18,9 @@ public class Player extends Controllable {
     private Image sprite2;
     private Vector2 originalPosition;
     private PositionPacket packetToSend;
-    private int mode = 0;
+//    private int mode = 0;
     public float stand = 0;
-    private boolean bulletShot = false;
+    public boolean bulletShot = false;
     private boolean isMoving = false;
     private boolean holdsBall = false;
     //endregion
@@ -29,8 +29,8 @@ public class Player extends Controllable {
         super(position, velocity);
         acceleration = new Vector2(0,0);
         keys.add("player");
-        setSprite("res/Player_pic.png");
-        setSprite2("res/Player_walking.png");
+        setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
+        setSprite2("res/Sprites/PlayerSkins/Cosmo_Moving.png");
         circle = new Circle(position.getX() + getWidth() / 2,
                 position.getY() + getHeight() / 2,
                 Math.max(getWidth(), getHeight()) / 2 + 1);
@@ -52,13 +52,17 @@ public class Player extends Controllable {
         gc.save();
         gc.setTransform(affine);
 
-        if (mode % 6 == 0 && isMoving) {
+        if (isMoving) {
             gc.drawImage(sprite2, posX, posY);
-            mode++;
-        } else {
-            gc.drawImage(sprite, posX, posY);
-            mode = (mode < 10) ? mode + 1 : 0;
-        }
+        } else gc.drawImage(sprite, posX, posY);
+
+//        if (mode % 6 == 0 && isMoving) {
+//            gc.drawImage(sprite2, posX, posY);
+//            mode++;
+//        } else {
+//            gc.drawImage(sprite, posX, posY);
+//            mode = (mode < 10) ? mode + 1 : 0;
+//        }
 
         gc.restore();
     }
