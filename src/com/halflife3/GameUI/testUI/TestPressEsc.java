@@ -1,4 +1,4 @@
-package com.halflife3.GameUI;
+package com.halflife3.GameUI.testUI;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -18,13 +18,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import javafx.scene.input.KeyCode;
 
-public class PauseMenu extends Application {
+public class TestPressEsc extends Application {
     private boolean pause = false;
     @Override
     public void start(Stage stage) throws Exception {
 
         //press button to enter pause:
-        Button pauseButton = new Button("Try pressing escape!");
+        Button pauseButton = new Button("Pause");
         Pane pane = new Pane();
         pane.setMinSize(600, 400);
         BorderPane root = new BorderPane(pane, null, null, pauseButton, new Label(""+pause));

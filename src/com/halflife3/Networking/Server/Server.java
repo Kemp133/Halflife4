@@ -27,6 +27,7 @@ public class Server implements Runnable {
     public static final int     GET_PORT_PORT       = 5566;
     public static final int     POSITIONS_PORT      = 5533;
 
+    private  int goal_width = 4;
     private boolean running = false;
     private static boolean welcoming = true;
     private static InetAddress multicastGroup;
@@ -45,6 +46,8 @@ public class Server implements Runnable {
     private AI botAI;
     private BasicBall theBall;
     private PositionPacket ballPacket;
+    private int mapWidth;
+    private int mapHeight;
     //endregion
 
     public void start() {
@@ -74,6 +77,8 @@ public class Server implements Runnable {
             BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
             int mapWidthMiddle = mapImage.getWidth() * 20;
             int mapHeightMiddle = mapImage.getHeight() * 20;
+            mapWidth = mapWidthMiddle * 2;
+            mapHeight = mapHeightMiddle * 2;
 
             theBall = new BasicBall(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
 
@@ -197,7 +202,7 @@ public class Server implements Runnable {
             double degreeRadians = Math.toRadians(playerWithBall.degrees);
             double ballX = Math.cos(degreeRadians);
             double ballY = Math.sin(degreeRadians);
-            Vector2 ballDir = new Vector2(ballX * 30, ballY * 30);
+            Vector2 ballDir = new Vector2(ballX * 35, ballY * 35);
             Vector2 ballPos = new Vector2(playerWithBall.posX + 6, playerWithBall.posY + 6).add(ballDir);
             theBall.setPosition(ballPos);
             theBall.isHeld = true;
@@ -236,7 +241,12 @@ public class Server implements Runnable {
         EventListenerServer.replaceEntry("ball", ballPacket);
         //endregion
 
-        //region Send the position list packet to all clients
+        //check if goal
+        if(theBall.getPosX()>mapWidth-goal_width*40 || theBall.getPosX()<goal_width*40){
+            theBall.setPosition(new Vector2(mapWidth/2,mapHeight/2));
+            theBall.resetVelocity();
+        }
+        //region Sends the position list packet to all clients
         posListPacket.posList = ClientListServer.positionList;
         posListPacket.connectedIPs = ClientListServer.connectedIPs;
         multicastPacket(posListPacket, POSITIONS_PORT);
