@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class AI {
-	private final int ONE_MOVE = 40;
+	private final int BLOCK_SIZE = 40;
 	private Node[][] map = null;
 	private int mapWidth = 0;
 	private int mapHeight = 0;
@@ -31,7 +31,7 @@ public class AI {
 			for (int i = 0; i < mapHeight; i++) {
 				for (int j = 0; j < mapWidth; j++) {
 					Color color = px.getColor(j,i);
-					map[i][j] = new Node(new Vector2((i * ONE_MOVE), (j * ONE_MOVE)));
+					map[i][j] = new Node(new Vector2((i * BLOCK_SIZE), (j * BLOCK_SIZE)));
 					if (color.equals(Color.BLACK))
 						map[i][j].type = "Wall";
 				}
@@ -56,8 +56,8 @@ public class AI {
 	public PositionPacket getBotMovement(PositionPacket bot) {
 		Vector2 toGoTo = mapCenter(); //mapCenter() or closestEnemy(bot)
 
-		Node botNode = map[(int) (bot.posY) / 40][(int) (bot.posX) / 40];
-		Node endNode = map[(int) (toGoTo.getY()) / 40][(int) (toGoTo.getX()) / 40];
+		Node botNode = map[(int) (bot.posY) / BLOCK_SIZE][(int) (bot.posX) / BLOCK_SIZE];
+		Node endNode = map[(int) (toGoTo.getY()) / BLOCK_SIZE][(int) (toGoTo.getX()) / BLOCK_SIZE];
 
 		System.out.println(botNode);
 		System.out.println("Target bot: " + endNode);
@@ -105,7 +105,7 @@ public class AI {
 
 				//region Calculate successor's g, h and f
 				if (!child.type.equals("Wall")) {
-					child.g = q.g + ONE_MOVE;
+					child.g = q.g + BLOCK_SIZE;
 					child.h = Math.abs(child.position.getX() - End.position.getX()) +
 							Math.abs(child.position.getY() - End.position.getY());
 					child.f = child.g + child.h;
@@ -151,7 +151,6 @@ public class AI {
 	}
 
 	private Vector2 closestEnemy(PositionPacket bot) {
-		//region Selects the closest enemy to go to next
 		Vector2 toGoTo = new Vector2();
 
 		var positions = ClientListServer.positionList.entrySet();
@@ -172,12 +171,7 @@ public class AI {
 		}
 
 		return toGoTo;
-		//endregion
 	}
 
-	private Vector2 mapCenter() {
-		//region Selects the center of the map
-		return new Vector2(mapWidth * 20, mapHeight * 20);
-		//endregion
-	}
+	private Vector2 mapCenter() { return new Vector2(mapWidth * 20, mapHeight * 20); }
 }
