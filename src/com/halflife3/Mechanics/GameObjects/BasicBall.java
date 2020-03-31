@@ -34,9 +34,9 @@ public class BasicBall extends Sprite {
         velocity.setX((velocity.getX() * velX > 0) ? velX : 0);
         velocity.setY((velocity.getY() * velY > 0) ? velY : 0);
 
-        float accInc = 0.5f;
-        acceleration.setX(acceleration.getX() < 0 ? acceleration.getX() - accInc : acceleration.getX() + accInc);
-        acceleration.setY(acceleration.getY() < 0 ? acceleration.getY() - accInc : acceleration.getY() + accInc);
+//        float accInc = 0.5f;
+//        acceleration.setX(acceleration.getX() < 0 ? acceleration.getX() - accInc : acceleration.getX() + accInc);
+//        acceleration.setY(acceleration.getY() < 0 ? acceleration.getY() - accInc : acceleration.getY() + accInc);
 
         position.add(new Vector2(velocity).multiply(time));
         circle.setCenterX(position.getX() + getWidth() / 2);

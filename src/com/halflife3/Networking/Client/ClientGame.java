@@ -55,7 +55,7 @@ public class ClientGame extends Application {
     private         final int   GAME_WINDOW_HEIGHT  = 600;
     private         final int   GAME_WINDOW_WIDTH   = 800;
     private         final int   MOVEMENT_SPEED      = 120;
-    public static   final int   SHOT_SPEED          = 240;
+    public static   final int   SHOT_SPEED          = 200;
     public static   final float STUN_DURATION       = 100;
 
     //region Other variables
@@ -117,7 +117,6 @@ public class ClientGame extends Application {
         thisPlayer = new Player(startPos, startVel);
         thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
         thisPlayer.setAI(false);
-        side = (thisPlayer.getPosX() < mapWidth / 2f) ? 'L' : 'R'; // Sets the team of this player
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -144,6 +143,7 @@ public class ClientGame extends Application {
         primaryStage.setScene(scene);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         gameInit(scene);// << BG, cursor, audio, key input, map loading
+        side = (thisPlayer.getPosX() < mapWidth / 2f) ? 'L' : 'R'; // Sets the team of this player
         //endregion
 
         //region Initialise stun bars
@@ -254,9 +254,8 @@ public class ClientGame extends Application {
                 var ballPos = new Vector2(ball.getPosition());
                 var nextBallPos = new Vector2(ballPos).add(new Vector2(ball.getVelocity()).multiply(elapsedTime));
                 boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-                boolean ballMovingAway = playerCenter.distance(ballPos) < playerCenter.distance(nextBallPos);
 
-                thisPlayer.setHoldsBall(playerIsTouchingTheBall && !ballMovingAway);
+                if(playerIsTouchingTheBall){ thisPlayer.setHoldsBall(true);}
                 //endregion
 
                 //region Shoots a bullet or the ball
@@ -275,8 +274,8 @@ public class ClientGame extends Application {
                             }
 
                         if (!ballInWall) {
-//                            ball.setVelocity(new Vector2(shotVelocity).multiply(1.5));
-//                            ball.setAcceleration(new Vector2(shotVelocity).divide(100));
+//                           ball.setVelocity(new Vector2(shotVelocity).multiply(1.5));
+//                           ball.setAcceleration(new Vector2(shotVelocity).divide(100));
                             thisPlayer.setBulletShot(true);
                         }
                     } else { // Shoots a bullet
@@ -322,7 +321,8 @@ public class ClientGame extends Application {
                     your_score++;
                     goal = true;
                     System.out.println("Goal for YOUR team!");
-                } else if ((side == 'R' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
+                }
+                if ((side == 'R' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
                         (side=='L' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)){
                     enemy_score++;
                     System.out.println("Goal for the ENEMY team!");

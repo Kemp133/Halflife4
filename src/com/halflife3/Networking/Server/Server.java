@@ -35,7 +35,7 @@ public class Server implements Runnable {
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
-    private final int GOAL_WIDTH = 4;
+    private final int GOAL_WIDTH = 2;
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
     private static Vector2[] startPositions = {new Vector2(80, 480),
@@ -48,6 +48,7 @@ public class Server implements Runnable {
     private PositionPacket ballPacket;
     private int mapWidth;
     private int mapHeight;
+    private Vector2 PreviousBallVel = new Vector2(0,0);
     //endregion
 
     public void start() {
@@ -225,14 +226,14 @@ public class Server implements Runnable {
         }
         //endregion
 
-        //region Ball collision
-        if (!theBall.isHeld) ballWallBounce();
-        //endregion
-
         //region Update objects
         theBall.update(elapsedTime);
         //endregion
 
+        //region Ball collision
+        if (!theBall.isHeld && PreviousBallVel.equals(theBall.getVelocity()) ) ballWallBounce();
+        //endregion
+        PreviousBallVel = theBall.getVelocity();
         //region Update ballPacket
         ballPacket.posX = theBall.getPosX();
         ballPacket.posY = theBall.getPosY();
@@ -269,12 +270,13 @@ public class Server implements Runnable {
             double rel_x = relevantPos.getX();
             double rel_y = relevantPos.getY();
 
-            if ((rel_x > 0 && rel_x < 38 && rel_y > -33 && rel_y < 33 && theBall.getVelX() < 0) ||
-                    rel_x > -38 && rel_x < 0 && rel_y > -33 && rel_y < 33 && theBall.getVelX() > 0) {
-                theBall.collision(1);
-            } else if ((rel_x > -33 && rel_x < 33 && rel_y > 0 && rel_y < 38 && theBall.getVelY() < 0) ||
-                    rel_x > -33 && rel_x < 33 && rel_y > -38 && rel_y < 0 && theBall.getVelY() > 0) {
+            if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) ||
+                    (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) ||
+                    (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) ||
+                    (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0)) {
                 theBall.collision(2);
+            } else {
+                theBall.collision(1);
             }
         }
     }
