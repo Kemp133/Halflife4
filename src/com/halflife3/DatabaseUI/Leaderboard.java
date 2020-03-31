@@ -70,8 +70,8 @@ public class Leaderboard extends Application {
         return data;
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public static void started () {
+        launch();
     }
 
     private Background addBackground() {

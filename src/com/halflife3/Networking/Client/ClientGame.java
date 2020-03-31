@@ -74,12 +74,14 @@ public class ClientGame extends Application {
     private int enemy_score = 0;
     private boolean win;
     private static HashMap<Integer, Image> score_sprite;
+    private Vector2 startPos = new Vector2();
 
     private boolean flag = false;
     public boolean running = false;
     private int bulletLimiter = 0;
     public int mapWidth;
     private int mapHeight;
+    private int END_SCENE_DURATION = 300;
     private final int RIGHT_END_OF_SCREEN = 11*40;
     private final int LEFT_END_OF_SCREEN = 9*40;
     private final int BOTTOM_OF_SCREEN = 8*40;
@@ -112,7 +114,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise this player
-        Vector2 startPos = clientNetwork.getStartingPosition();
+        startPos = clientNetwork.getStartingPosition();
         Vector2 startVel = new Vector2(0, 0);
         thisPlayer = new Player(startPos, startVel);
         thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
@@ -144,6 +146,7 @@ public class ClientGame extends Application {
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         gameInit(scene);// << BG, cursor, audio, key input, map loading
         side = (thisPlayer.getPosX() < mapWidth / 2f) ? 'L' : 'R'; // Sets the team of this player
+        startPos = thisPlayer.getPosition();
         //endregion
 
         //region Initialise stun bars
@@ -183,6 +186,9 @@ public class ClientGame extends Application {
                 //endregion
 
                 //TODO: Check the goal status
+                if (your_score == 1 || enemy_score == 1){
+                    stop();
+                }
 
                 //region Camera offset
                 Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
@@ -320,11 +326,13 @@ public class ClientGame extends Application {
                         (side == 'R' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)) {
                     your_score++;
                     goal = true;
+                    thisPlayer.setPosition(startPos);
                     System.out.println("Goal for YOUR team!");
                 }
                 if ((side == 'R' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
                         (side=='L' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)){
                     enemy_score++;
+                    thisPlayer.setPosition(startPos);
                     System.out.println("Goal for the ENEMY team!");
                     goal = true;
                 }
