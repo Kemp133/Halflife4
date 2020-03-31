@@ -195,7 +195,7 @@ public class Server implements Runnable {
         for (String ip : ClientListServer.positionList.keySet()) {
             PositionPacket playerWithBall = ClientListServer.positionList.get(ip);
 
-            if (!playerWithBall.holdsBall)
+            if (!playerWithBall.holdsBall )
                 continue;
 
             //region Ball's position
@@ -238,6 +238,7 @@ public class Server implements Runnable {
         ballPacket.posY = theBall.getPosY();
         ballPacket.velX = theBall.getVelX();
         ballPacket.velY = theBall.getVelY();
+        ballPacket.holdsBall = theBall.isHeld;
         EventListenerServer.replaceEntry("ball", ballPacket);
         //endregion
 
