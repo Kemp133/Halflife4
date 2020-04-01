@@ -47,7 +47,7 @@ public class ClientGame extends Application {
     private         final int   GAME_WINDOW_WIDTH   = 800;
     private         final int   MOVEMENT_SPEED      = 120;
     public static   final int   SHOT_SPEED          = 200;
-    public static   final float STUN_DURATION       = 100;
+    public static   final float STUN_DURATION       = 20;
 
     //region Other variables
     private static Pane root;
@@ -69,6 +69,7 @@ public class ClientGame extends Application {
 
     private boolean flag = false;
     public boolean running = false;
+    private boolean ball_hold = false;
     private int bulletLimiter = 0;
     public int mapWidth;
     private int mapHeight;
@@ -247,7 +248,7 @@ public class ClientGame extends Application {
 
                 //region Checks if the player is holding the ball
                 boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-                if (playerIsTouchingTheBall) thisPlayer.setHoldsBall(true);
+                if(playerIsTouchingTheBall && !ball_hold){ thisPlayer.setHoldsBall(true);}
                 //endregion
 
                 //region Shoots a bullet or the ball
@@ -297,14 +298,16 @@ public class ClientGame extends Application {
                 for (String ip : playerList.keySet()) {
                     stunBar[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
                     stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 12);
-                    stunBar[id].setProgress(playerList.get(ip).stand / STUN_DURATION);
+                    stunBar[id].setProgress(playerList.get(ip).stand / (STUN_DURATION*5));
                     id++;
                 }
                 //endregion
 
                 //region Sends the client's position, whether they've shot a bullet and if they're holding the ball
+                if(thisPlayer.stand!=0) thisPlayer.setHoldsBall(false);
                 Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
                 if (thisPlayer.bulletShot) thisPlayer.setHoldsBall(false);
+
                 //endregion
 
                 //region Checks if a goal has been scored
@@ -550,6 +553,7 @@ public class ClientGame extends Application {
             } else {
                 ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 ball.setPosition(theDoubleValues.posX, theDoubleValues.posY);
+                ball_hold = theDoubleValues.holdsBall;
             }
             //endregion
 
@@ -599,9 +603,9 @@ public class ClientGame extends Application {
                             crash_bullet_list.add(bullet);
                             //Players hit
                             if (player.stand == 0) {
-                                player.stand = STUN_DURATION;
-                                player.setVelocity(bullet.getVelocity());
-                                player.setAcceleration(new Vector2(player.getVelocity()).divide(42));
+                                player.stand = STUN_DURATION*5;
+                                player.setVelocity(bullet.getVelocity().divide(3));
+                                player.setAcceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
                                 player.setMoving(false);
                             }
                         }

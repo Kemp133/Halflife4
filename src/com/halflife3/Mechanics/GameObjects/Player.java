@@ -77,11 +77,15 @@ public class Player extends Controllable {
             stand--;
         } else {
             originalPosition = new Vector2(position);
-            velocity.subtract(acceleration);
+            Vector2 previous_Vel = new Vector2(velocity);
+            if(velocity.getX()*previous_Vel.subtract(acceleration).getX()>0)
+                velocity.subtract(acceleration);
             position.add(new Vector2(velocity).multiply(time));
             isMoving = !originalPosition.equals(position);
             circle.setCenterX(position.getX() + getWidth() / 2 + 1);
             circle.setCenterY(position.getY() + getHeight() / 2 + 1);
+            if(stand!=0)
+                stand--;
         }
     }
     //endregion
