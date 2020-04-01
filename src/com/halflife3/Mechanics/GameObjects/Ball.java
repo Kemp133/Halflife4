@@ -7,14 +7,16 @@ import javafx.scene.shape.Circle;
 
 public class Ball extends Sprite {
     public Circle circle;
-    Vector2 original_position;
+    public Vector2 originalPosition;
     public boolean isHeld = false;
+    private Vector2 spawnPosition;
 
     public Ball(Vector2 position, Vector2 velocity) {
         super(position, velocity);
         setSprite("res/Sprites/Ball/Ball.png");
         keys.add("Ball");
         position.subtract(getWidth() / 2, getHeight() / 2);
+        spawnPosition = position;
         circle = new Circle(position.getX(),
                 position.getY(),
                 Math.max(getWidth(), getHeight()) / 2);
@@ -27,16 +29,12 @@ public class Ball extends Sprite {
 
     @Override
     public void update(double time) {
-        original_position = new Vector2(position);
-        double velX = velocity.getX() - acceleration.getX();
-        double velY = velocity.getY() - acceleration.getY();
+        originalPosition = new Vector2(position);
+        double velX = velocity.getX() - deceleration.getX();
+        double velY = velocity.getY() - deceleration.getY();
 
         velocity.setX((velocity.getX() * velX > 0) ? velX : 0);
         velocity.setY((velocity.getY() * velY > 0) ? velY : 0);
-
-//        float accInc = 0.5f;
-//        acceleration.setX(acceleration.getX() < 0 ? acceleration.getX() - accInc : acceleration.getX() + accInc);
-//        acceleration.setY(acceleration.getY() < 0 ? acceleration.getY() - accInc : acceleration.getY() + accInc);
 
         position.add(new Vector2(velocity).multiply(time));
         circle.setCenterX(position.getX() + getWidth() / 2);
@@ -44,28 +42,28 @@ public class Ball extends Sprite {
     }
 
     public void collision(int bounce) {
-        this.position = original_position;
+        this.position = originalPosition;
         switch (bounce) {
             case 1 : {
-                position = original_position;
+                position = originalPosition;
                 velocity.setX(-velocity.getX());
-                acceleration.setX(-acceleration.getX());
+                deceleration.setX(-deceleration.getX());
                 break;
             }
 
             case 2 : {
-                position = original_position;
+                position = originalPosition;
                 velocity.setY(-velocity.getY());
-                acceleration.setY(-acceleration.getY());
+                deceleration.setY(-deceleration.getY());
                 break;
             }
 
             case 3 : {
-                position = original_position;
+                position = originalPosition;
                 velocity.setX(0);
                 velocity.setY(0);
-                acceleration.setX(0);
-                acceleration.setY(0);
+                deceleration.setX(0);
+                deceleration.setY(0);
                 break;
             }
         }
@@ -74,4 +72,12 @@ public class Ball extends Sprite {
         circle.setCenterY(position.getY() + getHeight() / 2);
     }
 
+    public void reset() {
+        isHeld = false;
+        position = spawnPosition;
+        circle.setCenterX(position.getX() + getWidth() / 2);
+        circle.setCenterY(position.getY() + getHeight() / 2);
+        originalPosition = spawnPosition;
+        resetVelocity();
+    }
 }
