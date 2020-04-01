@@ -15,11 +15,12 @@ import java.io.IOException;
 public class Player extends Controllable {
     //region Variables
     public Circle circle;
+    public float reload = ClientGame.RELOAD_DURATION;
+    public float stunned = 0;
+    public boolean bulletShot = false;
     private Image sprite2;
     private Vector2 originalPosition;
     private PositionPacket packetToSend;
-    public float stunned = 0;
-    public boolean bulletShot = false;
     private boolean isMoving = false;
     private boolean holdsBall = false;
     //endregion
@@ -56,6 +57,8 @@ public class Player extends Controllable {
 
     @Override
     public void update(double time) {
+        if(reload<ClientGame.RELOAD_DURATION)
+            reload++;
         if (stunned <= ClientGame.STUN_DURATION && stunned != 0) {
             velocity.setX(0);
             velocity.setY(0);
@@ -113,8 +116,8 @@ public class Player extends Controllable {
         bulletShot = false;
         isMoving = false;
         holdsBall = false;
-        originalPosition = spawnPosition;
-        position = spawnPosition;
+        originalPosition = new Vector2(spawnPosition);
+        position = new Vector2(spawnPosition);
         circle.setCenterX(position.getX() + getWidth() / 2 + 1);
         circle.setCenterY(position.getY() + getHeight() / 2 + 1);
         resetVelocity();
