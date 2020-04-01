@@ -9,11 +9,18 @@ import java.util.HashMap;
 public final class SceneManager {
 	private Stage                  mainWindow;
 	private HashMap<String, Scene> Scenes = new HashMap<>();
+	private static SceneManager    instance;
 
-	public SceneManager () {}
+	public SceneManager (Stage stage) {
+		mainWindow = stage;
+	}
 
 	public void setMainWindow (Stage mainWindow) {
 		this.mainWindow = mainWindow;
+	}
+
+	public void showWindow() {
+		mainWindow.show();
 	}
 
 	//region SetScene
@@ -63,5 +70,7 @@ public final class SceneManager {
 		if (!Scenes.containsKey(label))
 			Scenes.put(label, scene);
 	}
+
+	public static SceneManager getInstance() { return instance; }
 	//endregion
 }

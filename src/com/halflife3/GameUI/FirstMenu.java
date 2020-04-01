@@ -32,9 +32,9 @@ public class FirstMenu extends Application implements ICredentialUser {
 	//region Variables
 	private        Stage            pStage = null;
 	private        StackPane        root   = new StackPane();
-	private        Pane             back;
-	private        Button           client_m;
-	private        Button           server_m;
+	private static       Pane             back;
+	private static       Button           client_m;
+	private static       Button           server_m;
 	private static ApplicationUser  user;
 	private static WindowAttributes windowAttributes;
 	//endregion
@@ -63,6 +63,37 @@ public class FirstMenu extends Application implements ICredentialUser {
 			try {
 				new Windows().start(pStage);
 			} catch (FileNotFoundException ex) { ex.printStackTrace(); }
+		});
+	}
+
+	static {
+		try {
+			var input1 = new FileInputStream("res/Client.png");
+			var input2 = new FileInputStream("res/create_server.png");
+			var input3 = new FileInputStream("res/MenuBackground.png");
+
+			var image1 = new Image(input1);
+			var image2 = new Image(input2);
+			var image3 = new Image(input3);
+
+			back = new Pane(new ImageView(image3));
+
+			client_m = new Button("", new ImageView(image1));
+			server_m = new Button("", new ImageView(image2));
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		server_m.setOnAction(e -> {
+//			try {
+////				runServer();
+//			} catch (Exception ex) { ex.printStackTrace(); }
+		});
+
+		client_m.setOnAction(e -> {
+//			try {
+////				new Windows().start(pStage);
+//			} catch (FileNotFoundException ex) { ex.printStackTrace(); }
 		});
 	}
 
@@ -131,6 +162,10 @@ public class FirstMenu extends Application implements ICredentialUser {
 		mayBeShown();
 	}
 
+	public static Scene getStartMenuScene() {
+		return new Scene(createContent(new StackPane()), SCREEN_WIDTH, SCREEN_HEIGHT, Color.WHITE);
+	}
+
 	private void setPStage (Stage pStage) { this.pStage = pStage; }
 
 	private void setMainStage (Stage s) {
@@ -154,7 +189,16 @@ public class FirstMenu extends Application implements ICredentialUser {
 
 	private StackPane createContent () {
 		VBox pane = new VBox(20);
-		pane.getChildren().add(getBack());
+		pane.getChildren().add(back);
+		pane.getChildren().addAll(server_m, client_m);
+		pane.setAlignment(Pos.CENTER);
+		root.getChildren().add(pane);
+		return root;
+	}
+
+	private static StackPane createContent(StackPane root) {
+		VBox pane = new VBox(20);
+		pane.getChildren().add(back);
 		pane.getChildren().addAll(server_m, client_m);
 		pane.setAlignment(Pos.CENTER);
 		root.getChildren().add(pane);

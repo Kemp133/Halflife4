@@ -17,7 +17,7 @@ public class MainMode extends GameMode implements ITimeLimit {
 		teams = new HashMap<>();
 	}
 
-	public MainMode (String GameModeName, boolean CanRespawn, double score) {
+	public MainMode (String GameModeName, double score) {
 		super(GameModeName);
 //		this.CanRespawn = CanRespawn;
 		this.scoreLimit = score;
