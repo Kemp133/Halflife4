@@ -2,7 +2,6 @@ package com.halflife3.Mechanics.AI;
 
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
-import com.halflife3.Networking.Server.ClientListServer;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
@@ -13,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class AI {
-	private final int ONE_MOVE = 40;
+	private final int BLOCK_SIZE = 40;
 	private Node[][] map = null;
-	private int mapWidth = 0;
-	private int mapHeight = 0;
+	private int mapWidth;
+	private int mapHeight;
 
 	public boolean setupMap() {
 		try {
@@ -31,7 +30,7 @@ public class AI {
 			for (int i = 0; i < mapHeight; i++) {
 				for (int j = 0; j < mapWidth; j++) {
 					Color color = px.getColor(j,i);
-					map[i][j] = new Node(new Vector2((i * ONE_MOVE), (j * ONE_MOVE)));
+					map[i][j] = new Node(new Vector2((i * BLOCK_SIZE), (j * BLOCK_SIZE)));
 					if (color.equals(Color.BLACK))
 						map[i][j].type = "Wall";
 				}
@@ -53,19 +52,22 @@ public class AI {
 		return true;
 	}
 
-	public PositionPacket getBotMovement(PositionPacket bot) {
-		Vector2 toGoTo = mapCenter(); //mapCenter() or closestEnemy(bot)
+	public PositionPacket getNextPacket(PositionPacket bot, Vector2 toGoTo) {
+		Node botNode = map[(int) (bot.posY) / BLOCK_SIZE][(int) (bot.posX) / BLOCK_SIZE];
+		Node endNode = map[(int) (toGoTo.getY()) / BLOCK_SIZE][(int) (toGoTo.getX()) / BLOCK_SIZE];
 
-		Node botNode = map[(int) (bot.posY) / 40][(int) (bot.posX) / 40];
-		Node endNode = map[(int) (toGoTo.getY()) / 40][(int) (toGoTo.getX()) / 40];
+		if (botNode.position.equals(endNode.position))
+			return bot;
 
-		System.out.println(botNode);
-		System.out.println("Target bot: " + endNode);
-		System.out.println("Path taken:  Start: " + bot.posX + "|" + bot.posY);
-		for (Node step : aStar(endNode, botNode))
-			System.out.println("    " + step);
+		Node nextNode = aStar(endNode, botNode).get(0);
 
-		return bot;
+		resetParents();
+
+		PositionPacket next = new PositionPacket();
+		next.posX = nextNode.position.getY();
+		next.posY = nextNode.position.getX();
+
+		return next;
 	}
 
 	private ArrayList<Node> aStar(Node Start, Node End) {
@@ -105,7 +107,7 @@ public class AI {
 
 				//region Calculate successor's g, h and f
 				if (!child.type.equals("Wall")) {
-					child.g = q.g + ONE_MOVE;
+					child.g = q.g + BLOCK_SIZE;
 					child.h = Math.abs(child.position.getX() - End.position.getX()) +
 							Math.abs(child.position.getY() - End.position.getY());
 					child.f = child.g + child.h;
@@ -142,42 +144,20 @@ public class AI {
 
 		q = closedList.remove(closedList.size() - 1);
 
-		while (!q.position.equals(Start.position)) {
+		pathEndToStart.add(q.getParent());
+		return pathEndToStart;
+
+		/*while (!q.position.equals(Start.position)) {
 			q = q.getParent();
 			pathEndToStart.add(q);
 		}
 
-		return pathEndToStart;
+		return pathEndToStart;*/
 	}
 
-	private Vector2 closestEnemy(PositionPacket bot) {
-		//region Selects the closest enemy to go to next
-		Vector2 toGoTo = new Vector2();
-
-		var positions = ClientListServer.positionList.entrySet();
-		double shortestDistance = Double.MAX_VALUE;
-		for (var enemyEntry : positions) {
-			PositionPacket enemyPacket = enemyEntry.getValue();
-			if (enemyPacket.posX == bot.posX && enemyPacket.posY == bot.posY)
-				continue;
-
-			double distance = Math.pow(bot.posX - enemyPacket.posX, 2) +
-					Math.pow(bot.posY - enemyPacket.posY, 2);
-
-			if (distance < shortestDistance) {
-				shortestDistance = distance;
-				toGoTo.setX(enemyPacket.posX);
-				toGoTo.setY(enemyPacket.posY);
-			}
-		}
-
-		return toGoTo;
-		//endregion
-	}
-
-	private Vector2 mapCenter() {
-		//region Selects the center of the map
-		return new Vector2(mapWidth * 20, mapHeight * 20);
-		//endregion
+	private void resetParents() {
+		for (int i = 0; i < mapHeight; i++)
+			for (int j = 0; j < mapWidth; j++)
+				map[i][j].setParent(null);
 	}
 }

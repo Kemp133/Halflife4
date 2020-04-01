@@ -31,8 +31,8 @@ public class Player extends Controllable {
         keys.add("player");
         setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
         setSprite2("res/Sprites/PlayerSkins/Cosmo_Moving.png");
-        circle = new Circle(position.getX() + getWidth() / 2,
-                position.getY() + getHeight() / 2,
+        circle = new Circle(position.getX() + getWidth() / 2 + 1,
+                position.getY() + getHeight() / 2 + 1,
                 Math.max(getWidth(), getHeight()) / 2 + 1);
         affine = new Affine();
         packetToSend = new PositionPacket();
@@ -77,11 +77,15 @@ public class Player extends Controllable {
             stand--;
         } else {
             originalPosition = new Vector2(position);
-            velocity.subtract(acceleration);
+            Vector2 previous_Vel = new Vector2(velocity);
+            if(velocity.getX()*previous_Vel.subtract(acceleration).getX()>0)
+                velocity.subtract(acceleration);
             position.add(new Vector2(velocity).multiply(time));
             isMoving = !originalPosition.equals(position);
             circle.setCenterX(position.getX() + getWidth() / 2 + 1);
             circle.setCenterY(position.getY() + getHeight() / 2 + 1);
+            if(stand!=0)
+                stand--;
         }
     }
     //endregion
