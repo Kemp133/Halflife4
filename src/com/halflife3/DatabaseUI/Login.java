@@ -277,7 +277,7 @@ public class Login extends Preloader {
 		if (info.getType() == StateChangeNotification.Type.BEFORE_START) {
 			user = (ICredentialUser) info.getApplication();
 			if (getUserLoginAttributes()) {
-				if(loginAttributes.rememberMe) {
+				if (loginAttributes.rememberMe) {
 					nameField.setText(loginAttributes.username);
 					passwordField.setText(loginAttributes.password);
 					hasLoggedIn = confirmUser(getConnection(), loginAttributes.username, loginAttributes.password);
@@ -328,8 +328,8 @@ public class Login extends Preloader {
 				if (nameField.getText() != null && passwordField.getText() != null) {
 					if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
 						hasLoggedIn = true;
-						if(chbRememberMe.isSelected())
-						    writeLoginAttributesToFile();
+						if (chbRememberMe.isSelected())
+							writeLoginAttributesToFile();
 						mayBeHid();
 					} else {
 						setNullFields();
@@ -633,6 +633,12 @@ public class Login extends Preloader {
 		passwordFieldConf.setText(null);
 	}
 
+	/**
+	 * Try and load log in values for automatically logging in. In the event the file is not found,
+	 * a new one is created with generic values and saved instead, ready for the next time the person
+	 * logs in
+	 * @return {@code true} if a configuration file has been found, and {@code false otherwise}
+	 */
 	public boolean getUserLoginAttributes () {
 		try (var fis = new FileInputStream("AppData/login.conf")) {
 			try (var ois = new ObjectInputStream(fis)) {
@@ -658,22 +664,26 @@ public class Login extends Preloader {
 		return false;
 	}
 
-	public void writeLoginAttributesToFile() {
-	    try (var fos = new FileOutputStream("AppData/login.conf", false)) {
-	        try (var oos = new ObjectOutputStream(fos)) {
-                LoginAttributes lab = new LoginAttributes();
-                lab.username = nameField.getText();
-                lab.password = passwordField.getText();
-                lab.rememberMe = true;
-                oos.writeObject(lab);
-            }
-        } catch (IOException e) {
-            NetworkingUtilities.CreateErrorMessage(
-                    "Cannot save Login Details",
-                    "Login credentials could not be saved. Make sure the AppData directory" +
-                            "is writeable",
-                    e.getMessage()
-            );
-        }
-    }
+	/**
+	 * A method to write the login values to file so that they can be used to automatically
+	 * log in for future start ups
+	 */
+	public void writeLoginAttributesToFile () {
+		try (var fos = new FileOutputStream("AppData/login.conf", false)) {
+			try (var oos = new ObjectOutputStream(fos)) {
+				LoginAttributes lab = new LoginAttributes();
+				lab.username   = nameField.getText();
+				lab.password   = passwordField.getText();
+				lab.rememberMe = true;
+				oos.writeObject(lab);
+			}
+		} catch (IOException e) {
+			NetworkingUtilities.CreateErrorMessage(
+					"Cannot save Login Details",
+					"Login credentials could not be saved. Make sure the AppData directory" +
+							"is writeable",
+					e.getMessage()
+			);
+		}
+	}
 }
