@@ -55,7 +55,7 @@ public class ClientGame extends Application {
     private static HashMap<String, Player> playerList;
     private Input input = Input.getInstance(); //Now a singleton pattern (nowhere close to as many statics)
     private static ProgressBar[] stunBar;
-    private static BasicBall ball;
+    private static Ball ball;
     private Stage window = null;
     private char side;
     private boolean goal = false;
@@ -150,7 +150,7 @@ public class ClientGame extends Application {
         //endregion
 
         //region Initialise ball
-        ball = new BasicBall(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
+        ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
         ballPreviousX = mapWidth / 2f;
         //endregion
 
@@ -246,12 +246,8 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Checks if the player is holding the ball
-                var playerCenter = new Vector2(thisPlayer.circle.getCenterX(), thisPlayer.circle.getCenterY());
-                var ballPos = new Vector2(ball.getPosition());
-                var nextBallPos = new Vector2(ballPos).add(new Vector2(ball.getVelocity()).multiply(elapsedTime));
                 boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-
-                if(playerIsTouchingTheBall){ thisPlayer.setHoldsBall(true);}
+                if (playerIsTouchingTheBall) thisPlayer.setHoldsBall(true);
                 //endregion
 
                 //region Shoots a bullet or the ball

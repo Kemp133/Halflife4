@@ -31,8 +31,8 @@ public class Player extends Controllable {
         keys.add("player");
         setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
         setSprite2("res/Sprites/PlayerSkins/Cosmo_Moving.png");
-        circle = new Circle(position.getX() + getWidth() / 2,
-                position.getY() + getHeight() / 2,
+        circle = new Circle(position.getX() + getWidth() / 2 + 1,
+                position.getY() + getHeight() / 2 + 1,
                 Math.max(getWidth(), getHeight()) / 2 + 1);
         affine = new Affine();
         packetToSend = new PositionPacket();

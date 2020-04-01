@@ -1,17 +1,20 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Mechanics.AI.AI;
-import com.halflife3.Mechanics.GameObjects.BasicBall;
+import com.halflife3.Mechanics.GameObjects.Ball;
 import com.halflife3.Mechanics.GameObjects.Bricks;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.ClientGame;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
+import javafx.scene.image.Image;
+import javafx.scene.shape.Circle;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -36,58 +39,43 @@ public class Server implements Runnable {
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
     public final int SERVER_TIMEOUT = 3000000; // milliseconds
-    private final int GOAL_WIDTH = 2;
+    private final int GOAL_WIDTH = 2 * 40;
     private static int clientPort = 6666;
-    private static HashMap<Vector2, Boolean> positionAvailable = new HashMap<>();
-    private static Vector2[] startPositions = {new Vector2(160, 600),
-                                               new Vector2(1840, 600)/*,
-                                               new Vector2(1920, 480),
-                                               new Vector2(1920, 720)*/};
-    public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot0", "bot1"/*, "bot2", "bot3"*/));
+    private static HashMap<Vector2, Boolean> availablePositions;
+    private static Vector2[] startPositions = {new Vector2(1720, 680), //160, 600
+                                               new Vector2(1840, 600)};
+    public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
+    private HashMap<String, Circle> botCircles;
+    private HashMap<String, PositionPacket> soughtPositions;
+    private HashMap<String, PositionPacket> nextPositions;
+    private HashMap<String, Boolean> alreadyLooking;
     private AI botAI;
-    private BasicBall theBall;
+    private Ball theBall;
+    private Image playerImage;
     private PositionPacket ballPacket;
     private int mapWidth;
     private int mapHeight;
-    private Vector2 PreviousBallVel = new Vector2(0,0);
+    private Vector2 previousBallVel;
     //endregion
 
     public void start() {
+        //region Object initialisation
         botAI = new AI();
+        botCircles = new HashMap<>();
+        alreadyLooking = new HashMap<>();
+        soughtPositions = new HashMap<>();
+        nextPositions = new HashMap<>();
+        availablePositions = new HashMap<>();
+        previousBallVel = new Vector2(0,0);
+        posListPacket = new PositionListPacket();
+        listenerServer = new EventListenerServer();
+        try (var fis = new FileInputStream("res/Sprites/PlayerSkins/Cosmo_Hovering.png")) {
+            playerImage = new Image(fis);
+        } catch (IOException e) { System.err.println("Player sprite not found!"); }
+        //endregion
+
         final boolean[] readyAI = {false};
-
         new Thread(() -> readyAI[0] = botAI.setupMap()).start();
-
-        //region Fills the positionList with bot players, giving them available starting positions
-        for (int i = 0; i < startPositions.length; i++) {
-            positionAvailable.put(startPositions[i], true);
-            PositionPacket botPacket = newBotPacket(i);
-            ClientListServer.positionList.put(botNamesList.get(i), botPacket);
-            ClientListServer.connectedIPs.add(botNamesList.get(i));
-        }
-        //endregion
-
-        //region Adds the ball to the positionList
-        try {
-            BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
-            int mapWidthMiddle = mapImage.getWidth() * 20;
-            int mapHeightMiddle = mapImage.getHeight() * 20;
-            mapWidth = mapWidthMiddle * 2;
-            mapHeight = mapHeightMiddle * 2;
-
-            theBall = new BasicBall(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
-
-            ballPacket = new PositionPacket();
-            ballPacket.velX = 0;
-            ballPacket.velY = 0;
-            ballPacket.posX = ballPacket.spawnX = mapWidthMiddle;
-            ballPacket.posY = ballPacket.spawnY = mapHeightMiddle;
-            ballPacket.degrees = 0;
-            ballPacket.holdsBall = false;
-
-            ClientListServer.positionList.put("ball", ballPacket);
-        } catch (IOException e) { e.printStackTrace(); }
-        //endregion
 
         //region Sets up the communication sockets
         try {
@@ -109,12 +97,46 @@ public class Server implements Runnable {
         MapRender.LoadLevel();
         //endregion
 
-        posListPacket = new PositionListPacket();
-        listenerServer = new EventListenerServer();
+        //region Adds the ball to the positionList
+        try {
+            BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
+            int mapWidthMiddle = mapImage.getWidth() * 20;
+            int mapHeightMiddle = mapImage.getHeight() * 20;
+            mapWidth = mapWidthMiddle * 2;
+            mapHeight = mapHeightMiddle * 2;
+
+            theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
+
+            ballPacket = new PositionPacket();
+            ballPacket.velX = 0;
+            ballPacket.velY = 0;
+            ballPacket.posX = ballPacket.spawnX = mapWidthMiddle;
+            ballPacket.posY = ballPacket.spawnY = mapHeightMiddle;
+            ballPacket.degrees = 0;
+            ballPacket.holdsBall = false;
+
+            ClientListServer.positionList.put("ball", ballPacket);
+        } catch (IOException e) { e.printStackTrace(); }
+        //endregion
+
+        //region Fills the positionList with bot players, giving them available starting positions
+        for (int i = 0; i < startPositions.length; i++) {
+            availablePositions.put(startPositions[i], true);
+            PositionPacket botPacket = newBotPacket(i);
+            ClientListServer.positionList.put(botNamesList.get(i), botPacket);
+            ClientListServer.connectedIPs.add(botNamesList.get(i));
+            botCircles.put(botNamesList.get(i),
+                    new Circle(botPacket.posX + playerImage.getWidth() / 2 + 1,
+                    botPacket.posY + playerImage.getHeight() / 2 + 1,
+                    Math.max(playerImage.getWidth(), playerImage.getHeight()) / 2 + 1));
+            alreadyLooking.put(botNamesList.get(i), false);
+            soughtPositions.put(botNamesList.get(i), botAI.getNextPacket(botPacket, theBall.getPosition()));
+        }
+        //endregion
 
 //        Wait until the AI is done loading the map
         while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
-//        moveAI(0);
+
         new Thread(this).start();
     }
 
@@ -187,8 +209,8 @@ public class Server implements Runnable {
 
     private void gameFrame(double elapsedTime) {
         //region Move AI controlled players
-//        if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < 4)
-//            moveAI(elapsedTime);
+        if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < startPositions.length)
+            moveAI(elapsedTime);
         //endregion
 
         //region Ball's position and velocity
@@ -225,14 +247,14 @@ public class Server implements Runnable {
         }
         //endregion
 
-        //region Update objects
+        //region Update the ball locally
         theBall.update(elapsedTime);
         //endregion
 
         //region Ball collision
-        if (!theBall.isHeld && PreviousBallVel.equals(theBall.getVelocity()))
+        if (!theBall.isHeld && previousBallVel.equals(theBall.getVelocity()))
             ballWallBounce();
-        PreviousBallVel = theBall.getVelocity();
+        previousBallVel = theBall.getVelocity();
         //endregion
 
         //region Update ballPacket
@@ -244,8 +266,8 @@ public class Server implements Runnable {
         //endregion
 
         //region Check if a goal has been scored
-        if (theBall.getPosX() > mapWidth - GOAL_WIDTH * 40 || theBall.getPosX() < GOAL_WIDTH * 40) {
-            theBall.setPosition(new Vector2(mapWidth/2f,mapHeight/2f));
+        if (theBall.getPosX() > mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH) {
+            theBall.setPosition((mapWidth - theBall.getWidth()) / 2,(mapHeight - theBall.getHeight()) / 2);
             theBall.resetVelocity();
         }
         //endregion
@@ -282,17 +304,89 @@ public class Server implements Runnable {
         }
     }
 
+    //Replaces bot entries with new PositionPackets after moving the AI
     private void moveAI(double time) {
-        for (var ip : ClientListServer.connectedIPs) {
+        for (String ip : ClientListServer.connectedIPs) {
             if (!botNamesList.contains(ip))
                 continue;
 
-            long before = System.currentTimeMillis();
-            System.out.print(ip + ": ");
-            EventListenerServer.replaceEntry(ip, botAI.getBotMovement(ClientListServer.positionList.get(ip)));
-            long after = System.currentTimeMillis();
-            System.out.println("Time taken (ms): " + (after - before) + '\n');
+            PositionPacket botCurrentPos = ClientListServer.positionList.get(ip);
+            PositionPacket botSoughtPos = soughtPositions.get(ip);
+            Circle botCircle = botCircles.get(ip);
+
+            //region Updates the bot's position locally
+            botCurrentPos.posX += botCurrentPos.velX * time;
+            botCurrentPos.posY += botCurrentPos.velY * time;
+            botCircle.setCenterX(botCurrentPos.posX + playerImage.getWidth() / 2 + 1);
+            botCircle.setCenterY(botCurrentPos.posY + playerImage.getHeight() / 2 + 1);
+            botCircles.replace(ip, botCircle);
+            //endregion
+
+            //region Sets bot's rotation
+            if (botSoughtPos != null && botCurrentPos != botSoughtPos) {
+                Vector2 botCenter = new Vector2(botCurrentPos.posX, botCurrentPos.posY);
+                Vector2 direction = new Vector2(botSoughtPos.posX, botSoughtPos.posY).subtract(botCenter);
+                botCurrentPos.degrees = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+            }
+            //endregion
+
+            //region Checks if bot is holding the ball
+            if (theBall.getBounds().intersects(botCircle.getBoundsInLocal()))
+                botCurrentPos.holdsBall = true;
+            //endregion
+
+            //region Sets the currently sought after and next positions
+            if (botSoughtPos == null) {
+                botSoughtPos = botAI.getNextPacket(botCurrentPos, getNextGoal(botCurrentPos));
+                soughtPositions.put(ip, botSoughtPos);
+            } else if (Math.abs(botCurrentPos.posX - 2) < Math.abs(botSoughtPos.posX) &&
+                    Math.abs(botCurrentPos.posX + 2) > Math.abs(botSoughtPos.posX) &&
+                    Math.abs(botCurrentPos.posY - 2) < Math.abs(botSoughtPos.posY) &&
+                    Math.abs(botCurrentPos.posY + 2) > Math.abs(botSoughtPos.posY)) {
+                botCurrentPos = botSoughtPos;
+                botSoughtPos = nextPositions.get(ip);
+                soughtPositions.replace(ip, botSoughtPos);
+                nextPositions.remove(ip);
+            }
+            //endregion
+
+            //region If there is no next position, computes one on another Thread
+            if (nextPositions.get(ip) == null && !alreadyLooking.get(ip)) {
+                alreadyLooking.replace(ip, true);
+                PositionPacket finalSeekedPos = botSoughtPos;
+                PositionPacket finalCurrentPos = botCurrentPos;
+                new Thread (() -> {
+                    nextPositions.put(ip,
+                            botAI.getNextPacket(finalSeekedPos, getNextGoal(finalCurrentPos)));
+                    alreadyLooking.replace(ip, false);
+                }).start();
+            }
+            //endregion
+
+            //region Changes bot's velocity for the next cycle
+            if (botSoughtPos.posX > botCurrentPos.posX)         botCurrentPos.velX = 100;
+            else if (botSoughtPos.posX < botCurrentPos.posX)    botCurrentPos.velX = -100;
+            else                                                botCurrentPos.velX = 0;
+
+            if (botSoughtPos.posY > botCurrentPos.posY)         botCurrentPos.velY = 100;
+            else if (botSoughtPos.posY < botCurrentPos.posY)    botCurrentPos.velY = -100;
+            else                                                botCurrentPos.velY = 0;
+            //endregion
+
+            EventListenerServer.replaceEntry(ip, botCurrentPos);
         }
+    }
+
+    private Vector2 getNextGoal(PositionPacket bot) {
+        if (bot.holdsBall) {
+            if (bot.spawnX < mapWidth / 2f) {
+                return new Vector2(mapWidth - GOAL_WIDTH, bot.posY);
+            } else {
+                return new Vector2(GOAL_WIDTH, bot.posY);
+            }
+        }
+
+        return theBall.getPosition();
     }
 
     private void connectionListener() throws IOException {
@@ -321,7 +415,7 @@ public class Server implements Runnable {
 
     public static void addConnection(InetAddress address) {
         //region Checks if Server is full
-        if (ClientListServer.clientList.size() >= 4) {
+        if (ClientListServer.clientList.size() >= startPositions.length) {
             System.out.println("Server is full");
             welcoming = false;
             return;
@@ -332,9 +426,9 @@ public class Server implements Runnable {
         //region Client's UniqueInfo and new positionList entry
         portPacket.setPort(clientPort);
         portPacket.setClientAddress(address);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < startPositions.length; i++) {
             Vector2 startPosition = startPositions[i];
-            if (positionAvailable.get(startPosition)) {
+            if (availablePositions.get(startPosition)) {
 //                Sets the start position for the UniqueInfo packet
                 portPacket.setStartPosition(startPosition);
 
@@ -355,7 +449,7 @@ public class Server implements Runnable {
                 ClientListServer.connectedIPs.add(address.toString());
 
 //                Disables the [i]th startPosition so that no new players could have it assigned to them
-                positionAvailable.replace(startPosition, false);
+                availablePositions.replace(startPosition, false);
                 break;
             }
         }
@@ -374,16 +468,16 @@ public class Server implements Runnable {
     }
 
     public static void removeConnection(InetAddress address) {
-        if (ClientListServer.clientList.size() >= 4) {
+        if (ClientListServer.clientList.size() >= startPositions.length) {
             welcoming = true;
         }
-        positionAvailable.replace(ClientListServer.clientList.get(address).getSpawnPoint(), true);
+        availablePositions.replace(ClientListServer.clientList.get(address).getSpawnPoint(), true);
 
         double clientSpawnX = ClientListServer.positionList.get(address.toString()).spawnX;
         double clientSpawnY = ClientListServer.positionList.get(address.toString()).spawnY;
 
         //Removes the player from positionList and adds a bot in its stead
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < startPositions.length; i++) {
             if (clientSpawnX == startPositions[i].getX()) {
                 if (clientSpawnY == startPositions[i].getY()) {
                     ClientListServer.positionList.remove(address.toString());
@@ -414,6 +508,7 @@ public class Server implements Runnable {
         pp.degrees = 0;
         pp.posX = pp.spawnX = startPositions[index].getX();
         pp.posY = pp.spawnY = startPositions[index].getY();
+        pp.holdsBall = false;
         return pp;
     }
 
