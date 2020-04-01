@@ -7,7 +7,6 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class ClientController extends Application implements IController {
-	private SceneManager manager;
 	private GameMode     gamemode;
 
 	@Override
@@ -16,8 +15,7 @@ public class ClientController extends Application implements IController {
 	}
 
 	@Override
-	public void initialise (SceneManager manager) {
-		this.manager = manager;
+	public void initialise () {
 	}
 
 	@Override
@@ -31,8 +29,8 @@ public class ClientController extends Application implements IController {
 	}
 
 	@Override
-	public void run (SceneManager manager) {
-		initialise(manager);
+	public void run () {
+		initialise();
 		start();
 	}
 }

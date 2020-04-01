@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -26,11 +27,8 @@ public class Windows extends Application {
 	private StackPane pane;
 	private LinMenu   main_menu = new LinMenu();
 	private Stage     pStage    = new Stage();
-	private SceneManager manager;
 
-	public Windows (SceneManager manager) throws FileNotFoundException {
-	    this.manager = manager;
-    } //This needs to be here, can't be helped
+	public Windows () throws FileNotFoundException {} //This needs to be here, can't be helped
 
 	@Override
 	public void start (Stage primaryStage) {
@@ -91,24 +89,21 @@ public class Windows extends Application {
 		pStage = stage;
 	}
 
-	public static Scene getMenuScene (SceneManager manager) {
+	public static Scene getMenuScene () {
 		StackPane pane = new StackPane();
-
 		try {
-		LinMenu menu = new LinMenu();
-			var inputStream = new FileInputStream("res/MenuBackground.png");
-			var image       = new Image(inputStream);
-			var imageView   = new ImageView(image);
+			LinMenu menu        = new LinMenu();
+			var     inputStream = new FileInputStream("res/MenuBackground.png");
+			var     image       = new Image(inputStream);
+			var     imageView   = new ImageView(image);
 			imageView.setFitWidth(FirstMenu.SCREEN_WIDTH);
 			imageView.setFitHeight(FirstMenu.SCREEN_HEIGHT);
 			var background = new Pane(imageView);
 			pane.getChildren().add(background);
 
-			menu.startGameButton().setOnAction(actionEvent -> {
-                try {
-                    menu.player.stop();
-                    new ClientController().run(manager);
-                } catch (Exception e) { e.printStackTrace(); }
+			menu.startGameButton().setOnMouseClicked((event) -> {
+					menu.player.stop();
+					new ClientController().run();
 			});
 
 			VBox menuBar = LinMenu.getMenuVBox();
@@ -117,7 +112,6 @@ public class Windows extends Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return new Scene(pane, FirstMenu.SCREEN_WIDTH, FirstMenu.SCREEN_HEIGHT, Color.WHITE);
 	}
 }

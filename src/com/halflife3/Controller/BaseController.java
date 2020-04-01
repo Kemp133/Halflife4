@@ -9,27 +9,28 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class BaseController extends Application implements ICredentialUser, IController {
-	private SceneManager manager;
+	private SceneManager    manager;
 	private ApplicationUser user;
 
-	public static void main(String[] args) {
+	public static void main (String[] args) {
 		System.setProperty("javafx.preloader", Login.class.getName());
 		Application.launch(args);
 	}
 
 	@Override
 	public void start (Stage stage) throws Exception {
-		manager = new SceneManager(stage);
+		manager = SceneManager.getInstance();
+		manager.setMainWindow(stage);
 		run();
 	}
 
 	@Override
-	public void initialise (SceneManager manager) {} //Never called
+	public void initialise () {} //Never called
 
 	@Override
 	public void start () {
 		try {
-			this.manager.setScene("Main Menu", Windows.getMenuScene(manager));
+			this.manager.setScene("Main Menu", Windows.getMenuScene());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -42,7 +43,7 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	}
 
 	@Override
-	public void run (SceneManager manager) {
+	public void run () {
 		start();
 	}
 

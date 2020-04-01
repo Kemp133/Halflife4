@@ -5,26 +5,25 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
+import java.util.Stack;
 
 public final class SceneManager {
 	private Stage                  mainWindow;
 	private HashMap<String, Scene> Scenes = new HashMap<>();
 	private static SceneManager    instance;
+	private static Stack<String>   sceneOrder = new Stack<>();
 
-	public SceneManager (Stage stage) {
-		mainWindow = stage;
-	}
+	private SceneManager () {}
 
+	//region Set Main Window
 	public void setMainWindow (Stage mainWindow) {
 		this.mainWindow = mainWindow;
 	}
+	//endregion
 
-	public void showWindow() {
-		mainWindow.show();
-	}
+	public void showWindow() { mainWindow.show(); }
 
 	//region SetScene
-
 	/**
 	 * A method to set the {@code mainWindow} scene, as well as add it to the {@code Scenes} hashmap
 	 *
@@ -34,6 +33,7 @@ public final class SceneManager {
 	public void setScene (String label, Scene scene) {
 		addScene(label, scene);
 		mainWindow.setScene(scene);
+		sceneOrder.push(label);
 	}
 
 	/**
@@ -44,8 +44,15 @@ public final class SceneManager {
 	 */
 	public void setScene (String label) throws SceneDoesNotExistException {
 		mainWindow.setScene(getScene(label));
+		sceneOrder.push(label);
 	}
 	//endregion
+
+	/** A method to restore the previous scene as the currently set scene on the SceneManager  */
+	public void restorePreviousScene() {
+		sceneOrder.pop();
+		mainWindow.setScene(Scenes.get(sceneOrder.peek()));
+	}
 
 	//region HelperMethods
 	/**
@@ -71,6 +78,10 @@ public final class SceneManager {
 			Scenes.put(label, scene);
 	}
 
-	public static SceneManager getInstance() { return instance; }
+	public static SceneManager getInstance() {
+		if(instance == null)
+			instance = new SceneManager();
+		return instance;
+	}
 	//endregion
 }

@@ -466,7 +466,7 @@ public class ClientGame extends Application {
             }
         });
         //endregion
-    }
+    } //DONE
 
     public void initialisePlayers() {
         Client.receivePositions();
@@ -483,7 +483,7 @@ public class ClientGame extends Application {
             enemy.setIpOfClient(ip);
             playerList.put(ip, enemy);
         }
-    }
+    } //DONE
 
     public void updateEnemies() {
         Client.receivePositions();
