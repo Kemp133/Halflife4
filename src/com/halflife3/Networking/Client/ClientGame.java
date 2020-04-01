@@ -10,6 +10,7 @@ import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -448,15 +449,6 @@ public class ClientGame extends Application {
                     root.setEffect(null);
                     popupStage.hide();
                 });
-                //endregion
-
-                //region Options button
-//                Button options = new Button("Options");
-//                pauseRoot.getChildren().add(options);
-//                options.setOnAction(actionEvent -> {
-//
-//                });
-                //endregion
 
                 //region Audio button
                 Button sound = new Button("Audio On/Off");
@@ -476,7 +468,7 @@ public class ClientGame extends Application {
                 Button toDesktop = new Button("Quit to Desktop");
                 pauseRoot.getChildren().add(toDesktop);
                 toDesktop.setOnAction(actionEvent -> {
-
+                    Platform.exit();
                 });
                 //endregion
 
