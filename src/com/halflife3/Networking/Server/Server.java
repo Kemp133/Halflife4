@@ -322,14 +322,6 @@ public class Server implements Runnable {
             botCircles.replace(ip, botCircle);
             //endregion
 
-            //region Sets bot's rotation
-            if (botSoughtPos != null && botCurrentPos != botSoughtPos) {
-                Vector2 botCenter = new Vector2(botCurrentPos.posX, botCurrentPos.posY);
-                Vector2 direction = new Vector2(botSoughtPos.posX, botSoughtPos.posY).subtract(botCenter);
-                botCurrentPos.degrees = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-            }
-            //endregion
-
             //region Checks if bot is holding the ball
             if (theBall.getBounds().intersects(botCircle.getBoundsInLocal()))
                 botCurrentPos.holdsBall = true;
@@ -361,6 +353,12 @@ public class Server implements Runnable {
                     alreadyLooking.replace(ip, false);
                 }).start();
             }
+            //endregion
+
+            //region Sets bot's rotation
+            Vector2 botCenter = new Vector2(botCurrentPos.posX, botCurrentPos.posY);
+            Vector2 direction = new Vector2(botSoughtPos.posX, botSoughtPos.posY).subtract(botCenter);
+            botCurrentPos.degrees = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
             //endregion
 
             //region Changes bot's velocity for the next cycle

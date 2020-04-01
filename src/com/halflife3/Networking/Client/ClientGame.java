@@ -183,10 +183,6 @@ public class ClientGame extends Application {
                 lastUpdate = currentNanoTime;
                 //endregion
 
-//                if (your_score == 1 || enemy_score == 1){
-//                    Platform.exit();
-//                }
-
                 //region Camera offset
                 Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
                 Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
