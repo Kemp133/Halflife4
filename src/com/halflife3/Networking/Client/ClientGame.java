@@ -348,15 +348,9 @@ public class ClientGame extends Application {
         }
 
         thisPlayer.reset();
-        thisPlayer.update(time);
-        thisPlayer.render(gc);
-
         ball.reset();
-        ball.update(time);
-        ball.render(gc);
 
         try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
-
     }
 
     private void gameInit(Scene scene) {

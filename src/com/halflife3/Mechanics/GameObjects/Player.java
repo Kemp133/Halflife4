@@ -35,7 +35,7 @@ public class Player extends Controllable {
                 Math.max(getWidth(), getHeight()) / 2 + 1);
         affine = new Affine();
         packetToSend = new PositionPacket();
-        spawnPosition = position;
+        spawnPosition = new Vector2(position);
     }
 
     @Override

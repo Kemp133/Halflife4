@@ -26,8 +26,4 @@ public abstract class Controllable extends Sprite {
 
 	public short getDegrees() { return degrees; }
 	//endregion
-
-	public Vector2 getSpawnPosition() {
-		return spawnPosition;
-	}
 }
