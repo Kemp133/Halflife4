@@ -64,20 +64,16 @@ public class ClientGame extends Application {
     private static Pane root;
     private static Player thisPlayer;
     private static HashMap<String, Player> playerList;
+    private static HashMap<Integer, Image> scoreSprite;
     private Input input = Input.getInstance();
     private static ProgressBar[] stunBar;
     private static Ball ball;
     private Stage window = null;
     private char side;
-    private boolean goal = false;
-    private double ballPreviousX;
-    private int your_score = 0;
-    private int enemy_score = 0;
-    private static HashMap<Integer, Image> score_sprite;
-    private Vector2 startPos;
+    private int yourScore = 0;
+    private int enemyScore = 0;
     private boolean flag = false;
     public boolean running = false;
-    private boolean ball_hold = false;
     private int bulletLimiter = 0;
     public int mapWidth;
     private int mapHeight;
@@ -107,16 +103,14 @@ public class ClientGame extends Application {
 
         //region Initialise objects
         playerList = new HashMap<>();
-        score_sprite = new HashMap<>();
+        scoreSprite = new HashMap<>();
         stunBar = new ProgressBar[Server.startPositions.length];
         root = new Pane();
         //endregion
 
         //region Initialise this player
-        startPos = clientNetwork.getStartingPosition();
-        thisPlayer = new Player(startPos, new Vector2(0, 0));
+        thisPlayer = new Player(clientNetwork.getStartingPosition(), new Vector2(0, 0));
         thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
-        thisPlayer.setAI(false);
         //endregion
 
         //region Wait until Server acknowledges Player connection
@@ -158,7 +152,6 @@ public class ClientGame extends Application {
 
         //region Initialise ball
         ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
-        ballPreviousX = mapWidth / 2f;
         //endregion
 
         //region Thread to update the position of all enemies and the ball
@@ -250,7 +243,7 @@ public class ClientGame extends Application {
 
                 //region Checks if the player is holding the ball
                 boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-                if (playerIsTouchingTheBall && !ball_hold)
+                if (playerIsTouchingTheBall && !ball.isHeld)
                     thisPlayer.setHoldsBall(true);
                 //endregion
 
@@ -309,27 +302,16 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Checks if a goal has been scored
-                if ((side == 'L' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
-                        (side == 'R' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)) {
-                    your_score++;
-                    goal = true;
-                    thisPlayer.setPosition(startPos);
-                    System.out.println("Goal for YOUR team!");
-                }
-                if ((side == 'R' && ballPreviousX - ball.getPosX() > mapWidth / 4f) ||
-                        (side=='L' && ballPreviousX - ball.getPosX() < -mapWidth / 4f)) {
-                    enemy_score++;
-                    thisPlayer.setPosition(startPos);
-                    System.out.println("Goal for the ENEMY team!");
-                    goal = true;
-                }
-                ballPreviousX = ball.getPosX();
+                if (ball.getPosX() < Server.GOAL_WIDTH)
+                    scored('R', elapsedTime, graphicsContext);
+                else if (ball.getPosX() > mapWidth - Server.GOAL_WIDTH)
+                    scored('L', elapsedTime, graphicsContext);
                 //endregion
 
                 //region Renders the score text
-                graphicsContext.drawImage(score_sprite.get(your_score), GAME_WINDOW_WIDTH / 2f - 40, 40);
-                graphicsContext.drawImage(score_sprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
-                graphicsContext.drawImage(score_sprite.get(enemy_score), GAME_WINDOW_WIDTH / 2f + 40, 40);
+                graphicsContext.drawImage(scoreSprite.get(yourScore), GAME_WINDOW_WIDTH / 2f - 40, 40);
+                graphicsContext.drawImage(scoreSprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
+                graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
                 //endregion
 
                 //region FPS counter
@@ -354,6 +336,27 @@ public class ClientGame extends Application {
         running = false;
         Client.disconnect();
         super.stop();
+    }
+
+    private void scored(char scoringSide, double time, GraphicsContext gc) {
+        if (scoringSide == side) {
+            yourScore++;
+            System.out.println("Goal for YOUR team!");
+        } else {
+            enemyScore++;
+            System.out.println("Goal for the ENEMY team!");
+        }
+
+        thisPlayer.reset();
+        thisPlayer.update(time);
+        thisPlayer.render(gc);
+
+        ball.reset();
+        ball.update(time);
+        ball.render(gc);
+
+        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+
     }
 
     private void gameInit(Scene scene) {
@@ -410,11 +413,11 @@ public class ClientGame extends Application {
 
         //region Adds score sprites
         try {
-            score_sprite.put(-1, new Image(new FileInputStream("res/numbers/vs.png")));
-            score_sprite.put(0, new Image(new FileInputStream("res/numbers/0.png")));
-            score_sprite.put(1, new Image(new FileInputStream("res/numbers/1.png")));
-            score_sprite.put(2, new Image(new FileInputStream("res/numbers/2.png")));
-            score_sprite.put(3, new Image(new FileInputStream("res/numbers/3.png")));
+            scoreSprite.put(-1, new Image(new FileInputStream("res/numbers/vs.png")));
+            scoreSprite.put(0, new Image(new FileInputStream("res/numbers/0.png")));
+            scoreSprite.put(1, new Image(new FileInputStream("res/numbers/1.png")));
+            scoreSprite.put(2, new Image(new FileInputStream("res/numbers/2.png")));
+            scoreSprite.put(3, new Image(new FileInputStream("res/numbers/3.png")));
         } catch (FileNotFoundException e) { e.printStackTrace(); }
         //endregion
 
@@ -462,9 +465,7 @@ public class ClientGame extends Application {
                 //region ToDesktop button
                 Button toDesktop = new Button("Quit to Desktop");
                 pauseRoot.getChildren().add(toDesktop);
-                toDesktop.setOnAction(actionEvent -> {
-                    Platform.exit();
-                });
+                toDesktop.setOnAction(actionEvent -> Platform.exit());
                 //endregion
 
                 popupStage.show();
@@ -502,7 +503,7 @@ public class ClientGame extends Application {
                 continue;
 
 //            If server list has been updated - reset the odd player's position and velocity
-            playerList.get(player).resetPosition();
+            playerList.get(player).reset();
             playerList.get(player).resetVelocity();
 
 //            Find the odd player (bot or disconnected player)
@@ -535,12 +536,19 @@ public class ClientGame extends Application {
                         theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
 
                 enemy.setAffine(rotate);
-                enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 enemy.setPosition(theDoubleValues.posX, theDoubleValues.posY);
+                enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
             } else {
-                ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
                 ball.setPosition(theDoubleValues.posX, theDoubleValues.posY);
-                ball_hold = theDoubleValues.holdsBall;
+                ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+                ball.isHeld = theDoubleValues.holdsBall;
+
+                if (ball.getPosX() < Server.GOAL_WIDTH || ball.getPosX() > mapWidth - Server.GOAL_WIDTH) {
+                    try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                    return;
+                }
+
+                continue;
             }
             //endregion
 
@@ -552,7 +560,6 @@ public class ClientGame extends Application {
             double bulletX = Math.cos(degreeRadians);
             double bulletY = Math.sin(degreeRadians);
             Vector2 shotVel = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
-
             Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
             Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
                     theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
@@ -592,7 +599,7 @@ public class ClientGame extends Application {
                             if (player.stunned == 0) {
                                 player.stunned = STUN_DURATION * 5;
                                 player.setVelocity(bullet.getVelocity().divide(3));
-                                player.setAcceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
+                                player.setDeceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
                                 player.setMoving(false);
                             }
                         }

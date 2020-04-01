@@ -18,7 +18,6 @@ public class Player extends Controllable {
     private Image sprite2;
     private Vector2 originalPosition;
     private PositionPacket packetToSend;
-//    private int mode = 0;
     public float stunned = 0;
     public boolean bulletShot = false;
     private boolean isMoving = false;
@@ -27,7 +26,7 @@ public class Player extends Controllable {
 
     public Player(Vector2 position, Vector2 velocity) {
         super(position, velocity);
-        acceleration = new Vector2(0,0);
+        deceleration = new Vector2(0,0);
         keys.add("player");
         setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
         setSprite2("res/Sprites/PlayerSkins/Cosmo_Moving.png");
@@ -36,9 +35,9 @@ public class Player extends Controllable {
                 Math.max(getWidth(), getHeight()) / 2 + 1);
         affine = new Affine();
         packetToSend = new PositionPacket();
+        spawnPosition = position;
     }
 
-    //region Overridden super methods
     @Override
     public Circle getBounds() {
         return circle;
@@ -51,44 +50,30 @@ public class Player extends Controllable {
 
         gc.save();
         gc.setTransform(affine);
-
-        if (isMoving) {
-            gc.drawImage(sprite2, posX, posY);
-        } else gc.drawImage(sprite, posX, posY);
-
-//        if (mode % 6 == 0 && isMoving) {
-//            gc.drawImage(sprite2, posX, posY);
-//            mode++;
-//        } else {
-//            gc.drawImage(sprite, posX, posY);
-//            mode = (mode < 10) ? mode + 1 : 0;
-//        }
-
+        gc.drawImage((isMoving) ? sprite2 : sprite, posX, posY);
         gc.restore();
     }
 
     @Override
     public void update(double time) {
-        if (stunned <= ClientGame.STUN_DURATION && stunned != 0){
+        if (stunned <= ClientGame.STUN_DURATION && stunned != 0) {
             velocity.setX(0);
             velocity.setY(0);
-            acceleration.setX(0);
-            acceleration.setY(0);
+            deceleration.setX(0);
+            deceleration.setY(0);
             stunned--;
         } else {
             originalPosition = new Vector2(position);
-            Vector2 previous_Vel = new Vector2(velocity);
-            if(velocity.getX()*previous_Vel.subtract(acceleration).getX()>0)
-                velocity.subtract(acceleration);
+            Vector2 previousVel = new Vector2(velocity);
+            if (velocity.getX() * previousVel.subtract(deceleration).getX() > 0)
+                velocity.subtract(deceleration);
             position.add(new Vector2(velocity).multiply(time));
             isMoving = !originalPosition.equals(position);
             circle.setCenterX(position.getX() + getWidth() / 2 + 1);
             circle.setCenterY(position.getY() + getHeight() / 2 + 1);
-            if(stunned !=0)
-                stunned--;
+            if (stunned > 0) stunned--;
         }
     }
-    //endregion
 
     public void setMoving(boolean is_moving) {
         this.isMoving = is_moving;
@@ -123,8 +108,16 @@ public class Player extends Controllable {
         else if (dir.getY() < -30 && dir.getX() > -30 && dir.getX() < 30 && velocity.getY() < 0) velocity.setY(0);
     }
 
-    public void resetPosition() {
-        originalPosition = spawn_point;
+    public void reset() {
+        stunned = 0;
+        bulletShot = false;
+        isMoving = false;
+        holdsBall = false;
+        originalPosition = spawnPosition;
+        position = spawnPosition;
+        circle.setCenterX(position.getX() + getWidth() / 2 + 1);
+        circle.setCenterY(position.getY() + getHeight() / 2 + 1);
+        resetVelocity();
     }
 
     public void setBulletShot(boolean bulletShot) {

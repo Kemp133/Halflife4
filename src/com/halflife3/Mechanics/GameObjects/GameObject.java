@@ -13,7 +13,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     //region Class Fields
     protected Vector2 position;
     protected Vector2 velocity;
-    protected Vector2 acceleration;
+    protected Vector2 deceleration;
     /** Using a HashSet to store a list of keys (e.g. indicate what type the GameObject is). HashSet for speed, and
      * to disallow duplicate keys from being added */
     protected HashSet<String> keys;
@@ -24,7 +24,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
         this.position = position;
         this.velocity = velocity;
         ObjectManager.addObject(this);
-        acceleration = new Vector2(0,0);
+        deceleration = new Vector2(0,0);
     }
 
     //An initialiser block
@@ -133,7 +133,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
     }
     //endregion
 
-    //region Overridden method
+    //region Overridden methods
     @Override
     public String toString() {
         var sb = new StringBuilder();
@@ -165,12 +165,12 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
         return false;
     }
 
-    public void setAcceleration(Vector2 acceleration) {
-        this.acceleration = acceleration;
+    public void setDeceleration(Vector2 deceleration) {
+        this.deceleration = deceleration;
     }
 
-    public Vector2 getAcceleration() {
-        return acceleration;
+    public Vector2 getDeceleration() {
+        return deceleration;
     }
     //endregion
 }
