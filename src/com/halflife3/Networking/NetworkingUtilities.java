@@ -44,7 +44,7 @@ public class NetworkingUtilities {
 	 * A method to firstly set the interface to WiFi (if it exists), and then all addresses to find a suitable address
 	 * to use for datagram packets
 	 * @return A suitable address to use, using the WiFi interface
-	 * @throws SocketException In the even getting the correct interface and finding a suitable socket is unsuccessful
+	 * @throws SocketException In the event getting the correct interface and finding a suitable socket is unsuccessful
 	 */
 	public static InetAddress setWifiInterface () throws SocketException {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();

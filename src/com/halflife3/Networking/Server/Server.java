@@ -30,6 +30,8 @@ public class Server implements Runnable {
     public static final int     LISTENER_PORT       = 5544;
     public static final int     GET_PORT_PORT       = 5566;
     public static final int     POSITIONS_PORT      = 5533;
+    public static final int     GOAL_WIDTH          = 2 * 40;
+    public final int            SERVER_TIMEOUT      = 3000000; // milliseconds
 
     private boolean running = false;
     private static boolean welcoming = true;
@@ -38,11 +40,9 @@ public class Server implements Runnable {
     private PositionListPacket posListPacket;
     private DatagramSocket clientSocket;
     private EventListenerServer listenerServer;
-    public final int SERVER_TIMEOUT = 3000000; // milliseconds
-    private final int GOAL_WIDTH = 2 * 40;
     private static int clientPort = 6666;
     private static HashMap<Vector2, Boolean> availablePositions;
-    private static Vector2[] startPositions = {new Vector2(1720, 680), //160, 600
+    public static Vector2[] startPositions = {new Vector2(1720, 680), //160, 600
                                                new Vector2(1840, 600)};
     public static ArrayList<String> botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
     private HashMap<String, Circle> botCircles;
@@ -305,7 +305,6 @@ public class Server implements Runnable {
         }
     }
 
-    //Replaces bot entries with new PositionPackets after moving the AI
     private void moveAI(double time) {
         for (String ip : ClientListServer.connectedIPs) {
             if (!botNamesList.contains(ip))
@@ -381,9 +380,9 @@ public class Server implements Runnable {
     private Vector2 getNextGoal(PositionPacket bot) {
         if (bot.holdsBall) {
             if (bot.spawnX < mapWidth / 2f) {
-                return new Vector2(mapWidth - GOAL_WIDTH, bot.posY);
+                return new Vector2(mapWidth - GOAL_WIDTH, mapHeight / 2f);
             } else {
-                return new Vector2(GOAL_WIDTH, bot.posY);
+                return new Vector2(GOAL_WIDTH, mapHeight / 2f);
             }
         }
 

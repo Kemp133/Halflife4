@@ -19,7 +19,7 @@ public class Player extends Controllable {
     private Vector2 originalPosition;
     private PositionPacket packetToSend;
 //    private int mode = 0;
-    public float stand = 0;
+    public float stunned = 0;
     public boolean bulletShot = false;
     private boolean isMoving = false;
     private boolean holdsBall = false;
@@ -69,12 +69,12 @@ public class Player extends Controllable {
 
     @Override
     public void update(double time) {
-        if (stand <= ClientGame.STUN_DURATION && stand != 0){
+        if (stunned <= ClientGame.STUN_DURATION && stunned != 0){
             velocity.setX(0);
             velocity.setY(0);
             acceleration.setX(0);
             acceleration.setY(0);
-            stand--;
+            stunned--;
         } else {
             originalPosition = new Vector2(position);
             Vector2 previous_Vel = new Vector2(velocity);
@@ -84,8 +84,8 @@ public class Player extends Controllable {
             isMoving = !originalPosition.equals(position);
             circle.setCenterX(position.getX() + getWidth() / 2 + 1);
             circle.setCenterY(position.getY() + getHeight() / 2 + 1);
-            if(stand!=0)
-                stand--;
+            if(stunned !=0)
+                stunned--;
         }
     }
     //endregion
