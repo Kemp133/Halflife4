@@ -217,7 +217,7 @@ public class Server implements Runnable {
         for (String ip : ClientListServer.positionList.keySet()) {
             PositionPacket playerWithBall = ClientListServer.positionList.get(ip);
 
-            if (!playerWithBall.holdsBall )
+            if (!playerWithBall.holdsBall)
                 continue;
 
             //region Ball's position
@@ -333,6 +333,7 @@ public class Server implements Runnable {
             //region Checks if bot is holding the ball
             if (theBall.getBounds().intersects(botCircle.getBoundsInLocal()))
                 botCurrentPos.holdsBall = true;
+                theBall.isHeld = true;
             //endregion
 
             //region Sets the currently sought after and next positions
