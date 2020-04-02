@@ -1,3 +1,5 @@
+package com.halflife3.GameUI;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -85,7 +87,7 @@ public class MainMenu extends Application {
         borderPane.setBackground(addBackground());
         borderPane.setCenter(vbox());
 
-        File f = new File("res/MainMenu/MainMenuCSS.css");
+        File f = new File("res/com.halflife3.GameUI.MainMenu/MainMenuCSS.css");
         borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
 
         return borderPane;
@@ -96,7 +98,7 @@ public class MainMenu extends Application {
 
         Scene scene = new Scene(borderPane(), 800, 600);
 
-        /*File f = new File("res/MainMenu/MainMenuCSS.css");
+        /*File f = new File("res/com.halflife3.GameUI.MainMenu/MainMenuCSS.css");
         scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));*/
 
         stage.setScene(scene);
