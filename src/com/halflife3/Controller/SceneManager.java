@@ -1,7 +1,6 @@
 package com.halflife3.Controller;
 
 import com.halflife3.Controller.Exceptions.SceneDoesNotExistException;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -54,6 +53,19 @@ public final class SceneManager {
 	public void restorePreviousScene() {
 		sceneOrder.pop();
 		mainWindow.setScene(Scenes.get(sceneOrder.peek()));
+	}
+
+	/** You... Monster... You euthanized your faithful SceneManager data more quickly than any test
+	 * subject on record. Congratulations
+	 *
+	 * (This method completely removes all data from the object, clearing it out in the hopes that garbage
+	 * collection comes along and cleans it up)
+	 * */
+	public void eutanizeData() {
+		mainWindow = null;
+		Scenes.clear();
+		instance = null;
+		sceneOrder.clear();
 	}
 
 	//region HelperMethods

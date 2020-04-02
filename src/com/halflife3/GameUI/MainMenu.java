@@ -134,13 +134,15 @@ public class MainMenu /*extends Application*/ {
                 NetworkingUtilities.CreateErrorMessage(
 				"Media Player Error Occurred",
 				"A problem occurred with the media player",
-				"Contact your closest HalfLife team member for assistance with this error"
+				"Contact your most convenient HalfLife team member for assistance with this error"
 		));
 	}
 
 	public Scene getScene () { return scene; }
 
 	public MediaPlayer getPlayer () { return player; }
+
+	public Button getExit () { return exit; }
 
 //	@Override
 //	public void start (Stage stage) throws Exception {

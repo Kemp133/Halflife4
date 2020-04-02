@@ -55,9 +55,6 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	}
 
 	@Override
-	public void initialise () {} //Never called
-
-	@Override
 	public void start () {
 		menu = new MainMenu();
 		menu.getPlayer().play();
@@ -65,7 +62,15 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	}
 
 	@Override
-	public void end () { } //Not needed for this controller
+	public void initialise () {} //Never called
+
+	@Override
+	public void end () {
+		manager.eutanizeData();
+		user = null;
+		windowAttributes = null;
+		menu = null;
+	}
 
 	@Override
 	public void run () {
