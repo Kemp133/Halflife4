@@ -49,7 +49,7 @@ public class MainMode extends GameMode {
 	//region Other variables
 	public        Pane                    root;
 	private       Scene                   scene;
-	private       Player                  thisPlayer;
+	public        Player                  thisPlayer;
 	private       HashMap<String, Player> playerList;
 	private       HashMap<Integer, Image> scoreSprite;
 	private       Input                   input               = Input.getInstance();
@@ -58,8 +58,8 @@ public class MainMode extends GameMode {
 	private       Ball                    ball;
 	private       Stage                   window              = null;
 	private       char                    side;
-	private       int                     yourScore           = 0;
-	private       int                     enemyScore          = 0;
+	public        int                     yourScore           = 0;
+	public        int                     enemyScore          = 0;
 	public        boolean                 running             = false;
 	private       int                     bulletLimiter       = 0;
 	public        int                     mapWidth;
@@ -294,11 +294,17 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Checks if a goal has been scored
+
 		if (ballPreviousX - ball.getPosX() < -mapWidth / 4f){
 			scored('R', elapsedTime, graphicsContext);
 		}
 		else if (ballPreviousX - ball.getPosX() > mapWidth / 4f){
 			scored('L', elapsedTime, graphicsContext);
+		}
+		if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
+			yourScore = 0;
+			enemyScore = 0;
+			thisPlayer.reset();
 		}
 		ballPreviousX = ball.getPosX();
 		//endregion
