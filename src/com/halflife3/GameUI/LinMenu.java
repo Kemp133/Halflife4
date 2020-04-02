@@ -158,8 +158,6 @@ public class LinMenu extends ContextMenu {
 			});
 			//endregion
 
-
-
 			//region Exit button
 			exit_m = new Button();
 			exit_m.setMinHeight(90);

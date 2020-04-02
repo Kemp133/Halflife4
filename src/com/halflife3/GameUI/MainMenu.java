@@ -1,13 +1,19 @@
 package com.halflife3.GameUI;
 
+import com.halflife3.Controller.ClientController;
+import com.halflife3.Controller.SceneManager;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -18,12 +24,14 @@ import java.io.FileNotFoundException;
 public class MainMenu extends Application {
     private static BorderPane borderPane;
     private static VBox vbox;
+    private static final String MENU_AUDIO_PATH = "res/MainMenu/music_cinematic_darkness_falls.mp3";
 
     private static Button startServer = new Button("Host Game");
     private static Button joinGame = new Button("Join Game");
     private static Button leaderboard = new Button("Leaderboard");
     private static Button options = new Button("Options");
     private static Button exit = new Button("Exit");
+    private static MediaPlayer player;
 
     private static Background addBackground() {
         try {
@@ -44,6 +52,19 @@ public class MainMenu extends Application {
     }
 
     private static VBox vbox() {
+        File audioFile = new File(MENU_AUDIO_PATH);
+        player = new MediaPlayer(new Media(audioFile.toURI().toString()));
+        joinGame.setOnAction(actionEvent -> {
+            player.stop();
+            Platform.runLater(() -> new ClientController().start(SceneManager.getInstance().getMainWindow()));
+        });
+
+        exit.setOnAction(actionEvent -> {
+            Platform.exit();
+            System.exit(0); //This is done to actually stop the Java application that's running
+        });
+
+
         vbox = new VBox(startServer, joinGame, leaderboard, options, exit);
         vbox.setAlignment(Pos.BASELINE_CENTER);
         vbox.setPadding(new Insets(35, 0, 0, 30));
