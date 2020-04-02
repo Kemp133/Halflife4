@@ -101,12 +101,12 @@ public class Windows extends Application {
 			var background = new Pane(imageView);
 			pane.getChildren().add(background);
 
-			menu.startGameButton().setOnMouseClicked((event) -> {
+			menu.startGameButton().setOnAction((event) -> {
 					menu.player.stop();
 					new ClientController().run();
 			});
 
-			VBox menuBar = LinMenu.getMenuVBox();
+			VBox menuBar = menu.getMenuVBox();
 			menuBar.setAlignment(Pos.CENTER);
 			pane.getChildren().add(menuBar);
 		} catch (Exception e) {

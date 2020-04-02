@@ -15,7 +15,8 @@ public final class SceneManager {
 
 	private SceneManager () {}
 
-	//region Set Main Window
+	//region Get/Set Main Window
+	public Stage getMainWindow() { return mainWindow; }
 	public void setMainWindow (Stage mainWindow) {
 		this.mainWindow = mainWindow;
 	}
@@ -33,6 +34,7 @@ public final class SceneManager {
 	public void setScene (String label, Scene scene) {
 		addScene(label, scene);
 		mainWindow.setScene(scene);
+		mainWindow.show();
 		sceneOrder.push(label);
 	}
 

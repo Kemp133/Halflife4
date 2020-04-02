@@ -18,7 +18,7 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	}
 
 	@Override
-	public void start (Stage stage) throws Exception {
+	public void start (Stage stage) {
 		manager = SceneManager.getInstance();
 		manager.setMainWindow(stage);
 		run();
@@ -30,7 +30,7 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	@Override
 	public void start () {
 		try {
-			this.manager.setScene("Main Menu", Windows.getMenuScene());
+			manager.setScene("Main Menu", Windows.getMenuScene());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -41,6 +41,8 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	public void end () {
 
 	}
+
+
 
 	@Override
 	public void run () {

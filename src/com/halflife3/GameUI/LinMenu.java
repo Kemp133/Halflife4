@@ -1,5 +1,7 @@
 package com.halflife3.GameUI;
 
+import com.halflife3.Controller.ClientController;
+import com.halflife3.Controller.SceneManager;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -104,17 +106,7 @@ public class LinMenu extends ContextMenu {
 		return main_menu;
 	}
 
-	public static VBox getMenuVBox () {
-		VBox           main_menu = null;
-		MediaPlayer    player;
-		Slider         volume;
-		MenuItem       audioItem_on  = new MenuItem();
-		MenuItem       audioItem_off = new MenuItem();
-		CustomMenuItem audio         = new CustomMenuItem();
-		Button         start_m;
-		MenuButton     settings_m;
-		Button         exit_m;
-
+	public VBox getMenuVBox () {
 		try {
 			//region Audio Settings
 			settings_m = new MenuButton("", new ImageView(), audioItem_on, audioItem_off, audio);
@@ -160,8 +152,13 @@ public class LinMenu extends ContextMenu {
 					new BackgroundSize(start_m.getWidth(), start_m.getHeight(), true, true, true, false));
 			var newBJoin = new Background(bImageJoin);
 			start_m.setBackground(newBJoin);
-			//OnActionListener is in Windows.java -> addMenu()
+			start_m.setOnAction((event) -> {
+				player.stop();
+				Platform.runLater(() -> new ClientController().start(SceneManager.getInstance().getMainWindow()));
+			});
 			//endregion
+
+
 
 			//region Exit button
 			exit_m = new Button();
@@ -174,7 +171,10 @@ public class LinMenu extends ContextMenu {
 					new BackgroundSize(exit_m.getWidth(), exit_m.getHeight(), true, true, true, false));
 			var newBExit = new Background(bImageExit);
 			exit_m.setBackground(newBExit);
-			exit_m.setOnAction(actionEvent -> Platform.exit());
+			exit_m.setOnAction(actionEvent ->  {
+				Platform.exit();
+				System.exit(0);
+			});
 			//endregion
 
 			main_menu = new VBox(30);
@@ -183,7 +183,6 @@ public class LinMenu extends ContextMenu {
 			e.printStackTrace();
 		}
 
-        assert main_menu != null;
         return main_menu;
 	}
 }

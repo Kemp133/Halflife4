@@ -90,7 +90,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 	public MainMode (String GameModeName, double score) {
 		super(GameModeName);
 //		this.CanRespawn = CanRespawn;
-		this.scoreLimit = score;
+		scoreLimit = score;
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		//endregion
 
 		//region Initialise This Player
-		thisPlayer = new Player(clientNetwork.getStartingPosition(), new Vector2());
+		thisPlayer = new Player(clientNetwork.getStartingPosition(), new Vector2(0,0));
 		thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
 		//endregion
 
@@ -152,7 +152,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		//endregion
 
 		//region Initialise Ball
-		ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2());
+		ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0,0));
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
@@ -317,16 +317,6 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 				graphicsContext.drawImage(scoreSprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
 				graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
 				//endregion
-
-				//region FPS counter
-//                second -= elapsedTime;
-//                fpsCounter++;
-//                if (second < 0) {
-//                    System.out.println("FPS: " + fpsCounter);
-//                    second = 1;
-//                    fpsCounter = 0;
-//                }
-				//endregion
 			}
 		}.start();
 
@@ -337,6 +327,10 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 	void finished () {
 		//Send packet to end the game
 		//Set up game to await for the won/lost packet
+		System.out.println("Game exited");
+		running = false;
+		Client.disconnect();
+		SceneManager.getInstance().restorePreviousScene(); //End the flow of this class, return to the previous scene
 	}
 
 	@Override
@@ -616,6 +610,21 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 				break;
 			} //Update object positions
 		}
+	}
+
+	private void scored(char scoringSide, double time, GraphicsContext gc) {
+		if (scoringSide == side) {
+			yourScore++;
+			System.out.println("Goal for YOUR team!");
+		} else {
+			enemyScore++;
+			System.out.println("Goal for the ENEMY team!");
+		}
+
+		thisPlayer.reset();
+		ball.reset();
+
+		try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
 	}
 
 	//region Get/Set Scores
