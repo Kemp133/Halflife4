@@ -25,6 +25,7 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.stage.*;
 import javafx.util.Duration;
@@ -75,7 +76,6 @@ public class MainMode extends GameMode {
 
 	public MainMode (String GameModeName, double score) {
 		super(GameModeName);
-//		this.CanRespawn = CanRespawn;
 		scoreLimit = score;
 	}
 
@@ -327,19 +327,19 @@ public class MainMode extends GameMode {
 		//Set up game to await for the won/lost packet
 
 		//region Showing Who Won
-
+		VBox  vbox  = new VBox();
+		Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) + "won!");
+		vbox.getChildren().add(text);
+		Scene wonScene = new Scene(vbox, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, Color.WHITE);
+		window = new Stage();
+		window.setScene(wonScene);
 		//endregion
 
-		//region Show Leaderboard
-		Leaderboard leaderboard = new Leaderboard();
-		SceneManager.getInstance().setScene("leaderboard", leaderboard.getLeaderboardScene(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT));
-		try { Thread.sleep(10 * 1000); } catch (Exception ignored) {}
+		scene.setCursor(Cursor.DEFAULT);
 		SceneManager.getInstance().restorePreviousScene();
-		//endregion
 		System.out.println("Game exited");
 		running = false;
 		Client.disconnect();
-		scene.setCursor(Cursor.NONE);
 	}
 
 	@Override
