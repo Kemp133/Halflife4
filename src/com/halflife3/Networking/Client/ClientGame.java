@@ -84,6 +84,7 @@ public class ClientGame extends Application {
     private final int BOTTOM_OF_SCREEN = 8*40;
     private final int TOP_OF_SCREEN = 7*40;
     private double ballPreviousX;
+
     //endregion
 
     //region ClientGame constructors
@@ -321,12 +322,19 @@ public class ClientGame extends Application {
                 //endregion
 
                 //region Checks if a goal has been scored
-                if (ballPreviousX - ball.getPosX() < -mapWidth / 4f){
-                    scored('R', elapsedTime, graphicsContext);
+
+                    if (ballPreviousX - ball.getPosX() < -mapWidth / 4f){
+                        scored('R', elapsedTime, graphicsContext);
+                    }
+                    else if (ballPreviousX - ball.getPosX() > mapWidth / 4f){
+                        scored('L', elapsedTime, graphicsContext);
+                    }
+                if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
+                    yourScore = 0;
+                    enemyScore = 0;
+                    thisPlayer.reset();
                 }
-                else if (ballPreviousX - ball.getPosX() > mapWidth / 4f){
-                    scored('L', elapsedTime, graphicsContext);
-                }
+
                 ballPreviousX = ball.getPosX();
                 //endregion
 
@@ -556,6 +564,7 @@ public class ClientGame extends Application {
                 enemy.setAffine(rotate);
                 enemy.setPosition(theDoubleValues.posX, theDoubleValues.posY);
                 enemy.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
+
             } else {
                 ball.setPosition(theDoubleValues.posX, theDoubleValues.posY);
                 ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
@@ -578,6 +587,7 @@ public class ClientGame extends Application {
 
             editObjectManager(0, 0, bulletPos, shotVel, "enemy");
             theDoubleValues.bulletShot = false;
+
             //endregion
         }
         //endregion

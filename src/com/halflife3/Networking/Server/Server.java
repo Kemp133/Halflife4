@@ -1,5 +1,6 @@
 package com.halflife3.Networking.Server;
 
+import com.halflife3.Controller.GameModes.MainMode;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.GameObjects.Ball;
 import com.halflife3.Mechanics.GameObjects.Bricks;
@@ -307,7 +308,7 @@ public class Server implements Runnable {
             multicastPacket(posListPacket, POSITIONS_PORT);
         }).start();
 
-        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
     }
 
     private void moveAI(double time) {
