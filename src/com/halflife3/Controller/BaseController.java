@@ -3,6 +3,7 @@ package com.halflife3.Controller;
 import com.halflife3.Controller.Interfaces.IController;
 import com.halflife3.DatabaseUI.Login;
 import com.halflife3.GameUI.ApplicationUser;
+import com.halflife3.GameUI.MainMenu;
 import com.halflife3.GameUI.WindowAttributes;
 import com.halflife3.GameUI.Windows;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
@@ -55,7 +56,7 @@ public class BaseController extends Application implements ICredentialUser, ICon
 
 	@Override
 	public void start () {
-		manager.setScene("Main Menu", Windows.getMenuScene());
+		manager.setScene("Main Menu", MainMenu.getMenuScene());
 	}
 
 	@Override
