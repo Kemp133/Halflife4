@@ -5,14 +5,10 @@ import com.halflife3.DatabaseUI.Login;
 import com.halflife3.GameUI.ApplicationUser;
 import com.halflife3.GameUI.MainMenu;
 import com.halflife3.GameUI.WindowAttributes;
-import com.halflife3.GameUI.Windows;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Menu;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -58,6 +54,9 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	public void start () {
 		menu = new MainMenu();
 		menu.getPlayer().play();
+		menu.getExit().setOnAction(actionEvent -> {
+			end();
+		});
 		manager.setScene("Main Menu", menu.getScene());
 	}
 
@@ -66,10 +65,12 @@ public class BaseController extends Application implements ICredentialUser, ICon
 
 	@Override
 	public void end () {
-		manager.eutanizeData();
+		manager.euthanizeData();
 		user = null;
 		windowAttributes = null;
 		menu = null;
+		Platform.exit();
+		System.exit(0);
 	}
 
 	@Override

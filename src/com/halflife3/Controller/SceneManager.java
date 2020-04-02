@@ -61,7 +61,7 @@ public final class SceneManager {
 	 * (This method completely removes all data from the object, clearing it out in the hopes that garbage
 	 * collection comes along and cleans it up)
 	 * */
-	public void eutanizeData() {
+	public void euthanizeData () {
 		mainWindow = null;
 		Scenes.clear();
 		instance = null;
