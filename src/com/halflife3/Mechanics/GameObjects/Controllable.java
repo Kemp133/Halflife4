@@ -9,7 +9,10 @@ public abstract class Controllable extends Sprite {
 	protected short 	degrees;
 	protected Vector2 spawnPosition;
 
-	public Controllable(Vector2 position, Vector2 velocity) { super(position, velocity); }
+	public Controllable(Vector2 position, Vector2 velocity) {
+		super(position, velocity);
+		spawnPosition = position;
+	}
 
 	//region IP getter and setter
 	public String getIpOfClient() {	return ipOfClient; }
