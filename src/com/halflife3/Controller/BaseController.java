@@ -10,7 +10,9 @@ import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Menu;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -24,6 +26,7 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	private        SceneManager     manager;
 	private        ApplicationUser  user;
 	private static WindowAttributes windowAttributes;
+	private        MainMenu         menu;
 
 	public static void main (String[] args) {
 		System.setProperty("javafx.preloader", Login.class.getName());
@@ -56,7 +59,9 @@ public class BaseController extends Application implements ICredentialUser, ICon
 
 	@Override
 	public void start () {
-		manager.setScene("Main Menu", MainMenu.getMenuScene());
+		menu = new MainMenu();
+		menu.getPlayer().play();
+		manager.setScene("Main Menu", menu.getScene());
 	}
 
 	@Override
