@@ -16,16 +16,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class MainMenu extends Application {
-    BorderPane borderPane;
-    VBox vbox;
+    private static BorderPane borderPane;
+    private static VBox vbox;
 
-    Button startServer = new Button("Host Game");
-    Button joinGame = new Button("Join Game");
-    Button leaderboard = new Button("Leaderboard");
-    Button options = new Button("Options");
-    Button exit = new Button("Exit");
+    private static Button startServer = new Button("Host Game");
+    private static Button joinGame = new Button("Join Game");
+    private static Button leaderboard = new Button("Leaderboard");
+    private static Button options = new Button("Options");
+    private static Button exit = new Button("Exit");
 
-    private Background addBackground() {
+    private static Background addBackground() {
         try {
 
             FileInputStream inputStream = new FileInputStream("res/Leaderboard/LeaderboardBackground.jpg");
@@ -43,7 +43,7 @@ public class MainMenu extends Application {
         return null;
     }
 
-    private VBox vbox() {
+    private static VBox vbox() {
         vbox = new VBox(startServer, joinGame, leaderboard, options, exit);
         vbox.setAlignment(Pos.BASELINE_CENTER);
         vbox.setPadding(new Insets(35, 0, 0, 30));
@@ -53,7 +53,7 @@ public class MainMenu extends Application {
         return vbox;
     }
 
-    private BorderPane borderPane() {
+    private static BorderPane borderPane() {
         borderPane = new BorderPane();
 
         Font paladinFont = null;
@@ -87,10 +87,15 @@ public class MainMenu extends Application {
         borderPane.setBackground(addBackground());
         borderPane.setCenter(vbox());
 
-        File f = new File("res/com.halflife3.GameUI.MainMenu/MainMenuCSS.css");
+        File f = new File("res/MainMenu/MainMenuCSS.css");
         borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
 
         return borderPane;
+    }
+
+    public static Scene getMenuScene() {
+        Scene scene = new Scene(borderPane(), 800, 600);
+        return scene;
     }
 
     @Override
