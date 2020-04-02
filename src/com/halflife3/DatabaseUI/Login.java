@@ -2,6 +2,7 @@ package com.halflife3.DatabaseUI;
 
 import com.halflife3.GameUI.FirstMenu;
 import com.halflife3.GameUI.LoginAttributes;
+import com.halflife3.GameUI.WindowAttributes;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Platform;
@@ -25,6 +26,8 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -49,9 +52,9 @@ public class Login extends Preloader {
 
 	private static Stage preloaderStage = null;
 
-	private boolean         hasLoggedIn = false;
-	private ICredentialUser user;
-	private LoginAttributes loginAttributes;
+	private boolean          hasLoggedIn = false;
+	private ICredentialUser  user;
+	private LoginAttributes  loginAttributes;
 
 	String mySecurePassword;
 	String salt;
@@ -637,6 +640,7 @@ public class Login extends Preloader {
 	 * Try and load log in values for automatically logging in. In the event the file is not found,
 	 * a new one is created with generic values and saved instead, ready for the next time the person
 	 * logs in
+	 *
 	 * @return {@code true} if a configuration file has been found, and {@code false otherwise}
 	 */
 	public boolean getUserLoginAttributes () {

@@ -324,7 +324,7 @@ public class MainMode extends GameMode {
 		VBox  vbox  = new VBox();
 		Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) + "won!");
 		vbox.getChildren().add(text);
-		Scene wonScene = new Scene(vbox, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, Color.WHITE);
+		Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
 		window = new Stage();
 		window.setScene(wonScene);
 		//endregion

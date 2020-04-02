@@ -133,7 +133,7 @@ public class LinMenu extends ContextMenu {
 			audioItem_off.setOnAction(actionEvent -> player.setMute(true));
 			audio.setOnAction(actionEvent -> volumeControl(player, volume));
 
-			player.setAutoPlay(true);
+			player.setAutoPlay(false);
 			player.setOnEndOfMedia(() -> {
 				player.seek(Duration.ZERO);
 				player.play();

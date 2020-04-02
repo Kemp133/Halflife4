@@ -35,7 +35,6 @@ public final class SceneManager {
 	public void setScene (String label, Scene scene) {
 		addScene(label, scene);
 		mainWindow.setScene(scene);
-		mainWindow.show();
 		sceneOrder.push(label);
 	}
 

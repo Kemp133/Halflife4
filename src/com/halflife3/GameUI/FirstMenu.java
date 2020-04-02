@@ -177,14 +177,6 @@ public class FirstMenu extends Application implements ICredentialUser {
 		if (!windowAttributes.decorated) s.initStyle(StageStyle.UNIFIED);
 		if (windowAttributes.isModal) s.initModality(Modality.APPLICATION_MODAL);
 		if (windowAttributes.maximisedOnLoad) s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-
-//        if(!windowAttributes.iconPath.isEmpty() || !windowAttributes.iconPath.isBlank()) {
-//            try (FileInputStream fi = new FileInputStream(windowAttributes.iconPath)) {
-//                s.getIcons().add(new Image(fi));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
 	}
 
 	private StackPane createContent () {
