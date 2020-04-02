@@ -1,7 +1,7 @@
 package com.halflife3.Controller.GameModes;
 
 import com.halflife3.Controller.*;
-//import com.halflife3.Controller.Interfaces.ITimeLimit;
+import com.halflife3.DatabaseUI.Leaderboard;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Mechanics.GameObjects.*;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
@@ -12,7 +12,6 @@ import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
-import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,69 +22,54 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.*;
 import javafx.util.Duration;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
 import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCode.S;
 
-public class MainMode extends GameMode /*implements ITimeLimit*/ {
-//	protected Timer  timer; //Not using timer at the minute
+public class MainMode extends GameMode {
 	protected double scoreLimit;
-	protected HashMap<Integer, Double> scores;
-	protected HashMap<Integer, String> teams;
 
-	private         final int   FPS                 = 30;
-	private         final int   GAME_WINDOW_HEIGHT  = 600;
-	private         final int   GAME_WINDOW_WIDTH   = 800;
-	private         final int   MOVEMENT_SPEED      = 120;
-	public static   final int   SHOT_SPEED          = 200;
-	public static   final float STUN_DURATION       = 20;
+	private final       int   FPS                = 30;
+	private final       int   GAME_WINDOW_HEIGHT = 600;
+	private final       int   GAME_WINDOW_WIDTH  = 800;
+	private final       int   MOVEMENT_SPEED     = 120;
+	public static final int   SHOT_SPEED         = 200;
+	public static final float STUN_DURATION      = 15;
 
 	//region Other variables
-	private static Pane root;
-	private static Player thisPlayer;
-	private static HashMap<String, Player> playerList;
-	private static HashMap<Integer, Image> scoreSprite;
-	private Input input = Input.getInstance();
-	private static ProgressBar[] stunBar;
-	private static Ball ball;
-	private Stage window = null;
-	private char side;
-	private int yourScore = 0;
-	private int enemyScore = 0;
-	private boolean flag = false;
-	public boolean running = false;
-	private int bulletLimiter = 0;
-	public int mapWidth;
-	private int mapHeight;
+	public        Pane                    root;
+	private       Scene                   scene;
+	private       Player                  thisPlayer;
+	private       HashMap<String, Player> playerList;
+	private       HashMap<Integer, Image> scoreSprite;
+	private       Input                   input               = Input.getInstance();
+	private       ProgressBar[]           stunBar;
+	private       Ball                    ball;
+	private       Stage                   window              = null;
+	private       char                    side;
+	private       int                     yourScore           = 0;
+	private       int                     enemyScore          = 0;
+	public        boolean                 running             = false;
+	private       int                     bulletLimiter       = 0;
+	public        int                     mapWidth;
+	private       int                     mapHeight;
 	//    private int END_SCENE_DURATION = 300;
-	private final int RIGHT_END_OF_SCREEN = 11*40;
-	private final int LEFT_END_OF_SCREEN = 9*40;
-	private final int BOTTOM_OF_SCREEN = 8*40;
-	private final int TOP_OF_SCREEN = 7*40;
-	private GraphicsContext graphicsContext;
+	private final int                     RIGHT_END_OF_SCREEN = 11 * 40;
+	private final int                     LEFT_END_OF_SCREEN  = 9 * 40;
+	private final int                     BOTTOM_OF_SCREEN    = 8 * 40;
+	private final int                     TOP_OF_SCREEN       = 7 * 40;
+	private       GraphicsContext         graphicsContext;
 	//endregion
 
 //	public MainMode() {}
-
-
-	{
-//		timer = new Timer(5 * Timer.MINUTE, Timer.TimeDirection.DOWN);
-		teams = new HashMap<>();
-	}
 
 	public MainMode (String GameModeName, double score) {
 		super(GameModeName);
@@ -94,7 +78,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 	}
 
 	@Override
-	void initialise () {
+	public void initialise () {
 		//region Networking
 		Client clientNetwork = new Client();
 		clientNetwork.joinGroup();
@@ -103,21 +87,21 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		//endregion
 
 		//region Initialise Objects
-		playerList = new HashMap<>();
+		playerList  = new HashMap<>();
 		scoreSprite = new HashMap<>();
-		stunBar = new ProgressBar[4];
-		root = new Pane();
+		stunBar     = new ProgressBar[4];
+		root        = new Pane();
 		//endregion
 
 		//region Initialise This Player
-		thisPlayer = new Player(clientNetwork.getStartingPosition(), new Vector2(0,0));
+		thisPlayer = new Player(clientNetwork.getStartingPosition(), new Vector2(0, 0));
 		thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
 		//endregion
 
 		//region Wait For Server To Acknowledge Player Connection
 		do {
 			Client.receivePositions();
-		} while(!Client.listOfClients.connectedIPs.contains(thisPlayer.getIpOfClient()));
+		} while (!Client.listOfClients.connectedIPs.contains(thisPlayer.getIpOfClient()));
 		//endregion
 
 		//region Initialise The Players With Player Controlled and AI Controlled
@@ -129,8 +113,9 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		root.getChildren().add(canvas);
 		graphicsContext = canvas.getGraphicsContext2D();
 
-		Scene scene = new Scene(root, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+		scene = new Scene(root, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
 		SceneManager.getInstance().setScene("Game Scene", scene);
+		window = SceneManager.getInstance().getMainWindow();
 		//endregion
 
 		//region Initialise Game Objects
@@ -152,207 +137,197 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		//endregion
 
 		//region Initialise Ball
-		ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0,0));
+		ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
 		running = true;
-		new Thread(() -> { while(running) updateEnemies(); }).start();
+		new Thread(() -> { while (running) updateEnemies(); }).start();
 		//endregion
 
 		System.out.println("Game Running");
 	}
 
 	@Override
-	void gameLoop () {
-		new AnimationTimer() {
-			long lastUpdate = System.nanoTime();
-			double elapsedTime = 0;
-//            int fpsCounter = 0;
-//            double second = 1;
+	public void gameLoop (double elapsedTime) {
+		//region Camera offset
+		Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
+		Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
+		if (Camera.GetOffsetX() < 0)
+			Camera.SetOffsetX(0);
+		else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
+			Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
+		if (Camera.GetOffsetY() < 0)
+			Camera.SetOffsetY(0);
+		else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
+			Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
+		//endregion
 
-			public void handle(long currentNanoTime) {
-				if (currentNanoTime - lastUpdate < 1e9/(FPS * 1.07))
-					return;
+		//region Calculate the rotation
+		Vector2 playerClientCenter =
+				new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
+						thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
+		Vector2 direction =
+				new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY())
+						.subtract(playerClientCenter);
 
-				//region Calculate time since last update.
-				elapsedTime = (currentNanoTime - lastUpdate) / 1e9;
-				lastUpdate = currentNanoTime;
-				//endregion
+		Affine rotate = new Affine();
+		short  deg    = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+		rotate.appendRotation(deg, playerClientCenter.getX(), playerClientCenter.getY());
+		thisPlayer.setDegrees(deg);
+		thisPlayer.setAffine(rotate);
+		//endregion
 
-				//region Camera offset
-				Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
-				Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
-				if (Camera.GetOffsetX() < 0)
-					Camera.SetOffsetX(0);
-				else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
-					Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
-				if (Camera.GetOffsetY() < 0)
-					Camera.SetOffsetY(0);
-				else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
-					Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
-				//endregion
+		//region Handles player movement
+		if (thisPlayer.stunned == 0) {
+			if (input.isKeyReleased(A) && input.isKeyReleased(D)) {
+				thisPlayer.getVelocity().setX(0);
+			}
+			if (input.isKeyReleased(W) && input.isKeyReleased(S)) {
+				thisPlayer.getVelocity().setY(0);
+			}
+			if (input.isKeyPressed(A)) {
+				thisPlayer.getVelocity().setX(-MOVEMENT_SPEED);
+			}
+			if (input.isKeyPressed(D)) {
+				thisPlayer.getVelocity().setX(MOVEMENT_SPEED);
+			}
+			if (input.isKeyPressed(W)) {
+				thisPlayer.getVelocity().setY(-MOVEMENT_SPEED);
+			}
+			if (input.isKeyPressed(S)) {
+				thisPlayer.getVelocity().setY(MOVEMENT_SPEED);
+			}
+		}
+		//endregion
 
-				//region Calculate the rotation
-				Vector2 playerClientCenter =
-						new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
-								thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
-				Vector2 direction =
-						new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY())
-								.subtract(playerClientCenter);
-
-				Affine rotate = new Affine();
-				short deg = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-				rotate.appendRotation(deg, playerClientCenter.getX(), playerClientCenter.getY());
-				thisPlayer.setDegrees(deg);
-				thisPlayer.setAffine(rotate);
-				//endregion
-
-				//region Handles player movement
-				if (thisPlayer.stunned == 0) {
-					if (input.isKeyReleased(A) && input.isKeyReleased(D)) {
-						thisPlayer.getVelocity().setX(0);
-					}
-					if (input.isKeyReleased(W) && input.isKeyReleased(S)) {
-						thisPlayer.getVelocity().setY(0);
-					}
-					if (input.isKeyPressed(A)) {
-						thisPlayer.getVelocity().setX(-MOVEMENT_SPEED);
-					}
-					if (input.isKeyPressed(D)) {
-						thisPlayer.getVelocity().setX(MOVEMENT_SPEED);
-					}
-					if (input.isKeyPressed(W)) {
-						thisPlayer.getVelocity().setY(-MOVEMENT_SPEED);
-					}
-					if (input.isKeyPressed(S)) {
-						thisPlayer.getVelocity().setY(MOVEMENT_SPEED);
-					}
-				}
-				//endregion
-
-				//region Collision detection
+		//region Collision detection
 //                Player collision
-				for (Bricks block : MapRender.GetList())
-					if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
-						thisPlayer.collision(block, elapsedTime);
+		for (Bricks block : MapRender.GetList())
+			if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
+				thisPlayer.collision(block, elapsedTime);
 
 //                Bullet collision
-				editObjectManager(1, 0, null, null, null);
-				//endregion
+		editObjectManager(1, 0, null, null, null);
+		//endregion
 
-				//region Updates position of all game objects locally (has to go after collision)
-				editObjectManager(2, elapsedTime, null, null, null);
-				//endregion
+		//region Updates position of all game objects locally (has to go after collision)
+		editObjectManager(2, elapsedTime, null, null, null);
+		//endregion
 
-				//region Checks if the player is holding the ball
-				boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-				if (playerIsTouchingTheBall && !ball.isHeld)
-					thisPlayer.setHoldsBall(true);
-				//endregion
+		//region Checks if the player is holding the ball
+		boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
+		if (playerIsTouchingTheBall && !ball.isHeld)
+			thisPlayer.setHoldsBall(true);
+		//endregion
 
-				//region Shoots a bullet or the ball
-				thisPlayer.setBulletShot(false);
-				if (input.isButtonPressed(MouseButton.PRIMARY) && bulletLimiter == 0) {
-					double bulletX = Math.cos(Math.atan2(direction.getY(), direction.getX()));
-					double bulletY = Math.sin(Math.atan2(direction.getY(), direction.getX()));
-					Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
+		//region Shoots a bullet or the ball
+		thisPlayer.setBulletShot(false);
+		if (input.isButtonPressed(MouseButton.PRIMARY) && bulletLimiter == 0) {
+			double  bulletX      = Math.cos(Math.atan2(direction.getY(), direction.getX()));
+			double  bulletY      = Math.sin(Math.atan2(direction.getY(), direction.getX()));
+			Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
 
-					if (thisPlayer.isHoldingBall()) { // Shoots the ball
-						boolean ballInWall = false;
-						for (Bricks block : MapRender.GetList())
-							if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal())) {
-								ballInWall = true;
-								break;
-							}
-
-						thisPlayer.setBulletShot(!ballInWall);
-					} else { // Shoots a bullet
-						Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
-						Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
-								thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
-
-						editObjectManager
-								(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
-						thisPlayer.setBulletShot(true);
+			if (thisPlayer.isHoldingBall()) { // Shoots the ball
+				boolean ballInWall = false;
+				for (Bricks block : MapRender.GetList())
+					if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal())) {
+						ballInWall = true;
+						break;
 					}
-					bulletLimiter = FPS / 5;
-				} else if (bulletLimiter > 0) bulletLimiter--;
-				//endregion
 
-				//region Re-renders all game objects
-				graphicsContext.clearRect(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+				thisPlayer.setBulletShot(!ballInWall);
+			} else { // Shoots a bullet
+				Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
+				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
+						thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
 
-				MapRender.Render(graphicsContext);
-
-				for (IRenderable go : ObjectManager.getGameObjects())
-					go.render(graphicsContext);
-				//endregion
-
-				//region Updates the stun bar
-				int id = 0;
-				for (String ip : playerList.keySet()) {
-					stunBar[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
-					stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 12);
-					stunBar[id].setProgress(playerList.get(ip).stunned / (STUN_DURATION * 5));
-					id++;
-				}
-				//endregion
-
-				//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
-				if (thisPlayer.stunned != 0) thisPlayer.setHoldsBall(false);
-				Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
-				if (thisPlayer.bulletShot) thisPlayer.setHoldsBall(false);
-				//endregion
-
-				//region Checks if a goal has been scored
-				if (ball.getPosX() < Server.GOAL_WIDTH)
-					scored('R', elapsedTime, graphicsContext);
-				else if (ball.getPosX() > mapWidth - Server.GOAL_WIDTH)
-					scored('L', elapsedTime, graphicsContext);
-				//endregion
-
-				//region Renders the score text
-				graphicsContext.drawImage(scoreSprite.get(yourScore), GAME_WINDOW_WIDTH / 2f - 40, 40);
-				graphicsContext.drawImage(scoreSprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
-				graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
-				//endregion
+				editObjectManager
+						(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
+				thisPlayer.setBulletShot(true);
 			}
-		}.start();
+			bulletLimiter = FPS / 5;
+		} else if (bulletLimiter > 0) bulletLimiter--;
+		//endregion
 
-		root.requestFocus();
+		//region Re-renders all game objects
+		graphicsContext.clearRect(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+
+		MapRender.Render(graphicsContext);
+
+		for (IRenderable go : ObjectManager.getGameObjects())
+			go.render(graphicsContext);
+		//endregion
+
+		//region Updates the stun bar
+		int id = 0;
+		for (String ip : playerList.keySet()) {
+			stunBar[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
+			stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 12);
+			stunBar[id].setProgress(playerList.get(ip).stunned / (STUN_DURATION * 5));
+			id++;
+		}
+		//endregion
+
+		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
+		if (thisPlayer.stunned != 0) thisPlayer.setHoldsBall(false);
+		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
+		if (thisPlayer.bulletShot) thisPlayer.setHoldsBall(false);
+		//endregion
+
+		//region Checks if a goal has been scored
+		if (ball.getPosX() < Server.GOAL_WIDTH)
+			scored('R', elapsedTime, graphicsContext);
+		else if (ball.getPosX() > mapWidth - Server.GOAL_WIDTH)
+			scored('L', elapsedTime, graphicsContext);
+		//endregion
+
+		//region Renders the score text
+		graphicsContext.drawImage(scoreSprite.get(yourScore), GAME_WINDOW_WIDTH / 2f - 40, 40);
+		graphicsContext.drawImage(scoreSprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
+		graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
+		//endregion
+
+		if (won() || hasFinished) {
+			finished();
+			hasFinished = true;
+		}
 	}
 
 	@Override
-	void finished () {
+	public void finished () {
 		//Send packet to end the game
 		//Set up game to await for the won/lost packet
+
+		//region Showing Who Won
+
+		//endregion
+
+		//region Show Leaderboard
+		Leaderboard leaderboard = new Leaderboard();
+		SceneManager.getInstance().setScene("leaderboard", leaderboard.getLeaderboardScene(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT));
+		try { Thread.sleep(10 * 1000); } catch (Exception ignored) {}
+		SceneManager.getInstance().restorePreviousScene();
+		//endregion
 		System.out.println("Game exited");
 		running = false;
 		Client.disconnect();
-		SceneManager.getInstance().restorePreviousScene(); //End the flow of this class, return to the previous scene
+		scene.setCursor(Cursor.NONE);
 	}
 
 	@Override
-	boolean won (int team) {
-		//Send team with id of @team the won packet
-		//Send everybody else the lost packet
-
-		return false;
+	public boolean won () {
+		//Send everybody else the game over packet
+		return enemyScore == scoreLimit || yourScore == scoreLimit;
 	}
 
 	@Override
-	boolean lost () {
+	public boolean lost () {
 		return false;
 	}
-
-//	@Override
-//	public boolean timeLimitReached (double delta) {
-//		return timer.getHasFinished();
-//	}
 
 	/** A method to initialise the players in the game */
-	public void initialisePlayers() {
+	public void initialisePlayers () {
 		Client.receivePositions();
 		for (String ip : Client.listOfClients.connectedIPs) {
 			if (ip.equals(thisPlayer.getIpOfClient())) {
@@ -362,14 +337,14 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 
 			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
 			Vector2        pos             = new Vector2(theDoubleValues.posX, theDoubleValues.posY);
-			Vector2 vel = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-			Player enemy = new Player(pos, vel);
+			Vector2        vel             = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
+			Player         enemy           = new Player(pos, vel);
 			enemy.setIpOfClient(ip);
 			playerList.put(ip, enemy);
 		}
 	}
 
-	private void gameInit(Scene scene) {
+	private void gameInit (Scene scene) {
 		//region Background setup
 		try {
 			Image image = new Image(new FileInputStream("res/Space.png"));
@@ -415,9 +390,9 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 
 		//region Gets width and height of the map
 		try {
-			BufferedImage map = ImageIO.read(new File("res/map.png"));
-			mapWidth = map.getWidth() * 40;
-			mapHeight = map.getHeight() * 40;
+			Image map = new Image(new FileInputStream("res/map.png"));
+			mapWidth  = (int) map.getWidth() * 40;
+			mapHeight = (int) map.getHeight() * 40;
 		} catch (IOException e) { e.printStackTrace(); }
 		//endregion
 
@@ -453,7 +428,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 				//region ReturnToGame button
 				Button returnToGame = new Button("Return to game");
 				pauseRoot.getChildren().add(returnToGame);
-				returnToGame.setOnAction(event-> {
+				returnToGame.setOnAction(event -> {
 					root.setEffect(null);
 					popupStage.hide();
 				});
@@ -468,14 +443,21 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 				Button toMainMenu = new Button("Quit to Main Menu");
 				pauseRoot.getChildren().add(toMainMenu);
 				toMainMenu.setOnAction(actionEvent -> {
-
+					root.setEffect(null);
+					popupStage.hide();
+					hasFinished = true;
+					scene.setCursor(Cursor.DEFAULT);
+					Client.disconnect();
 				});
 				//endregion
 
 				//region ToDesktop button
 				Button toDesktop = new Button("Quit to Desktop");
 				pauseRoot.getChildren().add(toDesktop);
-				toDesktop.setOnAction(actionEvent -> Platform.exit());
+				toDesktop.setOnAction(actionEvent -> {
+					Platform.exit();
+					System.exit(0);
+				});
 				//endregion
 
 				popupStage.show();
@@ -484,7 +466,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		//endregion
 	}
 
-	public void updateEnemies() {
+	public void updateEnemies () {
 		Client.receivePositions();
 
 		//region Replaces Bots <-> Players
@@ -549,11 +531,11 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 			if (!theDoubleValues.bulletShot)
 				continue;
 
-			double degreeRadians = Math.toRadians(theDoubleValues.degrees);
-			double bulletX = Math.cos(degreeRadians);
-			double bulletY = Math.sin(degreeRadians);
-			Vector2 shotVel = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
-			Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
+			double  degreeRadians = Math.toRadians(theDoubleValues.degrees);
+			double  bulletX       = Math.cos(degreeRadians);
+			double  bulletY       = Math.sin(degreeRadians);
+			Vector2 shotVel       = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
+			Vector2 gunDirection  = new Vector2(bulletX * 32, bulletY * 32);
 			Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
 					theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
 
@@ -564,14 +546,14 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		//endregion
 	}
 
-	private synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
+	private synchronized void editObjectManager (int op, double time, Vector2 bp, Vector2 bv, String shooter) {
 		switch (op) {
-			case 0 : { //add bullets
+			case 0: { //add bullets
 				new Bullet(bp, bv, shooter);
 				break;
 			} //Add bullets
 
-			case 1 : { //remove bullets if needed
+			case 1: { //remove bullets if needed
 				HashSet<GameObject> crash_bullet_list = new HashSet<>();
 				for (GameObject bullet : ObjectManager.getGameObjects()) {
 					if (!bullet.getKeys().contains("Bullet"))
@@ -604,7 +586,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 				break;
 			} //Remove bullets if needed
 
-			case 2 : { //update object positions
+			case 2: { //update object positions
 				for (IUpdateable go : ObjectManager.getGameObjects())
 					go.update(time);
 				break;
@@ -612,7 +594,7 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 		}
 	}
 
-	private void scored(char scoringSide, double time, GraphicsContext gc) {
+	private void scored (char scoringSide, double time, GraphicsContext gc) {
 		if (scoringSide == side) {
 			yourScore++;
 			System.out.println("Goal for YOUR team!");
@@ -626,10 +608,4 @@ public class MainMode extends GameMode /*implements ITimeLimit*/ {
 
 		try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
 	}
-
-	//region Get/Set Scores
-	public double getTeamScore (int team) { return scores.get(team); }
-
-	public void setTeamScore (int team, double score) { this.scores.put(team, score); }
-	//endregion
 }

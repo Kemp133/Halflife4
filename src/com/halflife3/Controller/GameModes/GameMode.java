@@ -2,18 +2,14 @@ package com.halflife3.Controller.GameModes;
 
 public abstract class GameMode {
 	protected String GameModeName;
+	public boolean hasFinished;
 
 	public GameMode(String GameModeName) { this.GameModeName = GameModeName; }
-	abstract void initialise();
-	abstract void gameLoop();
-	abstract void finished();
-	abstract boolean won(int team);
-	abstract boolean lost();
-	public void runGame() {
-		initialise();
-		gameLoop();
-		finished();
-	}
+	public abstract void initialise();
+	public abstract void gameLoop(double elapsedTime);
+	public abstract void finished();
+	public abstract boolean won();
+	public abstract boolean lost();
 
 	//region Get/Set GameModeName
 	public String getGameModeName() { return GameModeName; }

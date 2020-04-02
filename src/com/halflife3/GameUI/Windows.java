@@ -5,6 +5,7 @@ import com.halflife3.Controller.SceneManager;
 import com.halflife3.Networking.Client.ClientGame;
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

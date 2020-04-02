@@ -1,5 +1,6 @@
 package com.halflife3.DatabaseUI;
 
+import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,6 +30,87 @@ public class Leaderboard extends Application {
     private Pane paneRight;
     private Pane paneLeft;
     private Pane paneBottom;
+
+    public Leaderboard() {
+                /*
+        Font properties
+         */
+        Font paladinFont = null;
+        try {
+            paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        /*
+        Label properties
+         */
+        Label title = new Label("Leaderboard");
+        title.setFont(paladinFont);
+        title.setStyle("-fx-text-fill: linear-gradient(#0000FF, #FFFFFF 95%);");
+
+        /*
+        Pane properties
+         */
+        paneRight = new Pane();
+        paneRight.setMinSize(100, 600);
+
+        paneLeft = new Pane();
+        paneLeft.setMinSize(100, 600);
+
+        paneBottom = new Pane();
+        paneBottom.setMinSize(600, 80);
+
+        /*
+        TableView properties
+         */
+        tableView = new TableView();
+        TableColumn nameColumn = new TableColumn("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn scoreColumn = new TableColumn("Score");
+        scoreColumn.setCellValueFactory(new PropertyValueFactory<>("Score"));
+
+        tableView.getColumns().addAll(nameColumn, scoreColumn);
+
+        try {
+            tableView.setItems(getTableData());
+        } catch (SQLException e) {
+            NetworkingUtilities.CreateErrorMessage(
+                    "SQL Error Occured",
+                    "A SQL error occured",
+                    "State: " + e.getSQLState() + "\n" + "Message" + e.getMessage()
+            );
+        }
+
+        //tableView.setPadding(new Insets(0, 0, 10, 0));
+
+        //Distributes column space evenly
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        /*
+        BorderPane properties
+         */
+        Insets insets = new Insets(30);
+        borderPane = new BorderPane();
+        borderPane.setMaxSize(800, 600);
+        borderPane.setMinSize(800, 600);
+        borderPane.setCenter(tableView);
+        borderPane.setTop(title);
+        BorderPane.setMargin(title, insets);
+        borderPane.setRight(paneRight);
+        borderPane.setLeft(paneLeft);
+        borderPane.setAlignment(title, Pos.TOP_CENTER);
+        borderPane.setBottom(paneBottom);
+        borderPane.setBackground(addBackground());
+    }
+
+    public Scene getLeaderboardScene(int width, int height) {
+        Scene scene = new Scene(borderPane, width, height);
+        File f = new File("res/Leaderboard/LeaderboardStyleSheet.css");
+        scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+        return scene;
+    }
 
     public ResultSet getData() throws SQLException {
         Connection c = null;

@@ -1,6 +1,7 @@
 package com.halflife3.Controller;
 
 import com.halflife3.Controller.Exceptions.SceneDoesNotExistException;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -13,7 +14,7 @@ public final class SceneManager {
 	private static SceneManager    instance;
 	private static Stack<String>   sceneOrder = new Stack<>();
 
-	private SceneManager () {}
+	private SceneManager () {} //Singleton, don't want to be able to create instances
 
 	//region Get/Set Main Window
 	public Stage getMainWindow() { return mainWindow; }
@@ -58,11 +59,11 @@ public final class SceneManager {
 
 	//region HelperMethods
 	/**
-	 * A helper method to get a scene out of the {@code Scenes} hashmap with the label {@code label}
+	 * A helper method to get a scene out of the {@code Scenes} hash map with the label {@code label}
 	 *
 	 * @param label The label of the scene to load
 	 * @return The Scene with the given label
-	 * @throws SceneDoesNotExistException If the given label does not exist in the {@code Scenes} hashmap
+	 * @throws SceneDoesNotExistException If the given label does not exist in the {@code Scenes} hash map
 	 */
 	private Scene getScene (String label) throws SceneDoesNotExistException {
 		if (!Scenes.containsKey(label))
@@ -70,10 +71,10 @@ public final class SceneManager {
 		return Scenes.get(label);
 	}
 	/**
-	 * A helper method to add a scene with a given label to the {@code Scenes} hashmap
+	 * A helper method to add a scene with a given label to the {@code Scenes} hash map
 	 *
 	 * @param label The label to associate with the given scene
-	 * @param scene The scene to add to the hashmap
+	 * @param scene The scene to add to the hash map
 	 */
 	private void addScene (String label, Scene scene) {
 		if (!Scenes.containsKey(label))

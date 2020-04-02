@@ -38,11 +38,7 @@ public class BaseController extends Application implements ICredentialUser, ICon
 	}
 
 	@Override
-	public void end () {
-
-	}
-
-
+	public void end () { } //Not needed for this controller
 
 	@Override
 	public void run () {
