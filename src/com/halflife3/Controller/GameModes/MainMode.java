@@ -43,6 +43,7 @@ public class MainMode extends GameMode {
 	private final       int   MOVEMENT_SPEED     = 120;
 	public static final int   SHOT_SPEED         = 200;
 	public static final float STUN_DURATION      = 15;
+	public static  final float RELOAD_DURATION     = 50;
 
 	//region Other variables
 	public        Pane                    root;
@@ -52,6 +53,7 @@ public class MainMode extends GameMode {
 	private       HashMap<Integer, Image> scoreSprite;
 	private       Input                   input               = Input.getInstance();
 	private       ProgressBar[]           stunBar;
+	private static ProgressBar amoBar;
 	private       Ball                    ball;
 	private       Stage                   window              = null;
 	private       char                    side;
@@ -61,12 +63,12 @@ public class MainMode extends GameMode {
 	private       int                     bulletLimiter       = 0;
 	public        int                     mapWidth;
 	private       int                     mapHeight;
-	//    private int END_SCENE_DURATION = 300;
 	private final int                     RIGHT_END_OF_SCREEN = 11 * 40;
 	private final int                     LEFT_END_OF_SCREEN  = 9 * 40;
 	private final int                     BOTTOM_OF_SCREEN    = 8 * 40;
 	private final int                     TOP_OF_SCREEN       = 7 * 40;
 	private       GraphicsContext         graphicsContext;
+	private double ballPreviousX;
 	//endregion
 
 //	public MainMode() {}
@@ -136,8 +138,17 @@ public class MainMode extends GameMode {
 		}
 		//endregion
 
+		//region Initialise Ammo Bar
+		amoBar = new ProgressBar(1);
+		amoBar.setStyle("-fx-accent: red;");
+		amoBar.setPrefHeight(20);
+		amoBar.setPrefWidth(150);
+		root.getChildren().add(amoBar);
+		//endregion
+
 		//region Initialise Ball
 		ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
+		ballPreviousX = ball.getPosX();
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
@@ -237,7 +248,7 @@ public class MainMode extends GameMode {
 					}
 
 				thisPlayer.setBulletShot(!ballInWall);
-			} else { // Shoots a bullet
+			} else if(thisPlayer.reload == RELOAD_DURATION){ // Shoots a bullet
 				Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
 				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
 						thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
@@ -245,6 +256,7 @@ public class MainMode extends GameMode {
 				editObjectManager
 						(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
 				thisPlayer.setBulletShot(true);
+				thisPlayer.reload = 0;
 			}
 			bulletLimiter = FPS / 5;
 		} else if (bulletLimiter > 0) bulletLimiter--;
@@ -269,6 +281,12 @@ public class MainMode extends GameMode {
 		}
 		//endregion
 
+		//region Updates the reload bar
+		amoBar.setProgress(thisPlayer.reload / RELOAD_DURATION);
+		amoBar.setLayoutX(40);
+		amoBar.setLayoutY(40);
+		//endregion
+
 		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
 		if (thisPlayer.stunned != 0) thisPlayer.setHoldsBall(false);
 		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
@@ -276,10 +294,13 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Checks if a goal has been scored
-		if (ball.getPosX() < Server.GOAL_WIDTH)
+		if (ballPreviousX - ball.getPosX() < -mapWidth / 4f){
 			scored('R', elapsedTime, graphicsContext);
-		else if (ball.getPosX() > mapWidth - Server.GOAL_WIDTH)
+		}
+		else if (ballPreviousX - ball.getPosX() > mapWidth / 4f){
 			scored('L', elapsedTime, graphicsContext);
+		}
+		ballPreviousX = ball.getPosX();
 		//endregion
 
 		//region Renders the score text
@@ -375,7 +396,7 @@ public class MainMode extends GameMode {
 		});
 		audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
 		audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-		//root.getChildren().add(audio.getMenuBar());
+		root.getChildren().add(audio.getMenuBar());
 		//endregion
 
 		//region Key input listener setup
@@ -517,12 +538,6 @@ public class MainMode extends GameMode {
 				ball.setPosition(theDoubleValues.posX, theDoubleValues.posY);
 				ball.setVelocity(theDoubleValues.velX, theDoubleValues.velY);
 				ball.isHeld = theDoubleValues.holdsBall;
-
-				if (ball.getPosX() < Server.GOAL_WIDTH || ball.getPosX() > mapWidth - Server.GOAL_WIDTH) {
-					try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
-					return;
-				}
-
 				continue;
 			}
 			//endregion
@@ -606,6 +621,6 @@ public class MainMode extends GameMode {
 		thisPlayer.reset();
 		ball.reset();
 
-		try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+		try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
 	}
 }
