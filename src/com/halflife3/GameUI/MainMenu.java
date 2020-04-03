@@ -66,6 +66,7 @@ public class MainMenu /*extends Application*/ {
 
 		startServer.setOnAction(actionEvent -> {
 			player.stop();
+			SceneManager.getInstance().hideWindow();
 			Platform.runLater(() -> new Server().start());
 		});
 
