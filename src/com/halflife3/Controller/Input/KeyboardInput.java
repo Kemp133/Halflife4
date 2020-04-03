@@ -1,11 +1,9 @@
-package com.halflife3.Controller;
+package com.halflife3.Controller.Input;
 
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 
 public class KeyboardInput implements EventHandler<KeyEvent> {
-    public KeyboardInput() {}
-
     @Override
     public void handle(KeyEvent keyEvent) {
         if (keyEvent.getEventType().equals(KeyEvent.KEY_PRESSED)) {

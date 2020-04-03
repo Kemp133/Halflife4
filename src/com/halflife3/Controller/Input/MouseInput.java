@@ -1,11 +1,9 @@
-package com.halflife3.Controller;
+package com.halflife3.Controller.Input;
 
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
 public class MouseInput implements EventHandler<MouseEvent> {
-    public MouseInput() {}
-
     @Override
     public void handle(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED) {

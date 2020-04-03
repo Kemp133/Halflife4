@@ -1,8 +1,8 @@
 //package com.halflife3.View;
 //
-//import com.halflife3.Controller.Input;
+//import com.halflife3.Controller.Input.Input;
 //import com.halflife3.Controller.KeyHandle;
-//import com.halflife3.Controller.MouseInput;
+//import com.halflife3.Controller.Input.MouseInput;
 //import com.halflife3.Controller.ObjectManager;
 //import com.halflife3.Model.*;
 //import com.halflife3.Model.Interfaces.IRenderable;

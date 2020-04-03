@@ -1,4 +1,4 @@
-package com.halflife3.Controller;
+package com.halflife3.Controller.Input;
 
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.input.KeyCode;
@@ -6,9 +6,26 @@ import javafx.scene.input.MouseButton;
 
 import java.util.HashMap;
 
+/**
+ * @author Team Halflife
+ *
+ * This class deals with the input for the program. It is a singleton pattern, meaning that it is accessible from
+ * anywhere, but all the contents do not need to be static themselves. This class contains hash maps to act as a mapping
+ * between input keycodes, and what state they're in. There are hash maps for three types of input, and this exists for
+ * both keyboard and mouse inputs. This class also stores the mouse position in a {@code Vector2} object, keeping all
+ * input based logic neatly encapsulated in one class.
+ *
+ * These consist of pressed, momentary (typed and clicked respectively), and released. Due to the pressed and released
+ * values being mutually exclusive of each other, when a key is pressed (and hence the keyvalue in the pressed hash map
+ * is set to true), the corresponding entry in the released hash map is also then set to false. This means that only the
+ * typed values need to be reset each loop, which reduces the amount of time spent in the input class.
+ *
+ * On creation (i.e the first time the getInstance method is called), the values in the hash map are initialised once
+ * and then are ready to use. The getInstance method is also classed as enthusiastic initilisation as if the instance
+ * doesn't exist, it's cretated inside of this method
+ */
 public class Input {
 	public static Input instance; //Used as part of singleton design of this class
-
 	private Input () {} //We do not want to be able to create an instance of this class
 
 	//region key maps (pressed, typed, released)

@@ -1,6 +1,6 @@
 package com.halflife3.Mechanics.GameObjects;
 
-import com.halflife3.Controller.Input;
+import com.halflife3.Controller.Input.Input;
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;

@@ -1,8 +1,8 @@
 package com.halflife3.Networking.Client;
 
-import com.halflife3.Controller.Input;
-import com.halflife3.Controller.KeyboardInput;
-import com.halflife3.Controller.MouseInput;
+import com.halflife3.Controller.Input.Input;
+import com.halflife3.Controller.Input.KeyboardInput;
+import com.halflife3.Controller.Input.MouseInput;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Mechanics.GameObjects.*;

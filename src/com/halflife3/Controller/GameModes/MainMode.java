@@ -1,7 +1,9 @@
 package com.halflife3.Controller.GameModes;
 
 import com.halflife3.Controller.*;
-import com.halflife3.DatabaseUI.Leaderboard;
+import com.halflife3.Controller.Input.Input;
+import com.halflife3.Controller.Input.KeyboardInput;
+import com.halflife3.Controller.Input.MouseInput;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.Mechanics.GameObjects.*;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
