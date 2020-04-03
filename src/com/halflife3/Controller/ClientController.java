@@ -1,13 +1,13 @@
 package com.halflife3.Controller;
 
+import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.GameModes.GameMode;
 import com.halflife3.Controller.GameModes.MainMode;
-import com.halflife3.Controller.Interfaces.IController;
+import com.halflife3.Networking.NetworkingUtilities;
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.stage.Stage;
 
-public class ClientController extends Application implements IController {
+public class ClientController extends BaseController {
 	private       GameMode gamemode;
 	private final int      FPS = 30;
 
@@ -43,7 +43,15 @@ public class ClientController extends Application implements IController {
 				if(gamemode.hasFinished) {
 					this.stop();
 					gamemode = null;
-					SceneManager.getInstance().restorePreviousScene();
+					try {
+						SceneManager.getInstance().restorePreviousScene();
+					} catch (SceneStackEmptyException e) {
+						NetworkingUtilities.CreateErrorMessage(
+								"No Scenes To Revert To",
+								"The scene stack only contains one element!",
+								e.getMessage()
+						);
+					}
 				}
 			}
 		}.start();
@@ -58,11 +66,9 @@ public class ClientController extends Application implements IController {
 
 	@Override
 	public void end () {
-		gamemode = null;
-		SceneManager.getInstance().restorePreviousScene(); //Exit this scene, go back to the menu
+//		gamemode = null;
+//		SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
 	}
-
-
 
 	@Override
 	public void run () {
