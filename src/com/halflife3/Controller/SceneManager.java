@@ -99,13 +99,14 @@ public final class SceneManager {
 	}
 	//endregion
 
-	/** A method to restore the previous scene as the currently set scene on the SceneManager */
+	/** A method to restore the previous scene as the currently set scene in SceneManager */
 	public void restorePreviousScene () throws SceneStackEmptyException {
 		if(sceneOrder.size() == 1) throw new SceneStackEmptyException("The scene stack only contains one value! No scene to restore");
 		sceneOrder.pop();
 		mainWindow.setScene(Scenes.get(sceneOrder.peek()));
 	}
 
+	/** A method to restore the previous stage as the currently set main stage in SceneManager */
 	public void restorePreviousStage() throws StageStackEmptyException {
 		if(stageOrder.size() == 1) throw new StageStackEmptyException("The stage stack only contains one value! No stage to restore");
 	}

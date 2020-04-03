@@ -1,6 +1,7 @@
 package com.halflife3.Controller.GameModes;
 
 import com.halflife3.Controller.*;
+import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
@@ -10,6 +11,7 @@ import com.halflife3.Mechanics.Interfaces.IRenderable;
 import com.halflife3.Mechanics.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.Client;
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
@@ -338,7 +340,17 @@ public class MainMode extends GameMode {
 		//endregion
 
 		scene.setCursor(Cursor.DEFAULT);
-		SceneManager.getInstance().restorePreviousScene();
+
+		try {
+			SceneManager.getInstance().restorePreviousScene();
+		} catch (SceneStackEmptyException e) {
+			NetworkingUtilities.CreateErrorMessage(
+					"Scene stack empty",
+					"The scene stack only contained one element",
+					"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
+			);
+		}
+
 		System.out.println("Game exited");
 		running = false;
 		Client.disconnect();
