@@ -395,6 +395,11 @@ public class MainMode extends GameMode {
 			root.setBackground(new Background(myBI));
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find file in path: 'res/Space.png'");
+			NetworkingUtilities.CreateErrorMessage(
+					"Error Loading Background Image",
+					"The background image could not be loaded!",
+					"Exception message: " + e.getMessage()
+			);
 		}
 		//endregion
 

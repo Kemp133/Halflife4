@@ -33,11 +33,11 @@ public class MainMenu /*extends Application*/ {
 	private MediaPlayer player;
 	private Scene       scene;
 
-	public MainMenu () {
+	public MainMenu() {
 		initialiseMenuScene();
 	}
 
-	private Background addBackground () {
+	private Background addBackground() {
 		try {
 
 			FileInputStream inputStream = new FileInputStream("res/Leaderboard/LeaderboardBackground.jpg");
@@ -55,7 +55,7 @@ public class MainMenu /*extends Application*/ {
 		return null;
 	}
 
-	private VBox vbox () {
+	private VBox vbox() {
 		File audioFile = new File(MENU_AUDIO_PATH);
 		player = new MediaPlayer(new Media(audioFile.toURI().toString()));
 		joinGame.setOnAction(actionEvent -> {
@@ -78,7 +78,7 @@ public class MainMenu /*extends Application*/ {
 		return vbox;
 	}
 
-	private BorderPane borderPane () {
+	private BorderPane borderPane() {
 		borderPane = new BorderPane();
 
 		Font paladinFont = null;
@@ -118,41 +118,36 @@ public class MainMenu /*extends Application*/ {
 		return borderPane;
 	}
 
-	private void initialiseMenuScene () {
+	private void initialiseMenuScene() {
 		scene = new Scene(borderPane(), 800, 600);
 		configureMediaPlayer();
 	}
 
-	private void configureMediaPlayer () {
+	private void configureMediaPlayer() {
 		player.setAutoPlay(false);
 		player.setVolume(0.1);
 		player.setOnEndOfMedia(() -> {
 			player.seek(Duration.ZERO);
 			player.play();
 		});
-		player.setOnError(() ->
-                NetworkingUtilities.CreateErrorMessage(
-				"Media Player Error Occurred",
-				"A problem occurred with the media player",
-				"Contact your most convenient HalfLife team member for assistance with this error"
-		));
+		player.setOnError(() -> NetworkingUtilities.CreateErrorMessage("Media Player Error Occurred", "A problem occurred with the media player", "Contact your most convenient HalfLife team member for assistance with this error"));
 	}
 
-	public Scene getScene () { return scene; }
+	public Scene getScene()        { return scene; }
 
-	public MediaPlayer getPlayer () { return player; }
+	public MediaPlayer getPlayer() { return player; }
 
-	public Button getExit () { return exit; }
+	public Button getExit()        { return exit; }
 
-//	@Override
-//	public void start (Stage stage) throws Exception {
-//
-//		Scene scene = new Scene(borderPane(), 800, 600);
-//
-//        /*File f = new File("res/com.halflife3.GameUI.MainMenu/MainMenuCSS.css");
-//        scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));*/
-//
-//		stage.setScene(scene);
-//		stage.show();
-//	}
+	//	@Override
+	//	public void start (Stage stage) throws Exception {
+	//
+	//		Scene scene = new Scene(borderPane(), 800, 600);
+	//
+	//        /*File f = new File("res/com.halflife3.GameUI.MainMenu/MainMenuCSS.css");
+	//        scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));*/
+	//
+	//		stage.setScene(scene);
+	//		stage.show();
+	//	}
 }

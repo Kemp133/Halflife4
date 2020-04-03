@@ -3,6 +3,8 @@ package com.halflife3.Controller;
 import javafx.stage.Stage;
 
 public class HostController extends BaseController {
+
+
 	@Override
 	public void initialise () {
 
@@ -24,7 +26,7 @@ public class HostController extends BaseController {
 	}
 
 	@Override
-	public void start (Stage stage) throws Exception {
+	public void start (Stage stage) {
 
 	}
 }
