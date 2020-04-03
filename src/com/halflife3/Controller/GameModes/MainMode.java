@@ -35,6 +35,7 @@ import javafx.stage.*;
 import javafx.util.Duration;
 
 import java.io.*;
+import java.sql.*;
 import java.util.*;
 
 import static javafx.scene.input.KeyCode.*;
@@ -327,6 +328,11 @@ public class MainMode extends GameMode {
 
 	@Override
 	public void finished () {
+		//Log game win or loss in leaderboard
+		if (yourScore == scoreLimit) { //Can't just call won() right?
+			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
+		}
+
 		//Send packet to end the game
 		//Set up game to await for the won/lost packet
 
@@ -647,5 +653,82 @@ public class MainMode extends GameMode {
 		ball.reset();
 
 		try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+	}
+
+	private static Connection getConnection () {
+		Connection c = null;
+		try {
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://rogue.db.elephantsql.com:5432/nuzmlzpr";
+			url = url.trim();
+			c   = DriverManager.getConnection(url, "nuzmlzpr", "pd7OdC_3BiVrAPNU68CETtFtBaqFxJFB");
+
+			if (c != null) {
+				System.out.println("Connection complete");
+			} else {
+				System.out.println("Connection failed");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		return c;
+	}
+
+	private void closeConnections (Connection c, PreparedStatement p, ResultSet r) {
+		if (c != null) {
+			try {
+				c.close();
+			} catch (SQLException e) { /* ignored */}
+		}
+		if (p != null) {
+			try {
+				p.close();
+			} catch (SQLException e) { /* ignored */}
+		}
+		if (r != null) {
+			try {
+				r.close();
+			} catch (SQLException e) { /* ignored */}
+		}
+	}
+
+	private void updateLBoard (Connection c, String username) {
+		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
+		int score = currentScore(getConnection(), username);
+		try {
+			String query = "UPDATE userdatascore SET score = " + score++ + " WHERE name = '" + username + "'";
+			preparedStatement = c.prepareStatement(query);
+			rs = preparedStatement.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			closeConnections(c, preparedStatement, rs);
+		}
+	}
+
+	private int currentScore (Connection c, String username) {
+		PreparedStatement preparedStatement = null;
+		ResultSet rs                = null;
+		try {
+			//Creating a query checking if username is in the table
+			String query = "SELECT * FROM userdatascore WHERE name = '" + username + "'";
+			//Creating the Statement
+			preparedStatement = c.prepareStatement(query);
+			//Executing the query
+			rs = preparedStatement.executeQuery();
+			//Returns the score for the user
+			if (rs.next()) {
+				return rs.getInt("score");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			closeConnections(c, preparedStatement, rs);
+		}
+		return 0;
 	}
 }
