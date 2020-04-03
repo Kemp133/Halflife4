@@ -3,6 +3,7 @@ package com.halflife3.GameUI;
 import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.Networking.NetworkingUtilities;
+import com.halflife3.Networking.Server.Server;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -61,6 +62,10 @@ public class MainMenu /*extends Application*/ {
 		joinGame.setOnAction(actionEvent -> {
 			player.stop();
 			Platform.runLater(() -> new ClientController().start(SceneManager.getInstance().getMainWindow()));
+		});
+
+		startServer.setOnAction(actionEvent -> {
+			Platform.runLater(() -> new Server().start());
 		});
 
 		exit.setOnAction(actionEvent -> {
