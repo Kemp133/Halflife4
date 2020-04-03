@@ -65,6 +65,7 @@ public class MainMenu /*extends Application*/ {
 		});
 
 		startServer.setOnAction(actionEvent -> {
+			player.stop();
 			Platform.runLater(() -> new Server().start());
 		});
 
