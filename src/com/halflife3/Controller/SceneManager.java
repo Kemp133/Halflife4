@@ -7,6 +7,19 @@ import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Stack;
 
+/**
+ * @author Johnathon Kemp - HalfLife Team Project
+ * @version 1.0.0
+ *
+ * This class is a singleton which deals with the scenes, and changing between them. When a scene is added, it is first
+ * put into the {@code Scenes} hash map, along with a string to refer to that scene with in the future. This means that
+ * future scenes are cached, and therefore do not need to be loaded every time a scene is needed. As and when you want
+ * to revert to a previous scene, the {@code sceneOrder} stack keeps a track of all scenes set on the main window,
+ * meaning that when {@code restorePreviousScene} is called, the first value is {@code pop}'ed off and not captured as
+ * it isn't needed, and then {@code setScene} is called with the {@code peek()}'d value of the stack. As this is a
+ * singleton pattern, the {@code instance} variable is used to store a static reference to this object, meaning one
+ * reference can be accessed from anywhere.
+ * */
 public final class SceneManager {
 	private Stage                  mainWindow;
 	private HashMap<String, Scene> Scenes = new HashMap<>();

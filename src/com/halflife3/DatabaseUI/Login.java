@@ -1,6 +1,5 @@
 package com.halflife3.DatabaseUI;
 
-import com.halflife3.GameUI.FirstMenu;
 import com.halflife3.GameUI.LoginAttributes;
 import com.halflife3.GameUI.WindowAttributes;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
@@ -35,8 +34,7 @@ import java.sql.*;
 
 public class Login extends Preloader {
 
-	Button login = new Button();
-
+	Button login         = new Button();
 	Button createNewUser = new Button();
 
 	Button        backButton        = new Button();
@@ -50,11 +48,11 @@ public class Login extends Preloader {
 	CheckBox      chbRememberMe     = new CheckBox("Remember me?");
 	Text          incorrectFields   = new Text();
 
-	private static Stage preloaderStage = null;
+	private Stage preloaderStage = null;
 
-	private boolean          hasLoggedIn = false;
-	private ICredentialUser  user;
-	private LoginAttributes  loginAttributes;
+	private boolean         hasLoggedIn = false;
+	private ICredentialUser user;
+	private LoginAttributes loginAttributes;
 
 	String mySecurePassword;
 	String salt;
