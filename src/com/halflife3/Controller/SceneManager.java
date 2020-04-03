@@ -68,9 +68,11 @@ public final class SceneManager {
 		stageOrder.push(label);
 		this.mainWindow = stage;
 	}
+
 	//endregion
 	/** A method to show the main stage contained in this SceneManager reference */
 	public void showWindow() { mainWindow.show(); }
+	/** A method to hide the main stage contained in this SceneManager reference */
 	public void hideWindow() { mainWindow.hide(); }
 	//region SetScene
 
