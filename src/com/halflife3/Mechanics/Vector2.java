@@ -32,7 +32,10 @@ public class Vector2 implements Serializable {
 	/** The default constructor, makes a vector with elements {@code x == 0 & y == 0} */
 	public Vector2() {}
 
-	/** A constructor which takes two doubles, an x and a y, and sets the respective components of the vector */
+	/** A constructor which takes two doubles, an x and a y, and sets the respective components of the vector
+	 *
+	 * @param x The value to set as the {@code x} component
+	 * @param y The value to set as the {@code y} component*/
 	public Vector2(double x, double y) {
 		this.x = x;
 		this.y = y;
@@ -41,6 +44,8 @@ public class Vector2 implements Serializable {
 	/**
 	 * The deep copy constructor, uses another Vector2 to get the values for the x and y components and then generates
 	 * a completely new object with these values
+	 *
+	 * @param toCopy The {@code Vector2} to deep copy
 	 */
 	public Vector2(Vector2 toCopy) {
 		x = toCopy.getX();
