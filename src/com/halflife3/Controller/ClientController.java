@@ -16,7 +16,7 @@ import javafx.stage.Stage;
  * Wherever the game sets the scene in {@code SceneManager} should also set it back in the same place to try and avoid
  * errors with incorrectly using the SceneManager.
  *
- * This class also keeps track of the gamemode in {@code gamemode} as well as the FPS target that the game mode should be
+ * This class also keeps track of the game mode in {@code gamemode} as well as the FPS target that the game mode should be
  * played at. Hopefully in the (near) future I can move the FPS into the game mode and have this value encapsulated
  * fully.
  */
