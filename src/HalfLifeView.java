@@ -10,7 +10,7 @@ public class HalfLifeView extends Group {
     @FXML private int columnCount;
 
     /**
-     * for map item to be added &
+     * for map item to be added
      * Initializes the values of the image instance variables from files
      */
     public HalfLifeView() {
@@ -28,7 +28,6 @@ public class HalfLifeView extends Group {
      * should be the actual part to refresh game
      * waiting fo updated
      *
-     * @param
      */
     public void update() {
 

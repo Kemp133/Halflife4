@@ -60,6 +60,7 @@ public final class SceneManager {
 	/**
 	 * A method to set the main stage of this SceneManager reference (should only really be used once)
 	 *
+	 * @param label The label to associate with the given Stage
 	 * @param stage The stage to set the {@code mainWindow} variable to
 	 */
 	public void setMainWindow(String label, Stage stage) {
@@ -106,7 +107,11 @@ public final class SceneManager {
 	}
 	//endregion
 
-	/** A method to restore the previous scene as the currently set scene in SceneManager */
+	/** A method to restore the previous scene as the currently set scene in SceneManager
+	 *
+	 * @throws SceneStackEmptyException If the scene stack only contains one element, as restoring the previous scene is
+	 * impossible
+	 */
 	public void restorePreviousScene() throws SceneStackEmptyException {
 		if (SceneOrder.size() == 1)
 			throw new SceneStackEmptyException("The scene stack only contains one value! No scene to restore");
@@ -114,7 +119,11 @@ public final class SceneManager {
 		MainWindow.setScene(Scenes.get(SceneOrder.peek()));
 	}
 
-	/** A method to restore the previous stage as the currently set main stage in SceneManager */
+	/** A method to restore the previous stage as the currently set main stage in SceneManager
+	 *
+	 * @throws StageStackEmptyException If the stage stack contains only one element, as restoring the previous stage is
+	 * impossible
+	 */
 	public void restorePreviousStage() throws StageStackEmptyException {
 		if (StageOrder.size() == 1)
 			throw new StageStackEmptyException("The stage stack only contains one value! No stage to restore");
