@@ -3,6 +3,7 @@ package com.halflife3.Controller;
 import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.GameModes.GameMode;
 import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameUI.MainMenu;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.animation.AnimationTimer;
 import javafx.stage.Stage;
@@ -66,6 +67,8 @@ public class ClientController extends BaseController {
 		}.start();
 
 		((MainMode) gamemode).root.requestFocus();
+		MainMenu main = new MainMenu();
+		SceneManager.getInstance().setScene("Main Menu", main.getScene());
 	}
 
 	@Override

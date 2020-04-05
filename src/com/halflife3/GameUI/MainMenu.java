@@ -57,11 +57,9 @@ public class MainMenu /*extends Application*/ {
 
 		startServer.setOnAction(actionEvent -> {
 			player.stop();
-			SceneManager.getInstance().hideWindow();
 			Platform.runLater(() -> new Server().start());
+			Platform.runLater(() -> new ClientController().start(SceneManager.getInstance().getMainWindow()));
 		});
-
-		//TODO: Call method in controller
 
 		choose_map.setOnAction(actionEvent -> {
 			player.stop();

@@ -323,7 +323,7 @@ public class MainMode extends GameMode {
 		graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
 		//endregion
 
-		if (won() || hasFinished) {
+		if (won() || lost() || hasFinished) {
 			finished();
 			hasFinished = true;
 		}
@@ -350,19 +350,15 @@ public class MainMode extends GameMode {
 //
 		scene.setCursor(Cursor.DEFAULT);
 
-		try {
-			SceneManager.getInstance().restorePreviousScene();
-		} catch (SceneStackEmptyException e) {
-			NetworkingUtilities.CreateErrorMessage(
-					"Scene stack empty",
-					"The scene stack only contained one element",
-					"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
-			);
-		}
-
-//		SceneManager.getInstance().showWindow();
-//		MainMenu main = new MainMenu();
-//		SceneManager.getInstance().setScene("Main Menu", main.getScene());
+//		try {
+//			SceneManager.getInstance().restorePreviousScene();
+//		} catch (SceneStackEmptyException e) {
+//			NetworkingUtilities.CreateErrorMessage(
+//					"Scene stack empty",
+//					"The scene stack only contained one element",
+//					"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
+//			);
+//		}
 
 		System.out.println("Game exited");
 		running = false;
@@ -372,12 +368,12 @@ public class MainMode extends GameMode {
 	@Override
 	public boolean won () {
 		//Send everybody else the game over packet
-		return enemyScore == scoreLimit || yourScore == scoreLimit;
+		return yourScore == scoreLimit;
 	}
 
 	@Override
 	public boolean lost () {
-		return false;
+		return enemyScore == scoreLimit;
 	}
 
 	/** A method to initialise the players in the game */

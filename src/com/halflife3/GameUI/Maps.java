@@ -25,7 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Maps {
-    static public  String      Map = "res/map1.png";
+    static public  String      Map = "res/map.png";
     private BorderPane  borderPane;
     private VBox        vbox;
     private String      choice = "Maps";
