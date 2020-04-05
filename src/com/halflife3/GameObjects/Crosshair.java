@@ -1,4 +1,4 @@
-package com.halflife3.Mechanics.GameObjects;
+package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Mechanics.Vector2;

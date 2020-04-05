@@ -7,7 +7,7 @@ import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
-import com.halflife3.Mechanics.GameObjects.*;
+import com.halflife3.GameObjects.*;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
 import com.halflife3.Mechanics.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.Vector2;
@@ -50,43 +50,43 @@ public class MainMode extends GameMode {
 	private final       int   MOVEMENT_SPEED     = 120;
 	public static final int   SHOT_SPEED         = 200;
 	public static final float STUN_DURATION      = 15;
-	public static  final float RELOAD_DURATION     = 50;
+	public static final float RELOAD_DURATION    = 50;
 
 	//region Other variables
-	public        Pane                    root;
-	private       Scene                   scene;
-	public        Player                  thisPlayer;
-	private       HashMap<String, Player> playerList;
-	private       HashMap<Integer, Image> scoreSprite;
-	private       Input                   input               = Input.getInstance();
-	private       ProgressBar[]           stunBar;
-	private static ProgressBar amoBar;
-	private       Ball                    ball;
-	private       Stage                   window              = null;
-	private       char                    side;
-	public        int                     yourScore           = 0;
-	public        int                     enemyScore          = 0;
-	public        boolean                 running             = false;
-	private       int                     bulletLimiter       = 0;
-	public        int                     mapWidth;
-	private       int                     mapHeight;
-	private final int                     RIGHT_END_OF_SCREEN = 11 * 40;
-	private final int                     LEFT_END_OF_SCREEN  = 9 * 40;
-	private final int                     BOTTOM_OF_SCREEN    = 8 * 40;
-	private final int                     TOP_OF_SCREEN       = 7 * 40;
-	private       GraphicsContext         graphicsContext;
-	private double ballPreviousX;
+	public         Pane                    root;
+	private        Scene                   scene;
+	public         Player                  thisPlayer;
+	private        HashMap<String, Player> playerList;
+	private        HashMap<Integer, Image> scoreSprite;
+	private        Input                   input               = Input.getInstance();
+	private        ProgressBar[]           stunBar;
+	private static ProgressBar             amoBar;
+	private        Ball                    ball;
+	private        Stage                   window              = null;
+	private        char                    side;
+	public         int                     yourScore           = 0;
+	public         int                     enemyScore          = 0;
+	public         boolean                 running             = false;
+	private        int                     bulletLimiter       = 0;
+	public         int                     mapWidth;
+	private        int                     mapHeight;
+	private final  int                     RIGHT_END_OF_SCREEN = 11 * 40;
+	private final  int                     LEFT_END_OF_SCREEN  = 9 * 40;
+	private final  int                     BOTTOM_OF_SCREEN    = 8 * 40;
+	private final  int                     TOP_OF_SCREEN       = 7 * 40;
+	private        GraphicsContext         graphicsContext;
+	private        double                  ballPreviousX;
 	//endregion
 
-//	public MainMode() {}
+	//	public MainMode() {}
 
-	public MainMode (String GameModeName, double score) {
+	public MainMode(String GameModeName, double score) {
 		super(GameModeName);
 		scoreLimit = score;
 	}
 
 	@Override
-	public void initialise () {
+	public void initialise() {
 		//region Networking
 		Client clientNetwork = new Client();
 		clientNetwork.joinGroup();
@@ -102,7 +102,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise This Player
-		thisPlayer = new Player(clientNetwork.getStartingPosition(), new Vector2(0, 0));
+		thisPlayer = new Player(clientNetwork.getStartingPosition());
 		thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
 		//endregion
 
@@ -112,7 +112,7 @@ public class MainMode extends GameMode {
 		} while (!Client.listOfClients.connectedIPs.contains(thisPlayer.getIpOfClient()));
 		//endregion
 
-		//region Initialise The Players With Player Controlled and AI Controlled
+		//region Initialise The Other Players
 		initialisePlayers();
 		//endregion
 
@@ -153,20 +153,23 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Ball
-		ball = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
+		ball          = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), new Vector2(0, 0));
 		ballPreviousX = ball.getPosX();
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
 		running = true;
-		new Thread(() -> { while (running) updateEnemies(); }).start();
+		new Thread(() -> {
+			while (running)
+				updateEnemies();
+		}).start();
 		//endregion
 
 		System.out.println("Game Running");
 	}
 
 	@Override
-	public void gameLoop (double elapsedTime) {
+	public void gameLoop(double elapsedTime) {
 		//region Camera offset
 		Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
 		Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
@@ -181,12 +184,8 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Calculate the rotation
-		Vector2 playerClientCenter =
-				new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
-						thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
-		Vector2 direction =
-				new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY())
-						.subtract(playerClientCenter);
+		Vector2 playerClientCenter = new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2, thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
+		Vector2 direction = new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY()).subtract(playerClientCenter);
 
 		Affine rotate = new Affine();
 		short  deg    = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
@@ -219,12 +218,12 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Collision detection
-//                Player collision
+//		Player collision
 		for (Bricks block : MapRender.GetList())
 			if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
 				thisPlayer.collision(block, elapsedTime);
 
-//                Bullet collision
+//		  Bullet collision
 		editObjectManager(1, 0, null, null, null);
 		//endregion
 
@@ -254,18 +253,17 @@ public class MainMode extends GameMode {
 					}
 
 				thisPlayer.setBulletShot(!ballInWall);
-			} else if(thisPlayer.reload == RELOAD_DURATION){ // Shoots a bullet
+			} else if (thisPlayer.reload == RELOAD_DURATION) { // Shoots a bullet
 				Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
-				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
-						thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
+				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2, thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
 
-				editObjectManager
-						(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
+				editObjectManager(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
 				thisPlayer.setBulletShot(true);
 				thisPlayer.reload = 0;
 			}
 			bulletLimiter = FPS / 5;
-		} else if (bulletLimiter > 0) bulletLimiter--;
+		} else if (bulletLimiter > 0)
+			bulletLimiter--;
 		//endregion
 
 		//region Re-renders all game objects
@@ -294,17 +292,17 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
-		if (thisPlayer.stunned != 0) thisPlayer.setHoldsBall(false);
+		if (thisPlayer.stunned != 0)
+			thisPlayer.setHoldsBall(false);
 		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
-		if (thisPlayer.bulletShot) thisPlayer.setHoldsBall(false);
+		if (thisPlayer.bulletShot)
+			thisPlayer.setHoldsBall(false);
 		//endregion
 
 		//region Checks if a goal has been scored
-
-		if (ballPreviousX - ball.getPosX() < -mapWidth / 4f){
+		if (ballPreviousX - ball.getPosX() < -mapWidth / 4f) {
 			scored('R', elapsedTime, graphicsContext);
-		}
-		else if (ballPreviousX - ball.getPosX() > mapWidth / 4f){
+		} else if (ballPreviousX - ball.getPosX() > mapWidth / 4f) {
 			scored('L', elapsedTime, graphicsContext);
 		}
 //		if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
@@ -328,35 +326,35 @@ public class MainMode extends GameMode {
 	}
 
 	@Override
-	public void finished () {
-		//Log game win or loss in leaderboard
-//		if (yourScore == scoreLimit) { //Can't just call won() right?
-//			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
-//		}
-
-		//Send packet to end the game
-		//Set up game to await for the won/lost packet
-
-		//region Showing Who Won
-//		VBox  vbox  = new VBox();
-//		Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) + "won!");
-//		vbox.getChildren().add(text);
-//		Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
-//		window = new Stage();
-//		window.setScene(wonScene);
-//		//endregion
+	public void finished() {
+//		Log game win or loss in leaderboard
+//				if (yourScore == scoreLimit) { //Can't just call won() right?
+//					updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
+//				}
 //
+//		Send packet to end the game
+//		Set up game to await for the won/lost packet
+//
+//		region Showing Who Won
+//				VBox  vbox  = new VBox();
+//				Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) + "won!");
+//				vbox.getChildren().add(text);
+//				Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
+//				window = new Stage();
+//				window.setScene(wonScene);
+//				//endregion
+
 		scene.setCursor(Cursor.DEFAULT);
 
-//		try {
-//			SceneManager.getInstance().restorePreviousScene();
-//		} catch (SceneStackEmptyException e) {
-//			NetworkingUtilities.CreateErrorMessage(
-//					"Scene stack empty",
-//					"The scene stack only contained one element",
-//					"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
-//			);
-//		}
+//				try {
+//					SceneManager.getInstance().restorePreviousScene();
+//				} catch (SceneStackEmptyException e) {
+//					NetworkingUtilities.CreateErrorMessage(
+//							"Scene stack empty",
+//							"The scene stack only contained one element",
+//							"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
+//					);
+//				}
 
 		System.out.println("Game exited");
 		running = false;
@@ -364,18 +362,18 @@ public class MainMode extends GameMode {
 	}
 
 	@Override
-	public boolean won () {
+	public boolean won() {
 		//Send everybody else the game over packet
 		return yourScore == scoreLimit;
 	}
 
 	@Override
-	public boolean lost () {
+	public boolean lost() {
 		return enemyScore == scoreLimit;
 	}
 
 	/** A method to initialise the players in the game */
-	public void initialisePlayers () {
+	public void initialisePlayers() {
 		Client.receivePositions();
 		for (String ip : Client.listOfClients.connectedIPs) {
 			if (ip.equals(thisPlayer.getIpOfClient())) {
@@ -384,29 +382,22 @@ public class MainMode extends GameMode {
 			}
 
 			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
-			Vector2        pos             = new Vector2(theDoubleValues.posX, theDoubleValues.posY);
-			Vector2        vel             = new Vector2(theDoubleValues.velX, theDoubleValues.velY);
-			Player         enemy           = new Player(pos, vel);
+			Player enemy = new Player(new Vector2(theDoubleValues.posX, theDoubleValues.posY));
 			enemy.setIpOfClient(ip);
 			playerList.put(ip, enemy);
 		}
 	}
 
-	private void gameInit (Scene scene) {
+	private void gameInit(Scene scene) {
 		//region Background setup
 		try {
 			Image image = new Image(new FileInputStream("res/Space.png"));
-			var bgSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO,
-					false, false, true, true);
+			var bgSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
 			var myBI = new BackgroundImage(image, null, null, null, bgSize);
 			root.setBackground(new Background(myBI));
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find file in path: 'res/Space.png'");
-			NetworkingUtilities.CreateErrorMessage(
-					"Error Loading Background Image",
-					"The background image could not be loaded!",
-					"Exception message: " + e.getMessage()
-			);
+			NetworkingUtilities.CreateErrorMessage("Error Loading Background Image", "The background image could not be loaded!", "Exception message: " + e.getMessage());
 		}
 		//endregion
 
@@ -519,7 +510,7 @@ public class MainMode extends GameMode {
 		//endregion
 	}
 
-	public void updateEnemies () {
+	public void updateEnemies() {
 		Client.receivePositions();
 
 		//region Replaces Bots <-> Players
@@ -559,9 +550,7 @@ public class MainMode extends GameMode {
 			//region Rotation / Position / Velocity
 			if (!ip.equals("ball")) {
 				Affine rotate = new Affine();
-				rotate.appendRotation(theDoubleValues.degrees,
-						theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
-						theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
+				rotate.appendRotation(theDoubleValues.degrees, theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2, theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
 
 				enemy.setAffine(rotate);
 				enemy.setPosition(theDoubleValues.posX, theDoubleValues.posY);
@@ -583,8 +572,7 @@ public class MainMode extends GameMode {
 			double  bulletY       = Math.sin(degreeRadians);
 			Vector2 shotVel       = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
 			Vector2 gunDirection  = new Vector2(bulletX * 32, bulletY * 32);
-			Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
-					theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
+			Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2, theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
 
 			editObjectManager(0, 0, bulletPos, shotVel, "enemy");
 			theDoubleValues.bulletShot = false;
@@ -593,7 +581,7 @@ public class MainMode extends GameMode {
 		//endregion
 	}
 
-	private synchronized void editObjectManager (int op, double time, Vector2 bp, Vector2 bv, String shooter) {
+	private synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
 		switch (op) {
 			case 0: { //add bullets
 				new Bullet(bp, bv, shooter);
@@ -641,7 +629,7 @@ public class MainMode extends GameMode {
 		}
 	}
 
-	private void scored (char scoringSide, double time, GraphicsContext gc) {
+	private void scored(char scoringSide, double time, GraphicsContext gc) {
 		if (scoringSide == side) {
 			yourScore++;
 			System.out.println("Goal for YOUR team!");
@@ -656,7 +644,7 @@ public class MainMode extends GameMode {
 		try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
 	}
 
-	private static Connection getConnection () {
+	private static Connection getConnection() {
 		Connection c = null;
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -678,7 +666,7 @@ public class MainMode extends GameMode {
 		return c;
 	}
 
-	private void closeConnections (Connection c, PreparedStatement p, ResultSet r) {
+	private void closeConnections(Connection c, PreparedStatement p, ResultSet r) {
 		if (c != null) {
 			try {
 				c.close();
@@ -698,7 +686,7 @@ public class MainMode extends GameMode {
 
 	private void updateLBoard(Connection c, String username) {
 		PreparedStatement preparedStatement = null;
-		int score = currentScore(getConnection(), username);
+		int               score             = currentScore(getConnection(), username);
 		try {
 			String query = "UPDATE userdatascore SET score = " + (++score) + " WHERE name = '" + username + "'";
 			preparedStatement = c.prepareStatement(query);
@@ -711,9 +699,9 @@ public class MainMode extends GameMode {
 		}
 	}
 
-	private int currentScore (Connection c, String username) {
+	private int currentScore(Connection c, String username) {
 		PreparedStatement preparedStatement = null;
-		ResultSet rs                = null;
+		ResultSet         rs                = null;
 		try {
 			//Creating a query checking if username is in the table
 			String query = "SELECT * FROM userdatascore WHERE name = '" + username + "'";

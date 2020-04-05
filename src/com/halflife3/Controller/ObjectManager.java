@@ -1,6 +1,6 @@
 package com.halflife3.Controller;
 
-import com.halflife3.Mechanics.GameObjects.GameObject;
+import com.halflife3.GameObjects.GameObject;
 
 import java.util.HashSet;
 
