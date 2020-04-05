@@ -702,18 +702,18 @@ public class MainMode extends GameMode {
 		}
 	}
 
-	private void updateLBoard (Connection c, String username) {
+	private void updateLBoard(Connection c, String username) {
 		PreparedStatement preparedStatement = null;
-		ResultSet rs = null;
 		int score = currentScore(getConnection(), username);
 		try {
-			String query = "UPDATE userdatascore SET score = " + score++ + " WHERE name = '" + username + "'";
+			String query = "UPDATE userdatascore SET score = " + (++score) + " WHERE name = '" + username + "'";
 			preparedStatement = c.prepareStatement(query);
-			rs = preparedStatement.executeQuery();
+
+			int rowAffected = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			closeConnections(c, preparedStatement, rs);
+			closeConnections(c, preparedStatement, null);
 		}
 	}
 
