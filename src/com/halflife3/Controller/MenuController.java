@@ -31,7 +31,7 @@ public class MenuController extends BaseController implements ICredentialUser {
 		menu.getExit().setOnAction(actionEvent -> {
 			end();
 		});
-		manager.setScene("Main Menu", menu.getScene());
+		SceneManager.getInstance().setScene("Main Menu", menu.getScene());
 	}
 
 	@Override

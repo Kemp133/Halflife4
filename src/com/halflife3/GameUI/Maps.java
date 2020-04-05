@@ -1,23 +1,12 @@
 package com.halflife3.GameUI;
 
-import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.MapMenuController;
-import com.halflife3.Controller.SceneManager;
-import com.halflife3.Networking.NetworkingUtilities;
-import com.halflife3.Networking.Server.Server;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.geometry.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
 import javafx.scene.layout.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.text.Font;
-import javafx.util.Duration;
+import javafx.scene.text.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,7 +36,7 @@ public class Maps {
     private VBox vbox(){
 
         map1.setOnAction(actionEvent -> {
-            Map = "res/map1.png";
+            Map = "res/map.png";
             map1.getStyleClass().add("button1");
             map2.getStyleClass().remove("button1");
             map3.getStyleClass().remove("button1");
@@ -139,7 +128,7 @@ public class Maps {
 
     private void getImage(){
         try {
-            Image mapImage1 = new Image(new FileInputStream("res/map1.png"));
+            Image mapImage1 = new Image(new FileInputStream("res/map.png"));
             Image mapImage2 = new Image(new FileInputStream("res/map2.png"));
             Image mapImage3 = new Image(new FileInputStream("res/map3.png"));
             imgView1 = new ImageView(mapImage1);

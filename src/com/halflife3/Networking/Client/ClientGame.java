@@ -413,7 +413,7 @@ public class ClientGame extends Application {
             audio.getBattle_music().seek(Duration.ZERO);
             audio.getBattle_music().play();
         });
-        audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+        audio.getMute().setOnAction(actionEvent -> audio.switchMute());
         audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
         root.getChildren().add(audio.getMenuBar());
         //endregion
@@ -477,7 +477,7 @@ public class ClientGame extends Application {
                 //region Audio button
                 Button sound = new Button("Audio On/Off");
                 pauseRoot.getChildren().add(sound);
-                sound.setOnAction(actionEvent -> audio.swtichMute());
+                sound.setOnAction(actionEvent -> audio.switchMute());
                 //endregion
 
                 //region ToMainMenu button

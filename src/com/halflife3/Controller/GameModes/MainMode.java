@@ -1,13 +1,11 @@
 package com.halflife3.Controller.GameModes;
 
-import com.halflife3.Controller.*;
-import com.halflife3.Controller.Exceptions.SceneDoesNotExistException;
-import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
+import com.halflife3.Controller.ObjectManager;
+import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameUI.AudioForGame;
-import com.halflife3.GameUI.MainMenu;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.GameObjects.*;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
@@ -19,27 +17,27 @@ import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Cursor;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.application.*;
+import javafx.geometry.*;
+import javafx.scene.*;
+import javafx.scene.canvas.*;
 import javafx.scene.control.*;
-import javafx.scene.effect.GaussianBlur;
+import javafx.scene.effect.*;
 import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
-import javafx.scene.transform.Affine;
+import javafx.scene.paint.*;
+import javafx.scene.transform.*;
 import javafx.stage.*;
-import javafx.util.Duration;
+import javafx.util.*;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import static javafx.scene.input.KeyCode.*;
 
@@ -428,7 +426,7 @@ public class MainMode extends GameMode {
 			audio.getBattle_music().seek(Duration.ZERO);
 			audio.getBattle_music().play();
 		});
-		audio.getMute().setOnAction(actionEvent -> audio.swtichMute());
+		audio.getMute().setOnAction(actionEvent -> audio.switchMute());
 		audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
 		root.getChildren().add(audio.getMenuBar());
 		//endregion
@@ -491,7 +489,7 @@ public class MainMode extends GameMode {
 				//region Audio button
 				Button sound = new Button("Audio On/Off");
 				pauseRoot.getChildren().add(sound);
-				sound.setOnAction(actionEvent -> audio.swtichMute());
+				sound.setOnAction(actionEvent -> audio.switchMute());
 				//endregion
 
 				//region ToMainMenu button

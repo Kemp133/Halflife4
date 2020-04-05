@@ -5,13 +5,10 @@ import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.Exceptions.StageStackEmptyException;
 import com.halflife3.GameUI.WindowAttributes;
 import com.halflife3.Networking.NetworkingUtilities;
-import javafx.application.Platform;
-import javafx.scene.Cursor;
-import javafx.scene.Scene;
-import javafx.scene.input.KeyCombination;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.application.*;
+import javafx.scene.*;
+import javafx.scene.input.*;
+import javafx.stage.*;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -204,7 +201,7 @@ public final class SceneManager {
 					genericAttributes.maximisedOnLoad  = false;  //Change to false -> Main Menu not fullscreen
 					genericAttributes.fullScreenOnLoad = false; //Change to false -> Main Menu not fullscreen
 					genericAttributes.isModal          = false;
-					genericAttributes.decorated        = false;
+					genericAttributes.decorated        = true;
 
 					os.writeObject(genericAttributes);
 					windowAttributes = genericAttributes;
