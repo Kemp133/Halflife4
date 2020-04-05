@@ -295,7 +295,7 @@ public class MainMode extends GameMode {
 		if (thisPlayer.stunned != 0)
 			thisPlayer.setHoldsBall(false);
 		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
-		if (thisPlayer.bulletShot)
+		if (thisPlayer.isBulletShot())
 			thisPlayer.setHoldsBall(false);
 		//endregion
 
@@ -610,7 +610,6 @@ public class MainMode extends GameMode {
 								player.stunned = STUN_DURATION * 5;
 								player.setVelocity(bullet.getVelocity().divide(3));
 								player.setDeceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
-								player.setMoving(false);
 							}
 						}
 					}
