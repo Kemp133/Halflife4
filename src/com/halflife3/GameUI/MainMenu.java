@@ -1,6 +1,7 @@
 package com.halflife3.GameUI;
 
 import com.halflife3.Controller.ClientController;
+import com.halflife3.Controller.MapMenuController;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Server.Server;
@@ -21,39 +22,29 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+/**
+ * This class acts as a view for the MenuController, in the regards that it's purpose is to generate the menu and then
+ * allow the MenuController to add any functionality it wants to the buttons that it contains. This class specificially
+ * deals with loading the main menu for the game, and provides getters for the buttons that this contains so that the
+ * controller can set custom events for the buttons based on what it needs them to do.
+ */
 public class MainMenu /*extends Application*/ {
 	private              BorderPane borderPane;
 	private              VBox       vbox;
-	private static final String     MENU_AUDIO_PATH = "res/MainMenu/music_cinematic_darkness_falls.wav";
+	private static final String     MENU_AUDIO_PATH                = "res/MainMenu/music_cinematic_darkness_falls.wav";
+	private static final String     MENU_BACKGROUND_IMAGE_LOCATION = "res/Leaderboard/LeaderboardBackground.jpg";
 
 	private Button      startServer = new Button("Host Game");
 	private Button      joinGame    = new Button("Join Game");
 	private Button      leaderboard = new Button("Leaderboard");
 	private Button      options     = new Button("Options");
 	private Button      exit        = new Button("Exit");
+	private Button      choose_map  = new Button("Maps");
 	private MediaPlayer player;
 	private Scene       scene;
 
 	public MainMenu() {
 		initialiseMenuScene();
-	}
-
-	private Background addBackground() {
-		try {
-
-			FileInputStream inputStream = new FileInputStream("res/Leaderboard/LeaderboardBackground.jpg");
-			Image           image       = new Image(inputStream);
-
-			BackgroundSize  backgroundSize  = new BackgroundSize(800, 600, false, false, false, true);
-			BackgroundImage backgroundImage = new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
-			Background      background      = new Background(backgroundImage);
-			return background;
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		return null;
 	}
 
 	private VBox vbox() {
@@ -70,13 +61,21 @@ public class MainMenu /*extends Application*/ {
 			Platform.runLater(() -> new Server().start());
 		});
 
+		//TODO: Call method in controller
+
+		choose_map.setOnAction(actionEvent -> {
+			player.stop();
+			MapMenuController map_control = new MapMenuController();
+			map_control.start();
+		});
+
 		exit.setOnAction(actionEvent -> {
 			Platform.exit();
 			System.exit(0); //This is done to actually stop the Java application that's running
 		});
 
 
-		vbox = new VBox(startServer, joinGame, leaderboard, options, exit);
+		vbox = new VBox(startServer, joinGame, choose_map, leaderboard, options, exit);
 		vbox.setAlignment(Pos.BASELINE_CENTER);
 		vbox.setPadding(new Insets(35, 0, 0, 30));
 		vbox.setSpacing(30);
@@ -116,7 +115,7 @@ public class MainMenu /*extends Application*/ {
 		borderPane.setRight(rightPane);
 		borderPane.setBottom(bottomPane);
 
-		borderPane.setBackground(addBackground());
+		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), MENU_BACKGROUND_IMAGE_LOCATION));
 		borderPane.setCenter(vbox());
 
 		File f = new File("res/MainMenu/MainMenuCSS.css");
@@ -137,7 +136,10 @@ public class MainMenu /*extends Application*/ {
 			player.seek(Duration.ZERO);
 			player.play();
 		});
-		player.setOnError(() -> NetworkingUtilities.CreateErrorMessage("Media Player Error Occurred", "A problem occurred with the media player", "Contact your most convenient HalfLife team member for assistance with this error"));
+		player.setOnError(() -> NetworkingUtilities.CreateErrorMessage("Media Player Error Occurred",
+		                                                               "A problem occurred with the media player",
+		                                                               "Contact your most convenient HalfLife team member for assistance with this error"
+		));
 	}
 
 	public Scene getScene()        { return scene; }

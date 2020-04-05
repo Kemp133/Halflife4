@@ -26,7 +26,7 @@ public class ClientController extends BaseController {
 
 	@Override
 	public void initialise() {
-		gamemode = new MainMode("Ball Thing", 3);
+		gamemode = new MainMode("Ball Thing", 1);
 	}
 
 	@Override

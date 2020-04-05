@@ -1,11 +1,14 @@
 package com.halflife3.Controller.GameModes;
 
 import com.halflife3.Controller.*;
+import com.halflife3.Controller.Exceptions.SceneDoesNotExistException;
 import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
 import com.halflife3.GameUI.AudioForGame;
+import com.halflife3.GameUI.MainMenu;
+import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.GameObjects.*;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
 import com.halflife3.Mechanics.Interfaces.IUpdateable;
@@ -306,11 +309,11 @@ public class MainMode extends GameMode {
 		else if (ballPreviousX - ball.getPosX() > mapWidth / 4f){
 			scored('L', elapsedTime, graphicsContext);
 		}
-		if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
-			yourScore = 0;
-			enemyScore = 0;
-			thisPlayer.reset();
-		}
+//		if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
+//			yourScore = 0;
+//			enemyScore = 0;
+//			thisPlayer.reset();
+//		}
 		ballPreviousX = ball.getPosX();
 		//endregion
 
@@ -329,22 +332,22 @@ public class MainMode extends GameMode {
 	@Override
 	public void finished () {
 		//Log game win or loss in leaderboard
-		if (yourScore == scoreLimit) { //Can't just call won() right?
-			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
-		}
+//		if (yourScore == scoreLimit) { //Can't just call won() right?
+//			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
+//		}
 
 		//Send packet to end the game
 		//Set up game to await for the won/lost packet
 
 		//region Showing Who Won
-		VBox  vbox  = new VBox();
-		Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) + "won!");
-		vbox.getChildren().add(text);
-		Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
-		window = new Stage();
-		window.setScene(wonScene);
-		//endregion
-
+//		VBox  vbox  = new VBox();
+//		Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) + "won!");
+//		vbox.getChildren().add(text);
+//		Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
+//		window = new Stage();
+//		window.setScene(wonScene);
+//		//endregion
+//
 		scene.setCursor(Cursor.DEFAULT);
 
 		try {
@@ -356,6 +359,10 @@ public class MainMode extends GameMode {
 					"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
 			);
 		}
+
+//		SceneManager.getInstance().showWindow();
+//		MainMenu main = new MainMenu();
+//		SceneManager.getInstance().setScene("Main Menu", main.getScene());
 
 		System.out.println("Game exited");
 		running = false;
@@ -442,7 +449,7 @@ public class MainMode extends GameMode {
 
 		//region Gets width and height of the map
 		try {
-			Image map = new Image(new FileInputStream("res/map.png"));
+			Image map = new Image(new FileInputStream(Maps.Map));
 			mapWidth  = (int) map.getWidth() * 40;
 			mapHeight = (int) map.getHeight() * 40;
 		} catch (IOException e) { e.printStackTrace(); }
@@ -695,18 +702,18 @@ public class MainMode extends GameMode {
 		}
 	}
 
-	private void updateLBoard (Connection c, String username) {
+	private void updateLBoard(Connection c, String username) {
 		PreparedStatement preparedStatement = null;
-		ResultSet rs = null;
 		int score = currentScore(getConnection(), username);
 		try {
-			String query = "UPDATE userdatascore SET score = " + score++ + " WHERE name = '" + username + "'";
+			String query = "UPDATE userdatascore SET score = " + (++score) + " WHERE name = '" + username + "'";
 			preparedStatement = c.prepareStatement(query);
-			rs = preparedStatement.executeQuery();
+
+			int rowAffected = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			closeConnections(c, preparedStatement, rs);
+			closeConnections(c, preparedStatement, null);
 		}
 	}
 
