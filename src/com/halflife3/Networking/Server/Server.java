@@ -105,7 +105,7 @@ public class Server implements Runnable {
 			mapWidth  = mapWidthMiddle * 2;
 			mapHeight = mapHeightMiddle * 2;
 
-			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
+			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), "ServerBall");
 
 			ballPacket           = new PositionPacket();
 			ballPacket.velX      = 0;

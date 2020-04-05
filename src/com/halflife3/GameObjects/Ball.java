@@ -11,10 +11,10 @@ public class Ball extends Sprite {
     public boolean isHeld = false;
     private Vector2 spawnPosition;
 
-    public Ball(Vector2 position, Vector2 velocity) {
-        super(position, velocity);
+    public Ball(Vector2 position, String key) {
+        super(position, new Vector2());
         setSprite("res/Sprites/Ball/Ball.png");
-        keys.add("Ball");
+        keys.add(key);
         position.subtract(getWidth() / 2, getHeight() / 2);
         spawnPosition = position;
         circle = new Circle(position.getX(),
