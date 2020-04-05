@@ -35,51 +35,45 @@ import java.util.Stack;
  * permanent generation [the area in the JVM where static variables are stored]).
  */
 public final class SceneManager {
-	private Stage                  MainWindow;
+	private Stage                  mainWindow;
 	private HashMap<String, Stage> Stages     = new HashMap<>();
 	private HashMap<String, Scene> Scenes     = new HashMap<>();
-	private Stack<String>          SceneOrder = new Stack<>();
-	private Stack<String>          StageOrder = new Stack<>();
-	private WindowAttributes       WindowAttributes;
+	private Stack<String>          sceneOrder = new Stack<>();
+	private Stack<String>          stageOrder = new Stack<>();
+	private WindowAttributes       windowAttributes;
 
-	private static SceneManager Instance;
+	private static SceneManager instance;
 
 	private SceneManager() {
 		LoadWindowAttributes();
 	} //Singleton, don't want to be able to create instances of this class
 
-	//region Get/Set Main Window
+	//region Get Set Main Window
 
 	/**
 	 * A method to get the main stage from this SceneManager reference
 	 *
 	 * @return The Stage reference held by {@code mainWindow}
 	 */
-	public Stage getMainWindow() { return MainWindow; }
+	public Stage getMainWindow() { return mainWindow; }
 
 	/**
 	 * A method to set the main stage of this SceneManager reference (should only really be used once)
 	 *
-	 * @param label The label to associate with the given Stage
 	 * @param stage The stage to set the {@code mainWindow} variable to
 	 */
 	public void setMainWindow(String label, Stage stage) {
 		setMainStageAttributes(stage);
 		Stages.put(label, stage);
-		StageOrder.push(label);
-		this.MainWindow = stage;
+		stageOrder.push(label);
+		this.mainWindow = stage;
 	}
+
 	//endregion
-
-	//region Show/Hide Window (i.e. Stage)
-
 	/** A method to show the main stage contained in this SceneManager reference */
-	public void showWindow() { MainWindow.show(); }
-
+	public void showWindow() { mainWindow.show(); }
 	/** A method to hide the main stage contained in this SceneManager reference */
-	public void hideWindow() { MainWindow.hide(); }
-	//endregion
-
+	public void hideWindow() { mainWindow.hide(); }
 	//region SetScene
 
 	/**
@@ -90,8 +84,8 @@ public final class SceneManager {
 	 */
 	public void setScene(String label, Scene scene) {
 		addScene(label, scene);
-		MainWindow.setScene(scene);
-		SceneOrder.push(label);
+		mainWindow.setScene(scene);
+		sceneOrder.push(label);
 	}
 
 	/**
@@ -102,33 +96,23 @@ public final class SceneManager {
 	 * @throws SceneDoesNotExistException If the scene doesn't exist in the
 	 */
 	public void setScene(String label) throws SceneDoesNotExistException {
-		MainWindow.setScene(getScene(label));
-		SceneOrder.push(label);
+		mainWindow.setScene(getScene(label));
+		sceneOrder.push(label);
 	}
 	//endregion
 
-	/** A method to restore the previous scene as the currently set scene in SceneManager
-	 *
-	 * @throws SceneStackEmptyException If the scene stack only contains one element, as restoring the previous scene is
-	 * impossible
-	 */
+	/** A method to restore the previous scene as the currently set scene in SceneManager */
 	public void restorePreviousScene() throws SceneStackEmptyException {
-		if (SceneOrder.size() == 1)
+		if (sceneOrder.size() == 1)
 			throw new SceneStackEmptyException("The scene stack only contains one value! No scene to restore");
-		SceneOrder.pop();
-		MainWindow.setScene(Scenes.get(SceneOrder.peek()));
+		sceneOrder.pop();
+		mainWindow.setScene(Scenes.get(sceneOrder.peek()));
 	}
 
-	/** A method to restore the previous stage as the currently set main stage in SceneManager
-	 *
-	 * @throws StageStackEmptyException If the stage stack contains only one element, as restoring the previous stage is
-	 * impossible
-	 */
+	/** A method to restore the previous stage as the currently set main stage in SceneManager */
 	public void restorePreviousStage() throws StageStackEmptyException {
-		if (StageOrder.size() == 1)
+		if (stageOrder.size() == 1)
 			throw new StageStackEmptyException("The stage stack only contains one value! No stage to restore");
-		StageOrder.pop();
-		MainWindow = Stages.get(StageOrder.peek());
 	}
 
 	/**
@@ -137,16 +121,16 @@ public final class SceneManager {
 	 * <p>
 	 * (This method completely removes all data from the object, clearing it out in the hopes that garbage
 	 * collection comes along and cleans it up)
-	 * </p>
 	 */
 	public void euthanizeData() {
-		MainWindow = null;
+		mainWindow = null;
 		Scenes.clear();
-		Instance = null;
-		SceneOrder.clear();
+		instance = null;
+		sceneOrder.clear();
 	}
 
 	//region HelperMethods
+
 	/**
 	 * A helper method to get a scene out of the {@code Scenes} hash map with the label {@code label}
 	 *
@@ -179,16 +163,16 @@ public final class SceneManager {
 	 * @param s The stage to set the property of
 	 */
 	private void setMainStageAttributes(Stage s) {
-		s.setTitle(WindowAttributes.title);
-		s.setResizable(WindowAttributes.resizeable);
-		s.setMaximized(WindowAttributes.maximisedOnLoad);
-		s.setFullScreen(WindowAttributes.fullScreenOnLoad);
+		s.setTitle(windowAttributes.title);
+		s.setResizable(windowAttributes.resizeable);
+		s.setMaximized(windowAttributes.maximisedOnLoad);
+		s.setFullScreen(windowAttributes.fullScreenOnLoad);
 
-		if (!WindowAttributes.decorated)
+		if (!windowAttributes.decorated)
 			s.initStyle(StageStyle.UNIFIED);
-		if (WindowAttributes.isModal)
+		if (windowAttributes.isModal)
 			s.initModality(Modality.APPLICATION_MODAL);
-		if (WindowAttributes.maximisedOnLoad)
+		if (windowAttributes.maximisedOnLoad)
 			s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
 	}
 
@@ -196,7 +180,7 @@ public final class SceneManager {
 	private void LoadWindowAttributes() {
 		try (var fi = new FileInputStream(new File("AppData/config.conf"))) {
 			try (var oi = new ObjectInputStream(fi)) {
-				WindowAttributes = (WindowAttributes) oi.readObject();
+				windowAttributes = (WindowAttributes) oi.readObject();
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -204,11 +188,7 @@ public final class SceneManager {
 			if (Files.notExists(Paths.get("AppData"))) {
 				boolean createdAppData = new File("AppData").mkdir();
 				if (!createdAppData) {
-					NetworkingUtilities.CreateErrorMessage(
-							"Could not create AppData directory",
-					        "Error Creating AppData Directory",
-					        "AppData file could not be created. Please check that files can be created in the root directory!"
-					);
+					NetworkingUtilities.CreateErrorMessage("Could not create AppData directory", "Error Creating AppData Directory", "AppData file could not be created. Please check that files can be created in the root directory!");
 
 					//Error shown, now end the application
 					Platform.exit();
@@ -226,7 +206,7 @@ public final class SceneManager {
 					genericAttributes.decorated        = false;
 
 					os.writeObject(genericAttributes);
-					WindowAttributes = genericAttributes;
+					windowAttributes = genericAttributes;
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -243,8 +223,8 @@ public final class SceneManager {
 	 * @return The static reference to this class
 	 */
 	public static SceneManager getInstance() {
-		if (Instance == null)
-			Instance = new SceneManager();
-		return Instance;
+		if (instance == null)
+			instance = new SceneManager();
+		return instance;
 	}
 }
