@@ -2,8 +2,11 @@ package com.halflife3.GameObjects;
 
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
+import javafx.scene.shape.*;
 
 public abstract class Controllable extends Sprite {
+	public    float          stunned    = 0;
+	public    Circle         circle;
 	protected String         ipOfClient;
 	protected short          degrees;
 	protected Vector2        spawnPosition;
@@ -15,9 +18,19 @@ public abstract class Controllable extends Sprite {
 
 	public Controllable(Vector2 position) {
 		super(position, new Vector2());
-		spawnPosition = new Vector2(position);
-		deceleration  = new Vector2();
+		spawnPosition       = new Vector2(position);
+		deceleration        = new Vector2();
+		packetToSend        = new PositionPacket();
+		packetToSend.spawnX = position.getX();
+		packetToSend.spawnY = position.getY();
 		setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
+		circle = new Circle(position.getX() + getWidth() / 2 + 1, position.getY() + getHeight() / 2 + 1,
+				Math.max(getWidth(), getHeight()) / 2 + 1);
+	}
+
+	@Override
+	public Circle getBounds() {
+		return circle;
 	}
 
 	//region IP getter and setter
@@ -52,6 +65,10 @@ public abstract class Controllable extends Sprite {
 	}
 	//endregion
 
+	public Vector2 getSpawnPosition() {
+		return spawnPosition;
+	}
+
 	public PositionPacket getPacketToSend() {
 		packetToSend.posX       = getPosX();
 		packetToSend.posY       = getPosY();
@@ -62,4 +79,17 @@ public abstract class Controllable extends Sprite {
 		packetToSend.holdsBall  = holdsBall;
 		return packetToSend;
 	}
+
+	public void reset() {
+		stunned    = 0;
+		bulletShot = false;
+		isMoving   = false;
+		holdsBall  = false;
+		orgPos     = new Vector2(spawnPosition);
+		position   = new Vector2(spawnPosition);
+		circle.setCenterX(position.getX() + getWidth() / 2 + 1);
+		circle.setCenterY(position.getY() + getHeight() / 2 + 1);
+		resetVelocity();
+	}
+
 }

@@ -160,7 +160,8 @@ public class MainMode extends GameMode {
 		//region Thread To Update Position Of All Enemies and The Ball
 		running = true;
 		new Thread(() -> {
-			while (running) updateEnemies();
+			while (running)
+				updateEnemies();
 		}).start();
 		//endregion
 
@@ -172,17 +173,21 @@ public class MainMode extends GameMode {
 		//region Camera offset
 		Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
 		Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
-		if (Camera.GetOffsetX() < 0) Camera.SetOffsetX(0);
-		else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN) Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
-		if (Camera.GetOffsetY() < 0) Camera.SetOffsetY(0);
-		else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN) Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
+		if (Camera.GetOffsetX() < 0)
+			Camera.SetOffsetX(0);
+		else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
+			Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
+		if (Camera.GetOffsetY() < 0)
+			Camera.SetOffsetY(0);
+		else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
+			Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
 		//endregion
 
 		//region Calculate the rotation
 		Vector2 playerClientCenter =
 				new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
 						thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
-		Vector2 direction          =
+		Vector2 direction =
 				new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY()).subtract(playerClientCenter);
 
 		Affine rotate = new Affine();
@@ -218,8 +223,8 @@ public class MainMode extends GameMode {
 		//region Collision detection
 //		Player collision
 		for (Bricks block : MapRender.GetList())
-			if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal())) thisPlayer.collision(block,
-					elapsedTime);
+			if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
+				thisPlayer.collision(block, elapsedTime);
 
 //		  Bullet collision
 		editObjectManager(1, 0, null, null, null);
@@ -231,7 +236,8 @@ public class MainMode extends GameMode {
 
 		//region Checks if the player is holding the ball
 		boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-		if (playerIsTouchingTheBall && !ball.isHeld) thisPlayer.setHoldsBall(true);
+		if (playerIsTouchingTheBall && !ball.isHeld)
+			thisPlayer.setHoldsBall(true);
 		//endregion
 
 		//region Shoots a bullet or the ball
@@ -252,7 +258,7 @@ public class MainMode extends GameMode {
 				thisPlayer.setBulletShot(!ballInWall);
 			} else if (thisPlayer.reload == RELOAD_DURATION) { // Shoots a bullet
 				Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
-				Vector2 bulletPos    = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
+				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
 						thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
 
 				editObjectManager(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
@@ -260,7 +266,8 @@ public class MainMode extends GameMode {
 				thisPlayer.reload = 0;
 			}
 			bulletLimiter = FPS / 5;
-		} else if (bulletLimiter > 0) bulletLimiter--;
+		} else if (bulletLimiter > 0)
+			bulletLimiter--;
 		//endregion
 
 		//region Re-renders all game objects
@@ -268,8 +275,13 @@ public class MainMode extends GameMode {
 
 		MapRender.Render(graphicsContext);
 
-		for (IRenderable go : ObjectManager.getGameObjects())
+		for (IRenderable go : ObjectManager.getGameObjects()) {
+			if (go instanceof Ball)
+				if (((Ball) go).containsKey("ServerBall"))
+					continue;
 			go.render(graphicsContext);
+		}
+
 		//endregion
 
 		//region Updates the stun bar
@@ -289,9 +301,11 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
-		if (thisPlayer.stunned != 0) thisPlayer.setHoldsBall(false);
+		if (thisPlayer.stunned != 0)
+			thisPlayer.setHoldsBall(false);
 		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
-		if (thisPlayer.isBulletShot()) thisPlayer.setHoldsBall(false);
+		if (thisPlayer.isBulletShot())
+			thisPlayer.setHoldsBall(false);
 		//endregion
 
 		//region Checks if a goal has been scored
@@ -394,8 +408,8 @@ public class MainMode extends GameMode {
 			root.setBackground(new Background(myBI));
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find file in path: 'res/Space.png'");
-			NetworkingUtilities.CreateErrorMessage("Error Loading Background Image", "The background image could not " +
-					"be loaded!", "Exception message: " + e.getMessage());
+			NetworkingUtilities.CreateErrorMessage("Error Loading Background Image",
+					"The background image could not " + "be loaded!", "Exception message: " + e.getMessage());
 		}
 		//endregion
 
@@ -516,7 +530,8 @@ public class MainMode extends GameMode {
 
 		for (String player : playerKeys) {
 //            If bot name/player IP is stored locally - continue
-			if (Client.listOfClients.connectedIPs.contains(player)) continue;
+			if (Client.listOfClients.connectedIPs.contains(player))
+				continue;
 
 //            If server list has been updated - reset the odd player's position and velocity
 			playerList.get(player).reset();
@@ -525,7 +540,8 @@ public class MainMode extends GameMode {
 //            Find the odd player (bot or disconnected player)
 			for (String newIP : Client.listOfClients.connectedIPs) {
 //                If the player is in both local and server lists - continue
-				if (playerList.containsKey(newIP)) continue;
+				if (playerList.containsKey(newIP))
+					continue;
 
 //                If newIP is in local list but not in the server list
 				playerList.get(player).setIpOfClient(newIP); //Change the Player gameObject's IP to newIP
@@ -539,7 +555,8 @@ public class MainMode extends GameMode {
 		//region Updates info of *other* players/bots and the ball
 		for (String ip : Client.listOfClients.posList.keySet()) {
 			Player enemy = playerList.get(ip);
-			if (ip.equals(thisPlayer.getIpOfClient())) continue;
+			if (ip.equals(thisPlayer.getIpOfClient()))
+				continue;
 
 			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
 
@@ -562,14 +579,15 @@ public class MainMode extends GameMode {
 			//endregion
 
 			//region Enemies' bullet shots
-			if (!theDoubleValues.bulletShot) continue;
+			if (!theDoubleValues.bulletShot)
+				continue;
 
 			double  degreeRadians = Math.toRadians(theDoubleValues.degrees);
 			double  bulletX       = Math.cos(degreeRadians);
 			double  bulletY       = Math.sin(degreeRadians);
 			Vector2 shotVel       = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
 			Vector2 gunDirection  = new Vector2(bulletX * 32, bulletY * 32);
-			Vector2 bulletPos     = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
+			Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
 					theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
 
 			editObjectManager(0, 0, bulletPos, shotVel, "enemy");
@@ -589,13 +607,16 @@ public class MainMode extends GameMode {
 			case 1: { //remove bullets if needed
 				HashSet<GameObject> crash_bullet_list = new HashSet<>();
 				for (GameObject bullet : ObjectManager.getGameObjects()) {
-					if (!bullet.getKeys().contains("Bullet")) continue;
+					if (!bullet.getKeys().contains("Bullet"))
+						continue;
 
 					for (Bricks block : MapRender.GetList())
-						if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal())) crash_bullet_list.add(bullet);
+						if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+							crash_bullet_list.add(bullet);
 
 					for (String ip : Client.listOfClients.connectedIPs) {
-						if (((Bullet) bullet).getShooterName().equals(ip)) continue;
+						if (((Bullet) bullet).getShooterName().equals(ip))
+							continue;
 
 						Player player = playerList.get(ip);
 						if (bullet.getBounds().intersects(player.circle.getBoundsInLocal())) {
@@ -616,8 +637,17 @@ public class MainMode extends GameMode {
 			} //Remove bullets if needed
 
 			case 2: { //update object positions
-				for (IUpdateable go : ObjectManager.getGameObjects())
+				for (IUpdateable go : ObjectManager.getGameObjects()) {
+					if (go instanceof Ball) {
+						if (((Ball) go).containsKey("ServerBall")) {
+							continue;
+						}
+					} else if (go instanceof AIPlayer)
+						continue;
+
 					go.update(time);
+				}
+
 				break;
 			} //Update object positions
 		}

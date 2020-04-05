@@ -1,22 +1,20 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameObjects.AIPlayer;
 import com.halflife3.GameObjects.Ball;
 import com.halflife3.GameObjects.Bricks;
-import com.halflife3.GameObjects.Player;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
-import javafx.scene.image.*;
 import javafx.scene.shape.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -48,14 +46,12 @@ public class Server implements Runnable {
 	public static  Vector2[]                       startPositions = {new Vector2(160, 600), new Vector2(1840, 600)};
 	public static  ArrayList<String>               botNamesList   = new ArrayList<>(Arrays.asList("bot1", "bot2"));
 	private        HashMap<String, Circle>         botCircles;
-	private        HashMap<String, PositionPacket> soughtPositions;
-	private        HashMap<String, PositionPacket> nextPositions;
+	private        HashMap<String, Vector2>        soughtPositions;
+	private        HashMap<String, Vector2>        nextPositions;
 	private        HashMap<String, Boolean>        alreadyLooking;
-	private        HashMap<String, Player>         playerList;
+	private        HashMap<String, AIPlayer>       botList;
 	private        AI                              botAI;
 	private        Ball                            theBall;
-	private        Image                           playerImage;
-	private        PositionPacket                  ballPacket;
 	private        int                             mapWidth;
 	private        int                             mapHeight;
 	private        Vector2                         previousBallVel;
@@ -64,18 +60,15 @@ public class Server implements Runnable {
 	public void start() {
 		//region Object initialisation
 		botAI              = new AI();
+		previousBallVel    = new Vector2();
 		botCircles         = new HashMap<>();
 		alreadyLooking     = new HashMap<>();
 		soughtPositions    = new HashMap<>();
 		nextPositions      = new HashMap<>();
 		availablePositions = new HashMap<>();
-		playerList         = new HashMap<>();
-		previousBallVel    = new Vector2(0, 0);
+		botList            = new HashMap<>();
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
-		try (var fis = new FileInputStream("res/Sprites/PlayerSkins/Cosmo_Hovering.png")) {
-			playerImage = new Image(fis);
-		} catch (IOException e) { System.err.println("Player sprite not found!"); }
 		//endregion
 
 		final boolean[] readyAI = {false};
@@ -88,8 +81,8 @@ public class Server implements Runnable {
 			multicastSocket = new MulticastSocket();
 			multicastSocket.setInterface(NetworkingUtilities.setWifiInterface());
 		} catch (SocketException e) {
-			NetworkingUtilities.CreateErrorMessage("Error Setting Network Interface", "Network interface could not be " +
-					"set", e.getMessage());
+			NetworkingUtilities.CreateErrorMessage("Error Setting Network Interface",
+					"Network interface could not be " + "set", e.getMessage());
 		} catch (IOException e) { e.printStackTrace(); }
 		//endregion
 
@@ -107,36 +100,27 @@ public class Server implements Runnable {
 
 			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), "ServerBall");
 
-			ballPacket           = new PositionPacket();
-			ballPacket.velX      = 0;
-			ballPacket.velY      = 0;
-			ballPacket.posX      = ballPacket.spawnX = mapWidthMiddle;
-			ballPacket.posY      = ballPacket.spawnY = mapHeightMiddle;
-			ballPacket.degrees   = 0;
-			ballPacket.holdsBall = false;
-
-			ClientListServer.positionList.put("ball", ballPacket);
+			ClientListServer.positionList.put("ball", theBall.getPositionPacket());
 		} catch (IOException e) { e.printStackTrace(); }
-
-		ClientListServer.positionList.put("ball", ballPacket);
 		//endregion
 
 		//region Fills the positionList with bot players, giving them available starting positions
 		for (int i = 0; i < startPositions.length; i++) {
 			availablePositions.put(startPositions[i], true);
-			String botName   = botNamesList.get(i);
-			Player botPlayer = new Player(startPositions[i]);
+			String   botName   = botNamesList.get(i);
+			AIPlayer botPlayer = new AIPlayer(startPositions[i]);
 			botPlayer.setIpOfClient(botName);
-			playerList.put(botName, botPlayer);
+			botList.put(botName, botPlayer);
 			ClientListServer.positionList.put(botName, botPlayer.getPacketToSend());
 			ClientListServer.connectedIPs.add(botName);
 			alreadyLooking.put(botName, false);
-			soughtPositions.put(botName, botAI.getNextPacket(botPlayer.getPacketToSend(), theBall.getPosition()));
+			soughtPositions.put(botName, botAI.getNextPos(botPlayer.getPosition(), theBall.getPosition()));
 		}
 		//endregion
 
 //		Wait until the AI is done loading the map
-		while (!readyAI[0]) try { Thread.sleep(1); } catch (InterruptedException ignored) {}
+		while (!readyAI[0])
+			try { Thread.sleep(1); } catch (InterruptedException ignored) {}
 
 		new Thread(this).start();
 	}
@@ -156,9 +140,11 @@ public class Server implements Runnable {
 				waitASecond();
 
 				if (ClientListServer.clientList.isEmpty()) {
-					if (timeOut <= 3) System.out.println("Timeout in: " + timeOut);
+					if (timeOut <= 3)
+						System.out.println("Timeout in: " + timeOut);
 					timeOut--;
-				} else timeOut = SERVER_TIMEOUT / 1000;
+				} else
+					timeOut = SERVER_TIMEOUT / 1000;
 			}
 			running   = false;
 			welcoming = false;
@@ -171,7 +157,8 @@ public class Server implements Runnable {
 			long   lastUpdate = System.nanoTime();
 			double elapsedTime;
 			while (running) {
-				if (System.nanoTime() - lastUpdate < 1e9 / SERVER_FPS) continue;
+				if (System.nanoTime() - lastUpdate < 1e9 / SERVER_FPS)
+					continue;
 
 				elapsedTime = (System.nanoTime() - lastUpdate) / 1e9;
 				lastUpdate  = System.nanoTime();
@@ -196,14 +183,16 @@ public class Server implements Runnable {
 
 	private void gameFrame(double elapsedTime) {
 		//region Move AI controlled players
-		if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < startPositions.length) moveAI(elapsedTime);
+		if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < startPositions.length)
+			moveAI(elapsedTime);
 		//endregion
 
 		//region Ball's position and velocity if it is held
 		for (String ip : ClientListServer.positionList.keySet()) {
 			PositionPacket playerWithBall = ClientListServer.positionList.get(ip);
 
-			if (!playerWithBall.holdsBall) continue;
+			if (!playerWithBall.holdsBall)
+				continue;
 
 			//region Ball's position
 			double  degreeRadians = Math.toRadians(playerWithBall.degrees);
@@ -216,7 +205,8 @@ public class Server implements Runnable {
 			theBall.isHeld = true;
 			//endregion
 
-			if (!playerWithBall.bulletShot) continue;
+			if (!playerWithBall.bulletShot)
+				continue;
 
 			//region Ball's velocity if it's been shot
 			Vector2 shotVel = new Vector2(ballX, ballY).multiply(MainMode.SHOT_SPEED);
@@ -233,17 +223,14 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Ball collision
-		if (!theBall.isHeld && previousBallVel.equals(theBall.getVelocity())) ballWallBounce();
+		if (!theBall.isHeld && previousBallVel.equals(theBall.getVelocity()))
+			ballWallBounce();
 		previousBallVel = theBall.getVelocity();
 		//endregion
 
-		//region Update the ball locally
-		theBall.update(elapsedTime);
-		//endregion
+		theBall.update(elapsedTime); // Update the ball locally
 
-		//region Update ballPacket
-		updateBallPacket();
-		//endregion
+		EventListenerServer.replaceEntry("ball", theBall.getPositionPacket()); // Update ballPacket
 
 		//region Sends the position list packet to all clients
 		posListPacket.posList      = ClientListServer.positionList;
@@ -252,17 +239,9 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Check if a goal has been scored
-		if (theBall.getPosX() > mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH) resetMap();
+		if (theBall.getPosX() > mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH)
+			resetMap();
 		//endregion
-	}
-
-	private void updateBallPacket() {
-		ballPacket.posX      = theBall.getPosX();
-		ballPacket.posY      = theBall.getPosY();
-		ballPacket.velX      = theBall.getVelX();
-		ballPacket.velY      = theBall.getVelY();
-		ballPacket.holdsBall = theBall.isHeld;
-		EventListenerServer.replaceEntry("ball", ballPacket);
 	}
 
 	private void resetMap() {
@@ -270,29 +249,14 @@ public class Server implements Runnable {
 			System.out.println("Goal has been scored. Resetting positions...");
 			theBall.reset();
 			previousBallVel = theBall.getVelocity();
-			updateBallPacket();
+			EventListenerServer.replaceEntry("ball", theBall.getPositionPacket());
 
-			for (String ip : ClientListServer.positionList.keySet()) {
-				if (!botNamesList.contains(ip)) continue;
-
+			for (String ip : botList.keySet()) {
 				soughtPositions.remove(ip);
 				nextPositions.remove(ip);
 				alreadyLooking.replace(ip, false);
-
-				PositionPacket botPacket = ClientListServer.positionList.get(ip);
-				botPacket.posX       = botPacket.spawnX;
-				botPacket.posY       = botPacket.spawnY;
-				botPacket.velX       = botPacket.velY = 0;
-				botPacket.bulletShot = false;
-				botPacket.degrees    = 0;
-				botPacket.holdsBall  = false;
-
-				Circle botCircle = botCircles.get(ip);
-				botCircle.setCenterX(botPacket.posX + playerImage.getWidth() / 2 + 1);
-				botCircle.setCenterY(botPacket.posY + playerImage.getHeight() / 2 + 1);
-				botCircles.replace(ip, botCircle);
-
-				EventListenerServer.replaceEntry(ip, botPacket);
+				botList.get(ip).reset();
+				EventListenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend());
 			}
 
 			posListPacket.posList      = ClientListServer.positionList;
@@ -304,83 +268,152 @@ public class Server implements Runnable {
 	}
 
 	private void moveAI(double time) {
-		for (String ip : ClientListServer.connectedIPs) {
-			if (!botNamesList.contains(ip)) continue;
+		for (String ip : botList.keySet()) {
+			AIPlayer bot = botList.get(ip);
 
-			PositionPacket botCurrentPos = ClientListServer.positionList.get(ip);
-			PositionPacket botSoughtPos  = soughtPositions.get(ip);
-			Circle         botCircle     = botCircles.get(ip);
+			bot.update(time);
 
-			//region Updates the bot's position locally
-			botCurrentPos.posX += botCurrentPos.velX * time;
-			botCurrentPos.posY += botCurrentPos.velY * time;
-			botCircle.setCenterX(botCurrentPos.posX + playerImage.getWidth() / 2 + 1);
-			botCircle.setCenterY(botCurrentPos.posY + playerImage.getHeight() / 2 + 1);
-			botCircles.replace(ip, botCircle);
-			//endregion
+			Vector2 soughtPos = soughtPositions.get(ip);
 
-			//region Checks if bot is holding the ball
-			botCurrentPos.holdsBall = theBall.getBounds().intersects(botCircle.getBoundsInLocal());
-			//endregion
+			if (theBall.getBounds().intersects(bot.circle.getBoundsInLocal()) && !theBall.isHeld)
+				bot.setHoldsBall(true);
 
-			//region Sets the currently sought after and next positions
-			if (botSoughtPos == null) {
-				botSoughtPos = botAI.getNextPacket(botCurrentPos, getNextGoal(botCurrentPos));
-				soughtPositions.put(ip, botSoughtPos);
-			} else if (Math.abs(botCurrentPos.posX - 2) < Math.abs(botSoughtPos.posX) && Math.abs(botCurrentPos.posX + 2) > Math.abs(botSoughtPos.posX) && Math.abs(botCurrentPos.posY - 2) < Math.abs(botSoughtPos.posY) && Math.abs(botCurrentPos.posY + 2) > Math.abs(botSoughtPos.posY)) {
-				botCurrentPos.posX = botSoughtPos.posX;
-				botCurrentPos.posY = botSoughtPos.posY;
-				botSoughtPos       = nextPositions.get(ip);
-				soughtPositions.replace(ip, botSoughtPos);
+			if (soughtPos == null) {
+				soughtPos = botAI.getNextPos(bot.getPosition(), getNextGoal(bot));
+				soughtPositions.put(ip, soughtPos);
+			} else if (arrived(bot.getPosition(), soughtPos)) {
+				bot.setPosition(soughtPos);
+				soughtPos = new Vector2(nextPositions.get(ip));
+				soughtPositions.replace(ip, soughtPos);
 				nextPositions.remove(ip);
 			}
-			//endregion
 
-			//region If there is no next position, computes one on another Thread
 			if (nextPositions.get(ip) == null && !alreadyLooking.get(ip)) {
 				alreadyLooking.replace(ip, true);
-				PositionPacket finalSeekedPos = botSoughtPos;
+				Vector2 finalSeekedPos = soughtPos;
 				new Thread(() -> {
-					nextPositions.put(ip, botAI.getNextPacket(finalSeekedPos, getNextGoal(botCurrentPos)));
+					nextPositions.put(ip, botAI.getNextPos(finalSeekedPos, getNextGoal(bot)));
 					alreadyLooking.replace(ip, false);
 				}).start();
 			}
-			//endregion
 
-			//region Sets bot's rotation
-			Vector2 botCenter = new Vector2(botCurrentPos.posX, botCurrentPos.posY);
-			Vector2 direction = new Vector2(botSoughtPos.posX, botSoughtPos.posY).subtract(botCenter);
-			botCurrentPos.degrees = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-			//endregion
+			Vector2 direction = new Vector2(soughtPos).subtract(bot.getPosition());
+			bot.setDegrees((short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX())));
 
-			//region Changes bot's velocity for the next cycle
-			if (botSoughtPos.posX > botCurrentPos.posX) botCurrentPos.velX = 100;
-			else if (botSoughtPos.posX < botCurrentPos.posX) botCurrentPos.velX = -100;
-			else botCurrentPos.velX = 0;
+			if (soughtPos.getX() > bot.getPosX())
+				bot.setVelocity(100, bot.getVelY());
+			else if (soughtPos.getX() < bot.getPosX())
+				bot.setVelocity(-100, bot.getVelY());
+			else
+				bot.setVelocity(0, bot.getVelY());
 
-			if (botSoughtPos.posY > botCurrentPos.posY) botCurrentPos.velY = 100;
-			else if (botSoughtPos.posY < botCurrentPos.posY) botCurrentPos.velY = -100;
-			else botCurrentPos.velY = 0;
-			//endregion
+			if (soughtPos.getY() > bot.getPosY())
+				bot.setVelocity(bot.getVelX(), 100);
+			else if (soughtPos.getY() < bot.getPosY())
+				bot.setVelocity(bot.getVelX(), -100);
+			else
+				bot.setVelocity(bot.getVelX(), 0);
 
-			EventListenerServer.replaceEntry(ip, botCurrentPos);
+			EventListenerServer.replaceEntry(ip, bot.getPacketToSend());
+
 		}
+
+//		for (String ip : ClientListServer.connectedIPs) {
+//			if (!botNamesList.contains(ip))
+//				continue;
+//
+//			PositionPacket botCurrentPos = ClientListServer.positionList.get(ip);
+//			PositionPacket botSoughtPos  = soughtPositions.get(ip);
+//			Circle         botCircle     = botCircles.get(ip);
+//
+//			//region Updates the bot's position locally
+//			botCurrentPos.posX += botCurrentPos.velX * time;
+//			botCurrentPos.posY += botCurrentPos.velY * time;
+//			botCircle.setCenterX(botCurrentPos.posX + playerImage.getWidth() / 2 + 1);
+//			botCircle.setCenterY(botCurrentPos.posY + playerImage.getHeight() / 2 + 1);
+//			botCircles.replace(ip, botCircle);
+//			//endregion
+//
+//			//region Checks if bot is holding the ball
+//			botCurrentPos.holdsBall = theBall.getBounds().intersects(botCircle.getBoundsInLocal());
+//			//endregion
+//
+//			//region Sets the currently sought after & next positions
+//			if (botSoughtPos == null) {
+//				botSoughtPos = botAI.getNextPos(botCurrentPos, getNextGoal(botCurrentPos));
+//				soughtPositions.put(ip, botSoughtPos);
+//			} else if (Math.abs(botCurrentPos.posX - 2) < Math.abs(botSoughtPos.posX) &&
+//			           Math.abs(botCurrentPos.posX + 2) > Math.abs(botSoughtPos.posX) &&
+//			           Math.abs(botCurrentPos.posY - 2) < Math.abs(botSoughtPos.posY) &&
+//			           Math.abs(botCurrentPos.posY + 2) > Math.abs(botSoughtPos.posY)) {
+//				botCurrentPos.posX = botSoughtPos.posX;
+//				botCurrentPos.posY = botSoughtPos.posY;
+//				botSoughtPos       = nextPositions.get(ip);
+//				soughtPositions.replace(ip, botSoughtPos);
+//				nextPositions.remove(ip);
+//			}
+//			//endregion
+//
+//			//region If there is no next position, computes one on another Thread
+//			if (nextPositions.get(ip) == null && !alreadyLooking.get(ip)) {
+//				alreadyLooking.replace(ip, true);
+//				PositionPacket finalSeekedPos = botSoughtPos;
+//				new Thread(() -> {
+//					nextPositions.put(ip, botAI.getNextPos(finalSeekedPos, getNextGoal(botCurrentPos)));
+//					alreadyLooking.replace(ip, false);
+//				}).start();
+//			}
+//			//endregion
+//
+//			//region Sets bot's rotation
+//			Vector2 botCenter = new Vector2(botCurrentPos.posX, botCurrentPos.posY);
+//			Vector2 direction = new Vector2(botSoughtPos.posX, botSoughtPos.posY).subtract(botCenter);
+//			botCurrentPos.degrees = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
+//			//endregion
+//
+//			//region Changes bot's velocity for the next cycle
+//			if (botSoughtPos.posX > botCurrentPos.posX)
+//				botCurrentPos.velX = 100;
+//			else if (botSoughtPos.posX < botCurrentPos.posX)
+//				botCurrentPos.velX = -100;
+//			else
+//				botCurrentPos.velX = 0;
+//
+//			if (botSoughtPos.posY > botCurrentPos.posY)
+//				botCurrentPos.velY = 100;
+//			else if (botSoughtPos.posY < botCurrentPos.posY)
+//				botCurrentPos.velY = -100;
+//			else
+//				botCurrentPos.velY = 0;
+//			//endregion
+//
+//			EventListenerServer.replaceEntry(ip, botCurrentPos);
+//		}
+	}
+
+	private boolean arrived(Vector2 current, Vector2 sought) {
+		return (Math.abs(current.getX() - 2) < Math.abs(sought.getX()) &&
+		        Math.abs(current.getX() + 2) > Math.abs(sought.getX()) &&
+		        Math.abs(current.getY() - 2) < Math.abs(sought.getY()) &&
+		        Math.abs(current.getY() + 2) > Math.abs(sought.getY()));
 	}
 
 	private void ballWallBounce() {
 		for (Bricks block : MapRender.GetList()) {
-			if (!theBall.getBounds().intersects(block.getBounds().getBoundsInLocal())) continue;
+			if (!theBall.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+				continue;
 
 			Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
 					block.getPosY() + block.getHeight() / 2);
-			Vector2 ballCenter  = new Vector2(theBall.getPosX() + theBall.getWidth() / 2,
+			Vector2 ballCenter = new Vector2(theBall.getPosX() + theBall.getWidth() / 2,
 					theBall.getPosY() + theBall.getHeight() / 2);
 
 			Vector2 relevantPos = new Vector2(ballCenter).subtract(brickCenter);
 			double  rel_x       = relevantPos.getX();
 			double  rel_y       = relevantPos.getY();
 
-			if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) || (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) || (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) || (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0)) {
+			if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) || (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) ||
+			    (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) || (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0)) {
 				theBall.collision(2);
 			} else {
 				theBall.collision(1);
@@ -388,9 +421,9 @@ public class Server implements Runnable {
 		}
 	}
 
-	private Vector2 getNextGoal(PositionPacket bot) {
-		if (bot.holdsBall) {
-			if (bot.spawnX < mapWidth / 2f) {
+	private Vector2 getNextGoal(AIPlayer bot) {
+		if (bot.isHoldingBall()) {
+			if (bot.getSpawnPosition().getX() < mapWidth / 2f) {
 				return new Vector2(mapWidth - GOAL_WIDTH, mapHeight / 2f);
 			} else {
 				return new Vector2(GOAL_WIDTH, mapHeight / 2f);
@@ -406,7 +439,8 @@ public class Server implements Runnable {
 
 		if (ClientListServer.clientList.isEmpty()) {
 			clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
-		} else clientSocket.setSoTimeout(0);
+		} else
+			clientSocket.setSoTimeout(0);
 
 		try { clientSocket.receive(incPoke); } catch (SocketTimeoutException e) {
 			running = false;
@@ -543,4 +577,5 @@ public class Server implements Runnable {
 			e.printStackTrace();
 		}
 	}
+
 }
