@@ -1,6 +1,7 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.GameObjects.Ball;
 import com.halflife3.Mechanics.GameObjects.Bricks;
@@ -100,7 +101,7 @@ public class Server implements Runnable {
 
         //region Adds the ball to the positionList
         try {
-            BufferedImage mapImage = ImageIO.read(new File("res/map.png"));
+            BufferedImage mapImage = ImageIO.read(new File(Maps.Map));
             int mapWidthMiddle = mapImage.getWidth() * 20;
             int mapHeightMiddle = mapImage.getHeight() * 20;
             mapWidth = mapWidthMiddle * 2;

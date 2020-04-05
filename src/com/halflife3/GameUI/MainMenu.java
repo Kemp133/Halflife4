@@ -1,6 +1,7 @@
 package com.halflife3.GameUI;
 
 import com.halflife3.Controller.ClientController;
+import com.halflife3.Controller.MapMenuController;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Server.Server;
@@ -31,6 +32,7 @@ public class MainMenu /*extends Application*/ {
 	private Button      leaderboard = new Button("Leaderboard");
 	private Button      options     = new Button("Options");
 	private Button      exit        = new Button("Exit");
+	private Button 		choose_map  = new Button("Maps");
 	private MediaPlayer player;
 	private Scene       scene;
 
@@ -70,13 +72,21 @@ public class MainMenu /*extends Application*/ {
 			Platform.runLater(() -> new Server().start());
 		});
 
+		//TODO: Call method in controller
+
+		choose_map.setOnAction(actionEvent -> {
+			player.stop();
+			MapMenuController map_control = new MapMenuController();
+			map_control.start();
+		});
+
 		exit.setOnAction(actionEvent -> {
 			Platform.exit();
 			System.exit(0); //This is done to actually stop the Java application that's running
 		});
 
 
-		vbox = new VBox(startServer, joinGame, leaderboard, options, exit);
+		vbox = new VBox(startServer, joinGame, choose_map, leaderboard, options, exit);
 		vbox.setAlignment(Pos.BASELINE_CENTER);
 		vbox.setPadding(new Insets(35, 0, 0, 30));
 		vbox.setSpacing(30);

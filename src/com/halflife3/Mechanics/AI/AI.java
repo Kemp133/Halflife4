@@ -1,5 +1,6 @@
 package com.halflife3.Mechanics.AI;
 
+import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 import javafx.scene.image.Image;
@@ -19,7 +20,7 @@ public class AI {
 
 	public boolean setupMap() {
 		try {
-			Image mapImage = new Image(new FileInputStream("res/map.png"));
+			Image mapImage = new Image(new FileInputStream(Maps.Map));
 			mapWidth = (int) mapImage.getWidth();
 			mapHeight = (int) mapImage.getHeight();
 

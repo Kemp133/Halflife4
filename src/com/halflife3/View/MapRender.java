@@ -1,5 +1,6 @@
 package com.halflife3.View;
 
+import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.GameObjects.Bricks;
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.GraphicsContext;
@@ -26,7 +27,7 @@ public class MapRender {
 
     public static void LoadLevel() {
         try {
-            Image mapImage = new Image(new FileInputStream("res/map.png"));
+            Image mapImage = new Image(new FileInputStream(Maps.Map));
             PixelReader pixelReader = mapImage.getPixelReader();
             Vector2 zero = new Vector2(0, 0);
 
