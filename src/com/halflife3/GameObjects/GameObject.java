@@ -1,4 +1,4 @@
-package com.halflife3.Mechanics.GameObjects;
+package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Mechanics.Interfaces.ICollidable;

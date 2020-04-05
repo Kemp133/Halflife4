@@ -1,13 +1,13 @@
-package com.halflife3.Mechanics.GameObjects;
+package com.halflife3.GameObjects;
 
+import com.halflife3.Controller.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
-import com.halflife3.Networking.Client.ClientGame;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.View.Camera;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.shape.Circle;
-import javafx.scene.transform.Affine;
+import javafx.scene.canvas.*;
+import javafx.scene.image.*;
+import javafx.scene.shape.*;
+import javafx.scene.transform.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.io.IOException;
 public class Player extends Controllable {
     //region Variables
     public Circle circle;
-    public float reload = ClientGame.RELOAD_DURATION;
+    public float reload = MainMode.RELOAD_DURATION;
     public float stunned = 0;
     public boolean bulletShot = false;
     private Image sprite2;
@@ -25,8 +25,8 @@ public class Player extends Controllable {
     private boolean holdsBall = false;
     //endregion
 
-    public Player(Vector2 position, Vector2 velocity) {
-        super(position, velocity);
+    public Player(Vector2 position) {
+        super(position, new Vector2(0,0));
         deceleration = new Vector2(0,0);
         keys.add("player");
         setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
@@ -57,9 +57,9 @@ public class Player extends Controllable {
 
     @Override
     public void update(double time) {
-        if(reload<ClientGame.RELOAD_DURATION)
+        if(reload< MainMode.RELOAD_DURATION)
             reload++;
-        if (stunned <= ClientGame.STUN_DURATION && stunned != 0) {
+        if (stunned <= MainMode.STUN_DURATION && stunned != 0) {
             velocity.setX(0);
             velocity.setY(0);
             deceleration.setX(0);

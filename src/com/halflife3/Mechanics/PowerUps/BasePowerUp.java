@@ -1,6 +1,6 @@
-package com.halflife3.Mechanics.powerUps;
+package com.halflife3.Mechanics.PowerUps;
 
-import com.halflife3.Mechanics.GameObjects.Sprite;
+import com.halflife3.GameObjects.Sprite;
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Shape;

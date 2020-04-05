@@ -1,4 +1,4 @@
-package com.halflife3.Mechanics.GameObjects;
+package com.halflife3.GameObjects;
 
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.image.Image;

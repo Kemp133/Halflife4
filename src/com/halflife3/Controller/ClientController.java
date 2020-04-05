@@ -1,13 +1,10 @@
 package com.halflife3.Controller;
 
-import com.halflife3.Controller.Exceptions.SceneDoesNotExistException;
-import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.GameModes.GameMode;
 import com.halflife3.Controller.GameModes.MainMode;
 import com.halflife3.GameUI.MainMenu;
-import com.halflife3.Networking.NetworkingUtilities;
-import javafx.animation.AnimationTimer;
-import javafx.stage.Stage;
+import javafx.animation.*;
+import javafx.stage.*;
 
 /**
  * This class is used to deal with the client side control flow of the game. This class while only dealing with the
@@ -48,10 +45,8 @@ public class ClientController extends BaseController {
 				if (currentNanoTime - lastUpdate < 1e9 / (FPS * 1.07))
 					return;
 
-				//region Calculate time since last update.
-				elapsedTime = (currentNanoTime - lastUpdate) / 1e9;
+				elapsedTime = (currentNanoTime - lastUpdate) / 1e9; // Calculate time since last update.
 				lastUpdate  = currentNanoTime;
-				//endregion
 
 				gamemode.gameLoop(elapsedTime);
 
