@@ -6,6 +6,12 @@ import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Circle;
 
+/**
+ * This class represents the ball in the main game mode. This class extends sprite, adding some required methods and
+ * fields to implement the logic of the ball. This is in the form of a circle to act as a collider, a {@code Vector2}
+ * to say where the original position of the ball was, a boolean to say whether the ball is held or not, and a
+ * Vector2 to say where on the map it should spawn
+ */
 public class Ball extends Sprite {
 	public  Circle         circle;
 	public  Vector2        originalPosition;
@@ -13,6 +19,11 @@ public class Ball extends Sprite {
 	private Vector2        spawnPosition;
 	private PositionPacket positionPacket;
 
+	/**
+	 * The default constructor which mirrors the super constructor. Super is called and then the ball sprite is set, a
+	 * key with the value of "Ball" is added, and it's position is put to the center of the ball. The spawn point is
+	 * set to the passed position, and the circle shape is initialized
+	 */
 	public Ball(Vector2 position, String key) {
 		super(position, new Vector2());
 		setSprite("res/Sprites/Ball/Ball.png");
@@ -44,6 +55,11 @@ public class Ball extends Sprite {
 		circle.setCenterY(position.getY() + getHeight() / 2);
 	}
 
+	/**
+	 * This method is called when the object is collided with
+	 *
+	 * @param bounce I actually have no clue
+	 */
 	public void collision(int bounce) {
 		this.position = originalPosition;
 		switch (bounce) {
@@ -75,6 +91,7 @@ public class Ball extends Sprite {
 		circle.setCenterY(position.getY() + getHeight() / 2);
 	}
 
+	/** This method resets the ball to it's original values */
 	public void reset() {
 		isHeld   = false;
 		position = spawnPosition;

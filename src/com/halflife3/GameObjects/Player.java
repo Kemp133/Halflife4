@@ -1,6 +1,6 @@
 package com.halflife3.GameObjects;
 
-import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.*;

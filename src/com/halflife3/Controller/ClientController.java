@@ -1,7 +1,7 @@
 package com.halflife3.Controller;
 
-import com.halflife3.Controller.GameModes.GameMode;
-import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameModes.GameMode;
+import com.halflife3.GameModes.MainMode;
 import com.halflife3.GameUI.MainMenu;
 import javafx.animation.*;
 import javafx.stage.*;

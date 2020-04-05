@@ -1,4 +1,4 @@
-package com.halflife3.Controller.GameModes;
+package com.halflife3.GameModes;
 
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
