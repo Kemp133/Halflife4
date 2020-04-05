@@ -1,6 +1,6 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameModes.MainMode;
 import com.halflife3.GameObjects.Ball;
 import com.halflife3.GameObjects.Bricks;
 import com.halflife3.GameObjects.Player;

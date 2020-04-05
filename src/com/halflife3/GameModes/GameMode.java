@@ -1,4 +1,4 @@
-package com.halflife3.Controller.GameModes;
+package com.halflife3.GameModes;
 
 public abstract class GameMode {
 	protected String GameModeName;

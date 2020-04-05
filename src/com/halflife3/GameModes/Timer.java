@@ -1,4 +1,4 @@
-package com.halflife3.Controller.GameModes;
+package com.halflife3.GameModes;
 
 public class Timer {
 	private double        timeTo;
