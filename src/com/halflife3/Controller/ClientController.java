@@ -1,5 +1,6 @@
 package com.halflife3.Controller;
 
+import com.halflife3.Controller.Exceptions.SceneDoesNotExistException;
 import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.Controller.GameModes.GameMode;
 import com.halflife3.Controller.GameModes.MainMode;
@@ -57,18 +58,12 @@ public class ClientController extends BaseController {
 				if (gamemode.hasFinished) {
 					this.stop();
 					gamemode = null;
-					try {
-						SceneManager.getInstance().restorePreviousScene();
-					} catch (SceneStackEmptyException e) {
-						NetworkingUtilities.CreateErrorMessage("No Scenes To Revert To", "The scene stack only contains one element!", e.getMessage());
-					}
+					MainMenu main = new MainMenu();
+					SceneManager.getInstance().setScene("Main Menu", main.getScene());
 				}
 			}
 		}.start();
-
 		((MainMode) gamemode).root.requestFocus();
-		MainMenu main = new MainMenu();
-		SceneManager.getInstance().setScene("Main Menu", main.getScene());
 	}
 
 	@Override

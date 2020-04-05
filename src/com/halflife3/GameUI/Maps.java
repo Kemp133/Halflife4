@@ -79,6 +79,7 @@ public class Maps {
         h1.setSpacing(40);
         h2.setSpacing(40);
         h3.setSpacing(40);
+
         back.setOnAction(actionEvent -> {
             MapMenuController map_control = new MapMenuController();
             map_control.end();

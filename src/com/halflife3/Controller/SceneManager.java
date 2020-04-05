@@ -6,6 +6,7 @@ import com.halflife3.Controller.Exceptions.StageStackEmptyException;
 import com.halflife3.GameUI.WindowAttributes;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Platform;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;

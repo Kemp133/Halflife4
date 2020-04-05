@@ -2,7 +2,7 @@ package com.halflife3.Controller.GameModes;
 
 public abstract class GameMode {
 	protected String GameModeName;
-	static public boolean hasFinished = false;
+	public boolean hasFinished = false;
 
 	public GameMode(String GameModeName) { this.GameModeName = GameModeName; }
 	public abstract void initialise();

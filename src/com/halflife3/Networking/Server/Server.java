@@ -13,6 +13,8 @@ import com.halflife3.View.MapRender;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Circle;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -94,21 +96,25 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Adds the ball to the positionList
-		Image mapImage        = new Image(Maps.Map);
-		int   mapWidthMiddle  = (int) mapImage.getWidth() * 20;
-		int   mapHeightMiddle = (int) mapImage.getHeight() * 20;
-		mapWidth  = mapWidthMiddle * 2;
-		mapHeight = mapHeightMiddle * 2;
+		try {
+			BufferedImage mapImage = ImageIO.read(new File(Maps.Map));
+			int mapWidthMiddle = mapImage.getWidth() * 20;
+			int mapHeightMiddle = mapImage.getHeight() * 20;
+			mapWidth = mapWidthMiddle * 2;
+			mapHeight = mapHeightMiddle * 2;
 
-		theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
+			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), new Vector2(0, 0));
 
-		ballPacket           = new PositionPacket();
-		ballPacket.velX      = 0;
-		ballPacket.velY      = 0;
-		ballPacket.posX      = ballPacket.spawnX = mapWidthMiddle;
-		ballPacket.posY      = ballPacket.spawnY = mapHeightMiddle;
-		ballPacket.degrees   = 0;
-		ballPacket.holdsBall = false;
+			ballPacket = new PositionPacket();
+			ballPacket.velX = 0;
+			ballPacket.velY = 0;
+			ballPacket.posX = ballPacket.spawnX = mapWidthMiddle;
+			ballPacket.posY = ballPacket.spawnY = mapHeightMiddle;
+			ballPacket.degrees = 0;
+			ballPacket.holdsBall = false;
+
+			ClientListServer.positionList.put("ball", ballPacket);
+		} catch (IOException e) { e.printStackTrace(); }
 
 		ClientListServer.positionList.put("ball", ballPacket);
 		//endregion
