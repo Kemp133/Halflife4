@@ -1,10 +1,14 @@
 package com.halflife3.GameObjects;
 
-import com.halflife3.Controller.GameModes.MainMode;
+import com.halflife3.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.*;
 
 public class AIPlayer extends Controllable {
+	private boolean active;
+	private boolean alreadyLooking;
+	private Vector2 soughtPos;
+	private Vector2 nextPos;
 
 	public AIPlayer(Vector2 position) {
 		super(position);
@@ -34,4 +38,42 @@ public class AIPlayer extends Controllable {
 		}
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public boolean isAlreadyLooking() {
+		return alreadyLooking;
+	}
+
+	public void setAlreadyLooking(boolean alreadyLooking) {
+		this.alreadyLooking = alreadyLooking;
+	}
+
+	public Vector2 getSoughtPos() {
+		return soughtPos;
+	}
+
+	public void setSoughtPos(Vector2 soughtPos) {
+		this.soughtPos = soughtPos;
+	}
+
+	public Vector2 getNextPos() {
+		return nextPos;
+	}
+
+	public void setNextPos(Vector2 nextPos) {
+		this.nextPos = nextPos;
+	}
+
+	public void reset() {
+		soughtPos = null;
+		nextPos = null;
+		alreadyLooking = false;
+		resetBasics();
+	}
 }

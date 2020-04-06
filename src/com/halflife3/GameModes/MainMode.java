@@ -78,8 +78,6 @@ public class MainMode extends GameMode {
 	private int                     topOfScreen;
 	//endregion
 
-	//	public MainMode() {}
-
 	public MainMode(String GameModeName, double score) {
 		super(GameModeName);
 		scoreLimit = score;
@@ -160,7 +158,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Ball
-		ball          = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f), "ClientBall");
+		ball          = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f));
 		ballPreviousX = ball.getPosX();
 		//endregion
 
@@ -400,7 +398,7 @@ public class MainMode extends GameMode {
 			}
 
 			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
-			Player enemy = new Player(new Vector2(theDoubleValues.posX, theDoubleValues.posY));
+			Player         enemy           = new Player(new Vector2(theDoubleValues.posX, theDoubleValues.posY));
 			enemy.setIpOfClient(ip);
 			playerList.put(ip, enemy);
 		}
@@ -534,39 +532,50 @@ public class MainMode extends GameMode {
 		Client.receivePositions();
 
 		//region Replaces Bots <-> Players
-		ArrayList<String> playerKeys = new ArrayList<>(playerList.keySet());
+		ArrayList<String> playerKeys          = new ArrayList<>(playerList.keySet());
+		boolean           aNewPlayerHasJoined = false;
 
-		for (String player : playerKeys) {
+		for (String playerName : playerKeys) {
 //            If bot name/player IP is stored locally - continue
-			if (Client.listOfClients.connectedIPs.contains(player))
+			if (Client.listOfClients.connectedIPs.contains(playerName))
 				continue;
 
 //            If server list has been updated - reset the odd player's position and velocity
-			playerList.get(player).reset();
-			playerList.get(player).resetVelocity();
+			playerList.get(playerName).resetBasics();
+			aNewPlayerHasJoined = true;
 
 //            Find the odd player (bot or disconnected player)
 			for (String newIP : Client.listOfClients.connectedIPs) {
-//                If the player is in both local and server lists - continue
+//                If the player is in both local (checked before) and server lists - continue
 				if (playerList.containsKey(newIP))
 					continue;
 
-//                If newIP is in local list but not in the server list
-				playerList.get(player).setIpOfClient(newIP); //Change the Player gameObject's IP to newIP
-				playerList.put(newIP, playerList.get(player)); //Put a copy of the old player (with changed IP) as a
-				// new entry
-				playerList.remove(player); //Delete the old player entry from local list
+//                If newIP is in the server list but not in the local list
+				playerList.get(playerName).setIpOfClient(newIP); //Change the Player's IP to newIP
+				playerList.put(newIP, playerList.get(playerName)); //Copy the old player (with changed IP) to the list
+				playerList.remove(playerName); //Delete the old player entry from local list
+				break;
 			}
+			break;
+		}
+		//endregion
+
+		//region Resets the position of the ball and all the players if a new player has joined the game
+		if (aNewPlayerHasJoined) {
+			ball.reset();
+			for (Player player : playerList.values())
+				player.resetBasics();
+			return;
 		}
 		//endregion
 
 		//region Updates info of *other* players/bots and the ball
-		for (String ip : Client.listOfClients.posList.keySet()) {
-			Player enemy = playerList.get(ip);
+		for (String ip : playerList.keySet()) {
 			if (ip.equals(thisPlayer.getIpOfClient()))
 				continue;
 
 			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+			Player         enemy           = playerList.get(ip);
 
 			//region Rotation / Position / Velocity
 			if (!ip.equals("ball")) {
@@ -605,7 +614,7 @@ public class MainMode extends GameMode {
 		//endregion
 	}
 
-	private synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
+	public synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
 		switch (op) {
 			case 0: { //add bullets
 				new Bullet(bp, bv, shooter);
@@ -670,7 +679,7 @@ public class MainMode extends GameMode {
 			System.out.println("Goal for the ENEMY team!");
 		}
 
-		thisPlayer.reset();
+		thisPlayer.resetBasics();
 		ball.reset();
 
 		try { Thread.sleep(1000); } catch (InterruptedException ignored) {}

@@ -1,16 +1,17 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.GameObjects.AIPlayer;
+import com.halflife3.Controller.ObjectManager;
 import com.halflife3.GameModes.MainMode;
+import com.halflife3.GameObjects.AIPlayer;
 import com.halflife3.GameObjects.Ball;
 import com.halflife3.GameObjects.Bricks;
+import com.halflife3.GameObjects.Bullet;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
-import javafx.scene.shape.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,6 +21,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Server implements Runnable {
 
@@ -34,39 +36,33 @@ public class Server implements Runnable {
 	public static final int    GOAL_WIDTH        = 4 * 40;
 	public final        int    SERVER_TIMEOUT    = 3000000; // milliseconds
 
-	private        boolean                         running        = false;
-	private static boolean                         welcoming      = true;
-	private static InetAddress                     multicastGroup;
-	private static MulticastSocket                 multicastSocket;
-	private        PositionListPacket              posListPacket;
-	private        DatagramSocket                  clientSocket;
-	private        EventListenerServer             listenerServer;
-	private static int                             clientPort     = 6666;
-	private static HashMap<Vector2, Boolean>       availablePositions;
-	public static  Vector2[]                       startPositions = {new Vector2(160, 600), new Vector2(1840, 600)};
-	public static  ArrayList<String>               botNamesList   = new ArrayList<>(Arrays.asList("bot1", "bot2"));
-	private        HashMap<String, Circle>         botCircles;
-	private        HashMap<String, Vector2>        soughtPositions;
-	private        HashMap<String, Vector2>        nextPositions;
-	private        HashMap<String, Boolean>        alreadyLooking;
-	private        HashMap<String, AIPlayer>       botList;
-	private        AI                              botAI;
-	private        Ball                            theBall;
-	private        int                             mapWidth;
-	private        int                             mapHeight;
-	private        Vector2                         previousBallVel;
+	private        boolean                   running        = false;
+	private static boolean                   welcoming      = true;
+	private static InetAddress               multicastGroup;
+	private static MulticastSocket           multicastSocket;
+	private        PositionListPacket        posListPacket;
+	private        DatagramSocket            clientSocket;
+	private        EventListenerServer       listenerServer;
+	private static int                       clientPort     = 6666;
+	private static HashMap<Vector2, Boolean> availablePositions;
+	public static  Vector2[]                 startPositions = {new Vector2(160, 600), new Vector2(1840, 600)};
+	public static  ArrayList<String>         botNamesList   = new ArrayList<>(Arrays.asList("bot1", "bot2"));
+	private static HashMap<String, AIPlayer> botList;
+	private        AI                        botAI;
+	private        Ball                      theBall;
+	private        int                       mapWidth;
+	private        int                       mapHeight;
+	private        Vector2                   previousBallVel;
+	private        HashSet<Bullet>           bulletSet;
 	//endregion
 
 	public void start() {
 		//region Object initialisation
 		botAI              = new AI();
 		previousBallVel    = new Vector2();
-		botCircles         = new HashMap<>();
-		alreadyLooking     = new HashMap<>();
-		soughtPositions    = new HashMap<>();
-		nextPositions      = new HashMap<>();
-		availablePositions = new HashMap<>();
 		botList            = new HashMap<>();
+		bulletSet          = new HashSet<>();
+		availablePositions = new HashMap<>();
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
 		//endregion
@@ -98,7 +94,8 @@ public class Server implements Runnable {
 			mapWidth  = mapWidthMiddle * 2;
 			mapHeight = mapHeightMiddle * 2;
 
-			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle), "ServerBall");
+			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle));
+			ObjectManager.removeObject(theBall);
 
 			ClientListServer.positionList.put("ball", theBall.getPositionPacket());
 		} catch (IOException e) { e.printStackTrace(); }
@@ -110,11 +107,12 @@ public class Server implements Runnable {
 			String   botName   = botNamesList.get(i);
 			AIPlayer botPlayer = new AIPlayer(startPositions[i]);
 			botPlayer.setIpOfClient(botName);
+			botPlayer.setActive(true);
 			botList.put(botName, botPlayer);
 			ClientListServer.positionList.put(botName, botPlayer.getPacketToSend());
 			ClientListServer.connectedIPs.add(botName);
-			alreadyLooking.put(botName, false);
-			soughtPositions.put(botName, botAI.getNextPos(botPlayer.getPosition(), theBall.getPosition()));
+			botPlayer.setAlreadyLooking(false);
+			botPlayer.setSoughtPos(botAI.getNextPos(botPlayer.getPosition(), theBall.getPosition()));
 		}
 		//endregion
 
@@ -184,41 +182,45 @@ public class Server implements Runnable {
 	private void gameFrame(double elapsedTime) {
 		//region Move AI controlled players
 		if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < startPositions.length)
-			moveAI(elapsedTime);
+			for (String ip : botList.keySet())
+				moveAI(elapsedTime, ip);
 		//endregion
 
 		//region Ball's position and velocity if it is held
 		for (String ip : ClientListServer.positionList.keySet()) {
-			PositionPacket playerWithBall = ClientListServer.positionList.get(ip);
+			PositionPacket player = ClientListServer.positionList.get(ip);
 
-			if (!playerWithBall.holdsBall)
-				continue;
+			double degreeRadians = Math.toRadians(player.degrees);
+			double ballX         = Math.cos(degreeRadians);
+			double ballY         = Math.sin(degreeRadians);
 
-			//region Ball's position
-			double  degreeRadians = Math.toRadians(playerWithBall.degrees);
-			double  ballX         = Math.cos(degreeRadians);
-			double  ballY         = Math.sin(degreeRadians);
-			Vector2 ballDir       = new Vector2(ballX * 35, ballY * 35);
-			Vector2 ballPos       = new Vector2(playerWithBall.posX + 6, playerWithBall.posY + 6).add(ballDir);
-			theBall.setPosition(ballPos);
-			theBall.resetVelocity();
-			theBall.isHeld = true;
-			//endregion
+			if (player.holdsBall) {
+				Vector2 ballDir = new Vector2(ballX * 35, ballY * 35);
+				Vector2 ballPos = new Vector2(player.posX + 6, player.posY + 6).add(ballDir);
+				theBall.setPosition(ballPos);
+				theBall.resetVelocity();
+				theBall.isHeld = true;
+			}
 
-			if (!playerWithBall.bulletShot)
-				continue;
+			if (player.bulletShot) {
+				Vector2 shotVel = new Vector2(ballX, ballY).multiply(MainMode.SHOT_SPEED);
 
-			//region Ball's velocity if it's been shot
-			Vector2 shotVel = new Vector2(ballX, ballY).multiply(MainMode.SHOT_SPEED);
-			theBall.setVelocity(new Vector2(shotVel).multiply(1.5));
-			theBall.setDeceleration(new Vector2(shotVel).divide(100));
-			theBall.isHeld            = false;
-			playerWithBall.bulletShot = false;
-			playerWithBall.holdsBall  = false;
-			EventListenerServer.replaceEntry(ip, playerWithBall);
-			//endregion
+				if (player.holdsBall) {
+					theBall.setVelocity(new Vector2(shotVel).multiply(1.5));
+					theBall.setDeceleration(new Vector2(shotVel).divide(100));
+					theBall.isHeld    = false;
+					player.bulletShot = false;
+					player.holdsBall  = false;
+					EventListenerServer.replaceEntry(ip, player);
+				} else {
+					Vector2 bulletDir = new Vector2(ballX * 32, ballY * 32);
+					Vector2 bulletPos = new Vector2(player.posX + 6, player.posY + 6).add(bulletDir);
+					Bullet  bullet    = new Bullet(bulletPos, shotVel, "enemy");
+					ObjectManager.removeObject(bullet);
+					bulletSet.add(bullet);
+				}
+			}
 
-			break;
 		}
 		//endregion
 
@@ -252,143 +254,79 @@ public class Server implements Runnable {
 			EventListenerServer.replaceEntry("ball", theBall.getPositionPacket());
 
 			for (String ip : botList.keySet()) {
-				soughtPositions.remove(ip);
-				nextPositions.remove(ip);
-				alreadyLooking.replace(ip, false);
 				botList.get(ip).reset();
 				EventListenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend());
 			}
 
-			posListPacket.posList      = ClientListServer.positionList;
 			posListPacket.connectedIPs = ClientListServer.connectedIPs;
+			posListPacket.posList      = ClientListServer.positionList;
 			multicastPacket(posListPacket, POSITIONS_PORT);
 		}).start();
 
 		try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
 	}
 
-	private void moveAI(double time) {
-		for (String ip : botList.keySet()) {
-			AIPlayer bot = botList.get(ip);
+	/**
+	 * A method to update the position, velocity and rotation of the bot if it is active, check if the bot is holding
+	 * the ball and find a path for the bot to follow using the A* algorithm
+	 *
+	 * @param time The time passed since the last frame update
+	 * @param name The name of the bot to be updated
+	 */
+	private void moveAI(double time, String name) {
+		AIPlayer bot = botList.get(name);
 
-			bot.update(time);
+//	      If a bot is inactive - don't move it
+		if (!bot.isActive())
+			return;
 
-			Vector2 soughtPos = soughtPositions.get(ip);
+//		  Updates the bot's position
+		bot.update(time);
 
-			if (theBall.getBounds().intersects(bot.circle.getBoundsInLocal()) && !theBall.isHeld)
-				bot.setHoldsBall(true);
+//		  Checks if the bot is touching the ball
+		if (theBall.getBounds().intersects(bot.circle.getBoundsInLocal()) && !theBall.isHeld)
+			bot.setHoldsBall(true);
 
-			if (soughtPos == null) {
-				soughtPos = botAI.getNextPos(bot.getPosition(), getNextGoal(bot));
-				soughtPositions.put(ip, soughtPos);
-			} else if (arrived(bot.getPosition(), soughtPos)) {
-				bot.setPosition(soughtPos);
-				soughtPos = new Vector2(nextPositions.get(ip));
-				soughtPositions.replace(ip, soughtPos);
-				nextPositions.remove(ip);
-			}
-
-			if (nextPositions.get(ip) == null && !alreadyLooking.get(ip)) {
-				alreadyLooking.replace(ip, true);
-				Vector2 finalSeekedPos = soughtPos;
-				new Thread(() -> {
-					nextPositions.put(ip, botAI.getNextPos(finalSeekedPos, getNextGoal(bot)));
-					alreadyLooking.replace(ip, false);
-				}).start();
-			}
-
-			Vector2 direction = new Vector2(soughtPos).subtract(bot.getPosition());
-			bot.setDegrees((short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX())));
-
-			if (soughtPos.getX() > bot.getPosX())
-				bot.setVelocity(100, bot.getVelY());
-			else if (soughtPos.getX() < bot.getPosX())
-				bot.setVelocity(-100, bot.getVelY());
-			else
-				bot.setVelocity(0, bot.getVelY());
-
-			if (soughtPos.getY() > bot.getPosY())
-				bot.setVelocity(bot.getVelX(), 100);
-			else if (soughtPos.getY() < bot.getPosY())
-				bot.setVelocity(bot.getVelX(), -100);
-			else
-				bot.setVelocity(bot.getVelX(), 0);
-
-			EventListenerServer.replaceEntry(ip, bot.getPacketToSend());
-
+//		  Checks if the bot has a position to move to or if it has reached it already
+		if (bot.getSoughtPos() == null) {
+			bot.setSoughtPos(botAI.getNextPos(bot.getPosition(), getNextGoal(bot)));
+		} else if (arrived(bot.getPosition(), bot.getSoughtPos())) {
+			bot.setPosition(bot.getSoughtPos());
+			bot.setSoughtPos(bot.getNextPos());
+			bot.setNextPos(null);
 		}
 
-//		for (String ip : ClientListServer.connectedIPs) {
-//			if (!botNamesList.contains(ip))
-//				continue;
-//
-//			PositionPacket botCurrentPos = ClientListServer.positionList.get(ip);
-//			PositionPacket botSoughtPos  = soughtPositions.get(ip);
-//			Circle         botCircle     = botCircles.get(ip);
-//
-//			//region Updates the bot's position locally
-//			botCurrentPos.posX += botCurrentPos.velX * time;
-//			botCurrentPos.posY += botCurrentPos.velY * time;
-//			botCircle.setCenterX(botCurrentPos.posX + playerImage.getWidth() / 2 + 1);
-//			botCircle.setCenterY(botCurrentPos.posY + playerImage.getHeight() / 2 + 1);
-//			botCircles.replace(ip, botCircle);
-//			//endregion
-//
-//			//region Checks if bot is holding the ball
-//			botCurrentPos.holdsBall = theBall.getBounds().intersects(botCircle.getBoundsInLocal());
-//			//endregion
-//
-//			//region Sets the currently sought after & next positions
-//			if (botSoughtPos == null) {
-//				botSoughtPos = botAI.getNextPos(botCurrentPos, getNextGoal(botCurrentPos));
-//				soughtPositions.put(ip, botSoughtPos);
-//			} else if (Math.abs(botCurrentPos.posX - 2) < Math.abs(botSoughtPos.posX) &&
-//			           Math.abs(botCurrentPos.posX + 2) > Math.abs(botSoughtPos.posX) &&
-//			           Math.abs(botCurrentPos.posY - 2) < Math.abs(botSoughtPos.posY) &&
-//			           Math.abs(botCurrentPos.posY + 2) > Math.abs(botSoughtPos.posY)) {
-//				botCurrentPos.posX = botSoughtPos.posX;
-//				botCurrentPos.posY = botSoughtPos.posY;
-//				botSoughtPos       = nextPositions.get(ip);
-//				soughtPositions.replace(ip, botSoughtPos);
-//				nextPositions.remove(ip);
-//			}
-//			//endregion
-//
-//			//region If there is no next position, computes one on another Thread
-//			if (nextPositions.get(ip) == null && !alreadyLooking.get(ip)) {
-//				alreadyLooking.replace(ip, true);
-//				PositionPacket finalSeekedPos = botSoughtPos;
-//				new Thread(() -> {
-//					nextPositions.put(ip, botAI.getNextPos(finalSeekedPos, getNextGoal(botCurrentPos)));
-//					alreadyLooking.replace(ip, false);
-//				}).start();
-//			}
-//			//endregion
-//
-//			//region Sets bot's rotation
-//			Vector2 botCenter = new Vector2(botCurrentPos.posX, botCurrentPos.posY);
-//			Vector2 direction = new Vector2(botSoughtPos.posX, botSoughtPos.posY).subtract(botCenter);
-//			botCurrentPos.degrees = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
-//			//endregion
-//
-//			//region Changes bot's velocity for the next cycle
-//			if (botSoughtPos.posX > botCurrentPos.posX)
-//				botCurrentPos.velX = 100;
-//			else if (botSoughtPos.posX < botCurrentPos.posX)
-//				botCurrentPos.velX = -100;
-//			else
-//				botCurrentPos.velX = 0;
-//
-//			if (botSoughtPos.posY > botCurrentPos.posY)
-//				botCurrentPos.velY = 100;
-//			else if (botSoughtPos.posY < botCurrentPos.posY)
-//				botCurrentPos.velY = -100;
-//			else
-//				botCurrentPos.velY = 0;
-//			//endregion
-//
-//			EventListenerServer.replaceEntry(ip, botCurrentPos);
-//		}
+//		  Calculates the next place to move to in the background
+		if (bot.getNextPos() == null && !bot.isAlreadyLooking()) {
+			bot.setAlreadyLooking(true);
+			new Thread(() -> {
+				bot.setNextPos(botAI.getNextPos(bot.getSoughtPos(), getNextGoal(bot)));
+				bot.setAlreadyLooking(false);
+			}).start();
+		}
+
+//		  Makes the bot face the way it's going
+		Vector2 direction = new Vector2(bot.getSoughtPos()).subtract(bot.getPosition());
+		bot.setDegrees((short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX())));
+
+//		  Sets the bot's velocity on the X axis
+		if (bot.getSoughtPos().getX() > bot.getPosX())
+			bot.setVelocity(100, bot.getVelY());
+		else if (bot.getSoughtPos().getX() < bot.getPosX())
+			bot.setVelocity(-100, bot.getVelY());
+		else
+			bot.setVelocity(0, bot.getVelY());
+
+//		  Sets the bot's velocity on the Y axis
+		if (bot.getSoughtPos().getY() > bot.getPosY())
+			bot.setVelocity(bot.getVelX(), 100);
+		else if (bot.getSoughtPos().getY() < bot.getPosY())
+			bot.setVelocity(bot.getVelX(), -100);
+		else
+			bot.setVelocity(bot.getVelX(), 0);
+
+//		  Replaces the position packet of the bot
+		EventListenerServer.replaceEntry(name, bot.getPacketToSend());
 	}
 
 	private boolean arrived(Vector2 current, Vector2 sought) {
@@ -457,10 +395,10 @@ public class Server implements Runnable {
 		listenerServer.received(receivedPoke, incPoke.getAddress());
 	}
 
-	public static void addConnection(InetAddress address) {
+	public synchronized static void addConnection(InetAddress address) {
 		//region Checks if Server is full
 		if (ClientListServer.clientList.size() >= startPositions.length) {
-			System.out.println("Server is full");
+			System.out.println("Server is full. Player " + address + " disconnected");
 			welcoming = false;
 			return;
 		}
@@ -472,37 +410,39 @@ public class Server implements Runnable {
 		portPacket.setClientAddress(address);
 		for (int i = 0; i < startPositions.length; i++) {
 			Vector2 startPosition = startPositions[i];
-			if (availablePositions.get(startPosition)) {
-				//                Sets the start position for the UniqueInfo packet
-				portPacket.setStartPosition(startPosition);
+			if (!availablePositions.get(startPosition))
+				continue;
 
-				//                Removes the bot holding the [i]th startPosition
-				ClientListServer.positionList.remove(botNamesList.get(i));
+//            Sets the start position for the UniqueInfo packet
+			portPacket.setStartPosition(startPosition);
 
-				//region Adds the player (with the [i]th startPosition) to the positionList
-				PositionPacket playerPacket = new PositionPacket();
-				playerPacket.degrees = 0;
-				playerPacket.posX    = playerPacket.spawnX = startPosition.getX();
-				playerPacket.posY    = playerPacket.spawnY = startPosition.getY();
-				playerPacket.velX    = 0;
-				playerPacket.velY    = 0;
-				ClientListServer.positionList.put(address.toString(), playerPacket);
-				//endregion
+//            Removes the bot holding the [i]th startPosition
+			String botName = botNamesList.get(i);
+			ClientListServer.positionList.remove(botName);
+			ClientListServer.connectedIPs.remove(botName);
+			botList.get(botName).setActive(false);
 
-				ClientListServer.connectedIPs.remove(botNamesList.get(i));
-				ClientListServer.connectedIPs.add(address.toString());
+//			  Adds the player (with the [i]th startPosition) to the positionList
+			PositionPacket playerPacket = new PositionPacket();
+			playerPacket.posX = playerPacket.spawnX = startPosition.getX();
+			playerPacket.posY = playerPacket.spawnY = startPosition.getY();
+			ClientListServer.positionList.put(address.toString(), playerPacket);
+			ClientListServer.connectedIPs.add(address.toString());
 
-				//                Disables the [i]th startPosition so that no new players could have it assigned to
-				//                them
-				availablePositions.replace(startPosition, false);
-				break;
-			}
+//            Disables the [i]th startPosition so that no new players could have it assigned to them
+			availablePositions.replace(startPosition, false);
+			break;
 		}
 		//endregion
+
+		//Resets the position of every bot
+		for (AIPlayer bot : botList.values())
+			bot.resetBasics();
 
 		ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition());
 		new Thread(connection).start();
 
+		//Lets the client side get ready to receive the port
 		try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
 		multicastPacket(portPacket, GET_PORT_PORT);
 
@@ -512,28 +452,33 @@ public class Server implements Runnable {
 		welcoming = true;
 	}
 
+	/**
+	 * Removes the player from positionList and adds a bot in its stead
+	 *
+	 * @param address The address of the player to be removed
+	 */
 	public static void removeConnection(InetAddress address) {
-		if (ClientListServer.clientList.size() >= startPositions.length) {
+		if (ClientListServer.clientList.size() >= startPositions.length)
 			welcoming = true;
-		}
-		availablePositions.replace(ClientListServer.clientList.get(address).getSpawnPoint(), true);
 
-		double clientSpawnX = ClientListServer.positionList.get(address.toString()).spawnX;
-		double clientSpawnY = ClientListServer.positionList.get(address.toString()).spawnY;
+		Vector2 spawnPoint = ClientListServer.clientList.get(address).getSpawnPoint();
 
-		//Removes the player from positionList and adds a bot in its stead
+		availablePositions.replace(spawnPoint, true);
+
+		double clientSpawnX = spawnPoint.getX();
+		double clientSpawnY = spawnPoint.getY();
+
 		for (int i = 0; i < startPositions.length; i++) {
-			if (clientSpawnX == startPositions[i].getX()) {
-				if (clientSpawnY == startPositions[i].getY()) {
-					ClientListServer.positionList.remove(address.toString());
+			if (clientSpawnX != startPositions[i].getX() || clientSpawnY != startPositions[i].getY())
+				continue;
 
-					PositionPacket botPacket = newBotPacket(i);
+			String botName = botNamesList.get(i);
 
-					ClientListServer.positionList.put(botNamesList.get(i), botPacket);
-					ClientListServer.connectedIPs.remove(address.toString());
-					ClientListServer.connectedIPs.add(botNamesList.get(i));
-				}
-			}
+			ClientListServer.positionList.remove(address.toString());
+			ClientListServer.positionList.put(botName, botList.get(botName).getPacketToSend());
+
+			ClientListServer.connectedIPs.remove(address.toString());
+			ClientListServer.connectedIPs.add(botName);
 		}
 
 		ClientListServer.clientList.get(address).close();
@@ -541,29 +486,10 @@ public class Server implements Runnable {
 		System.out.println(address + " has disconnected");
 	}
 
-	/**
-	 * A method to create a PositionPacket for a new bot
-	 *
-	 * @param index The index of the start position to get the position values of
-	 *
-	 * @return The newly created {@code PositionPacket}
-	 */
-	public static PositionPacket newBotPacket(int index) {
-		PositionPacket pp = new PositionPacket();
-		pp.velX       = 0;
-		pp.velY       = 0;
-		pp.degrees    = 0;
-		pp.posX       = pp.spawnX = startPositions[index].getX();
-		pp.posY       = pp.spawnY = startPositions[index].getY();
-		pp.holdsBall  = false;
-		pp.bulletShot = false;
-		return pp;
-	}
-
 	public synchronized static void multicastPacket(Object o, int mPort) {
 		try {
-			byte[]         sendBuf = NetworkingUtilities.objectToByteArray(o);
-			DatagramPacket packet  = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);
+			byte[] sendBuf = NetworkingUtilities.objectToByteArray(o);
+			var    packet  = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);
 			multicastSocket.send(packet);
 		} catch (IOException e) {
 			e.printStackTrace();

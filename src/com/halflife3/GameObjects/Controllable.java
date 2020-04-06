@@ -39,12 +39,6 @@ public abstract class Controllable extends Sprite {
 	public void setIpOfClient(String ipOfClient) { this.ipOfClient = ipOfClient; }
 	//endregion
 
-	//region Rotation degrees getter and setter
-	public void setDegrees(short degrees) { this.degrees = degrees;}
-
-	public short getDegrees() { return degrees; }
-	//endregion
-
 	//region BulletShot getter and setter
 	public boolean isBulletShot() {
 		return bulletShot;
@@ -65,6 +59,8 @@ public abstract class Controllable extends Sprite {
 	}
 	//endregion
 
+	public void setDegrees(short degrees) { this.degrees = degrees;}
+
 	public Vector2 getSpawnPosition() {
 		return spawnPosition;
 	}
@@ -80,7 +76,7 @@ public abstract class Controllable extends Sprite {
 		return packetToSend;
 	}
 
-	public void reset() {
+	public void resetBasics() {
 		stunned    = 0;
 		bulletShot = false;
 		isMoving   = false;

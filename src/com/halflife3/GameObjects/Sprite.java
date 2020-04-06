@@ -1,11 +1,10 @@
 package com.halflife3.GameObjects;
 
 import com.halflife3.Mechanics.Vector2;
-import javafx.scene.image.Image;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import javafx.scene.image.*;
+import javafx.scene.shape.*;
 
-import java.io.*;
+import java.io.File;
 
 /**
  * This class deals with any sprites that are used in the game. This is because a lot of objects we had in the game
@@ -62,7 +61,9 @@ public abstract class Sprite extends GameObject {
 	 *
 	 * @param pathToSprite The location of the sprite in the project structure
 	 */
-	public void setSprite(String pathToSprite) { sprite = new Image(pathToSprite); }
+	public void setSprite(String pathToSprite) {
+		sprite = new Image(new File(pathToSprite).toURI().toString());
+	}
 
 	/**
 	 * A method to get the width of the image
