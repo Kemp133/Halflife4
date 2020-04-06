@@ -226,17 +226,17 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Collision detection
-//		Player collision
+//		  Player collision
 		for (Bricks block : MapRender.GetList())
 			if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
 				thisPlayer.collision(block, elapsedTime);
 
-//		  Bullet collision
-		editObjectManager(1, 0, null, null, null);
+		bulletCollision();
 		//endregion
 
 		//region Updates position of all game objects locally (has to go after collision)
-		editObjectManager(2, elapsedTime, null, null, null);
+		for (IUpdateable go : ObjectManager.getGameObjects())
+			go.update(elapsedTime);
 		//endregion
 
 		//region Checks if the player is holding the ball
@@ -266,7 +266,7 @@ public class MainMode extends GameMode {
 				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
 						thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
 
-				editObjectManager(0, 0, bulletPos, shotVelocity, thisPlayer.getIpOfClient());
+				new Bullet(bulletPos, shotVelocity, thisPlayer.getIpOfClient());
 				thisPlayer.setBulletShot(true);
 				thisPlayer.reload = 0;
 			}
@@ -570,7 +570,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Updates info of *other* players/bots and the ball
-		for (String ip : playerList.keySet()) {
+		for (String ip : Client.listOfClients.posList.keySet()) {
 			if (ip.equals(thisPlayer.getIpOfClient()))
 				continue;
 
@@ -607,67 +607,42 @@ public class MainMode extends GameMode {
 			Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
 					theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);
 
-			editObjectManager(0, 0, bulletPos, shotVel, "enemy");
+			new Bullet(bulletPos, shotVel, "enemy");
 			theDoubleValues.bulletShot = false;
 			//endregion
 		}
 		//endregion
 	}
 
-	public synchronized void editObjectManager(int op, double time, Vector2 bp, Vector2 bv, String shooter) {
-		switch (op) {
-			case 0: { //add bullets
-				new Bullet(bp, bv, shooter);
-				break;
-			} //Add bullets
+	private void bulletCollision() {
+		HashSet<GameObject> crash_bullet_list = new HashSet<>();
+		for (GameObject bullet : ObjectManager.getGameObjects()) {
+			if (!bullet.getKeys().contains("Bullet"))
+				continue;
 
-			case 1: { //remove bullets if needed
-				HashSet<GameObject> crash_bullet_list = new HashSet<>();
-				for (GameObject bullet : ObjectManager.getGameObjects()) {
-					if (!bullet.getKeys().contains("Bullet"))
-						continue;
+			for (Bricks block : MapRender.GetList())
+				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+					crash_bullet_list.add(bullet);
 
-					for (Bricks block : MapRender.GetList())
-						if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
-							crash_bullet_list.add(bullet);
+			for (String ip : Client.listOfClients.connectedIPs) {
+				if (((Bullet) bullet).getShooterName().equals(ip))
+					continue;
 
-					for (String ip : Client.listOfClients.connectedIPs) {
-						if (((Bullet) bullet).getShooterName().equals(ip))
-							continue;
-
-						Player player = playerList.get(ip);
-						if (bullet.getBounds().intersects(player.circle.getBoundsInLocal())) {
-							crash_bullet_list.add(bullet);
-							//Players hit
-							if (player.stunned == 0) {
-								player.stunned = STUN_DURATION * 5;
-								player.setVelocity(bullet.getVelocity().divide(3));
-								player.setDeceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
-							}
-						}
+				Player player = playerList.get(ip);
+				if (bullet.getBounds().intersects(player.circle.getBoundsInLocal())) {
+					crash_bullet_list.add(bullet);
+					//Players hit
+					if (player.stunned == 0) {
+						player.stunned = STUN_DURATION * 5;
+						player.setVelocity(bullet.getVelocity().divide(3));
+						player.setDeceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
 					}
 				}
-
-				for (GameObject bullet : crash_bullet_list)
-					bullet.destroy();
-				break;
-			} //Remove bullets if needed
-
-			case 2: { //update object positions
-				for (IUpdateable go : ObjectManager.getGameObjects()) {
-					if (go instanceof Ball) {
-						if (((Ball) go).containsKey("ServerBall")) {
-							continue;
-						}
-					} else if (go instanceof AIPlayer)
-						continue;
-
-					go.update(time);
-				}
-
-				break;
-			} //Update object positions
+			}
 		}
+
+		for (GameObject bullet : crash_bullet_list)
+			bullet.destroy();
 	}
 
 	private void scored(char scoringSide) {

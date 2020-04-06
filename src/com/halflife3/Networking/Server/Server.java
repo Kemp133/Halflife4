@@ -106,13 +106,13 @@ public class Server implements Runnable {
 			availablePositions.put(startPositions[i], true);
 			String   botName   = botNamesList.get(i);
 			AIPlayer botPlayer = new AIPlayer(startPositions[i]);
+			ObjectManager.removeObject(botPlayer);
 			botPlayer.setIpOfClient(botName);
 			botPlayer.setActive(true);
+			botPlayer.setSoughtPos(botAI.getNextPos(botPlayer.getPosition(), theBall.getPosition()));
 			botList.put(botName, botPlayer);
 			ClientListServer.positionList.put(botName, botPlayer.getPacketToSend());
 			ClientListServer.connectedIPs.add(botName);
-			botPlayer.setAlreadyLooking(false);
-			botPlayer.setSoughtPos(botAI.getNextPos(botPlayer.getPosition(), theBall.getPosition()));
 		}
 		//endregion
 

@@ -7,8 +7,8 @@ import javafx.scene.shape.Rectangle;
 
 public class Crosshair extends Sprite {
     public Crosshair(Vector2 position, Vector2 velocity) {
-        super(position, velocity);
-        setSprite("res/Crosshair.png");
+        super(position, velocity, "res/Crosshair.png");
+        keys.add("Crosshair");
         position.subtract(getWidth() / 2, getHeight() / 2);
     }
 

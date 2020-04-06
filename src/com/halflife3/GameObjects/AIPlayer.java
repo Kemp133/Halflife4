@@ -55,7 +55,7 @@ public class AIPlayer extends Controllable {
 	}
 
 	public Vector2 getSoughtPos() {
-		return soughtPos;
+		return (soughtPos == null ) ? null : new Vector2(soughtPos);
 	}
 
 	public void setSoughtPos(Vector2 soughtPos) {
@@ -63,7 +63,7 @@ public class AIPlayer extends Controllable {
 	}
 
 	public Vector2 getNextPos() {
-		return nextPos;
+		return (nextPos == null) ? null : new Vector2(nextPos);
 	}
 
 	public void setNextPos(Vector2 nextPos) {
