@@ -15,6 +15,7 @@ import java.util.Deque;
 
 public class MapRender {
     private static Deque<Bricks> Bricks_list = new ArrayDeque<>();
+    public static final int BLOCK_SIZE = 40;
 
     public static Deque<Bricks> GetList() {
         return Bricks_list;
@@ -29,12 +30,12 @@ public class MapRender {
         try {
             Image mapImage = new Image(new FileInputStream(Maps.Map));
             PixelReader pixelReader = mapImage.getPixelReader();
-            Vector2 zero = new Vector2(0, 0);
+            Vector2 zero = new Vector2();
 
             for (int x = 0; x < mapImage.getWidth(); x++) {
                 for (int y = 0; y < mapImage.getHeight(); y++) {
                     if (pixelReader.getColor(x, y).equals(Color.BLACK)) {
-                        Vector2 position = new Vector2(x * 40, y * 40);
+                        Vector2 position = new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE);
                         Bricks new_Brick = new Bricks(position, zero);
                         Bricks_list.add(new_Brick);
                     }

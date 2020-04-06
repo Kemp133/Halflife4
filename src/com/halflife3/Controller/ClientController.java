@@ -11,17 +11,18 @@ import javafx.stage.*;
  * MainMode game mode could be extended to play any amount of game modes. This class itself has to deal with the fact
  * that JavaFX is incredibly funky, and the animation timer has to be called inside of start otherwise it likes to
  * complain (hence why the run logic is stored here, which isn't too much of an inconvenience anyways).
- *
+ * <p>
  * Wherever the game sets the scene in {@code SceneManager} should also set it back in the same place to try and avoid
  * errors with incorrectly using the SceneManager.
- *
- * This class also keeps track of the gamemode in {@code gamemode} as well as the FPS target that the game mode should be
+ * <p>
+ * This class also keeps track of the gamemode in {@code gamemode} as well as the FPS target that the game mode
+ * should be
  * played at. Hopefully in the (near) future I can move the FPS into the game mode and have this value encapsulated
  * fully.
  */
 public class ClientController extends BaseController {
-	private       GameMode gamemode;
-	private final int      FPS = 30;
+	private             GameMode gamemode;
+	public static final int      FPS = 30;
 
 	@Override
 	public void initialise() {

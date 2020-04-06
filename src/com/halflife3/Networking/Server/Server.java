@@ -248,7 +248,7 @@ public class Server implements Runnable {
 		new Thread(() -> {
 			System.out.println("Goal has been scored. Resetting positions...");
 			theBall.reset();
-			previousBallVel = theBall.getVelocity();
+			previousBallVel = new Vector2();
 			EventListenerServer.replaceEntry("ball", theBall.getPositionPacket());
 
 			for (String ip : botList.keySet()) {
@@ -264,7 +264,7 @@ public class Server implements Runnable {
 			multicastPacket(posListPacket, POSITIONS_PORT);
 		}).start();
 
-		try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+		try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
 	}
 
 	private void moveAI(double time) {

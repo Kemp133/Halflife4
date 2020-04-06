@@ -1,5 +1,6 @@
 package com.halflife3.GameModes;
 
+import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
@@ -44,38 +45,37 @@ import static javafx.scene.input.KeyCode.*;
 public class MainMode extends GameMode {
 	protected double scoreLimit;
 
-	private final       int   FPS                = 30;
-	private final       int   GAME_WINDOW_HEIGHT = 600;
-	private final       int   GAME_WINDOW_WIDTH  = 800;
-	private final       int   MOVEMENT_SPEED     = 120;
-	public static final int   SHOT_SPEED         = 200;
-	public static final float STUN_DURATION      = 15;
-	public static final float RELOAD_DURATION    = 50;
+	private static final int   GAME_WINDOW_HEIGHT = 600;
+	private static final int   GAME_WINDOW_WIDTH  = 800;
+	private static final int   MOVEMENT_SPEED     = 120;
+	public static final  int   SHOT_SPEED         = 200;
+	public static final  float STUN_DURATION      = 15;
+	public static final  float RELOAD_DURATION    = 50;
 
 	//region Other variables
-	public         Pane                    root;
-	private        Scene                   scene;
-	public         Player                  thisPlayer;
-	private        HashMap<String, Player> playerList;
-	private        HashMap<Integer, Image> scoreSprite;
-	private        Input                   input               = Input.getInstance();
-	private        ProgressBar[]           stunBar;
-	private static ProgressBar             amoBar;
-	private        Ball                    ball;
-	private        Stage                   window              = null;
-	private        char                    side;
-	public         int                     yourScore           = 0;
-	public         int                     enemyScore          = 0;
-	public         boolean                 running             = false;
-	private        int                     bulletLimiter       = 0;
-	public         int                     mapWidth;
-	private        int                     mapHeight;
-	private final  int                     RIGHT_END_OF_SCREEN = 11 * 40;
-	private final  int                     LEFT_END_OF_SCREEN  = 9 * 40;
-	private final  int                     BOTTOM_OF_SCREEN    = 8 * 40;
-	private final  int                     TOP_OF_SCREEN       = 7 * 40;
-	private        GraphicsContext         graphicsContext;
-	private        double                  ballPreviousX;
+	public  Pane                    root;
+	private Scene                   scene;
+	public  Player                  thisPlayer;
+	private HashMap<String, Player> playerList;
+	private HashMap<Integer, Image> scoreSprite;
+	private Input                   input         = Input.getInstance();
+	private ProgressBar[]           stunBar;
+	private ProgressBar             amoBar;
+	private Ball                    ball;
+	private Stage                   window        = null;
+	private char                    side;
+	public  int                     yourScore     = 0;
+	public  int                     enemyScore    = 0;
+	public  boolean                 running       = false;
+	private int                     bulletLimiter = 0;
+	public  int                     mapWidth;
+	private int                     mapHeight;
+	private GraphicsContext         graphicsContext;
+	private double                  ballPreviousX;
+	private int                     rightEndOfScreen;
+	private int                     leftEndOfScreen;
+	private int                     bottomOfScreen;
+	private int                     topOfScreen;
 	//endregion
 
 	//	public MainMode() {}
@@ -104,6 +104,13 @@ public class MainMode extends GameMode {
 		//region Initialise This Player
 		thisPlayer = new Player(clientNetwork.getStartingPosition());
 		thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
+		//endregion
+
+		//region Set The Distances To The Sides Of The Window
+		rightEndOfScreen = (int) (GAME_WINDOW_WIDTH / 2 + thisPlayer.getWidth());
+		leftEndOfScreen  = (int) (GAME_WINDOW_WIDTH / 2 - thisPlayer.getWidth());
+		topOfScreen      = (int) ((GAME_WINDOW_HEIGHT - thisPlayer.getHeight()) / 2);
+		bottomOfScreen   = (int) ((GAME_WINDOW_HEIGHT + thisPlayer.getHeight()) / 2);
 		//endregion
 
 		//region Wait For Server To Acknowledge Player Connection
@@ -171,24 +178,24 @@ public class MainMode extends GameMode {
 	@Override
 	public void gameLoop(double elapsedTime) {
 		//region Camera offset
-		Camera.SetOffsetX(thisPlayer.getPosX() - LEFT_END_OF_SCREEN);
-		Camera.SetOffsetY(thisPlayer.getPosY() - TOP_OF_SCREEN);
+		Camera.SetOffsetX(thisPlayer.getPosX() - leftEndOfScreen);
+		Camera.SetOffsetY(thisPlayer.getPosY() - topOfScreen);
 		if (Camera.GetOffsetX() < 0)
 			Camera.SetOffsetX(0);
-		else if (Camera.GetOffsetX() > mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN)
-			Camera.SetOffsetX(mapWidth - LEFT_END_OF_SCREEN - RIGHT_END_OF_SCREEN);
+		else if (Camera.GetOffsetX() > mapWidth - leftEndOfScreen - rightEndOfScreen)
+			Camera.SetOffsetX(mapWidth - leftEndOfScreen - rightEndOfScreen);
 		if (Camera.GetOffsetY() < 0)
 			Camera.SetOffsetY(0);
-		else if (Camera.GetOffsetY() > mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN)
-			Camera.SetOffsetY(mapHeight - TOP_OF_SCREEN - BOTTOM_OF_SCREEN);
+		else if (Camera.GetOffsetY() > mapHeight - topOfScreen - bottomOfScreen)
+			Camera.SetOffsetY(mapHeight - topOfScreen - bottomOfScreen);
 		//endregion
 
 		//region Calculate the rotation
 		Vector2 playerClientCenter =
 				new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
-						thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
-		Vector2 direction =
-				new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY()).subtract(playerClientCenter);
+				thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
+		Vector2 direction = new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY()).subtract(
+				playerClientCenter);
 
 		Affine rotate = new Affine();
 		short  deg    = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
@@ -265,7 +272,7 @@ public class MainMode extends GameMode {
 				thisPlayer.setBulletShot(true);
 				thisPlayer.reload = 0;
 			}
-			bulletLimiter = FPS / 5;
+			bulletLimiter = ClientController.FPS / 5;
 		} else if (bulletLimiter > 0)
 			bulletLimiter--;
 		//endregion
@@ -310,9 +317,9 @@ public class MainMode extends GameMode {
 
 		//region Checks if a goal has been scored
 		if (ballPreviousX - ball.getPosX() < -mapWidth / 4f) {
-			scored('R', elapsedTime, graphicsContext);
+			scored('R');
 		} else if (ballPreviousX - ball.getPosX() > mapWidth / 4f) {
-			scored('L', elapsedTime, graphicsContext);
+			scored('L');
 		}
 //		if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()
 //		-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
@@ -393,7 +400,7 @@ public class MainMode extends GameMode {
 			}
 
 			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
-			Player         enemy           = new Player(new Vector2(theDoubleValues.posX, theDoubleValues.posY));
+			Player enemy = new Player(new Vector2(theDoubleValues.posX, theDoubleValues.posY));
 			enemy.setIpOfClient(ip);
 			playerList.put(ip, enemy);
 		}
@@ -447,8 +454,8 @@ public class MainMode extends GameMode {
 		//region Gets width and height of the map
 		try {
 			Image map = new Image(new FileInputStream(Maps.Map));
-			mapWidth  = (int) map.getWidth() * 40;
-			mapHeight = (int) map.getHeight() * 40;
+			mapWidth  = (int) map.getWidth() * MapRender.BLOCK_SIZE;
+			mapHeight = (int) map.getHeight() * MapRender.BLOCK_SIZE;
 		} catch (IOException e) { e.printStackTrace(); }
 		//endregion
 
@@ -488,6 +495,7 @@ public class MainMode extends GameMode {
 					root.setEffect(null);
 					popupStage.hide();
 				});
+				//endregion
 
 				//region Audio button
 				Button sound = new Button("Audio On/Off");
@@ -653,7 +661,7 @@ public class MainMode extends GameMode {
 		}
 	}
 
-	private void scored(char scoringSide, double time, GraphicsContext gc) {
+	private void scored(char scoringSide) {
 		if (scoringSide == side) {
 			yourScore++;
 			System.out.println("Goal for YOUR team!");
@@ -665,7 +673,7 @@ public class MainMode extends GameMode {
 		thisPlayer.reset();
 		ball.reset();
 
-		try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+		try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
 	}
 
 	private static Connection getConnection() {
@@ -694,17 +702,17 @@ public class MainMode extends GameMode {
 		if (c != null) {
 			try {
 				c.close();
-			} catch (SQLException e) { /* ignored */}
+			} catch (SQLException ignored) {}
 		}
 		if (p != null) {
 			try {
 				p.close();
-			} catch (SQLException e) { /* ignored */}
+			} catch (SQLException ignored) {}
 		}
 		if (r != null) {
 			try {
 				r.close();
-			} catch (SQLException e) { /* ignored */}
+			} catch (SQLException ignored) {}
 		}
 	}
 
