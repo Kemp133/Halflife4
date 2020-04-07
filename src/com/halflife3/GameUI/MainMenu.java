@@ -75,8 +75,8 @@ public class MainMenu /*extends Application*/ {
 
 		vbox = new VBox(startServer, joinGame, choose_map, leaderboard, options, exit);
 		vbox.setAlignment(Pos.BASELINE_CENTER);
-		vbox.setPadding(new Insets(35, 0, 0, 30));
-		vbox.setSpacing(30);
+		vbox.setPadding(new Insets(20, 0, 0, 30));
+		vbox.setSpacing(25);
 		vbox.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 
 		return vbox;
