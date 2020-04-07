@@ -158,4 +158,5 @@ public class AI {
 			for (int j = 0; j < mapWidth; j++)
 			     map[i][j].setParent(null);
 	}
+
 }

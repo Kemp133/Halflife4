@@ -1,7 +1,7 @@
 package com.halflife3.GameObjects;
 
-import com.halflife3.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Networking.Server.Server;
 import javafx.scene.canvas.*;
 
 public class AIPlayer extends Controllable {
@@ -20,15 +20,14 @@ public class AIPlayer extends Controllable {
 
 	@Override
 	public void update(double time) {
-		if (stunned <= MainMode.STUN_DURATION && stunned != 0) {
+		if (stunned <= Server.SERVER_FPS / 2f && stunned != 0) {
 			velocity.setX(0);
 			velocity.setY(0);
 			deceleration.setX(0);
 			deceleration.setY(0);
 			stunned--;
 		} else {
-			Vector2 nextVel = new Vector2(velocity);
-			if (velocity.getX() * nextVel.subtract(deceleration).getX() > 0)
+			if (velocity.getX() * new Vector2(velocity).subtract(deceleration).getX() > 0)
 				velocity.subtract(deceleration);
 			position.add(new Vector2(velocity).multiply(time));
 			circle.setCenterX(position.getX() + getWidth() / 2 + 1);
@@ -38,8 +37,8 @@ public class AIPlayer extends Controllable {
 		}
 	}
 
-	public boolean isActive() {
-		return active;
+	public boolean inactive() {
+		return !active;
 	}
 
 	public void setActive(boolean active) {

@@ -6,9 +6,9 @@ import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Controller.SceneManager;
+import com.halflife3.GameObjects.*;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
-import com.halflife3.GameObjects.*;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
 import com.halflife3.Mechanics.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.Vector2;
@@ -49,7 +49,7 @@ public class MainMode extends GameMode {
 	private static final int   GAME_WINDOW_WIDTH  = 800;
 	private static final int   MOVEMENT_SPEED     = 120;
 	public static final  int   SHOT_SPEED         = 200;
-	public static final  float STUN_DURATION      = 15;
+	public static final  float STUN_DURATION      = ClientController.FPS * 3;
 	public static final  float RELOAD_DURATION    = 50;
 
 	//region Other variables
@@ -58,16 +58,15 @@ public class MainMode extends GameMode {
 	public  Player                  thisPlayer;
 	private HashMap<String, Player> playerList;
 	private HashMap<Integer, Image> scoreSprite;
-	private Input                   input         = Input.getInstance();
+	private Input                   input      = Input.getInstance();
 	private ProgressBar[]           stunBar;
 	private ProgressBar             amoBar;
 	private Ball                    ball;
-	private Stage                   window        = null;
+	private Stage                   window     = null;
 	private char                    side;
-	public  int                     yourScore     = 0;
-	public  int                     enemyScore    = 0;
-	public  boolean                 running       = false;
-	private int                     bulletLimiter = 0;
+	public  int                     yourScore  = 0;
+	public  int                     enemyScore = 0;
+	public  boolean                 running    = false;
 	public  int                     mapWidth;
 	private int                     mapHeight;
 	private GraphicsContext         graphicsContext;
@@ -202,25 +201,25 @@ public class MainMode extends GameMode {
 		thisPlayer.setAffine(rotate);
 		//endregion
 
-		//region Handles player movement
+		//region Sets player's velocity according to input
 		if (thisPlayer.stunned == 0) {
 			if (input.isKeyReleased(A) && input.isKeyReleased(D)) {
-				thisPlayer.getVelocity().setX(0);
+				thisPlayer.setVelX(0);
 			}
 			if (input.isKeyReleased(W) && input.isKeyReleased(S)) {
-				thisPlayer.getVelocity().setY(0);
+				thisPlayer.setVelY(0);
 			}
 			if (input.isKeyPressed(A)) {
-				thisPlayer.getVelocity().setX(-MOVEMENT_SPEED);
+				thisPlayer.setVelX(-MOVEMENT_SPEED);
 			}
 			if (input.isKeyPressed(D)) {
-				thisPlayer.getVelocity().setX(MOVEMENT_SPEED);
+				thisPlayer.setVelX(MOVEMENT_SPEED);
 			}
 			if (input.isKeyPressed(W)) {
-				thisPlayer.getVelocity().setY(-MOVEMENT_SPEED);
+				thisPlayer.setVelY(-MOVEMENT_SPEED);
 			}
 			if (input.isKeyPressed(S)) {
-				thisPlayer.getVelocity().setY(MOVEMENT_SPEED);
+				thisPlayer.setVelY(MOVEMENT_SPEED);
 			}
 		}
 		//endregion
@@ -241,13 +240,13 @@ public class MainMode extends GameMode {
 
 		//region Checks if the player is holding the ball
 		boolean playerIsTouchingTheBall = ball.getBounds().intersects(thisPlayer.circle.getBoundsInLocal());
-		if (playerIsTouchingTheBall && !ball.isHeld)
+		if (playerIsTouchingTheBall && !ball.isHeld && thisPlayer.stunned == 0)
 			thisPlayer.setHoldsBall(true);
 		//endregion
 
 		//region Shoots a bullet or the ball
 		thisPlayer.setBulletShot(false);
-		if (input.isButtonPressed(MouseButton.PRIMARY) && bulletLimiter == 0) {
+		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload == RELOAD_DURATION) {
 			double  bulletX      = Math.cos(Math.atan2(direction.getY(), direction.getX()));
 			double  bulletY      = Math.sin(Math.atan2(direction.getY(), direction.getX()));
 			Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
@@ -261,18 +260,17 @@ public class MainMode extends GameMode {
 					}
 
 				thisPlayer.setBulletShot(!ballInWall);
-			} else if (thisPlayer.reload == RELOAD_DURATION) { // Shoots a bullet
+			} else { // Shoots a bullet
 				Vector2 gunDirection = new Vector2(bulletX * 32, bulletY * 32);
 				Vector2 bulletPos = new Vector2(thisPlayer.getPosX() + thisPlayer.getHeight() / 2,
 						thisPlayer.getPosY() + thisPlayer.getWidth() / 2).add(gunDirection);
 
 				new Bullet(bulletPos, shotVelocity, thisPlayer.getIpOfClient());
 				thisPlayer.setBulletShot(true);
-				thisPlayer.reload = 0;
 			}
-			bulletLimiter = ClientController.FPS / 5;
-		} else if (bulletLimiter > 0)
-			bulletLimiter--;
+
+			thisPlayer.reload = 0;
+		}
 		//endregion
 
 		//region Re-renders all game objects
@@ -280,13 +278,8 @@ public class MainMode extends GameMode {
 
 		MapRender.Render(graphicsContext);
 
-		for (IRenderable go : ObjectManager.getGameObjects()) {
-			if (go instanceof Ball)
-				if (((Ball) go).containsKey("ServerBall"))
-					continue;
+		for (IRenderable go : ObjectManager.getGameObjects())
 			go.render(graphicsContext);
-		}
-
 		//endregion
 
 		//region Updates the stun bar
@@ -294,7 +287,7 @@ public class MainMode extends GameMode {
 		for (String ip : playerList.keySet()) {
 			stunBar[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
 			stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 12);
-			stunBar[id].setProgress(playerList.get(ip).stunned / (STUN_DURATION * 5));
+			stunBar[id].setProgress(playerList.get(ip).stunned / STUN_DURATION);
 			id++;
 		}
 		//endregion
@@ -615,33 +608,38 @@ public class MainMode extends GameMode {
 	}
 
 	private void bulletCollision() {
-		HashSet<GameObject> crash_bullet_list = new HashSet<>();
+		HashSet<GameObject> bulletsToDestroy = new HashSet<>();
 		for (GameObject bullet : ObjectManager.getGameObjects()) {
 			if (!bullet.getKeys().contains("Bullet"))
 				continue;
 
+//			  Bullets and Walls
 			for (Bricks block : MapRender.GetList())
 				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
-					crash_bullet_list.add(bullet);
+					bulletsToDestroy.add(bullet);
 
+//			  Bullets and Players
 			for (String ip : Client.listOfClients.connectedIPs) {
 				if (((Bullet) bullet).getShooterName().equals(ip))
 					continue;
 
 				Player player = playerList.get(ip);
-				if (bullet.getBounds().intersects(player.circle.getBoundsInLocal())) {
-					crash_bullet_list.add(bullet);
-					//Players hit
-					if (player.stunned == 0) {
-						player.stunned = STUN_DURATION * 5;
-						player.setVelocity(bullet.getVelocity().divide(3));
-						player.setDeceleration(new Vector2(player.getVelocity()).divide(STUN_DURATION));
-					}
-				}
+
+				if (!bullet.getBounds().intersects(player.circle.getBoundsInLocal()))
+					continue;
+
+				bulletsToDestroy.add(bullet);
+
+				if (player.stunned != 0)
+					continue;
+
+				player.stunned = STUN_DURATION;
+				player.setVelocity(bullet.getVelocity().divide(STUN_DURATION / ClientController.FPS));
+				player.setDeceleration(new Vector2(player.getVelocity()).divide(ClientController.FPS / 2f));
 			}
 		}
 
-		for (GameObject bullet : crash_bullet_list)
+		for (GameObject bullet : bulletsToDestroy)
 			bullet.destroy();
 	}
 

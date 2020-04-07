@@ -1,5 +1,6 @@
 package com.halflife3.GameObjects;
 
+import com.halflife3.Controller.ClientController;
 import com.halflife3.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.View.Camera;
@@ -39,7 +40,7 @@ public class Player extends Controllable {
 	public void update(double time) {
 		if (reload < MainMode.RELOAD_DURATION)
 			reload++;
-		if (stunned <= MainMode.STUN_DURATION && stunned != 0) {
+		if (stunned <= ClientController.FPS / 2f && stunned != 0) {
 			velocity.setX(0);
 			velocity.setY(0);
 			deceleration.setX(0);
@@ -47,8 +48,7 @@ public class Player extends Controllable {
 			stunned--;
 		} else {
 			orgPos = new Vector2(position);
-			Vector2 previousVel = new Vector2(velocity);
-			if (velocity.getX() * previousVel.subtract(deceleration).getX() > 0)
+			if (velocity.getX() * new Vector2(velocity).subtract(deceleration).getX() > 0)
 				velocity.subtract(deceleration);
 			position.add(new Vector2(velocity).multiply(time));
 			isMoving = !orgPos.equals(position);

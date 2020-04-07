@@ -20,9 +20,9 @@ public class Ball extends Sprite {
 	private PositionPacket positionPacket;
 
 	/**
-	 * The default constructor which mirrors the super constructor. Super is called and then the ball sprite is set, a
-	 * key with the value of "Ball" is added, and it's position is put to the center of the ball. The spawn point is
-	 * set to the passed position, and the circle shape is initialized
+	 * The default constructor which mirrors the super constructor. Super is called, then a key with the value of
+	 * "Ball" is added, and it's position is put to the center of the ball. The spawn point is set to the passed
+	 * position, and the circle shape is initialized
 	 */
 	public Ball(Vector2 position) {
 		super(position, new Vector2(), "res/Sprites/Ball/Ball.png");
@@ -55,9 +55,11 @@ public class Ball extends Sprite {
 	}
 
 	/**
-	 * This method is called when the object is collided with
+	 * This method is called when the ball collides with the walls to decide how the ball's velocity should be changed
 	 *
-	 * @param bounce I actually have no clue
+	 * @param bounce The operation to be carried out. 1 - means the ball is coming from the side of the wall,
+	 *               therefore the X axis' velocity needs to be reversed. 2 - means the ball is coming from either the
+	 *               top or the bottom of the wall and therefore the Y axis' velocity needs changing
 	 */
 	public void collision(int bounce) {
 		this.position = originalPosition;
@@ -75,22 +77,13 @@ public class Ball extends Sprite {
 				deceleration.setY(-deceleration.getY());
 				break;
 			}
-
-			case 3: {
-				position = originalPosition;
-				velocity.setX(0);
-				velocity.setY(0);
-				deceleration.setX(0);
-				deceleration.setY(0);
-				break;
-			}
 		}
 
 		circle.setCenterX(position.getX() + getWidth() / 2);
 		circle.setCenterY(position.getY() + getHeight() / 2);
 	}
 
-	/** This method resets the ball to it's original values */
+	/** This method resets the ball to its original values */
 	public void reset() {
 		isHeld   = false;
 		position = spawnPosition;
@@ -100,6 +93,11 @@ public class Ball extends Sprite {
 		resetVelocity();
 	}
 
+	/**
+	 * Getter method for the PositionPacket of the ball
+	 *
+	 * @return PositionPacket with the information about the ball's position, velocity and if it is being held
+	 */
 	public PositionPacket getPositionPacket() {
 		positionPacket.posX      = getPosX();
 		positionPacket.posY      = getPosY();
