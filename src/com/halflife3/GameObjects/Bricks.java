@@ -7,10 +7,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
+/**
+ *
+ */
 public class Bricks extends Sprite {
     public Rectangle rectangle;
 

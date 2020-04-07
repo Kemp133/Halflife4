@@ -1,7 +1,8 @@
 package com.halflife3.DatabaseUI;
 
+import com.halflife3.Controller.DatabaseManager;
 import com.halflife3.GameUI.LoginAttributes;
-import com.halflife3.GameUI.WindowAttributes;
+import com.halflife3.GameUI.MenuUtilitites;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Platform;
@@ -12,33 +13,55 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
+import javafx.scene.text.*;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.sql.*;
 
+/**
+ * This class is the entry point of the program. This is the first screen which the user interacts with, and the user
+ * cannot get off this screen unless they either exit the application or log into the system. This uses a class in
+ * JavaFX called {@code Preloader}, which is registered when {@code main} is called in MenuController (the entry point
+ * of the <i>Application</i> itself).
+ * <p>
+ * This class works by getting called when a special environment variable is set in the main method of the {@code
+ * MenuController}, which then invokes this class via a reference passed to this environmental variable. The preloader
+ * then runs, waiting for the application to load in the background so that it can be shown.
+ * <p>
+ * In the meantime, the preloader shows the log in screen. Here, the user has three main options:
+ * <ol>
+ *     <li>Log in to an existing account</li>
+ *     <li>Create a new account</li>
+ *     <li>Exit the application</li>
+ * </ol>
+ * For the first eventuality, the user puts in their username and password, and can then log into the system.
+ * Firstly, the user is checked to make sure they have an account to log into the application to begin with. If they
+ * don't, then an error is displayed and they are prompted that their log in attempt was unsuccessful. In the event
+ * that the log in was successful however, the username of the user is passed through to the {@code ApplicationUser}
+ * reference inside of {@code MenuController} so that the username can be accessed in the game.
+ * <p>
+ * For the second eventuality, a new pane is created which contains three text boxes for a username, password, and
+ * confirm password. The confirm password is there so that the user has chance to enter their password twice, and
+ * that in the event they typed it wrong either time, they are alerted that the passwords are different and that they
+ * should check them to make sure they're entered correctly. The username doesn't have this kind of verification, but
+ * is checked in the database first to make sure it doesn't exist. If it does, then the user is prompted that the
+ * username they chose has already been chosen, and to choose another one instead. Once both of these checks are
+ * successful, the username and password are sent off to the database and stored, and the user gets a message that
+ * their account has been created so that they can go back to the log in page and log in.
+ * <p>
+ * For the final eventuality, the application just ends, and the JVM instance closes completely.
+ */
 public class Login extends Preloader {
-
 	Button login         = new Button();
 	Button createNewUser = new Button();
+	Button backButton    = new Button();
+	Button create        = new Button();
 
-	Button        backButton        = new Button();
-	Button        create            = new Button();
 	Text          name              = new Text("Name");
 	TextField     nameField         = new TextField();
 	Text          password          = new Text("Password");
@@ -57,27 +80,8 @@ public class Login extends Preloader {
 	String mySecurePassword;
 	String salt;
 
-	/*
-		This is used by the stackPanes for the two different scenes, Login and Create Account, to add an image to the background
-	*/
-	private Background addBackground () {
-		try {
-			FileInputStream inputStream = new FileInputStream("res/Login/login-background.jpg");
-			Image           image       = new Image(inputStream);
-
-			BackgroundSize  backgroundSize  = new BackgroundSize(800, 600, false, false, false, true);
-			BackgroundImage backgroundImage = new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
-			Background      background      = new Background(backgroundImage);
-			return background;
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		return null;
-	}
-
-	private void textProperties () {
+	/** A method to set the text properties of the objects in the menu */
+	private void textProperties() {
 		Font paladinFont = null;
 		try {
 			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
@@ -98,55 +102,20 @@ public class Login extends Preloader {
 		incorrectFields.setFill(Color.RED);
 	}
 
-	public void buttonProperties () throws FileNotFoundException {
+	/** A method which sets the text values of the buttons in the menu */
+	public void setButtonText() {
 		createNewUser.setText("Create New Account");
 		login.setText("Login");
 		backButton.setText("Back");
 		create.setText("Create User");
-
-        /*createNewUser.setMaxHeight(30);
-        createNewUser.setMaxWidth(150);
-
-        FileInputStream iSCreateNew = new FileInputStream("res/button_create-new-account (1).png");
-        Image imageCreateNew = new Image(iSCreateNew, createNewUser.getWidth(), createNewUser.getHeight(), false, true);
-        BackgroundImage cNImage = new BackgroundImage(imageCreateNew, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
-                new BackgroundSize(createNewUser.getWidth(), createNewUser.getHeight(), true, true, true, false));
-        Background cB = new Background(cNImage);
-        createNewUser.setBackground(cB);
-
-        login.setMaxHeight(30);
-        login.setMaxWidth(150);
-
-        FileInputStream iSLogin = new FileInputStream("res/button_login (1).png");
-        Image imageLogin = new Image(iSLogin, login.getWidth(), login.getHeight(), false, true);
-        BackgroundImage bImageLogin = new BackgroundImage(imageLogin, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
-                new BackgroundSize(login.getWidth(), login.getHeight(), true, true, true, false));
-        Background newBLogin = new Background(bImageLogin);
-        login.setBackground(newBLogin);
-
-        backButton.setMinHeight(30);
-        backButton.setMinWidth(150);
-
-        FileInputStream iSBack = new FileInputStream("res/button_back.png");
-        Image imageBack = new Image(iSBack, login.getWidth(), login.getHeight(), false, true);
-        BackgroundImage bBack = new BackgroundImage(imageBack, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
-                new BackgroundSize(backButton.getWidth(), backButton.getHeight(), true, true, true, false));
-        Background newBBack = new Background(bBack);
-        backButton.setBackground(newBBack);
-
-        create.setMinHeight(30);
-        create.setMinWidth(150);
-
-        FileInputStream isCreate = new FileInputStream("res/button_create-user.png");
-        Image imageCreate = new Image(isCreate, login.getWidth(), login.getHeight(), false, true);
-        BackgroundImage bImageCreate = new BackgroundImage(imageCreate, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
-                new BackgroundSize(create.getWidth(), create.getHeight(), true, true, true, false));
-        Background newBCreate = new Background(bImageCreate);
-        create.setBackground(newBCreate);*/
-
 	}
 
-	private static GridPane basePane () {
+	/**
+	 * A method to generate a grid pane to build other panes off of
+	 *
+	 * @return A {@code GridPane} which has all the essential styling done already
+	 */
+	private GridPane basePane() {
 		GridPane gridPaneLogin = new GridPane();
 		//Setting size for the pane
 		gridPaneLogin.setMinSize(500, 400);
@@ -161,7 +130,12 @@ public class Login extends Preloader {
 		return gridPaneLogin;
 	}
 
-	private static BorderPane baseBPane () {
+	/**
+	 * A method used to generate a base border pane to build the other panes off of
+	 *
+	 * @return A {@code BorderPane} which has all the essential styling done already
+	 */
+	private BorderPane baseBPane() {
 		BorderPane borderPane = new BorderPane();
 
 		Font paladinFont = null;
@@ -195,7 +169,12 @@ public class Login extends Preloader {
 		return borderPane;
 	}
 
-	public BorderPane loginPane () {
+	/**
+	 * A method to generate the pane used for the "Log In" section of the preloader
+	 *
+	 * @return A {@code BorderPane} which contains all the UI elements for the log in screen
+	 */
+	private BorderPane loginPane() {
 		GridPane gridPaneLogin = basePane();
 
 		BorderPane borderPane = baseBPane();
@@ -220,7 +199,7 @@ public class Login extends Preloader {
 		gridPaneLogin.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 		//gridPaneLogin.setMinSize(500, 400);
 
-		borderPane.setBackground(addBackground());
+		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), "res/Login/login-background.jpg"));
 		borderPane.setCenter(gridPaneLogin);
 
 		File f = new File("res/Login/LoginStyleSheet.css");
@@ -230,7 +209,12 @@ public class Login extends Preloader {
 		return borderPane;
 	}
 
-	public BorderPane newUserPane () {
+	/**
+	 * A method to generate the pane used for the "New User" section of the preloader
+	 *
+	 * @return A {@code BorderPane} which contains all the UI elements for the user pane
+	 */
+	private BorderPane newUserPane() {
 		GridPane gridPaneCreateUser = basePane();
 
 		BorderPane newBorderPane = baseBPane();
@@ -257,7 +241,7 @@ public class Login extends Preloader {
 		gridPaneCreateUser.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 		gridPaneCreateUser.setMinSize(500, 400);
 
-		newBorderPane.setBackground(addBackground());
+		newBorderPane.setBackground(MenuUtilitites.getBackground(getClass(), "res/Login/login-background.jpg"));
 		newBorderPane.setCenter(gridPaneCreateUser);
 
 		File f = new File("res/Login/LoginStyleSheet.css");
@@ -266,7 +250,9 @@ public class Login extends Preloader {
 		return newBorderPane;
 	}
 
-	private void mayBeHid () {
+	//region Preloader Required Methods
+	/** A method to check whether the preloader may be hid, or if the user still has not logged in yet */
+	private void mayBeHid() {
 		if (hasLoggedIn) {
 			user.setApplicationUser(nameField.getText());
 			Platform.runLater(() -> preloaderStage.hide());
@@ -274,23 +260,26 @@ public class Login extends Preloader {
 	}
 
 	@Override
-	public void handleStateChangeNotification (StateChangeNotification info) {
+	public void handleStateChangeNotification(StateChangeNotification info) {
 		if (info.getType() == StateChangeNotification.Type.BEFORE_START) {
 			user = (ICredentialUser) info.getApplication();
 			if (getUserLoginAttributes()) {
 				if (loginAttributes.rememberMe) {
 					nameField.setText(loginAttributes.username);
 					passwordField.setText(loginAttributes.password);
-					hasLoggedIn = confirmUser(getConnection(), loginAttributes.username, loginAttributes.password);
+					hasLoggedIn = DatabaseManager.confirmUser(DatabaseManager.getConnection(),
+							loginAttributes.username, loginAttributes.password);
 				}
 			}
 			mayBeHid();
 		}
 	}
+	//endregion
 
-	private void initialiseFields () throws FileNotFoundException {
+	/** This method initializes all the fields in the views ready to display */
+	private void initialiseFields() {
 		//Sets the properties of the buttons
-		buttonProperties();
+		setButtonText();
 
 		//Setting properties of text/textFields
 		name.setFont(Font.font("wide latin", FontWeight.BOLD, FontPosture.REGULAR, 20));
@@ -310,7 +299,7 @@ public class Login extends Preloader {
 	}
 
 	@Override
-	public void start (Stage stage) throws Exception {
+	public void start(Stage stage) {
 		//Setting properties of buttons
 		preloaderStage = stage;
 		preloaderStage.setTitle("Login/Create User");
@@ -325,12 +314,12 @@ public class Login extends Preloader {
 		//Setting on click events for login
 		login.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle (ActionEvent e) {
+			public void handle(ActionEvent e) {
 				if (nameField.getText() != null && passwordField.getText() != null) {
-					if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
+					if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), nameField.getText(),
+							passwordField.getText())) {
 						hasLoggedIn = true;
-						if (chbRememberMe.isSelected())
-							writeLoginAttributesToFile();
+						if (chbRememberMe.isSelected()) writeLoginAttributesToFile();
 						mayBeHid();
 					} else {
 						setNullFields();
@@ -340,7 +329,6 @@ public class Login extends Preloader {
 				} else {
 					incorrectFields.setText("Type in a username and password");
 					incorrectFields.setVisible(true);
-
 				}
 			}
 		});
@@ -348,7 +336,7 @@ public class Login extends Preloader {
 		//This will change the scene to show the create new user stackpane
 		createNewUser.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle (ActionEvent e) {
+			public void handle(ActionEvent e) {
 				setNullFields();
 				incorrectFields.setVisible(false);
 				Scene sceneCreate = new Scene(newUserPane(), 800, 600, Color.WHITE);
@@ -360,7 +348,7 @@ public class Login extends Preloader {
 		//NEED TO ACCOUNT FOR NON MATCHING PASSWORDS
 		create.setOnAction(e -> {
 			if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
-				if (doesUserExist(getConnection(), nameField.getText()) == true) {
+				if (doesUserExist(DatabaseManager.getConnection(), nameField.getText()) == true) {
 					incorrectFields.setText("Username already exists. Choose another");
 					incorrectFields.setVisible(true);
 				} else if (!passwordField.getText().equals(passwordFieldConf.getText())) {
@@ -369,10 +357,9 @@ public class Login extends Preloader {
 					incorrectFields.setVisible(true);
 				} else {
 					//Insert user and password into table
-					addNewUser(getConnection(), nameField.getText(), passwordField.getText());
-					//TODO: Assign username to player and Change to game screen
-					incorrectFields.setText("User created"); //TODO: delete after above
-					incorrectFields.setVisible(true); //TODO: delete after above
+					addNewUser(DatabaseManager.getConnection(), nameField.getText(), passwordField.getText());
+					incorrectFields.setText("User created");
+					incorrectFields.setVisible(true);
 				}
 			} else {
 				incorrectFields.setText("Please type in a username and password");
@@ -383,7 +370,7 @@ public class Login extends Preloader {
 		//This will change the scene to show the login stackpane
 		backButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle (ActionEvent e) {
+			public void handle(ActionEvent e) {
 				setNullFields();
 				incorrectFields.setVisible(false);
 				Scene sceneLogin = new Scene(loginPane(), 800, 600);
@@ -401,14 +388,10 @@ public class Login extends Preloader {
 			if (event.getCode() == KeyCode.ENTER) {
 				if (stage.getScene() == sceneLogin) {
 					if (nameField.getText() != null && passwordField.getText() != null) {
-						if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
+						if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), nameField.getText(),
+								passwordField.getText())) {
 							hasLoggedIn = true;
 							mayBeHid();
-//                       try {
-//                            new Windows().start(preloaderStage);
-//                        } catch (FileNotFoundException ex) {
-//                            ex.printStackTrace();
-//                        }
 						} else {
 							setNullFields();
 							incorrectFields.setText("Incorrect username and/or password.");
@@ -417,11 +400,10 @@ public class Login extends Preloader {
 					} else {
 						incorrectFields.setText("Type in a username and password");
 						incorrectFields.setVisible(true);
-
 					}
 				} else {
 					if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
-						if (doesUserExist(getConnection(), nameField.getText()) == true) {
+						if (doesUserExist(DatabaseManager.getConnection(), nameField.getText()) == true) {
 							incorrectFields.setText("That username already exists. Please choose another one");
 							incorrectFields.setVisible(true);
 						} else if (!passwordField.getText().equals(passwordFieldConf.getText())) {
@@ -430,10 +412,9 @@ public class Login extends Preloader {
 							incorrectFields.setVisible(true);
 						} else {
 							//Insert user and password into table
-							addNewUser(getConnection(), nameField.getText(), passwordField.getText());
-							//TODO: Assign username to player and Change to game screen
-							incorrectFields.setText("User created"); //TODO: delete after above
-							incorrectFields.setVisible(true); //TODO: delete after above
+							addNewUser(DatabaseManager.getConnection(), nameField.getText(), passwordField.getText());
+							incorrectFields.setText("User created");
+							incorrectFields.setVisible(true);
 						}
 					} else {
 						incorrectFields.setText("Please type in a username and password");
@@ -442,76 +423,25 @@ public class Login extends Preloader {
 				}
 			}
 		});
-
-        /*sceneCreate.addEventHandler(KeyEvent.KEY_PRESSED, event -> {  //TODO: Test doesn't conflict with previous scene on enter button press
-            if (event.getCode() == KeyCode.ENTER) {
-                if (nameField.getText() != null && passwordField.getText() != null) {
-                    if (confirmUser(getConnection(), nameField.getText(), passwordField.getText())) {
-                        //TODO: Assign username to 'player' and change to game screen
-                        hasLoggedIn = true;
-                        mayBeHid();
-//                       try {
-//                            new Windows().start(preloaderStage);
-//                        } catch (FileNotFoundException ex) {
-//                            ex.printStackTrace();
-//                        }
-                    } else {
-                        setNullFields();
-                        incorrectFields.setText("Incorrect username and/or password.");
-                        incorrectFields.setVisible(true);
-                    }
-                }
-                else {
-                    incorrectFields.setText("Type in a username and password");
-                    incorrectFields.setVisible(true);
-
-                }
-            }
-        });*/
 	}
 
-	public static Connection getConnection () {
-		Connection c = null;
-		try {
-			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql://rogue.db.elephantsql.com:5432/nuzmlzpr";
-			url = url.trim();
-			c   = DriverManager.getConnection(url, "nuzmlzpr", "pd7OdC_3BiVrAPNU68CETtFtBaqFxJFB");
-
-			if (c != null) {
-				System.out.println("Connection complete");
-			} else {
-				System.out.println("Connection failed");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		return c;
+	/** Sets text fields to null */
+	private void setNullFields() {
+		nameField.setText(null);
+		passwordField.setText(null);
+		passwordFieldConf.setText(null);
 	}
 
-	public void closeConnections (Connection c, PreparedStatement p, ResultSet r) {
-		if (c != null) {
-			try {
-				c.close();
-			} catch (SQLException e) { /* ignored */}
-		}
-		if (p != null) {
-			try {
-				p.close();
-			} catch (SQLException e) { /* ignored */}
-		}
-		if (r != null) {
-			try {
-				r.close();
-			} catch (SQLException e) { /* ignored */}
-		}
-	}
-
-	//Returns true if a user exists in the database table and false if it doesn't
-	public boolean doesUserExist (Connection c, String username) {
+	//region Unique Database Methods
+	/**
+	 * A method to check if a user with the given username exists in the database already or not
+	 *
+	 * @param c        The {@code Connection} to use to connect to the database
+	 * @param username The username to check against the database to see if it exists already
+	 *
+	 * @return Returns {@code true} if a user exists in the database table and {@code false} if it doesn't
+	 */
+	private boolean doesUserExist(Connection c, String username) {
 		PreparedStatement preparedStatement = null;
 		ResultSet         rs                = null;
 		try {
@@ -528,83 +458,27 @@ public class Login extends Preloader {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			closeConnections(c, preparedStatement, rs);
+			DatabaseManager.closeConnections(c, preparedStatement, rs);
 		}
 		return false;
 	}
 
-	/*
-	Verifying the user details are correct
+	/**
+	 * Adds new user information to the database
+	 *
+	 * @param c               The {@code Connection} to use to connect to the database
+	 * @param username        The username of the user to submit
+	 * @param passwordEntered The password of the user to submit
 	 */
-	public boolean confirmUser (Connection c, String username, String passwordEntered) {
-
-		boolean returnValue      = false;
-		String  saltCheck        = "";
-		String  securedPassword  = "";
-		byte[]  securedPassword2 = new byte[0];
-
-		PreparedStatement saltStatement     = null;
-		ResultSet         rs                = null;
-		PreparedStatement preparedStatement = null;
-		ResultSet         rsDetails         = null;
-		try {
-			//Retrieving the salt from the table based on the username given
-			//Creating the query
-			String querySalt = "SELECT * FROM userdatascore WHERE \"name\" = '" + username + "'";
-			//Creating the statement
-			saltStatement = c.prepareStatement(querySalt);
-			//Executing the query
-			rs = saltStatement.executeQuery();
-			while (rs.next()) {
-				String testName = rs.getString(2);
-				saltCheck        = rs.getString("salt");
-				securedPassword2 = rs.getBytes("password");
-				System.out.println("Salt retrieved: " + saltCheck + " name: " + testName + " password: " + new String(securedPassword2));
-			}
-			System.out.println("username passed: " + username + " password passed: " + passwordEntered);
-			securedPassword = new String(securedPassword2);
-
-            /*Creating the query
-            String queryDetails = "SELECT * FROM userdatascore WHERE \"name\" = '" + username + "'";
-            //Creating the statement
-            preparedStatement = c.prepareStatement(queryDetails);
-            //Executing the query
-            rsDetails = preparedStatement.executeQuery();
-            while (rsDetails.next()) {
-                System.out.println("here");
-                securedPassword = rs.getString(5);
-                System.out.println("Password retrieved: " + securedPassword);
-            }*/
-
-			// Generating new secure password with the salt retrieved from the database associated with the username
-			//String newSecurePassword = Password.generateSecurePassword(passwordEntered, saltCheck);
-
-			// Check if two passwords are equal and returns true if they are
-			//return returnValue = newSecurePassword.equalsIgnoreCase(securedPassword);
-
-			//Code to check password while hashed password is broken
-			System.out.println("Password entered: " + passwordEntered);
-			System.out.println("SecuredPassword: " + securedPassword);
-			return returnValue = securedPassword.equals(passwordEntered);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			closeConnections(c, saltStatement, rs);
-			closeConnections(null, preparedStatement, rsDetails);
-		}
-		return false;
-	}
-
-	//Adds new user information to the table
-	public void addNewUser (Connection c, String username, String passwordEntered) {
+	private void addNewUser(Connection c, String username, String passwordEntered) {
 		PreparedStatement preparedStatement = null;
 		try {
 			//Generating password and salt
 			String saltAdd = Password.returnSalt();
 			genPassword(passwordEntered, saltAdd);
 			//Creating the query
-			String query = "INSERT INTO userdatascore (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; //saltAdd changed to 123 and mySecurePassword changed to passwordEntered
+			String query =
+					"INSERT INTO userdatascore (name, score, salt, password) VALUES ('" + username + "', " + 0 + ", '" + "123" + "', '" + passwordEntered + "')"; //saltAdd changed to 123 and mySecurePassword changed to passwordEntered
 			//Creating the statement
 			preparedStatement = c.prepareStatement(query);
 			//Executing the query
@@ -612,11 +486,17 @@ public class Login extends Preloader {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			closeConnections(c, preparedStatement, null);
+			DatabaseManager.closeConnections(c, preparedStatement, null);
 		}
 	}
 
-	public void genPassword (String password, String salt) {
+	/**
+	 * A method to generate a secure password from a passed plain text password
+	 *
+	 * @param password The password to encrypt
+	 * @param salt     The salt to encrypt the password with
+	 */
+	private void genPassword(String password, String salt) {
 		String myPassword = password;
 
 		// Protect user's password. The generated value can be stored in DB.
@@ -626,22 +506,17 @@ public class Login extends Preloader {
 		System.out.println("My secure password = " + mySecurePassword);
 		System.out.println("Salt value = " + salt);
 	}
+	//endregion
 
-	//Sets text fields to null
-	public void setNullFields () {
-		nameField.setText(null);
-		passwordField.setText(null);
-		passwordFieldConf.setText(null);
-	}
-
+	//region Log In Attribute Loading and Saving
 	/**
-	 * Try and load log in values for automatically logging in. In the event the file is not found,
-	 * a new one is created with generic values and saved instead, ready for the next time the person
-	 * logs in
+	 * Try and load log in values for automatically logging in. In the event the file is not found, a new one is
+	 * created
+	 * with generic values and saved instead, ready for the next time the person logs in
 	 *
-	 * @return {@code true} if a configuration file has been found, and {@code false otherwise}
+	 * @return {@code true} if a configuration file has been found, and {@code false} otherwise
 	 */
-	public boolean getUserLoginAttributes () {
+	private boolean getUserLoginAttributes() {
 		try (var fis = new FileInputStream("AppData/login.conf")) {
 			try (var ois = new ObjectInputStream(fis)) {
 				loginAttributes = (LoginAttributes) ois.readObject();
@@ -667,10 +542,9 @@ public class Login extends Preloader {
 	}
 
 	/**
-	 * A method to write the login values to file so that they can be used to automatically
-	 * log in for future start ups
+	 * A method to write the login values to file so that they can be used to automatically log in for future start ups
 	 */
-	public void writeLoginAttributesToFile () {
+	private void writeLoginAttributesToFile() {
 		try (var fos = new FileOutputStream("AppData/login.conf", false)) {
 			try (var oos = new ObjectOutputStream(fos)) {
 				LoginAttributes lab = new LoginAttributes();
@@ -680,12 +554,10 @@ public class Login extends Preloader {
 				oos.writeObject(lab);
 			}
 		} catch (IOException e) {
-			NetworkingUtilities.CreateErrorMessage(
-					"Cannot save Login Details",
-					"Login credentials could not be saved. Make sure the AppData directory" +
-							"is writeable",
-					e.getMessage()
-			);
+			NetworkingUtilities.CreateErrorMessage("Cannot save Login Details",
+					"Login credentials could not be saved" + "." + " Make sure the AppData directory" + "is writeable"
+					, e.getMessage());
 		}
 	}
+	//endregion
 }

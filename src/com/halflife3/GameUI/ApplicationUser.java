@@ -1,7 +1,7 @@
 package com.halflife3.GameUI;
 
 public class ApplicationUser {
-    public  static String username;
+    public String username;
     public boolean isValidSession = false;
 
     public ApplicationUser() {}
