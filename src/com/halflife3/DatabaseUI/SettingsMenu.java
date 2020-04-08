@@ -106,6 +106,7 @@ public class SettingsMenu {
 			} else {
 				if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username, password.getText())) {
 					deleteUserDetails(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username);
+					userFeedback.setFill(Color.GREEN);
 					userFeedback.setText("Your account has been deleted");
 					//TODO: Change 'back' on action to go to login page instead of settings
 				} else {
