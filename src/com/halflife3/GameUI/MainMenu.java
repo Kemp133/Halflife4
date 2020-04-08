@@ -3,6 +3,7 @@ package com.halflife3.GameUI;
 import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.MapMenuController;
 import com.halflife3.Controller.SceneManager;
+import com.halflife3.DatabaseUI.Leaderboard;
 import com.halflife3.DatabaseUI.SettingsMenu;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Server.Server;
@@ -67,6 +68,13 @@ public class MainMenu /*extends Application*/ {
 //			MapMenuController map_control = new MapMenuController();
 			Platform.runLater(() -> new MapMenuController().start());
 		});
+
+		leaderboard.setOnAction(actionEvent -> {
+			player.stop();
+			Leaderboard lb = new Leaderboard();
+			SceneManager.getInstance().setScene("Leader Board",lb.returnScene());
+		});
+
 
 		options.setOnAction(actionEvent -> {
 			player.stop();

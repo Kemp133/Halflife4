@@ -1,12 +1,15 @@
 package com.halflife3.DatabaseUI;
 
+import com.halflife3.Controller.SceneManager;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -23,13 +26,14 @@ import java.sql.*;
 
 //TODO: Add button to be able to exit
 
-public class Leaderboard extends Application {
+public class Leaderboard {
     private ObservableList<User> data;
     private TableView tableView;
     private BorderPane borderPane;
     private Pane paneRight;
     private Pane paneLeft;
     private Pane paneBottom;
+    private Button exit = new Button("Back to Main Menu");
 
     public Leaderboard() {
                 /*
@@ -57,6 +61,7 @@ public class Leaderboard extends Application {
 
         paneLeft = new Pane();
         paneLeft.setMinSize(100, 600);
+
 
         paneBottom = new Pane();
         paneBottom.setMinSize(600, 80);
@@ -152,10 +157,6 @@ public class Leaderboard extends Application {
         return data;
     }
 
-    public static void started () {
-        launch();
-    }
-
     private Background addBackground() {
         try {
 
@@ -174,8 +175,8 @@ public class Leaderboard extends Application {
         return null;
     }
 
-    @Override
-    public void start(Stage stage) throws Exception {
+
+    public Scene returnScene(){
         /*
         Font properties
          */
@@ -202,9 +203,25 @@ public class Leaderboard extends Application {
         paneLeft = new Pane();
         paneLeft.setMinSize(100, 600);
 
-        paneBottom = new Pane();
-        paneBottom.setMinSize(600, 80);
+        exit.setOnAction(actionEvent -> {
+            try {
+                SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
+            } catch(Exception e) {
+                NetworkingUtilities.CreateErrorMessage(
+                        "Scene Stack Empty!",
+                        "SceneManager threw an exception",
+                        "Message" + e.getMessage()
+                );
+            }
+        });
 
+
+//        paneBottom = new Pane();
+//        paneBottom.setMinSize(600, 80);
+
+        VBox vb = new VBox(exit);
+        vb.setAlignment(Pos.BASELINE_CENTER);
+        vb.setMinSize(600,80);
         /*
         TableView properties
          */
@@ -217,7 +234,11 @@ public class Leaderboard extends Application {
 
         tableView.getColumns().addAll(nameColumn, scoreColumn);
 
-        tableView.setItems(getTableData());
+        try{
+            tableView.setItems(getTableData());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         //tableView.setPadding(new Insets(0, 0, 10, 0));
 
@@ -237,7 +258,7 @@ public class Leaderboard extends Application {
         borderPane.setRight(paneRight);
         borderPane.setLeft(paneLeft);
         borderPane.setAlignment(title, Pos.TOP_CENTER);
-        borderPane.setBottom(paneBottom);
+        borderPane.setBottom(vb);
         borderPane.setBackground(addBackground());
 
         Scene scene = new Scene(borderPane);
@@ -245,8 +266,7 @@ public class Leaderboard extends Application {
         File f = new File("res/Leaderboard/LeaderboardStyleSheet.css");
         scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
 
-        stage.setScene(scene);
-        stage.show();
+        return scene;
     }
 
     //TODO: May not be needed before prototype if issue not fixed
