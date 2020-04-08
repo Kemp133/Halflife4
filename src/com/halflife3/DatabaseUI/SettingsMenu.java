@@ -40,8 +40,9 @@ public class SettingsMenu {
 	/*
 	Set-up for scene to allow user to delete account
 	 */
-	private Text          confirmDeletion = new Text();
+	private Text		  passwordT		  = new Text();
 	private PasswordField password        = new PasswordField();
+	private Text		  confPasswordT   = new Text();
 	private PasswordField confPassword    = new PasswordField();
 	private Button        confDeleteAcc   = new Button("Delete Account");
 	private Button        back2           = new Button("Back");
@@ -86,11 +87,12 @@ public class SettingsMenu {
 		});
 
 		userFeedback.setVisible(false);
+		userFeedback.setStyle("-fx-font-size: 15pt;");
 		userFeedback.setFill(Color.RED);
 		vboxSettings = new VBox(deleteRememberMe, removeAcc, back, userFeedback);
 		vboxSettings.setAlignment(Pos.BASELINE_CENTER);
-		vboxSettings.setPadding(new Insets(35, 0, 0, 30));
-		vboxSettings.setSpacing(30);
+		vboxSettings.setPadding(new Insets(50, 0, 0, 20));
+		vboxSettings.setSpacing(60);
 		vboxSettings.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 
 		return vboxSettings;
@@ -98,7 +100,7 @@ public class SettingsMenu {
 
 	private VBox removeAccVBox() {
 		confDeleteAcc.setOnAction(actionEvent -> {
-			if (!password.equals(confPassword)) {
+			if (!password.getText().equals(confPassword.getText())) {
 				userFeedback.setText("Passwords do not match");
 				setNullFields();
 			} else {
@@ -123,12 +125,21 @@ public class SettingsMenu {
 			}
 		});
 
+
+		passwordT.setText("Password For User: " + BaseController.GetApplicationUser().username);
+		passwordT.setStyle("-fx-font-size: 12pt; -fx-font-weight: bold;");
+		passwordT.setFill(Color.BLUE);
+		password.setMaxWidth(400);
+		confPasswordT.setText("Confirm Password");
+		confPasswordT.setStyle("-fx-font-size: 12pt; -fx-font-weight: bold;");
+		confPasswordT.setFill(Color.BLUE);
+		confPassword.setMaxWidth(400);
 		userFeedback.setVisible(false);
 		userFeedback.setFill(Color.RED);
-		vboxDeleteAccount = new VBox(confirmDeletion, password, confPassword, confDeleteAcc, back2, userFeedback);
+		vboxDeleteAccount = new VBox(passwordT, password, confPasswordT, confPassword, confDeleteAcc, back2, userFeedback);
 		vboxDeleteAccount.setAlignment(Pos.BASELINE_CENTER);
-		vboxDeleteAccount.setPadding(new Insets(35, 0, 0, 30));
-		vboxDeleteAccount.setSpacing(30);
+		vboxDeleteAccount.setPadding(new Insets(30, 0, 0, 30));
+		vboxDeleteAccount.setSpacing(25);
 		vboxDeleteAccount.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 
 		return vboxDeleteAccount;
