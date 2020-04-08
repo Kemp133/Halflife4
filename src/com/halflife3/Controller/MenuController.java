@@ -4,9 +4,15 @@ import com.halflife3.DatabaseUI.Login;
 import com.halflife3.GameUI.ApplicationUser;
 import com.halflife3.GameUI.MainMenu;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
+import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.*;
+import javafx.scene.image.*;
 import javafx.stage.Stage;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class MenuController extends BaseController implements ICredentialUser {
 	private MainMenu menu;

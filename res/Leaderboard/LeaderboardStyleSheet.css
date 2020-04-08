@@ -44,3 +44,13 @@
 .label {
     -fx-text-fill: blue;
 }
+
+.button {
+    -fx-background-color: #000099, linear-gradient(#e5e5ff, #ccccff), linear-gradient(#9999ff 0%, #6666ff 49%, #3232ff 50%, #0000FF 100%);
+    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 3,2,1;
+    -fx-padding: 3 30 3 30;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+}

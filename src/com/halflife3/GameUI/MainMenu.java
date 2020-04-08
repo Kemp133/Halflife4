@@ -3,6 +3,7 @@ package com.halflife3.GameUI;
 import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.MapMenuController;
 import com.halflife3.Controller.SceneManager;
+import com.halflife3.DatabaseUI.SettingsMenu;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Server.Server;
 import javafx.application.Platform;
@@ -63,8 +64,13 @@ public class MainMenu /*extends Application*/ {
 
 		choose_map.setOnAction(actionEvent -> {
 			player.stop();
-			MapMenuController map_control = new MapMenuController();
-			map_control.start();
+//			MapMenuController map_control = new MapMenuController();
+			Platform.runLater(() -> new MapMenuController().start());
+		});
+
+		options.setOnAction(actionEvent -> {
+			player.stop();
+			Platform.runLater(() -> new SettingsMenu().start());
 		});
 
 		exit.setOnAction(actionEvent -> {
@@ -75,8 +81,8 @@ public class MainMenu /*extends Application*/ {
 
 		vbox = new VBox(startServer, joinGame, choose_map, leaderboard, options, exit);
 		vbox.setAlignment(Pos.BASELINE_CENTER);
-		vbox.setPadding(new Insets(35, 0, 0, 30));
-		vbox.setSpacing(30);
+		vbox.setPadding(new Insets(20, 0, 0, 30));
+		vbox.setSpacing(25);
 		vbox.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 
 		return vbox;

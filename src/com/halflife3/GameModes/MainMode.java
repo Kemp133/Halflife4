@@ -9,11 +9,11 @@ import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameObjects.*;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
+import com.halflife3.GameUI.MenuUtilitites;
 import com.halflife3.Mechanics.Interfaces.IRenderable;
 import com.halflife3.Mechanics.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.Client;
-import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
@@ -327,7 +327,7 @@ public class MainMode extends GameMode {
 		graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
 		//endregion
 
-		//region Checks if the game has ended
+		//region End Condition
 		if (won() || lost() || hasFinished) {
 			finished();
 			hasFinished = true;
@@ -354,18 +354,6 @@ public class MainMode extends GameMode {
 //				window = new Stage();
 //				window.setScene(wonScene);
 //				//endregion
-
-		scene.setCursor(Cursor.DEFAULT);
-
-//				try {
-//					SceneManager.getInstance().restorePreviousScene();
-//				} catch (SceneStackEmptyException e) {
-//					NetworkingUtilities.CreateErrorMessage(
-//							"Scene stack empty",
-//							"The scene stack only contained one element",
-//							"It is impossible to backtrack, error created in '" + getClass().getName() + "'"
-//					);
-//				}
 
 		System.out.println("Game exited");
 		running = false;
@@ -401,20 +389,7 @@ public class MainMode extends GameMode {
 
 	private void gameInit(Scene scene) {
 		//region Background setup
-		try {
-			Image image  = new Image(new FileInputStream("res/Space.png"));
-			var   bgSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
-			var   myBI   = new BackgroundImage(image, null, null, null, bgSize);
-			root.setBackground(new Background(myBI));
-		} catch (FileNotFoundException e) {
-			System.out.println("Could not find file in path: 'res/Space.png'");
-			NetworkingUtilities.CreateErrorMessage("Error Loading Background Image",
-					"The background image could not " + "be loaded!", "Exception message: " + e.getMessage());
-		}
-		//endregion
-
-		//region Initialise cursor
-		new Crosshair(input.getMousePosition(), new Vector2(0, 0));
+		root.setBackground(MenuUtilitites.getBackground(getClass(), "res/Space.png"));
 		//endregion
 
 		//region Add audio into game
@@ -437,7 +412,6 @@ public class MainMode extends GameMode {
 		//region Key input listener setup
 		root.addEventHandler(KeyEvent.ANY, new KeyboardInput());
 		root.addEventHandler(MouseEvent.ANY, new MouseInput());
-		scene.setCursor(Cursor.NONE);
 		//endregion
 
 		//region Map loading
@@ -503,7 +477,6 @@ public class MainMode extends GameMode {
 					root.setEffect(null);
 					popupStage.hide();
 					hasFinished = true;
-					scene.setCursor(Cursor.DEFAULT);
 					Client.disconnect();
 				});
 				//endregion

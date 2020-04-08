@@ -7,6 +7,7 @@ import com.halflife3.GameUI.WindowAttributes;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.*;
 import javafx.scene.*;
+import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.stage.*;
 
@@ -47,7 +48,6 @@ public final class SceneManager {
 	} //Singleton, don't want to be able to create instances of this class
 
 	//region Get Set Main Window
-
 	/**
 	 * A method to get the main stage from this SceneManager reference
 	 *
@@ -70,10 +70,10 @@ public final class SceneManager {
 	//endregion
 	/** A method to show the main stage contained in this SceneManager reference */
 	public void showWindow() { mainWindow.show(); }
+
 	/** A method to hide the main stage contained in this SceneManager reference */
 	public void hideWindow() { mainWindow.hide(); }
 	//region SetScene
-
 	/**
 	 * A method to set the {@code mainWindow} scene, as well as add it to the {@code Scenes} hashmap
 	 *
@@ -82,8 +82,25 @@ public final class SceneManager {
 	 */
 	public void setScene(String label, Scene scene) {
 		addScene(label, scene);
+		setSceneCursor(scene);
 		mainWindow.setScene(scene);
 		sceneOrder.push(label);
+	}
+
+	/**
+	 * A method to set the cursor of the scene. For simplicity's sake, this cursor is the one used in the game modes,
+	 * and now in every scene so we don't have to worry about the cursor disappearing between scenes.
+	 *
+	 * @param scene The scene to set the cursor of
+	 */
+	private void setSceneCursor(Scene scene) {
+		try {
+			Image image = new Image(new FileInputStream("res/Crosshair.png"));
+			scene.setCursor(new ImageCursor(image, image.getWidth() / 2, image.getHeight() / 2));
+		} catch (IOException e) {
+			NetworkingUtilities.CreateErrorMessage("Error Loading Cursor", "There was an error loading the cursor",
+					"Message: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -91,7 +108,7 @@ public final class SceneManager {
 	 *
 	 * @param label The label of the scene to set
 	 *
-	 * @throws SceneDoesNotExistException If the scene doesn't exist in the
+	 * @throws SceneDoesNotExistException If the scene doesn't exist in the Scenes stack
 	 */
 	public void setScene(String label) throws SceneDoesNotExistException {
 		mainWindow.setScene(getScene(label));
@@ -114,11 +131,11 @@ public final class SceneManager {
 	}
 
 	/**
-	 * You... Monster... You euthanized your faithful SceneManager data more quickly than any test
-	 * subject on record. Congratulations
+	 * You... Monster... You euthanized your faithful SceneManager data more quickly than any test subject on record.
+	 * Congratulations
 	 * <p>
-	 * (This method completely removes all data from the object, clearing it out in the hopes that garbage
-	 * collection comes along and cleans it up)
+	 * (This method completely removes all data from the object, clearing it out in the hopes that garbage collection
+	 * comes along and cleans it up)
 	 */
 	public void euthanizeData() {
 		mainWindow = null;
@@ -128,7 +145,6 @@ public final class SceneManager {
 	}
 
 	//region HelperMethods
-
 	/**
 	 * A helper method to get a scene out of the {@code Scenes} hash map with the label {@code label}
 	 *
@@ -151,8 +167,7 @@ public final class SceneManager {
 	 * @param scene The scene to add to the hash map
 	 */
 	private void addScene(String label, Scene scene) {
-		if (!Scenes.containsKey(label))
-			Scenes.put(label, scene);
+		if (!Scenes.containsKey(label)) Scenes.put(label, scene);
 	}
 
 	/**
@@ -166,12 +181,9 @@ public final class SceneManager {
 		s.setMaximized(windowAttributes.maximisedOnLoad);
 		s.setFullScreen(windowAttributes.fullScreenOnLoad);
 
-		if (!windowAttributes.decorated)
-			s.initStyle(StageStyle.UNIFIED);
-		if (windowAttributes.isModal)
-			s.initModality(Modality.APPLICATION_MODAL);
-		if (windowAttributes.maximisedOnLoad)
-			s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+		if (!windowAttributes.decorated) s.initStyle(StageStyle.UNIFIED);
+		if (windowAttributes.isModal) s.initModality(Modality.APPLICATION_MODAL);
+		if (windowAttributes.maximisedOnLoad) s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
 	}
 
 	/** A method to load the saved window attributes from disk. This is used to preserve user set variables */
@@ -186,7 +198,10 @@ public final class SceneManager {
 			if (Files.notExists(Paths.get("AppData"))) {
 				boolean createdAppData = new File("AppData").mkdir();
 				if (!createdAppData) {
-					NetworkingUtilities.CreateErrorMessage("Could not create AppData directory", "Error Creating AppData Directory", "AppData file could not be created. Please check that files can be created in the root directory!");
+					NetworkingUtilities.CreateErrorMessage("Could not create AppData directory", "Error Creating " +
+							"AppData Directory",
+							"AppData file could not be created. Please check that files can be " + "created in the " +
+									"root directory!");
 
 					//Error shown, now end the application
 					Platform.exit();
@@ -221,8 +236,7 @@ public final class SceneManager {
 	 * @return The static reference to this class
 	 */
 	public static SceneManager getInstance() {
-		if (instance == null)
-			instance = new SceneManager();
+		if (instance == null) instance = new SceneManager();
 		return instance;
 	}
 }

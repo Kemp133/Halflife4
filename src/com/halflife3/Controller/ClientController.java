@@ -2,7 +2,7 @@ package com.halflife3.Controller;
 
 import com.halflife3.GameModes.GameMode;
 import com.halflife3.GameModes.MainMode;
-import com.halflife3.GameUI.MainMenu;
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Server.ClientListServer;
 import javafx.animation.*;
 import javafx.stage.*;
@@ -16,7 +16,7 @@ import javafx.stage.*;
  * Wherever the game sets the scene in {@code SceneManager} should also set it back in the same place to try and avoid
  * errors with incorrectly using the SceneManager.
  * <p>
- * This class also keeps track of the gamemode in {@code gamemode} as well as the FPS target that the game mode
+ * This class also keeps track of the game mode in {@code gamemode} as well as the FPS target that the game mode
  * should be
  * played at. Hopefully in the (near) future I can move the FPS into the game mode and have this value encapsulated
  * fully.
@@ -54,11 +54,9 @@ public class ClientController extends BaseController {
 
 				if (gamemode.hasFinished) {
 					this.stop();
-					gamemode = null;
-					ClientListServer.reset();
-					ObjectManager.resetObjects();
-					MainMenu main = new MainMenu();
-					SceneManager.getInstance().setScene("Main Menu", main.getScene());
+					ClientController.this.stop();
+//					MainMenu main = new MainMenu();
+//					SceneManager.getInstance().setScene("Main Menu", main.getScene());
 				}
 			}
 		}.start();
@@ -71,7 +69,20 @@ public class ClientController extends BaseController {
 	}
 
 	@Override
-	public void end() {}
+	public void end() {
+		try {
+			SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
+		} catch(Exception e) {
+			NetworkingUtilities.CreateErrorMessage(
+					"Scene Stack Empty!",
+					"SceneManager threw an exception",
+					"Message" + e.getMessage()
+			);
+		}
+		gamemode = null;
+		ClientListServer.reset();
+		ObjectManager.resetObjects();
+	}
 
 	@Override
 	public void run() {
