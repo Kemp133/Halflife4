@@ -7,8 +7,8 @@ import java.net.*;
 import java.util.Enumeration;
 
 /**
- * A class to hold useful Networking based utilities (mainly for Client and Server) to reduce code duplication inside
- * of the client and server
+ * A class to hold useful Networking based utilities (mainly for Client and Server) to reduce code duplication inside of
+ * the client and server
  */
 public class NetworkingUtilities {
 	/**
@@ -59,8 +59,7 @@ public class NetworkingUtilities {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 		while (interfaces.hasMoreElements()) {
 			NetworkInterface net = interfaces.nextElement();
-			if (!net.getName().startsWith("wlan") || !net.isUp())
-				continue;
+			if (!net.getName().startsWith("wlan") || !net.isUp()) continue;
 
 			Enumeration<InetAddress> addresses = net.getInetAddresses();
 			while (addresses.hasMoreElements()) {
@@ -87,5 +86,14 @@ public class NetworkingUtilities {
 		alert.setHeaderText(headerText);
 		alert.setContentText(content);
 		alert.show();
+	}
+
+	/**
+	 * A method used to halt the program for X amount of seconds
+	 *
+	 * @param secondsToWait The time (in seconds) to wait
+	 */
+	public static void WaitXSeconds(int secondsToWait) {
+		try { Thread.sleep(secondsToWait * 1000); } catch (InterruptedException ignored) {}
 	}
 }

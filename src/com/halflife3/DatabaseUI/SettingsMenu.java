@@ -1,9 +1,6 @@
 package com.halflife3.DatabaseUI;
 
 import com.halflife3.Controller.BaseController;
-import com.halflife3.Controller.DatabaseManager;
-import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
-import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameUI.MenuUtilitites;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,10 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.sql.*;
+import java.io.*;
 
 public class SettingsMenu {
 	private BorderPane borderPane;
@@ -34,8 +28,8 @@ public class SettingsMenu {
 	private Button back             = new Button("Back");
 
 	public Button getDeleteRememberMe() { return deleteRememberMe; }
-	public Button getRemoveAcc() { return removeAcc; }
-	public Button getBack() { return back; }
+	public Button getRemoveAcc()        { return removeAcc; }
+	public Button getBack()             { return back; }
 
 	/*
 	Set-up for scene to allow user to delete account
@@ -48,13 +42,20 @@ public class SettingsMenu {
 	private Button        back2           = new Button("Back");
 	private Text          userFeedback    = new Text();
 
-	private Scene scene;
+	public Text getUserFeedback() { return userFeedback; }
+	public PasswordField getPassword() { return password; }
+	public PasswordField getConfPassword() { return confPassword; }
+	public Button getConfDeleteAcc() { return confDeleteAcc; }
+	public Button getBack2() { return back2; }
 
-	private SceneManager manager = SceneManager.getInstance();
+	private Scene mainScene;
+	private Scene removeAccountScene;
+	private Scene accountDeletedScene;
 
-	public void start() {
-		initialiseMenuScene(settingsVBox());
-		manager.setScene("Settings", getScene());
+	public SettingsMenu() {
+		mainScene = createSceneContext(settingsVBox());
+		removeAccountScene = createSceneContext(removeAccVBox());
+		accountDeletedScene = createSceneContext(accountDeletedVbox());
 	}
 
 	private Background addBackground() {
@@ -62,30 +63,6 @@ public class SettingsMenu {
 	}
 
 	private VBox settingsVBox() {
-		deleteRememberMe.setOnAction(actionEvent -> {
-			if (deleteLoginConf()) {
-				userFeedback.setText("Auto-login removed");
-			} else {
-				userFeedback.setText("Remember me has not been used");
-			}
-			userFeedback.setVisible(true);
-		});
-
-		removeAcc.setOnAction(actionEvent -> {
-			//TODO: Handle scene change to delete acc scene
-			initialiseMenuScene(removeAccVBox());
-			manager.setScene("Settings Delete Account", getScene());
-		});
-
-		back.setOnAction(actionEvent -> {
-			//TODO: Handle scene change to main menu
-			try {
-				manager.restorePreviousScene();
-			} catch (SceneStackEmptyException e) {
-				e.printStackTrace();
-			}
-		});
-
 		userFeedback.setVisible(false);
 		userFeedback.setStyle("-fx-font-size: 15pt;");
 		userFeedback.setFill(Color.RED);
@@ -98,35 +75,20 @@ public class SettingsMenu {
 		return vboxSettings;
 	}
 
+	private VBox accountDeletedVbox() {
+		Text headerText = new Text("Your account has been deleted successfully");
+		Text bodyText = new Text("The game window will close automatically in 5 seconds");
+		headerText.setStyle("-fx-font-size: 25pt;");
+		headerText.setFill(Color.GREEN);
+		bodyText.setStyle("-fx-font-size: 15pt;");
+		bodyText.setFill(Color.GREEN);
+		VBox vBox = new VBox(headerText, bodyText);
+		vBox.setAlignment(Pos.CENTER);
+		vBox.setStyle("-fx-background-color: rgba(176,224,230,0.8)");
+		return vBox;
+	}
+
 	private VBox removeAccVBox() {
-		confDeleteAcc.setOnAction(actionEvent -> {
-			if (!password.getText().equals(confPassword.getText())) {
-				userFeedback.setText("Passwords do not match");
-				setNullFields();
-			} else {
-				if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username, password.getText())) {
-					deleteUserDetails(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username);
-					userFeedback.setFill(Color.GREEN);
-					userFeedback.setText("Your account has been deleted");
-					//TODO: Change 'back' on action to go to login page instead of settings
-				} else {
-					userFeedback.setText("Password is incorrect");
-					setNullFields();
-				}
-			}
-			userFeedback.setVisible(true);
-		});
-
-		back.setOnAction(actionEvent -> {
-			//TODO: Add code to go back to settings
-			try {
-				manager.restorePreviousScene();
-			} catch (SceneStackEmptyException e) {
-				e.printStackTrace();
-			}
-		});
-
-
 		passwordT.setText("Password For User: " + BaseController.GetApplicationUser().username);
 		passwordT.setStyle("-fx-font-size: 12pt; -fx-font-weight: bold;");
 		passwordT.setFill(Color.BLUE);
@@ -186,43 +148,8 @@ public class SettingsMenu {
 		return borderPane;
 	}
 
-	private void deleteUserDetails(Connection c, String username) {
-		PreparedStatement deleteStatement = null;
-		try {
-			String deleteQuery = "DELETE FROM userdatascore WHERE \"name\" = '" + username + "'";
-			deleteStatement = c.prepareStatement(deleteQuery);
-			deleteStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			DatabaseManager.closeConnections(c, deleteStatement, null);
-		}
-	}
+	private Scene createSceneContext(VBox content) { return new Scene(borderPane(content), 800,600); }
 
-	private boolean deleteLoginConf() {
-		try {
-			File f = new File("AppData/login.conf");
-			if (f.delete()) {
-				System.out.println(f.getName() + " deleted");
-				return true;
-			} else {
-				System.out.println("failed");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	//Sets text fields to null
-	public void setNullFields() {
-		password.setText(null);
-		confPassword.setText(null);
-	}
-
-	private void initialiseMenuScene(VBox sceneName) {
-		scene = new Scene(borderPane(sceneName), 800, 600);
-	}
-
-	public Scene getScene() { return scene; }
+	public Scene getMainScene() { return mainScene; }
+	public Scene getRemoveAccountScene() { return removeAccountScene; }
 }

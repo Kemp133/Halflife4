@@ -2,6 +2,7 @@ package com.halflife3.GameUI;
 
 import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.MapMenuController;
+import com.halflife3.Controller.OptionsController;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.DatabaseUI.Leaderboard;
 import com.halflife3.DatabaseUI.SettingsMenu;
@@ -52,6 +53,7 @@ public class MainMenu /*extends Application*/ {
 	private VBox vbox() {
 		File audioFile = new File(MENU_AUDIO_PATH);
 		player = new MediaPlayer(new Media(audioFile.toURI().toString()));
+
 		joinGame.setOnAction(actionEvent -> {
 			player.stop();
 			Platform.runLater(() -> new ClientController().start(SceneManager.getInstance().getMainWindow()));
@@ -75,17 +77,14 @@ public class MainMenu /*extends Application*/ {
 			SceneManager.getInstance().setScene("Leader Board",lb.returnScene());
 		});
 
-
 		options.setOnAction(actionEvent -> {
-			player.stop();
-			Platform.runLater(() -> new SettingsMenu().start());
+			Platform.runLater(() -> new OptionsController().start());
 		});
 
 		exit.setOnAction(actionEvent -> {
 			Platform.exit();
 			System.exit(0); //This is done to actually stop the Java application that's running
 		});
-
 
 		vbox = new VBox(startServer, joinGame, choose_map, leaderboard, options, exit);
 		vbox.setAlignment(Pos.BASELINE_CENTER);

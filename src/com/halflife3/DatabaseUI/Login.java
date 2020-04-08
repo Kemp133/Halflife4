@@ -358,8 +358,7 @@ public class Login extends Preloader {
 				} else {
 					//Insert user and password into table
 					addNewUser(DatabaseManager.getConnection(), nameField.getText(), passwordField.getText());
-					incorrectFields.setText("User created");
-					incorrectFields.setVisible(true);
+					logInUser(nameField.getText());
 				}
 			} else {
 				incorrectFields.setText("Please type in a username and password");
@@ -430,6 +429,12 @@ public class Login extends Preloader {
 		nameField.setText(null);
 		passwordField.setText(null);
 		passwordFieldConf.setText(null);
+	}
+
+	private void logInUser(String username) {
+		nameField.setText(username);
+		hasLoggedIn = true;
+		mayBeHid();
 	}
 
 	//region Unique Database Methods
