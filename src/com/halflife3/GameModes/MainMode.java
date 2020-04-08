@@ -62,11 +62,11 @@ public class MainMode extends GameMode {
 	private ProgressBar[]           stunBar;
 	private ProgressBar             amoBar;
 	private Ball                    ball;
-	private Stage                   window     = null;
+	private Stage                   window;
 	private char                    side;
 	public  int                     yourScore  = 0;
 	public  int                     enemyScore = 0;
-	public  boolean                 running    = false;
+	public  boolean                 running;
 	public  int                     mapWidth;
 	private int                     mapHeight;
 	private GraphicsContext         graphicsContext;
@@ -94,7 +94,7 @@ public class MainMode extends GameMode {
 		//region Initialise Objects
 		playerList  = new HashMap<>();
 		scoreSprite = new HashMap<>();
-		stunBar     = new ProgressBar[4];
+		stunBar     = new ProgressBar[Server.startPositions.length];
 		root        = new Pane();
 		//endregion
 
@@ -284,10 +284,10 @@ public class MainMode extends GameMode {
 
 		//region Updates the stun bar
 		int id = 0;
-		for (String ip : playerList.keySet()) {
-			stunBar[id].setLayoutX(playerList.get(ip).getPosX() - Camera.GetOffsetX());
-			stunBar[id].setLayoutY(playerList.get(ip).getPosY() - Camera.GetOffsetY() - 12);
-			stunBar[id].setProgress(playerList.get(ip).stunned / STUN_DURATION);
+		for (var player : playerList.values()) {
+			stunBar[id].setLayoutX(player.getPosX() - Camera.GetOffsetX());
+			stunBar[id].setLayoutY(player.getPosY() - Camera.GetOffsetY() - 12);
+			stunBar[id].setProgress(player.stunned / STUN_DURATION);
 			id++;
 		}
 		//endregion
@@ -327,10 +327,12 @@ public class MainMode extends GameMode {
 		graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
 		//endregion
 
+		//region Checks if the game has ended
 		if (won() || lost() || hasFinished) {
 			finished();
 			hasFinished = true;
 		}
+		//endregion
 	}
 
 	@Override

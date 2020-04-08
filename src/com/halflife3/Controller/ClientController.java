@@ -3,6 +3,7 @@ package com.halflife3.Controller;
 import com.halflife3.GameModes.GameMode;
 import com.halflife3.GameModes.MainMode;
 import com.halflife3.GameUI.MainMenu;
+import com.halflife3.Networking.Server.ClientListServer;
 import javafx.animation.*;
 import javafx.stage.*;
 
@@ -54,6 +55,8 @@ public class ClientController extends BaseController {
 				if (gamemode.hasFinished) {
 					this.stop();
 					gamemode = null;
+					ClientListServer.reset();
+					ObjectManager.resetObjects();
 					MainMenu main = new MainMenu();
 					SceneManager.getInstance().setScene("Main Menu", main.getScene());
 				}
@@ -68,10 +71,7 @@ public class ClientController extends BaseController {
 	}
 
 	@Override
-	public void end() {
-		//gamemode = null;
-		//SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
-	}
+	public void end() {}
 
 	@Override
 	public void run() {

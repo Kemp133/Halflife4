@@ -10,18 +10,18 @@ public class ObjectManager {
     private static HashSet<GameObject> gameObjects = new HashSet<>();
 
     public static void addObject(GameObject toAdd) {
+        gameObjects.add(toAdd);
         while (true) {
             HashSet<GameObject> existingSet = getGameObjects();
-            gameObjects.add(toAdd);
             if (atomicObjects.compareAndSet(existingSet, gameObjects))
                 return;
         }
     }
 
     public static void removeObject(GameObject toRemove) {
+        gameObjects.remove(toRemove);
         while (true) {
             HashSet<GameObject> existingSet = getGameObjects();
-            gameObjects.remove(toRemove);
             if (atomicObjects.compareAndSet(existingSet, gameObjects))
                 return;
         }
@@ -29,5 +29,14 @@ public class ObjectManager {
 
     public static HashSet<GameObject> getGameObjects() {
         return atomicObjects.get();
+    }
+
+    public static void resetObjects() {
+        gameObjects = new HashSet<>();
+        while (true) {
+            HashSet<GameObject> existingSet = getGameObjects();
+            if (atomicObjects.compareAndSet(existingSet, gameObjects))
+                return;
+        }
     }
 }

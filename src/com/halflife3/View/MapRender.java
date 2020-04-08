@@ -1,12 +1,11 @@
 package com.halflife3.View;
 
-import com.halflife3.GameUI.Maps;
 import com.halflife3.GameObjects.Bricks;
+import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.Vector2;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.paint.Color;
+import javafx.scene.canvas.*;
+import javafx.scene.image.*;
+import javafx.scene.paint.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +13,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class MapRender {
-    private static Deque<Bricks> Bricks_list = new ArrayDeque<>();
+    private static Deque<Bricks> Bricks_list;
     public static final int BLOCK_SIZE = 40;
 
     public static Deque<Bricks> GetList() {
@@ -28,6 +27,7 @@ public class MapRender {
 
     public static void LoadLevel() {
         try {
+            Bricks_list = new ArrayDeque<>();
             Image mapImage = new Image(new FileInputStream(Maps.Map));
             PixelReader pixelReader = mapImage.getPixelReader();
             Vector2 zero = new Vector2();

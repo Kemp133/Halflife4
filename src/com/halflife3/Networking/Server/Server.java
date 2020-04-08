@@ -14,7 +14,6 @@ import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
@@ -37,8 +36,8 @@ public class Server implements Runnable {
 	public static final int    SERVER_TIMEOUT    = 3000000; // milliseconds
 	public static final float  STUN_DURATION     = SERVER_FPS * 3;
 
-	private        boolean                   running        = false;
-	private static boolean                   welcoming      = true;
+	private static boolean                   running;
+	private static boolean                   welcoming;
 	private static InetAddress               multicastGroup;
 	private static MulticastSocket           multicastSocket;
 	private        PositionListPacket        posListPacket;
@@ -47,7 +46,7 @@ public class Server implements Runnable {
 	private static int                       clientPort     = 6666;
 	private static HashMap<Vector2, Boolean> availablePositions;
 	private static HashMap<Vector2, Boolean> canShoot;
-	public static  Vector2[]                 startPositions = {new Vector2(/*160*/600, 600), new Vector2(1840, 600)};
+	public static  Vector2[]                 startPositions = {new Vector2(160, 600), new Vector2(1840, 600)};
 	public static  ArrayList<String>         botNamesList   = new ArrayList<>(Arrays.asList("bot1", "bot2"));
 	private static HashMap<String, AIPlayer> botList;
 	private        AI                        botAI;
@@ -91,9 +90,9 @@ public class Server implements Runnable {
 
 		//region Adds the ball to the positionList
 		try {
-			BufferedImage mapImage        = ImageIO.read(new File(Maps.Map));
-			int           mapWidthMiddle  = mapImage.getWidth() * 20;
-			int           mapHeightMiddle = mapImage.getHeight() * 20;
+			var mapImage        = ImageIO.read(new File(Maps.Map));
+			int mapWidthMiddle  = mapImage.getWidth() * 20;
+			int mapHeightMiddle = mapImage.getHeight() * 20;
 			mapWidth  = mapWidthMiddle * 2;
 			mapHeight = mapHeightMiddle * 2;
 
@@ -109,7 +108,7 @@ public class Server implements Runnable {
 			availablePositions.put(startPositions[i], true);
 			canShoot.put(startPositions[i], true);
 			String   botName   = botNamesList.get(i);
-			AIPlayer botPlayer = new AIPlayer(startPositions[i]);
+			AIPlayer botPlayer = new AIPlayer(new Vector2(startPositions[i]));
 			ObjectManager.removeObject(botPlayer);
 			botPlayer.setIpOfClient(botName);
 			botPlayer.setActive(true);
@@ -136,6 +135,7 @@ public class Server implements Runnable {
 		//region Multicasts WelcomePackets
 		new Thread(() -> {
 			int timeOut = SERVER_TIMEOUT / 1000;
+			welcoming = true;
 			while (running && timeOut > 0) {
 				if (welcoming) { multicastPacket(new WelcomePacket(), MULTICAST_PORT); }
 
@@ -170,7 +170,7 @@ public class Server implements Runnable {
 		}).start();
 		//endregion
 
-		//region Listens for incoming packets
+		//region Listens for incoming connections
 		while (running) {
 			if (ClientListServer.clientList.size() < startPositions.length) {
 				try {
@@ -180,6 +180,10 @@ public class Server implements Runnable {
 		}
 		//endregion
 
+		exit();
+	}
+
+	private void exit() {
 		multicastSocket.close();
 	}
 
@@ -446,7 +450,7 @@ public class Server implements Runnable {
 		portPacket.setPort(clientPort);
 		portPacket.setClientAddress(address);
 		for (int i = 0; i < startPositions.length; i++) {
-			Vector2 startPosition = startPositions[i];
+			Vector2 startPosition = new Vector2(startPositions[i]);
 			if (!availablePositions.get(startPosition))
 				continue;
 
@@ -495,6 +499,11 @@ public class Server implements Runnable {
 	 * @param address The address of the player to be removed
 	 */
 	public static void removeConnection(InetAddress address) {
+		if (ClientListServer.clientList.size() == 1) {
+			running = false;
+			return;
+		}
+
 		if (ClientListServer.clientList.size() >= startPositions.length)
 			welcoming = true;
 

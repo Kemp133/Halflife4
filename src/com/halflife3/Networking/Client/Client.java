@@ -8,9 +8,8 @@ import com.halflife3.Networking.Packets.PositionListPacket;
 import com.halflife3.Networking.Packets.WelcomePacket;
 import com.halflife3.Networking.Server.Server;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.*;
-import java.util.Enumeration;
 
 import static com.halflife3.Networking.Server.Server.GET_PORT_PORT;
 
@@ -18,11 +17,11 @@ public class Client {
 
     //region Variables
 //    For "catching" the server
-    protected static MulticastSocket serverSocket = null;
-    protected InetAddress group = null;
+    protected static MulticastSocket serverSocket;
+    protected InetAddress group;
 
 //    For receiving clients' positions
-    protected static MulticastSocket positionSocket = null;
+    protected static MulticastSocket positionSocket;
     private static int incPacketSize = 2000;
 
     //    For sending packets to the server
@@ -37,6 +36,18 @@ public class Client {
 
 //    List of Clients
     public static PositionListPacket listOfClients;
+
+    public static void reset() {
+        serverSocket = null;
+        positionSocket = null;
+        hostAddress = null;
+        outSocket = null;
+        clientAddress = null;
+        uniquePort = 0;
+        listenerClient = null;
+        startingPosition = null;
+        listOfClients = null;
+    }
     //endregion
 
 //    Joins the multicast group to listen for multicasted packets
@@ -105,7 +116,6 @@ public class Client {
 
 //    Sends a disconnect packet to the server and closes the sockets
     public static void disconnect() {
-
         //region Sends Disconnect packet to the Server
         DisconnectPacket leave = new DisconnectPacket();
         byte[] tempBuf = NetworkingUtilities.objectToByteArray(leave);
@@ -119,6 +129,8 @@ public class Client {
         serverSocket.close();
         outSocket.close();
         positionSocket.close();
+
+        reset();
     }
 
 //    Gets the unique port to communicate with the server and a starting position
