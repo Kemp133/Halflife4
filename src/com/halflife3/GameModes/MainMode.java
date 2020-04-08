@@ -330,6 +330,8 @@ public class MainMode extends GameMode {
 		//region End Condition
 		if (won() || lost() || hasFinished) {
 			finished();
+			if(won())
+				win = true;
 			hasFinished = true;
 		}
 		//endregion
@@ -354,6 +356,7 @@ public class MainMode extends GameMode {
 //				window = new Stage();
 //				window.setScene(wonScene);
 //				//endregion
+
 
 		System.out.println("Game exited");
 		running = false;

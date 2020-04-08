@@ -2,9 +2,12 @@ package com.halflife3.Controller;
 
 import com.halflife3.GameModes.GameMode;
 import com.halflife3.GameModes.MainMode;
+import com.halflife3.GameUI.LoseScene;
+import com.halflife3.GameUI.WinScene;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Server.ClientListServer;
 import javafx.animation.*;
+import javafx.scene.Scene;
 import javafx.stage.*;
 
 /**
@@ -70,14 +73,22 @@ public class ClientController extends BaseController {
 
 	@Override
 	public void end() {
-		try {
-			SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
-		} catch(Exception e) {
-			NetworkingUtilities.CreateErrorMessage(
-					"Scene Stack Empty!",
-					"SceneManager threw an exception",
-					"Message" + e.getMessage()
-			);
+//		try {
+//			SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
+//		} catch(Exception e) {
+//			NetworkingUtilities.CreateErrorMessage(
+//					"Scene Stack Empty!",
+//					"SceneManager threw an exception",
+//					"Message" + e.getMessage()
+//			);
+//		}
+		if(gamemode.win){
+			WinScene win = new WinScene();
+			SceneManager.getInstance().setScene("Win Scene", win.getScene());
+		}
+		else {
+			LoseScene lose = new LoseScene();
+			SceneManager.getInstance().setScene("Lose Scene", lose.getScene());
 		}
 		gamemode = null;
 		ClientListServer.reset();

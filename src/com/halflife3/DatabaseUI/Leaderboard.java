@@ -215,10 +215,6 @@ public class Leaderboard {
             }
         });
 
-
-//        paneBottom = new Pane();
-//        paneBottom.setMinSize(600, 80);
-
         VBox vb = new VBox(exit);
         vb.setAlignment(Pos.BASELINE_CENTER);
         vb.setMinSize(600,80);
