@@ -39,6 +39,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static javafx.scene.input.KeyCode.*;
 
@@ -63,13 +65,13 @@ public class MainMode extends GameMode {
 	private ProgressBar             amoBar;
 	private Ball                    ball;
 	private Stage                   window;
+	private GraphicsContext         graphicsContext;
+	private ExecutorService         executor;
 	private char                    side;
 	public  int                     yourScore  = 0;
 	public  int                     enemyScore = 0;
-	public  boolean                 running;
 	public  int                     mapWidth;
 	private int                     mapHeight;
-	private GraphicsContext         graphicsContext;
 	private double                  ballPreviousX;
 	private int                     rightEndOfScreen;
 	private int                     leftEndOfScreen;
@@ -96,6 +98,7 @@ public class MainMode extends GameMode {
 		scoreSprite = new HashMap<>();
 		stunBar     = new ProgressBar[Server.startPositions.length];
 		root        = new Pane();
+		executor    = Executors.newSingleThreadExecutor();
 		//endregion
 
 		//region Initialise This Player
@@ -131,7 +134,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Game Objects
-		gameInit(scene);
+		gameInit();
 		//endregion
 
 		//region Set Side Of Player
@@ -162,11 +165,10 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
-		running = true;
-		new Thread(() -> {
-			while (running)
+		executor.submit(() -> {
+			while (true)
 				updateEnemies();
-		}).start();
+		});
 		//endregion
 
 		System.out.println("Game Running");
@@ -330,7 +332,7 @@ public class MainMode extends GameMode {
 		//region End Condition
 		if (won() || lost() || hasFinished) {
 			finished();
-			if(won())
+			if (won())
 				win = true;
 			hasFinished = true;
 		}
@@ -359,7 +361,7 @@ public class MainMode extends GameMode {
 
 
 		System.out.println("Game exited");
-		running = false;
+		executor.shutdownNow();
 		Client.disconnect();
 	}
 
@@ -390,7 +392,7 @@ public class MainMode extends GameMode {
 		}
 	}
 
-	private void gameInit(Scene scene) {
+	private void gameInit() {
 		//region Background setup
 		root.setBackground(MenuUtilitites.getBackground(getClass(), "res/Space.png"));
 		//endregion

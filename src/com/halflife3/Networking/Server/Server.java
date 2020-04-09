@@ -33,7 +33,7 @@ public class Server implements Runnable {
 	public static final int    GET_PORT_PORT     = 5566;
 	public static final int    POSITIONS_PORT    = 5533;
 	public static final int    GOAL_WIDTH        = 4 * 40;
-	public static final int    SERVER_TIMEOUT    = 3000000; // milliseconds
+	public static final int    SERVER_TIMEOUT    = 3000; // seconds
 	public static final float  STUN_DURATION     = SERVER_FPS * 3;
 
 	private static boolean                   running;
@@ -134,19 +134,20 @@ public class Server implements Runnable {
 
 		//region Multicasts WelcomePackets
 		new Thread(() -> {
-			int timeOut = SERVER_TIMEOUT / 1000;
+			int timeOut = SERVER_TIMEOUT;
 			welcoming = true;
 			while (running && timeOut > 0) {
-				if (welcoming) { multicastPacket(new WelcomePacket(), MULTICAST_PORT); }
+				if (welcoming)
+					multicastPacket(new WelcomePacket(), MULTICAST_PORT);
 
-				waitASecond();
+				NetworkingUtilities.WaitXSeconds(1);
 
 				if (ClientListServer.clientList.isEmpty()) {
 					if (timeOut <= 3)
 						System.out.println("Timeout in: " + timeOut);
 					timeOut--;
 				} else
-					timeOut = SERVER_TIMEOUT / 1000;
+					timeOut = SERVER_TIMEOUT;
 			}
 			running   = false;
 			welcoming = false;
@@ -154,7 +155,7 @@ public class Server implements Runnable {
 		}).start();
 		//endregion
 
-		//region Multicasts the positionList
+		//region Tracks the state of the game
 		new Thread(() -> {
 			long   lastUpdate = System.nanoTime();
 			double elapsedTime;
@@ -261,10 +262,8 @@ public class Server implements Runnable {
 		multicastPacket(posListPacket, POSITIONS_PORT);
 		//endregion
 
-		//region Check if a goal has been scored
 		if (theBall.getPosX() > mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH)
-			resetMap();
-		//endregion
+			resetMap(); //Checks if a goal has been scored and resets the map if so
 	}
 
 	/**
@@ -417,7 +416,7 @@ public class Server implements Runnable {
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
 		if (ClientListServer.clientList.isEmpty()) {
-			clientSocket.setSoTimeout(SERVER_TIMEOUT + 1000);
+			clientSocket.setSoTimeout(SERVER_TIMEOUT * 1001);
 		} else
 			clientSocket.setSoTimeout(0);
 
@@ -484,7 +483,7 @@ public class Server implements Runnable {
 		new Thread(connection).start();
 
 		//Lets the client side get ready to receive the port
-		try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+		NetworkingUtilities.WaitXSeconds(3);
 		multicastPacket(portPacket, GET_PORT_PORT);
 
 		ClientListServer.clientList.put(address, connection);
@@ -542,14 +541,6 @@ public class Server implements Runnable {
 		}
 	}
 
-	public static void waitASecond() {
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
 	private void resetMap() {
 		new Thread(() -> {
 			System.out.println("Goal has been scored. Resetting positions...");
@@ -567,6 +558,6 @@ public class Server implements Runnable {
 			multicastPacket(posListPacket, POSITIONS_PORT);
 		}).start();
 
-		try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+		NetworkingUtilities.WaitXSeconds(1);
 	}
 }

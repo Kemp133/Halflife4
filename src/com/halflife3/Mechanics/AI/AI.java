@@ -51,7 +51,7 @@ public class AI {
 		return true;
 	}
 
-	public Vector2 getNextPos(Vector2 bot, Vector2 toGoTo) {
+	public synchronized Vector2 getNextPos(Vector2 bot, Vector2 toGoTo) {
 		Node botNode = map[(int) (bot.getY()) / BLOCK_SIZE][(int) (bot.getX()) / BLOCK_SIZE];
 		Node endNode = map[(int) (toGoTo.getY()) / BLOCK_SIZE][(int) (toGoTo.getX()) / BLOCK_SIZE];
 

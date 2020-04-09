@@ -89,7 +89,7 @@ public class NetworkingUtilities {
 	}
 
 	/**
-	 * A method used to halt the program for X amount of seconds
+	 * A method used to halt the program for X number of seconds
 	 *
 	 * @param secondsToWait The time (in seconds) to wait
 	 */
