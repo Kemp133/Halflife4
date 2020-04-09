@@ -43,9 +43,7 @@ public class Brick extends Sprite {
     }
 
     @Override
-    public void update(double time) {
-        //TODO: If bullet touches the brick and the brick can be destroyed, remove brick
-    }
+    public void update(double time) {}
 
     private ArrayList<String> pathList() {
         ArrayList<String> paths = new ArrayList<>();
