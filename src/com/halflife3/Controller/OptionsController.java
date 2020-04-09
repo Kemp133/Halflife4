@@ -108,11 +108,9 @@ public class OptionsController extends BaseController {
 		try {
 			File f = new File("AppData/login.conf");
 			if (f.delete()) {
-				menu.getUserFeedback().setText("Automatic login data deleted!");
 				System.out.println(f.getName() + " deleted");
 				return true;
 			} else {
-				menu.getUserFeedback().setText("Failed to delete automatic login data!");
 				System.out.println("failed");
 			}
 		} catch (Exception e) {
