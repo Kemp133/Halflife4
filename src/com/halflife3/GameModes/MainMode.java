@@ -158,7 +158,8 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Ball
-		ball          = new Ball(new Vector2(mapWidth / 2f, mapHeight / 2f));
+		PositionPacket ballPacket = Client.listOfClients.posList.get("ball");
+		ball          = new Ball(new Vector2(ballPacket.posX, ballPacket.posY));
 		ballPreviousX = ball.getPosX();
 		//endregion
 

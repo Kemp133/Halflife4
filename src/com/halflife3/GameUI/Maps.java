@@ -13,48 +13,51 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class Maps {
-	static public String     Map    = "res/map.png";
-	private       Button     map1   = new Button("Map1");
-	private       Button     map2   = new Button("Map2");
-	private       Button     map3   = new Button("Map3");
-	private       Button     back   = new Button("Back to Main Menu");
-	private       ImageView  imgView1;
-	private       ImageView  imgView2;
-	private       ImageView  imgView3;
-
+	static public String      Map  = "res/map1.png";
+	private       Button      map0 = new Button("Map1");
+	private       Button      map1 = new Button("Map2");
+	private       Button      map2 = new Button("Map3");
+	private       Button      back = new Button("Back to Main Menu");
+	private       ImageView   imgView1;
+	private       ImageView   imgView2;
+	private       ImageView   imgView3;
+	private ArrayList<String> mapList;
 
 	private Scene scene;
 
 	public Maps() {
+		mapList = pathList();
 		initialiseMenuScene();
 	}
 
 	private VBox vbox() {
-		map1.setOnAction(actionEvent -> {
-			Map = "res/map.png";
-			map1.getStyleClass().add("button1");
+		map0.setOnAction(actionEvent -> {
+			Map = mapList.get(0);
+			map0.getStyleClass().add("button1");
+			map1.getStyleClass().remove("button1");
 			map2.getStyleClass().remove("button1");
-			map3.getStyleClass().remove("button1");
+			var map_control = new MapMenuController();
+			map_control.end();
+		});
+
+		map1.setOnAction(actionEvent -> {
+			Map = mapList.get(1);
+			map1.getStyleClass().add("button1");
+			map0.getStyleClass().remove("button1");
+			map2.getStyleClass().remove("button1");
 			var map_control = new MapMenuController();
 			map_control.end();
 		});
 
 		map2.setOnAction(actionEvent -> {
-			Map = "res/map2.png";
+			Map = mapList.get(2);
 			map2.getStyleClass().add("button1");
+			map0.getStyleClass().remove("button1");
 			map1.getStyleClass().remove("button1");
-			map3.getStyleClass().remove("button1");
-			var map_control = new MapMenuController();
-			map_control.end();
-		});
-
-		map3.setOnAction(actionEvent -> {
-			Map = "res/map3.png";
-			map3.getStyleClass().add("button1");
-			map1.getStyleClass().remove("button1");
-			map2.getStyleClass().remove("button1");
 			var map_control = new MapMenuController();
 			map_control.end();
 		});
@@ -66,9 +69,9 @@ public class Maps {
 
 		getImage();
 
-		HBox h1 = createHBox(map1, imgView1);
-		HBox h2 = createHBox(map2, imgView2);
-		HBox h3 = createHBox(map3, imgView3);
+		HBox h1 = createHBox(map0, imgView1);
+		HBox h2 = createHBox(map1, imgView2);
+		HBox h3 = createHBox(map2, imgView3);
 
 		VBox vbox = new VBox(h1, h2, h3, back);
 		vbox.setAlignment(Pos.BASELINE_CENTER);
@@ -132,9 +135,9 @@ public class Maps {
 
 	private void getImage() {
 		try {
-			Image mapImage1 = new Image(new FileInputStream("res/map.png"));
-			Image mapImage2 = new Image(new FileInputStream("res/map2.png"));
-			Image mapImage3 = new Image(new FileInputStream("res/map3.png"));
+			Image mapImage1 = new Image(new FileInputStream(mapList.get(0)));
+			Image mapImage2 = new Image(new FileInputStream(mapList.get(1)));
+			Image mapImage3 = new Image(new FileInputStream(mapList.get(2)));
 			imgView1 = new ImageView(mapImage1);
 			imgView2 = new ImageView(mapImage2);
 			imgView3 = new ImageView(mapImage3);
@@ -145,9 +148,21 @@ public class Maps {
 			imgView3.setFitHeight(100);
 			imgView3.setFitWidth(220);
 		} catch (IOException e) {
-			System.out.println("Can't find Image.");
+			System.err.println("Can't find Image.");
 		}
 	}
 
 	public Scene getScene() { return scene; }
+
+	private ArrayList<String> pathList() {
+		ArrayList<String> paths = new ArrayList<>();
+
+		File directory = new File("res\\Maps");
+		int fileCount = Objects.requireNonNull(directory.list()).length;
+
+		for (int i = 1; i <= fileCount; i++)
+		     paths.add(String.format("res/Maps/map%d.png", i));
+
+		return paths;
+	}
 }

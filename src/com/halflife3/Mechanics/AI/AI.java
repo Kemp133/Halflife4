@@ -44,7 +44,7 @@ public class AI {
 				}
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("Could not find file at location: 'res/map.png'");
+			e.printStackTrace();
 			return false;
 		}
 
