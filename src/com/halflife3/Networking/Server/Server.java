@@ -2,10 +2,7 @@ package com.halflife3.Networking.Server;
 
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.GameModes.MainMode;
-import com.halflife3.GameObjects.AIPlayer;
-import com.halflife3.GameObjects.Ball;
-import com.halflife3.GameObjects.Bricks;
-import com.halflife3.GameObjects.Bullet;
+import com.halflife3.GameObjects.*;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.NetworkingUtilities;
@@ -236,8 +233,7 @@ public class Server implements Runnable {
 		}
 		//endregion
 
-		for (var b : bulletSet)
-			b.update(elapsedTime); //Updates the bullet positions
+		for (Bullet b : bulletSet) { b.update(elapsedTime); } //Updates the bullet positions
 
 		//region Updates the ball and its packet
 		theBall.update(elapsedTime);
@@ -250,8 +246,16 @@ public class Server implements Runnable {
 		multicastPacket(posListPacket, POSITIONS_PORT);
 		//endregion
 
-		if (theBall.getPosX() > MapRender.mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH)
+		if (/*theBall.getPosX() > MapRender.mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH*/goalScored())
 			resetMap(); //Checks if a goal has been scored and resets the map if so
+	}
+
+	private boolean goalScored() {
+		for (Goal g : MapRender.getGoalZone())
+			if (theBall.getBounds().intersects(g.getBounds().getBoundsInLocal()))
+				return true;
+
+		return false;
 	}
 
 	/**
@@ -344,7 +348,7 @@ public class Server implements Runnable {
 	}
 
 	private void ballWallBounce() {
-		for (Bricks block : MapRender.GetList()) {
+		for (Brick block : MapRender.GetList()) {
 			if (!theBall.getBounds().intersects(block.getBounds().getBoundsInLocal()))
 				continue;
 
@@ -369,7 +373,7 @@ public class Server implements Runnable {
 	private void bulletCollision() {
 		HashSet<Bullet> bulletsToDestroy = new HashSet<>();
 		for (Bullet bullet : bulletSet) {
-			for (Bricks block : MapRender.GetList())
+			for (Brick block : MapRender.GetList())
 				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
 					bulletsToDestroy.add(bullet);
 

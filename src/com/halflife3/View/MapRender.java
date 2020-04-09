@@ -1,6 +1,7 @@
 package com.halflife3.View;
 
-import com.halflife3.GameObjects.Bricks;
+import com.halflife3.GameObjects.Brick;
+import com.halflife3.GameObjects.Goal;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.*;
@@ -14,44 +15,48 @@ import java.util.ArrayList;
 import java.util.Deque;
 
 public class MapRender {
-	private static      Deque<Bricks>      Bricks_list;
+	private static      Deque<Brick>       Bricks_list;
+	private static      Deque<Goal>        goalZone;
 	public static final int                BLOCK_SIZE = 40;
 	private static      Vector2            ballSpawnPos;
 	private static      ArrayList<Vector2> startPositions;
-	public static       int                mapWidth;
-	public static       int                mapHeight;
+	public static       int                mapWidth = 0;
+	public static       int                mapHeight = 0;
 
-	public static Deque<Bricks> GetList() {
+	public static Deque<Brick> GetList() {
 		return Bricks_list;
 	}
 
 	public static void Render(GraphicsContext gc) {
-		for (Bricks bricks : Bricks_list)
-			bricks.render(gc);
+		for (Brick brick : Bricks_list)
+			brick.render(gc);
 	}
 
-	public static void LoadLevel() {
+	public synchronized static void LoadLevel() {
+		if (mapWidth != 0 && mapHeight != 0) { return; } //To stop loading the map twice when hosting and playing
 		try {
-			Bricks_list = new ArrayDeque<>();
-            startPositions = new ArrayList<>();
+			Bricks_list    = new ArrayDeque<>();
+			goalZone       = new ArrayDeque<>();
+			startPositions = new ArrayList<>();
 			Image mapImage = new Image(new FileInputStream(Maps.Map));
 			mapWidth  = (int) mapImage.getWidth() * 40;
 			mapHeight = (int) mapImage.getHeight() * 40;
 
 			PixelReader pixelReader = mapImage.getPixelReader();
-			Vector2     zero        = new Vector2();
 
 			for (int x = 0; x < mapImage.getWidth(); x++) {
 				for (int y = 0; y < mapImage.getHeight(); y++) {
 					if (pixelReader.getColor(x, y).equals(Color.BLACK)) {
 						Vector2 position  = new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE);
-						Bricks  new_Brick = new Bricks(position, zero);
+						Brick   new_Brick = new Brick(position);
 						Bricks_list.add(new_Brick);
 					} else if (pixelReader.getColor(x, y).equals(Color.RED)) {
 						ballSpawnPos = new Vector2((x + 0.5) * BLOCK_SIZE, (y + 0.5) * BLOCK_SIZE);
+					} else if (pixelReader.getColor(x, y).equals(Color.rgb(155, 255, 155))) {
+						goalZone.add(new Goal(x * BLOCK_SIZE, y * BLOCK_SIZE));
 					} else if (pixelReader.getColor(x, y).equals(Color.BLUE)) {
-					    startPositions.add(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE));
-                    }
+						startPositions.add(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE));
+					}
 				}
 			}
 
@@ -63,7 +68,11 @@ public class MapRender {
 		return new Vector2(ballSpawnPos);
 	}
 
-    public static Vector2[] getStartPositions() {
-        return startPositions.toArray(new Vector2[0]);
-    }
+	public static Vector2[] getStartPositions() {
+		return startPositions.toArray(new Vector2[0]);
+	}
+
+	public static Deque<Goal> getGoalZone() {
+		return goalZone;
+	}
 }

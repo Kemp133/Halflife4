@@ -68,7 +68,7 @@ public class Player extends Controllable {
 
 	}
 
-	public void collision(Bricks block, double time) {
+	public void collision(Brick block, double time) {
 		Vector2 dir = new Vector2(block.getPosX() - orgPos.getX(), block.getPosY() - orgPos.getY());
 
 		if (Math.abs(dir.getX()) < 30 && Math.abs(dir.getY()) < 30) {

@@ -12,12 +12,12 @@ import java.util.*;
 /**
  *
  */
-public class Bricks extends Sprite {
+public class Brick extends Sprite {
     public Rectangle rectangle;
 
-    public Bricks(Vector2 position, Vector2 velocity) {
-        super(position, velocity);
-        keys.add("Bricks");
+    public Brick(Vector2 position) {
+        super(position, new Vector2());
+        keys.add("Brick");
         //Bricks should only be created in the MapRender class,
         // so remove them from the ObjectManager to stop them polluting the object pool
         ObjectManager.removeObject(this);

@@ -15,6 +15,7 @@ import com.halflife3.Mechanics.Interfaces.IRenderable;
 import com.halflife3.Mechanics.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.Client;
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
 import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
@@ -70,7 +71,6 @@ public class MainMode extends GameMode {
 	public  int                     enemyScore = 0;
 	public  int                     mapWidth;
 	private int                     mapHeight;
-	private double                  ballPreviousX;
 	private int                     rightEndOfScreen;
 	private int                     leftEndOfScreen;
 	private int                     bottomOfScreen;
@@ -159,8 +159,7 @@ public class MainMode extends GameMode {
 
 		//region Initialise Ball
 		PositionPacket ballPacket = Client.listOfClients.posList.get("ball");
-		ball          = new Ball(new Vector2(ballPacket.posX, ballPacket.posY));
-		ballPreviousX = ball.getPosX();
+		ball = new Ball(new Vector2(ballPacket.posX, ballPacket.posY));
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
@@ -227,7 +226,7 @@ public class MainMode extends GameMode {
 
 		//region Collision detection
 //		  Player collision
-		for (Bricks block : MapRender.GetList())
+		for (Brick block : MapRender.GetList())
 			if (block.getBounds().intersects(thisPlayer.circle.getBoundsInLocal()))
 				thisPlayer.collision(block, elapsedTime);
 
@@ -254,7 +253,7 @@ public class MainMode extends GameMode {
 
 			if (thisPlayer.isHoldingBall()) { // Shoots the ball
 				boolean ballInWall = false;
-				for (Bricks block : MapRender.GetList())
+				for (Brick block : MapRender.GetList())
 					if (ball.getBounds().intersects(block.getBounds().getBoundsInLocal())) {
 						ballInWall = true;
 						break;
@@ -308,18 +307,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Checks if a goal has been scored
-		if (ballPreviousX - ball.getPosX() < -mapWidth / 4f) {
-			scored('R');
-		} else if (ballPreviousX - ball.getPosX() > mapWidth / 4f) {
-			scored('L');
-		}
-//		if((ballPreviousX>Server.GOAL_WIDTH+40||ballPreviousX<mapWidth-Server.GOAL_WIDTH-40) && (ball.getPosX()
-//		-ballPreviousX>40||ball.getPosX()-ballPreviousX<-40)){
-//			yourScore = 0;
-//			enemyScore = 0;
-//			thisPlayer.reset();
-//		}
-		ballPreviousX = ball.getPosX();
+		checkForGoal();
 		//endregion
 
 		//region Renders the score text
@@ -373,6 +361,32 @@ public class MainMode extends GameMode {
 	@Override
 	public boolean lost() {
 		return enemyScore == scoreLimit;
+	}
+
+	private void checkForGoal() {
+		Goal g = goalScored();
+		if (g == null) { return; }
+
+		if (g.getScoringTeam() == side) {
+			yourScore++;
+			System.out.println("Goal for YOUR team!");
+		} else {
+			enemyScore++;
+			System.out.println("Goal for the ENEMY team!");
+		}
+
+		thisPlayer.resetBasics();
+		ball.reset();
+
+		NetworkingUtilities.WaitXSeconds(1);
+	}
+
+	private Goal goalScored() {
+		for (Goal g : MapRender.getGoalZone())
+			if (ball.getBounds().intersects(g.getBounds().getBoundsInLocal()))
+				return g;
+
+		return null;
 	}
 
 	/** A method to initialise the players in the game */
@@ -593,7 +607,7 @@ public class MainMode extends GameMode {
 				continue;
 
 //			  Bullets and Walls
-			for (Bricks block : MapRender.GetList())
+			for (Brick block : MapRender.GetList())
 				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
 					bulletsToDestroy.add(bullet);
 
@@ -620,21 +634,6 @@ public class MainMode extends GameMode {
 
 		for (GameObject bullet : bulletsToDestroy)
 			bullet.destroy();
-	}
-
-	private void scored(char scoringSide) {
-		if (scoringSide == side) {
-			yourScore++;
-			System.out.println("Goal for YOUR team!");
-		} else {
-			enemyScore++;
-			System.out.println("Goal for the ENEMY team!");
-		}
-
-		thisPlayer.resetBasics();
-		ball.reset();
-
-		try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
 	}
 
 	private static Connection getConnection() {
