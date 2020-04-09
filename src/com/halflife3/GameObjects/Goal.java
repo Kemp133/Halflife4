@@ -1,6 +1,6 @@
 package com.halflife3.GameObjects;
 
-import com.halflife3.Mechanics.Interfaces.ICollidable;
+import com.halflife3.GameObjects.Interfaces.ICollidable;
 import com.halflife3.View.MapRender;
 import javafx.scene.shape.*;
 
