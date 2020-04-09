@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Maps {
-	static public String      Map  = "res/map1.png";
+	static public String      Map  = "res/Maps/map1.png";
 	private       Button      map0 = new Button("Map1");
 	private       Button      map1 = new Button("Map2");
 	private       Button      map2 = new Button("Map3");

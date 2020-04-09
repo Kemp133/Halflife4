@@ -6,15 +6,12 @@ import com.halflife3.GameObjects.AIPlayer;
 import com.halflife3.GameObjects.Ball;
 import com.halflife3.GameObjects.Bricks;
 import com.halflife3.GameObjects.Bullet;
-import com.halflife3.GameUI.Maps;
 import com.halflife3.Mechanics.AI.AI;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
 
-import javax.imageio.ImageIO;
-import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -51,8 +48,6 @@ public class Server implements Runnable {
 	private static HashMap<String, AIPlayer> botList;
 	private        AI                        botAI;
 	private        Ball                      theBall;
-	private        int                       mapWidth;
-	private        int                       mapHeight;
 	private        Vector2                   previousBallVel;
 	private        HashSet<Bullet>           bulletSet;
 	//endregion
@@ -67,6 +62,10 @@ public class Server implements Runnable {
 		canShoot           = new HashMap<>();
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
+		//endregion
+
+		//region Loads the map
+		MapRender.LoadLevel();
 		//endregion
 
 		final boolean[] readyAI = {false};
@@ -84,23 +83,11 @@ public class Server implements Runnable {
 		} catch (IOException e) { e.printStackTrace(); }
 		//endregion
 
-		//region Loads the map
-		MapRender.LoadLevel();
-		//endregion
-
 		//region Adds the ball to the positionList
-		try {
-			var mapImage        = ImageIO.read(new File(Maps.Map));
-			int mapWidthMiddle  = mapImage.getWidth() * 20;
-			int mapHeightMiddle = mapImage.getHeight() * 20;
-			mapWidth  = mapWidthMiddle * 2;
-			mapHeight = mapHeightMiddle * 2;
+		theBall = new Ball(MapRender.getBallSpawnPos());
+		ObjectManager.removeObject(theBall);
 
-			theBall = new Ball(new Vector2(mapWidthMiddle, mapHeightMiddle));
-			ObjectManager.removeObject(theBall);
-
-			ClientListServer.positionList.put("ball", theBall.getPositionPacket());
-		} catch (IOException e) { e.printStackTrace(); }
+		ClientListServer.positionList.put("ball", theBall.getPositionPacket());
 		//endregion
 
 		//region Fills the positionList with bot players, giving them available starting positions
@@ -262,7 +249,7 @@ public class Server implements Runnable {
 		multicastPacket(posListPacket, POSITIONS_PORT);
 		//endregion
 
-		if (theBall.getPosX() > mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH)
+		if (theBall.getPosX() > MapRender.mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH)
 			resetMap(); //Checks if a goal has been scored and resets the map if so
 	}
 
@@ -345,10 +332,10 @@ public class Server implements Runnable {
 
 	private Vector2 getNextGoal(AIPlayer bot) {
 		if (bot.isHoldingBall()) {
-			if (bot.getSpawnPosition().getX() < mapWidth / 2f) {
-				return new Vector2(mapWidth - GOAL_WIDTH, mapHeight / 2f);
+			if (bot.getSpawnPosition().getX() < MapRender.mapWidth / 2f) {
+				return new Vector2(MapRender.mapWidth - GOAL_WIDTH, MapRender.mapHeight / 2f);
 			} else {
-				return new Vector2(GOAL_WIDTH, mapHeight / 2f);
+				return new Vector2(GOAL_WIDTH, MapRender.mapHeight / 2f);
 			}
 		}
 
