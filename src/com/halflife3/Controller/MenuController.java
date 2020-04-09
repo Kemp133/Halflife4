@@ -8,8 +8,8 @@ import javafx.application.*;
 import javafx.stage.*;
 
 public class MenuController extends BaseController implements ICredentialUser {
-	public static final int      GAME_WINDOW_HEIGHT = 600;
 	public static final int      GAME_WINDOW_WIDTH  = 800;
+	public static final int      GAME_WINDOW_HEIGHT = 600;
 	private             MainMenu menu;
 
 	public static void main(String[] args) {
@@ -29,9 +29,7 @@ public class MenuController extends BaseController implements ICredentialUser {
 	public void start() {
 		menu = new MainMenu();
 		menu.getPlayer().play();
-		menu.getExit().setOnAction(actionEvent -> {
-			end();
-		});
+		menu.getExit().setOnAction(actionEvent -> end());
 		SceneManager.getInstance().setScene("Main Menu", menu.getScene());
 	}
 
