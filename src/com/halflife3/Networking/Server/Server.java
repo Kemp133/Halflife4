@@ -40,11 +40,11 @@ public class Server implements Runnable {
 	private        PositionListPacket        posListPacket;
 	private        DatagramSocket            clientSocket;
 	private        EventListenerServer       listenerServer;
-	private static int                       clientPort     = 6666;
+	private static int                       clientPort   = 6666;
 	private static HashMap<Vector2, Boolean> availablePositions;
 	private static HashMap<Vector2, Boolean> canShoot;
-	public static  Vector2[]                 startPositions = {new Vector2(160, 600), new Vector2(1840, 600)};
-	public static  ArrayList<String>         botNamesList   = new ArrayList<>(Arrays.asList("bot1", "bot2"));
+	public static  Vector2[]                 startPositions;
+	public static  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
 	private static HashMap<String, AIPlayer> botList;
 	private        AI                        botAI;
 	private        Ball                      theBall;
@@ -53,6 +53,10 @@ public class Server implements Runnable {
 	//endregion
 
 	public void start() {
+		//region Loads the map
+		MapRender.LoadLevel();
+		//endregion
+
 		//region Object initialisation
 		botAI              = new AI();
 		previousBallVel    = new Vector2();
@@ -62,10 +66,7 @@ public class Server implements Runnable {
 		canShoot           = new HashMap<>();
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
-		//endregion
-
-		//region Loads the map
-		MapRender.LoadLevel();
+		startPositions     = MapRender.getStartPositions();
 		//endregion
 
 		final boolean[] readyAI = {false};
