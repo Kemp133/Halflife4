@@ -4,6 +4,7 @@ import com.halflife3.Controller.ClientController;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
+import com.halflife3.Controller.MenuController;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameObjects.*;
@@ -47,16 +48,13 @@ import static javafx.scene.input.KeyCode.*;
 public class MainMode extends GameMode {
 	protected double scoreLimit;
 
-	private static final int   GAME_WINDOW_HEIGHT = 600;
-	private static final int   GAME_WINDOW_WIDTH  = 800;
-	private static final int   MOVEMENT_SPEED     = 120;
-	public static final  int   SHOT_SPEED         = 200;
-	public static final  float STUN_DURATION      = ClientController.FPS * 3;
-	public static final  float RELOAD_DURATION    = 50;
+	private static final int   MOVEMENT_SPEED  = 120;
+	public static final  int   SHOT_SPEED      = 200;
+	public static final  float STUN_DURATION   = ClientController.FPS * 3;
+	public static final  float RELOAD_DURATION = 50;
 
 	//region Other variables
 	public  Pane                    root;
-	private Scene                   scene;
 	public  Player                  thisPlayer;
 	private HashMap<String, Player> playerList;
 	private HashMap<Integer, Image> scoreSprite;
@@ -107,10 +105,10 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Set The Distances To The Sides Of The Window
-		rightEndOfScreen = (int) (GAME_WINDOW_WIDTH / 2 + thisPlayer.getWidth());
-		leftEndOfScreen  = (int) (GAME_WINDOW_WIDTH / 2 - thisPlayer.getWidth());
-		topOfScreen      = (int) ((GAME_WINDOW_HEIGHT - thisPlayer.getHeight()) / 2);
-		bottomOfScreen   = (int) ((GAME_WINDOW_HEIGHT + thisPlayer.getHeight()) / 2);
+		rightEndOfScreen = (int) (MenuController.GAME_WINDOW_WIDTH / 2 + thisPlayer.getWidth());
+		leftEndOfScreen  = (int) (MenuController.GAME_WINDOW_WIDTH / 2 - thisPlayer.getWidth());
+		topOfScreen      = (int) ((MenuController.GAME_WINDOW_HEIGHT - thisPlayer.getHeight()) / 2);
+		bottomOfScreen   = (int) ((MenuController.GAME_WINDOW_HEIGHT + thisPlayer.getHeight()) / 2);
 		//endregion
 
 		//region Wait For Server To Acknowledge Player Connection
@@ -124,11 +122,11 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Set Up Scene
-		Canvas canvas = new Canvas(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+		Canvas canvas = new Canvas(MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
 		root.getChildren().add(canvas);
 		graphicsContext = canvas.getGraphicsContext2D();
 
-		scene = new Scene(root, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+		Scene scene = new Scene(root, MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
 		SceneManager.getInstance().setScene("Game Scene", scene);
 		window = SceneManager.getInstance().getMainWindow();
 		//endregion
@@ -276,7 +274,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Re-renders all game objects
-		graphicsContext.clearRect(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+		graphicsContext.clearRect(0, 0, MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
 
 		MapRender.Render(graphicsContext);
 
@@ -324,9 +322,9 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Renders the score text
-		graphicsContext.drawImage(scoreSprite.get(yourScore), GAME_WINDOW_WIDTH / 2f - 40, 40);
-		graphicsContext.drawImage(scoreSprite.get(-1), GAME_WINDOW_WIDTH / 2f + 10, 40);
-		graphicsContext.drawImage(scoreSprite.get(enemyScore), GAME_WINDOW_WIDTH / 2f + 40, 40);
+		graphicsContext.drawImage(scoreSprite.get(yourScore), MenuController.GAME_WINDOW_WIDTH / 2f - 40, 40);
+		graphicsContext.drawImage(scoreSprite.get(-1), MenuController.GAME_WINDOW_WIDTH / 2f + 10, 40);
+		graphicsContext.drawImage(scoreSprite.get(enemyScore), MenuController.GAME_WINDOW_WIDTH / 2f + 40, 40);
 		//endregion
 
 		//region End Condition

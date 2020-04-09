@@ -4,18 +4,13 @@ import com.halflife3.DatabaseUI.Login;
 import com.halflife3.GameUI.ApplicationUser;
 import com.halflife3.GameUI.MainMenu;
 import com.halflife3.GameUI.interfaces.ICredentialUser;
-import com.halflife3.Networking.NetworkingUtilities;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.*;
-import javafx.scene.image.*;
-import javafx.stage.Stage;
-
-import java.io.FileInputStream;
-import java.io.IOException;
+import javafx.application.*;
+import javafx.stage.*;
 
 public class MenuController extends BaseController implements ICredentialUser {
-	private MainMenu menu;
+	public static final int      GAME_WINDOW_HEIGHT = 600;
+	public static final int      GAME_WINDOW_WIDTH  = 800;
+	private             MainMenu menu;
 
 	public static void main(String[] args) {
 		System.setProperty("javafx.preloader", Login.class.getName());
