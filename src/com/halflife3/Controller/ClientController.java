@@ -30,7 +30,7 @@ public class ClientController extends BaseController {
 
 	@Override
 	public void initialise() {
-		gamemode = new MainMode("Ball Thing", 1);
+		gamemode = new MainMode("Ball Thing", 3);
 	}
 
 	@Override
@@ -83,16 +83,20 @@ public class ClientController extends BaseController {
 //			);
 //		}
 		if(gamemode.win){
+			gamemode = null;
+			ClientListServer.reset();
+			ObjectManager.resetObjects();
 			WinScene win = new WinScene();
 			SceneManager.getInstance().setScene("Win Scene", win.getScene());
 		}
 		else {
+			gamemode = null;
+			ClientListServer.reset();
+			ObjectManager.resetObjects();
 			LoseScene lose = new LoseScene();
 			SceneManager.getInstance().setScene("Lose Scene", lose.getScene());
 		}
-		gamemode = null;
-		ClientListServer.reset();
-		ObjectManager.resetObjects();
+
 	}
 
 	@Override
