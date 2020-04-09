@@ -49,10 +49,10 @@ import static javafx.scene.input.KeyCode.*;
 public class MainMode extends GameMode {
 	protected double scoreLimit;
 
-	private static final int   MOVEMENT_SPEED  = 120;
-	public static final  int   SHOT_SPEED      = 200;
-	public static final  float STUN_DURATION   = ClientController.FPS * 3;
-	public static final  float RELOAD_DURATION = 50;
+	public static final int   MOVEMENT_SPEED  = 120;
+	public static final int   SHOT_SPEED      = 250;
+	public static final float STUN_DURATION   = ClientController.FPS * 3;
+	public static final float RELOAD_DURATION = 50;
 
 	//region Other variables
 	public  Pane                    root;
@@ -246,7 +246,8 @@ public class MainMode extends GameMode {
 
 		//region Shoots a bullet or the ball
 		thisPlayer.setBulletShot(false);
-		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload == RELOAD_DURATION) {
+		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload == RELOAD_DURATION &&
+		    thisPlayer.stunned == 0) {
 			double  bulletX      = Math.cos(Math.atan2(direction.getY(), direction.getX()));
 			double  bulletY      = Math.sin(Math.atan2(direction.getY(), direction.getX()));
 			Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
@@ -629,6 +630,7 @@ public class MainMode extends GameMode {
 				player.stunned = STUN_DURATION;
 				player.setVelocity(bullet.getVelocity().divide(STUN_DURATION / ClientController.FPS));
 				player.setDeceleration(new Vector2(player.getVelocity()).divide(ClientController.FPS / 2f));
+				player.setHoldsBall(false);
 			}
 		}
 

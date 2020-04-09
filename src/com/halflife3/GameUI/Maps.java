@@ -54,7 +54,7 @@ public class Maps {
 		});
 
 		map2.setOnAction(actionEvent -> {
-			Map = mapList.get(2);
+			Map = mapList.get(3);
 			map2.getStyleClass().add("button1");
 			map0.getStyleClass().remove("button1");
 			map1.getStyleClass().remove("button1");
@@ -137,7 +137,7 @@ public class Maps {
 		try {
 			Image mapImage1 = new Image(new FileInputStream(mapList.get(0)));
 			Image mapImage2 = new Image(new FileInputStream(mapList.get(1)));
-			Image mapImage3 = new Image(new FileInputStream(mapList.get(2)));
+			Image mapImage3 = new Image(new FileInputStream(mapList.get(3)));
 			imgView1 = new ImageView(mapImage1);
 			imgView2 = new ImageView(mapImage2);
 			imgView3 = new ImageView(mapImage3);

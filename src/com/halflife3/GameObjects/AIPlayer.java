@@ -1,10 +1,15 @@
 package com.halflife3.GameObjects;
 
+import com.halflife3.Controller.ClientController;
+import com.halflife3.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Server.Server;
 import javafx.scene.canvas.*;
 
 public class AIPlayer extends Controllable {
+	public final float RELOAD_DURATION = MainMode.RELOAD_DURATION * Server.SERVER_FPS / ClientController.FPS;
+
+	public  float   reload = RELOAD_DURATION;
 	private boolean active;
 	private boolean alreadyLooking;
 	private Vector2 soughtPos;
@@ -20,6 +25,8 @@ public class AIPlayer extends Controllable {
 
 	@Override
 	public void update(double time) {
+		if (reload < RELOAD_DURATION)
+			reload++;
 		if (stunned <= Server.SERVER_FPS / 2f && stunned != 0) {
 			velocity.setX(0);
 			velocity.setY(0);
@@ -54,7 +61,7 @@ public class AIPlayer extends Controllable {
 	}
 
 	public Vector2 getSoughtPos() {
-		return (soughtPos == null ) ? null : new Vector2(soughtPos);
+		return (soughtPos == null) ? null : new Vector2(soughtPos);
 	}
 
 	public void setSoughtPos(Vector2 soughtPos) {
@@ -70,8 +77,8 @@ public class AIPlayer extends Controllable {
 	}
 
 	public void reset() {
-		soughtPos = null;
-		nextPos = null;
+		soughtPos      = null;
+		nextPos        = null;
 		alreadyLooking = false;
 		resetBasics();
 	}

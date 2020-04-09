@@ -189,10 +189,8 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Bullets and the ball - position/velocity
-		for (String ip : ClientListServer.positionList.keySet()) {
-			if (ip.equals("ball"))
-				continue;
-
+		theBall.isHeld = false;
+		for (String ip : ClientListServer.connectedIPs) {
 			PositionPacket player = ClientListServer.positionList.get(ip);
 
 			double degreeRadians = Math.toRadians(player.degrees);
@@ -208,32 +206,37 @@ public class Server implements Runnable {
 			}
 
 			if (player.bulletShot) {
-				if (canShoot.get(new Vector2(player.spawnX, player.spawnY))) {
-					Vector2 shotVel = new Vector2(ballX, ballY).multiply(MainMode.SHOT_SPEED);
+				if (!canShoot.get(new Vector2(player.spawnX, player.spawnY)))
+					continue;
 
-					if (player.holdsBall) {
-						theBall.setVelocity(new Vector2(shotVel).multiply(1.5));
-						theBall.setDeceleration(new Vector2(shotVel).divide(100));
-						theBall.isHeld    = false;
-						player.bulletShot = false;
-						player.holdsBall  = false;
-						EventListenerServer.replaceEntry(ip, player);
-					} else {
-						Vector2 bulletDir = new Vector2(ballX * 32, ballY * 32);
-						Vector2 bulletPos = new Vector2(player.posX + 6, player.posY + 6).add(bulletDir);
-						Bullet  bullet    = new Bullet(bulletPos, shotVel, "human");
-						ObjectManager.removeObject(bullet);
-						bulletSet.add(bullet);
+				Vector2 shotVel = new Vector2(ballX, ballY).multiply(MainMode.SHOT_SPEED);
+
+				if (player.holdsBall) {
+					theBall.setVelocity(new Vector2(shotVel).multiply(1.5));
+					theBall.setDeceleration(new Vector2(shotVel).divide(100));
+					theBall.isHeld    = false;
+					player.bulletShot = false;
+					player.holdsBall  = false;
+					if (botList.get(ip) != null) {
+						botList.get(ip).setHoldsBall(false);
+						botList.get(ip).setBulletShot(false);
 					}
-
-					canShoot.replace(new Vector2(player.spawnX, player.spawnY), false);
+					EventListenerServer.replaceEntry(ip, player);
+				} else {
+					Vector2 bulletDir = new Vector2(ballX * 32, ballY * 32);
+					Vector2 bulletPos = new Vector2(player.posX + 6, player.posY + 6).add(bulletDir);
+					Bullet  bullet    = new Bullet(bulletPos, shotVel, "human");
+					ObjectManager.removeObject(bullet);
+					addBullet(bullet);
 				}
+
+				canShoot.replace(new Vector2(player.spawnX, player.spawnY), false);
 			} else
 				canShoot.replace(new Vector2(player.spawnX, player.spawnY), true);
 		}
 		//endregion
 
-		for (Bullet b : bulletSet) { b.update(elapsedTime); } //Updates the bullet positions
+		for (Bullet b : getBulletSet()) { b.update(elapsedTime); } //Updates the bullet positions
 
 		//region Updates the ball and its packet
 		theBall.update(elapsedTime);
@@ -246,8 +249,8 @@ public class Server implements Runnable {
 		multicastPacket(posListPacket, POSITIONS_PORT);
 		//endregion
 
-		if (/*theBall.getPosX() > MapRender.mapWidth - GOAL_WIDTH || theBall.getPosX() < GOAL_WIDTH*/goalScored())
-			resetMap(); //Checks if a goal has been scored and resets the map if so
+		if (goalScored()) { resetMap(); }// Checks if a goal has been scored and resets the map if so
+
 	}
 
 	private boolean goalScored() {
@@ -287,6 +290,16 @@ public class Server implements Runnable {
 //		  Checks if the bot has a position to move to or if it has reached it already
 		if (bot.getSoughtPos() == null) {
 			bot.setSoughtPos(botAI.getNextPos(bot.getPosition(), getNextGoal(bot)));
+			if (bot.getSoughtPos() == null) {
+				new Thread(() -> {
+					System.err.println("Bot is lost. Stopping movement");
+					while (bot.getSoughtPos() == null) {
+						bot.stunned = SERVER_FPS / 2f;
+						bot.setSoughtPos(botAI.getNextPos(bot.getPosition(), getNextGoal(bot)));
+					}
+				}).start();
+				return;
+			}
 		} else if (arrived(bot.getPosition(), bot.getSoughtPos())) {
 			bot.setPosition(bot.getSoughtPos());
 			bot.setSoughtPos(bot.getNextPos());
@@ -302,30 +315,70 @@ public class Server implements Runnable {
 			}).start();
 		}
 
-//		  Makes the bot face the way it's going
-		Vector2 direction = new Vector2(bot.getSoughtPos()).subtract(bot.getPosition());
-		bot.setDegrees((short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX())));
+//		Shoots bullets at enemies and ball into the goal
+		bot.setBulletShot(false);
+		Vector2 enemyToShoot = getEnemyInRadius(bot);
+		Goal goal = goalInRadius(bot);
+		if (enemyToShoot != null && !bot.isHoldingBall()) {// Faces an enemy
+			Vector2 toEnemy = enemyToShoot.subtract(bot.getPosition());
+			bot.setDegrees((short) Math.toDegrees(Math.atan2(toEnemy.getY(), toEnemy.getX())));
+			if (bot.reload == bot.RELOAD_DURATION && bot.stunned == 0) {
+				bot.setBulletShot(true);
+				bot.reload = 0;
+			}
+		} else if (bot.isHoldingBall() && goal != null) {//Faces the goal
+			Vector2 toGoal = goal.getPosition().subtract(bot.getPosition());
+			bot.setDegrees((short) Math.toDegrees(Math.atan2(toGoal.getY(), toGoal.getX())));
+			if (bot.reload == bot.RELOAD_DURATION && bot.stunned == 0) {
+				bot.setBulletShot(true);
+				bot.reload = 0;
+				bot.stunned = 100;
+			}
+		} else {// Faces the way it's going
+			Vector2 direction = new Vector2(bot.getSoughtPos()).subtract(bot.getPosition());
+			bot.setDegrees((short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX())));
+		}
 
 		//region Sets the bot's velocity on the X axis
 		if (bot.getSoughtPos().getX() > bot.getPosX())
-			bot.setVelocity(100, bot.getVelY());
+			bot.setVelocity(MainMode.MOVEMENT_SPEED, bot.getVelY());
 		else if (bot.getSoughtPos().getX() < bot.getPosX())
-			bot.setVelocity(-100, bot.getVelY());
+			bot.setVelocity(-MainMode.MOVEMENT_SPEED, bot.getVelY());
 		else
 			bot.setVelocity(0, bot.getVelY());
 		//endregion
 
 		//region Sets the bot's velocity on the Y axis
 		if (bot.getSoughtPos().getY() > bot.getPosY())
-			bot.setVelocity(bot.getVelX(), 100);
+			bot.setVelocity(bot.getVelX(), MainMode.MOVEMENT_SPEED);
 		else if (bot.getSoughtPos().getY() < bot.getPosY())
-			bot.setVelocity(bot.getVelX(), -100);
+			bot.setVelocity(bot.getVelX(), -MainMode.MOVEMENT_SPEED);
 		else
 			bot.setVelocity(bot.getVelX(), 0);
 		//endregion
 
 //		  Replaces the position packet of the bot
 		EventListenerServer.replaceEntry(name, bot.getPacketToSend());
+	}
+
+	private Goal goalInRadius(AIPlayer bot) {
+		for (Goal g : MapRender.getGoalZone())
+			if (bot.getPosition().distance(g.getPosition()) < 200)
+				return g;
+		return null;
+	}
+
+	private Vector2 getEnemyInRadius(AIPlayer bot) {
+		for (var ip : ClientListServer.connectedIPs) {
+			if (ip.equals(bot.getIpOfClient()))
+				continue;
+			PositionPacket enemy   = ClientListServer.positionList.get(ip);
+			Vector2        toEnemy = new Vector2(enemy.posX, enemy.posY);
+			if (bot.getPosition().distance(toEnemy) < 250)
+				return toEnemy;
+		}
+
+		return null;
 	}
 
 	private boolean arrived(Vector2 current, Vector2 sought) {
@@ -338,9 +391,11 @@ public class Server implements Runnable {
 	private Vector2 getNextGoal(AIPlayer bot) {
 		if (bot.isHoldingBall()) {
 			if (bot.getSpawnPosition().getX() < MapRender.mapWidth / 2f) {
-				return new Vector2(MapRender.mapWidth - GOAL_WIDTH, MapRender.mapHeight / 2f);
+				for (Goal g : MapRender.getGoalZone())
+					if (g.getScoringTeam() == 'L') { return g.getPosition(); }
 			} else {
-				return new Vector2(GOAL_WIDTH, MapRender.mapHeight / 2f);
+				for (Goal g : MapRender.getGoalZone())
+					if (g.getScoringTeam() == 'R') { return g.getPosition(); }
 			}
 		}
 
@@ -372,7 +427,7 @@ public class Server implements Runnable {
 
 	private void bulletCollision() {
 		HashSet<Bullet> bulletsToDestroy = new HashSet<>();
-		for (Bullet bullet : bulletSet) {
+		for (Bullet bullet : getBulletSet()) {
 			for (Brick block : MapRender.GetList())
 				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
 					bulletsToDestroy.add(bullet);
@@ -400,7 +455,7 @@ public class Server implements Runnable {
 		}
 
 		for (Bullet bullet : bulletsToDestroy)
-			bulletSet.remove(bullet);
+			removeBullet(bullet);
 	}
 
 	private void connectionListener() throws IOException {
@@ -551,5 +606,17 @@ public class Server implements Runnable {
 		}).start();
 
 		NetworkingUtilities.WaitXSeconds(1);
+	}
+
+	private synchronized void addBullet(Bullet toAdd) {
+		bulletSet.add(toAdd);
+	}
+
+	private synchronized void removeBullet(Bullet toRemove) {
+		bulletSet.remove(toRemove);
+	}
+
+	private synchronized HashSet<Bullet> getBulletSet() {
+		return new HashSet<>(bulletSet);
 	}
 }
