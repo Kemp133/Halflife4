@@ -1,9 +1,9 @@
 package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Mechanics.Interfaces.ICollidable;
-import com.halflife3.Mechanics.Interfaces.IRenderable;
-import com.halflife3.Mechanics.Interfaces.IUpdateable;
+import com.halflife3.GameObjects.Interfaces.IRenderable;
+import com.halflife3.GameObjects.Interfaces.ICollidable;
+import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.Vector2;
 
 import java.util.HashSet;

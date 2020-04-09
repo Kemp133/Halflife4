@@ -591,6 +591,7 @@ public class Server implements Runnable {
 	private void resetMap() {
 		new Thread(() -> {
 			System.out.println("Goal has been scored. Resetting positions...");
+
 			theBall.reset();
 			previousBallVel = new Vector2();
 			EventListenerServer.replaceEntry("ball", theBall.getPositionPacket());
@@ -599,13 +600,12 @@ public class Server implements Runnable {
 				botList.get(ip).reset();
 				EventListenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend());
 			}
-
-			posListPacket.connectedIPs = ClientListServer.connectedIPs;
-			posListPacket.posList      = ClientListServer.positionList;
-			multicastPacket(posListPacket, POSITIONS_PORT);
 		}).start();
 
 		NetworkingUtilities.WaitXSeconds(1);
+		posListPacket.connectedIPs = ClientListServer.connectedIPs;
+		posListPacket.posList      = ClientListServer.positionList;
+		multicastPacket(posListPacket, POSITIONS_PORT);
 	}
 
 	private synchronized void addBullet(Bullet toAdd) {

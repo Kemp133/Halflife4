@@ -9,9 +9,6 @@ import javafx.scene.shape.Rectangle;
 import java.io.File;
 import java.util.*;
 
-/**
- *
- */
 public class Brick extends Sprite {
     public Rectangle rectangle;
 

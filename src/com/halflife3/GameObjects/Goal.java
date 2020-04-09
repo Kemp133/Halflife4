@@ -29,6 +29,6 @@ public class Goal implements ICollidable {
 
 
 	public Vector2 getPosition() {
-		return position;
+		return new Vector2(position);
 	}
 }
