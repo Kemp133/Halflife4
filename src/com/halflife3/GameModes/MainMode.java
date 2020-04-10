@@ -50,15 +50,15 @@ import static javafx.scene.input.KeyCode.*;
 public class MainMode extends GameMode {
 	protected double scoreLimit;
 
-	public static final int   NORMAL_SPEED  = 120;
-	public static final int   QUICK_SPEED	  = 240;
-	public static final int   SHOT_SPEED      = 250;
-	public static final float STUN_DURATION   = ClientController.FPS * 3;
+	public static final int   NORMAL_SPEED           = 120;
+	public static final int   QUICK_SPEED            = 240;
+	public static final int   SHOT_SPEED             = 250;
+	public static final float STUN_DURATION          = ClientController.FPS * 3;
 	public static final float NORMAL_RELOAD_DURATION = 50;
-	public static final float QUICK_RELOAD_DURATION = 10;
-	public static final float POWER_UP_DURATION = 50;
-	public  static int 		  MOVEMENT_SPEED = NORMAL_SPEED;
-	public  static float	  RELOAD_DURATION = NORMAL_RELOAD_DURATION;
+	public static final float QUICK_RELOAD_DURATION  = 10;
+	public static final float POWER_UP_DURATION      = 50;
+	public static       int   MOVEMENT_SPEED         = NORMAL_SPEED;
+	public static       float RELOAD_DURATION        = NORMAL_RELOAD_DURATION;
 
 	//region Other variables
 	public  Pane                    root;
@@ -68,23 +68,23 @@ public class MainMode extends GameMode {
 	private Input                   input;
 	private ProgressBar[]           stunBar;
 	private ProgressBar             amoBar;
-	private ProgressBar				PowerUpBar;
+	private ProgressBar             PowerUpBar;
 	private Ball                    ball;
 	private Stage                   window;
 	private GraphicsContext         graphicsContext;
 	private ExecutorService         executor;
 	private Client                  clientNetwork;
 	private char                    side;
-	public  int                     yourScore  = 0;
-	public  int                     enemyScore = 0;
+	public  int                     yourScore            = 0;
+	public  int                     enemyScore           = 0;
 	public  int                     mapWidth;
 	private int                     mapHeight;
 	private int                     rightEndOfScreen;
 	private int                     leftEndOfScreen;
 	private int                     bottomOfScreen;
 	private int                     topOfScreen;
-	public float 					speedup_duration = 0;
-	public float 					quickReload_duration = 0;
+	public  float                   speedup_duration     = 0;
+	public  float                   quickReload_duration = 0;
 	//endregion
 
 	public MainMode(String GameModeName, double score) {
@@ -253,44 +253,44 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Check power ups
-		if(speedup_duration != 0)
+		if (speedup_duration != 0)
 			speedup_duration--;
 		else
 			MOVEMENT_SPEED = NORMAL_SPEED;
 
-		if(quickReload_duration != 0)
+		if (quickReload_duration != 0)
 			quickReload_duration--;
 		else {
-			if(thisPlayer.reload == RELOAD_DURATION)
+			if (thisPlayer.reload == RELOAD_DURATION)
 				thisPlayer.reload = NORMAL_RELOAD_DURATION;
 			RELOAD_DURATION = NORMAL_RELOAD_DURATION;
 		}
 
 
 		HashSet<Speedup> Speedup_destroy = new HashSet<>();
-		for(Speedup su : MapRender.getSpeedup_list()){
-			if(thisPlayer.getBounds().intersects(su.getBounds().getBoundsInLocal())){
+		for (Speedup su : MapRender.getSpeedup_list()) {
+			if (thisPlayer.getBounds().intersects(su.getBounds().getBoundsInLocal())) {
 				speedup_duration = POWER_UP_DURATION;
-				MOVEMENT_SPEED = QUICK_SPEED;
+				MOVEMENT_SPEED   = QUICK_SPEED;
 				Speedup_destroy.add(su);
 			}
 		}
-		for(Speedup su : Speedup_destroy){
+		for (Speedup su : Speedup_destroy) {
 			MapRender.getSpeedup_list().remove(su);
 			su.destroy();
 		}
 
 		HashSet<FastReload> FastReload_destroy = new HashSet<>();
-		for(FastReload fd : MapRender.getFastReload_list()){
-			if(thisPlayer.getBounds().intersects(fd.getBounds().getBoundsInLocal())){
+		for (FastReload fd : MapRender.getFastReload_list()) {
+			if (thisPlayer.getBounds().intersects(fd.getBounds().getBoundsInLocal())) {
 				quickReload_duration = POWER_UP_DURATION;
-				RELOAD_DURATION = QUICK_RELOAD_DURATION;
-				if(thisPlayer.reload > RELOAD_DURATION)
+				RELOAD_DURATION      = QUICK_RELOAD_DURATION;
+				if (thisPlayer.reload > RELOAD_DURATION)
 					thisPlayer.reload = RELOAD_DURATION;
 				FastReload_destroy.add(fd);
 			}
 		}
-		for(FastReload fd : FastReload_destroy){
+		for (FastReload fd : FastReload_destroy) {
 			MapRender.getFastReload_list().remove(fd);
 			fd.destroy();
 		}
@@ -365,20 +365,13 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Updates the power up bar
-		if(speedup_duration>quickReload_duration)
-			PowerUpBar.setProgress(speedup_duration/POWER_UP_DURATION);
+		if (speedup_duration > quickReload_duration)
+			PowerUpBar.setProgress(speedup_duration / POWER_UP_DURATION);
 		else
-			PowerUpBar.setProgress(quickReload_duration/POWER_UP_DURATION);
+			PowerUpBar.setProgress(quickReload_duration / POWER_UP_DURATION);
+
 		PowerUpBar.setLayoutX(40);
 		PowerUpBar.setLayoutY(80);
-		//end region
-
-		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
-		if (thisPlayer.stunned != 0)
-			thisPlayer.setHoldsBall(false);
-		clientNetwork.sendPacket(thisPlayer.getPacketToSend(), clientNetwork.getUniquePort());
-		if (thisPlayer.isBulletShot())
-			thisPlayer.setHoldsBall(false);
 		//endregion
 
 		//region Checks if a goal has been scored
