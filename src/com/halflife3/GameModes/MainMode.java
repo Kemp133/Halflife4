@@ -8,11 +8,11 @@ import com.halflife3.Controller.MenuController;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameObjects.*;
+import com.halflife3.GameObjects.Interfaces.IRenderable;
+import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.GameUI.MenuUtilitites;
-import com.halflife3.GameObjects.Interfaces.IRenderable;
-import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.Mechanics.PowerUps.FastReload;
 import com.halflife3.Mechanics.PowerUps.Speedup;
 import com.halflife3.Mechanics.Vector2;
@@ -391,12 +391,19 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region End Condition
-		if (won() || lost() || hasFinished) {
+		if (won() || lost()) {
+			if (won()) { win = true; }
 			finished();
-			if (won())
-				win = true;
-			hasFinished = true;
+			return;
 		}
+		//endregion
+
+		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
+		if (thisPlayer.stunned != 0)
+			thisPlayer.setHoldsBall(false);
+		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
+		if (thisPlayer.isBulletShot())
+			thisPlayer.setHoldsBall(false);
 		//endregion
 	}
 
@@ -420,10 +427,7 @@ public class MainMode extends GameMode {
 //				window.setScene(wonScene);
 //				//endregion
 
-
-		System.out.println("Game exited");
-		executor.shutdownNow();
-		Client.disconnect();
+		end();
 	}
 
 	@Override
@@ -435,6 +439,13 @@ public class MainMode extends GameMode {
 	@Override
 	public boolean lost() {
 		return enemyScore == scoreLimit;
+	}
+
+	private void end() {
+		hasFinished = true;
+		System.out.println("Game exited");
+		executor.shutdownNow();
+		Client.disconnect();
 	}
 
 	private void checkForGoal() {
@@ -530,60 +541,60 @@ public class MainMode extends GameMode {
 
 		//region Pause menu
 		root.setOnKeyPressed(keyEvent -> {
-			if (keyEvent.getCode() == KeyCode.ESCAPE) {
-				//Blurs the background
-				root.setEffect(new GaussianBlur());
+			if (keyEvent.getCode() != KeyCode.ESCAPE)
+				return;
 
-				//VBox - pane with buttons
-				VBox pauseRoot = new VBox(6);
-				pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
-				pauseRoot.setAlignment(Pos.CENTER);
-				pauseRoot.setPadding(new Insets(20));
-				pauseRoot.getChildren().add(new Label("Paused"));
+			//Blurs the background
+			root.setEffect(new GaussianBlur());
 
-				//Stage of the pause menu
-				Stage popupStage = new Stage(StageStyle.TRANSPARENT);
-				popupStage.initOwner(window);
-				popupStage.initModality(Modality.APPLICATION_MODAL);
-				popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
+			//VBox - pane with buttons
+			VBox pauseRoot = new VBox(6);
+			pauseRoot.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+			pauseRoot.setAlignment(Pos.CENTER);
+			pauseRoot.setPadding(new Insets(20));
+			pauseRoot.getChildren().add(new Label("Paused"));
 
-				//region ReturnToGame button
-				Button returnToGame = new Button("Return to game");
-				pauseRoot.getChildren().add(returnToGame);
-				returnToGame.setOnAction(event -> {
-					root.setEffect(null);
-					popupStage.hide();
-				});
-				//endregion
+			//Stage of the pause menu
+			Stage popupStage = new Stage(StageStyle.TRANSPARENT);
+			popupStage.initOwner(window);
+			popupStage.initModality(Modality.APPLICATION_MODAL);
+			popupStage.setScene(new Scene(pauseRoot, Color.TRANSPARENT));
 
-				//region Audio button
-				Button sound = new Button("Audio On/Off");
-				pauseRoot.getChildren().add(sound);
-				sound.setOnAction(actionEvent -> audio.switchMute());
-				//endregion
+			//region ReturnToGame button
+			Button returnToGame = new Button("Return to game");
+			pauseRoot.getChildren().add(returnToGame);
+			returnToGame.setOnAction(event -> {
+				root.setEffect(null);
+				popupStage.hide();
+			});
+			//endregion
 
-				//region ToMainMenu button
-				Button toMainMenu = new Button("Quit to Main Menu");
-				pauseRoot.getChildren().add(toMainMenu);
-				toMainMenu.setOnAction(actionEvent -> {
-					root.setEffect(null);
-					popupStage.hide();
-					hasFinished = true;
-					Client.disconnect();
-				});
-				//endregion
+			//region Audio button
+			Button sound = new Button("Audio On/Off");
+			pauseRoot.getChildren().add(sound);
+			sound.setOnAction(actionEvent -> audio.switchMute());
+			//endregion
 
-				//region ToDesktop button
-				Button toDesktop = new Button("Quit to Desktop");
-				pauseRoot.getChildren().add(toDesktop);
-				toDesktop.setOnAction(actionEvent -> {
-					Platform.exit();
-					System.exit(0);
-				});
-				//endregion
+			//region ToMainMenu button
+			Button toMainMenu = new Button("Quit to Main Menu");
+			pauseRoot.getChildren().add(toMainMenu);
+			toMainMenu.setOnAction(actionEvent -> {
+				root.setEffect(null);
+				popupStage.hide();
+				end();
+			});
+			//endregion
 
-				popupStage.show();
-			}
+			//region ToDesktop button
+			Button toDesktop = new Button("Quit to Desktop");
+			pauseRoot.getChildren().add(toDesktop);
+			toDesktop.setOnAction(actionEvent -> {
+				Platform.exit();
+				System.exit(0);
+			});
+			//endregion
+
+			popupStage.show();
 		});
 		//endregion
 	}
