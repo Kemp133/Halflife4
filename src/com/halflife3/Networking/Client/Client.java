@@ -17,27 +17,27 @@ public class Client {
 
     //region Variables
 //    For "catching" the server
-    protected static MulticastSocket serverSocket;
+    protected MulticastSocket serverSocket;
     protected InetAddress group;
 
 //    For receiving clients' positions
-    protected static MulticastSocket positionSocket;
-    private static int incPacketSize = 2000;
+    protected MulticastSocket positionSocket;
+    private int incPacketSize = 2000;
 
     //    For sending packets to the server
-    private static InetAddress hostAddress;
-    private static DatagramSocket outSocket;
+    private InetAddress hostAddress;
+    private DatagramSocket outSocket;
 
 //    Client's data
-    public static InetAddress clientAddress;
-    private static int uniquePort;
-    private static EventListenerClient listenerClient;
-    public static Vector2 startingPosition;
+    public InetAddress clientAddress;
+    private int uniquePort;
+    private EventListenerClient listenerClient;
+    public Vector2 startingPosition;
 
 //    List of Clients
-    public static PositionListPacket listOfClients;
+    public PositionListPacket listOfClients;
 
-    public static void reset() {
+    public void reset() {
         serverSocket = null;
         positionSocket = null;
         hostAddress = null;
@@ -115,16 +115,8 @@ public class Client {
     }
 
 //    Sends a disconnect packet to the server and closes the sockets
-    public static void disconnect() {
-        //region Sends Disconnect packet to the Server
-        DisconnectPacket leave = new DisconnectPacket();
-        byte[] tempBuf = NetworkingUtilities.objectToByteArray(leave);
-
-        DatagramPacket dc = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, uniquePort);
-        try { outSocket.send(dc); } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //endregion
+    public void disconnect() {
+        sendPacket(new DisconnectPacket(), uniquePort);
 
         serverSocket.close();
         outSocket.close();
@@ -158,21 +150,21 @@ public class Client {
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             serverSocket.receive(packet);
             Object o = NetworkingUtilities.byteArrayToObject(recBuf);
-            listenerClient.received(o);
+            listenerClient.received(o, this);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 //    Updates the 'listOfClients' variable
-    public static void receivePositions() {
+    public void receivePositions() {
         try {
             byte[] recBuf = new byte[incPacketSize];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             positionSocket.receive(packet);
             Object o = NetworkingUtilities.byteArrayToObject(recBuf);
             if (incPacketSize == 2000) incPacketSize = NetworkingUtilities.objectToByteArray(o).length + 100;
-            listenerClient.received(o);
+            listenerClient.received(o, this);
         } catch (SocketException ignored) {
 
         } catch (IOException e) {
@@ -181,7 +173,7 @@ public class Client {
     }
 
 //    Sends a packet to the Server
-    public static void sendPacket(Object objectToSend, int port) {
+    public void sendPacket(Object objectToSend, int port) {
         byte[] tempBuf = NetworkingUtilities.objectToByteArray(objectToSend);
         DatagramPacket packet = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, port);
         try {
@@ -218,11 +210,11 @@ public class Client {
         return startingPosition;
     }
 
-    public static int getUniquePort() {
+    public int getUniquePort() {
         return uniquePort;
     }
 
-    public static void setUniquePort(int uniquePort) {
-        Client.uniquePort = uniquePort;
+    public void setUniquePort(int uniquePort) {
+        this.uniquePort = uniquePort;
     }
 }

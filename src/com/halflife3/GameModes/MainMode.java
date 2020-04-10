@@ -59,13 +59,14 @@ public class MainMode extends GameMode {
 	public  Player                  thisPlayer;
 	private HashMap<String, Player> playerList;
 	private HashMap<Integer, Image> scoreSprite;
-	private Input                   input      = Input.getInstance();
+	private Input                   input;
 	private ProgressBar[]           stunBar;
 	private ProgressBar             amoBar;
 	private Ball                    ball;
 	private Stage                   window;
 	private GraphicsContext         graphicsContext;
 	private ExecutorService         executor;
+	private Client                  clientNetwork;
 	private char                    side;
 	public  int                     yourScore  = 0;
 	public  int                     enemyScore = 0;
@@ -85,13 +86,14 @@ public class MainMode extends GameMode {
 	@Override
 	public void initialise() {
 		//region Networking
-		Client clientNetwork = new Client();
+		clientNetwork = new Client();
 		clientNetwork.joinGroup();
 		clientNetwork.getHostInfo();
 		clientNetwork.start();
 		//endregion
 
 		//region Initialise Objects
+		input       = Input.getInstance();
 		playerList  = new HashMap<>();
 		scoreSprite = new HashMap<>();
 		stunBar     = new ProgressBar[Server.startPositions.length];
@@ -113,8 +115,8 @@ public class MainMode extends GameMode {
 
 		//region Wait For Server To Acknowledge Player Connection
 		do {
-			Client.receivePositions();
-		} while (!Client.listOfClients.connectedIPs.contains(thisPlayer.getIpOfClient()));
+			clientNetwork.receivePositions();
+		} while (!clientNetwork.listOfClients.connectedIPs.contains(thisPlayer.getIpOfClient()));
 		//endregion
 
 		//region Initialise The Other Players
@@ -158,7 +160,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Ball
-		PositionPacket ballPacket = Client.listOfClients.posList.get("ball");
+		PositionPacket ballPacket = clientNetwork.listOfClients.posList.get("ball");
 		ball = new Ball(new Vector2(ballPacket.posX, ballPacket.posY));
 		//endregion
 
@@ -320,7 +322,9 @@ public class MainMode extends GameMode {
 		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
 		if (thisPlayer.stunned != 0)
 			thisPlayer.setHoldsBall(false);
-		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
+
+		clientNetwork.sendPacket(thisPlayer.getPacketToSend(), clientNetwork.getUniquePort());
+
 		if (thisPlayer.isBulletShot())
 			thisPlayer.setHoldsBall(false);
 		//endregion
@@ -364,7 +368,7 @@ public class MainMode extends GameMode {
 		hasFinished = true;
 		System.out.println("Game exited");
 		executor.shutdownNow();
-		Client.disconnect();
+		clientNetwork.disconnect();
 	}
 
 	private void checkForGoal() {
@@ -395,14 +399,14 @@ public class MainMode extends GameMode {
 
 	/** A method to initialise the players in the game */
 	public void initialisePlayers() {
-		Client.receivePositions();
-		for (String ip : Client.listOfClients.connectedIPs) {
+		clientNetwork.receivePositions();
+		for (String ip : clientNetwork.listOfClients.connectedIPs) {
 			if (ip.equals(thisPlayer.getIpOfClient())) {
 				playerList.put(ip, thisPlayer);
 				continue;
 			}
 
-			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+			PositionPacket theDoubleValues = clientNetwork.listOfClients.posList.get(ip);
 			Player         enemy           = new Player(new Vector2(theDoubleValues.posX, theDoubleValues.posY));
 			enemy.setIpOfClient(ip);
 			playerList.put(ip, enemy);
@@ -519,7 +523,7 @@ public class MainMode extends GameMode {
 	}
 
 	public void updateEnemies() {
-		Client.receivePositions();
+		clientNetwork.receivePositions();
 
 		//region Replaces Bots <-> Players
 		ArrayList<String> playerKeys          = new ArrayList<>(playerList.keySet());
@@ -527,7 +531,7 @@ public class MainMode extends GameMode {
 
 		for (String playerName : playerKeys) {
 //            If bot name/player IP is stored locally - continue
-			if (Client.listOfClients.connectedIPs.contains(playerName))
+			if (clientNetwork.listOfClients.connectedIPs.contains(playerName))
 				continue;
 
 //            If server list has been updated - reset the odd player's position and velocity
@@ -535,7 +539,7 @@ public class MainMode extends GameMode {
 			aNewPlayerHasJoined = true;
 
 //            Find the odd player (bot or disconnected player)
-			for (String newIP : Client.listOfClients.connectedIPs) {
+			for (String newIP : clientNetwork.listOfClients.connectedIPs) {
 //                If the player is in both local (checked before) and server lists - continue
 				if (playerList.containsKey(newIP))
 					continue;
@@ -560,11 +564,11 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Updates info of *other* players/bots and the ball
-		for (String ip : Client.listOfClients.posList.keySet()) {
+		for (String ip : clientNetwork.listOfClients.posList.keySet()) {
 			if (ip.equals(thisPlayer.getIpOfClient()))
 				continue;
 
-			PositionPacket theDoubleValues = Client.listOfClients.posList.get(ip);
+			PositionPacket theDoubleValues = clientNetwork.listOfClients.posList.get(ip);
 			Player         enemy           = playerList.get(ip);
 
 			//region Rotation / Position / Velocity
@@ -616,7 +620,7 @@ public class MainMode extends GameMode {
 					bulletsToDestroy.add(bullet);
 
 //			  Bullets and Players
-			for (String ip : Client.listOfClients.connectedIPs) {
+			for (String ip : clientNetwork.listOfClients.connectedIPs) {
 				if (((Bullet) bullet).getShooterName().equals(ip))
 					continue;
 

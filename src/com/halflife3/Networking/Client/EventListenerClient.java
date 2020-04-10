@@ -5,7 +5,7 @@ import com.halflife3.Networking.Packets.UniquePortPacket;
 
 public class EventListenerClient {
 
-    public void received(Object packet) {
+    public void received(Object packet, Client client) {
 
         if (packet instanceof UniquePortPacket) {
 
@@ -13,16 +13,16 @@ public class EventListenerClient {
             UniquePortPacket portPacket = (UniquePortPacket) packet;
 
 //            "If" for when multiple clients are already connected
-            if (Client.clientAddress.getHostAddress()
+            if (client.clientAddress.getHostAddress()
                     .equals(portPacket.getClientAddress().getHostAddress())) {
-                Client.setUniquePort(portPacket.getPort());
-                Client.startingPosition = portPacket.getStartPosition();
+                client.setUniquePort(portPacket.getPort());
+                client.startingPosition = portPacket.getStartPosition();
             }
 
         } else if (packet instanceof PositionListPacket) {
 
 //            System.out.println("Received PositionListPacket");
-            Client.listOfClients = (PositionListPacket) packet;
+            client.listOfClients = (PositionListPacket) packet;
 
         }
 
