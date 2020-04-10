@@ -8,7 +8,6 @@ import com.halflife3.Controller.MenuController;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameObjects.*;
-import com.halflife3.GameObjects.Interfaces.IRenderable;
 import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
@@ -377,7 +376,7 @@ public class MainMode extends GameMode {
 		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
 		if (thisPlayer.stunned != 0)
 			thisPlayer.setHoldsBall(false);
-		Client.sendPacket(thisPlayer.getPacketToSend(), Client.getUniquePort());
+		clientNetwork.sendPacket(thisPlayer.getPacketToSend(), clientNetwork.getUniquePort());
 		if (thisPlayer.isBulletShot())
 			thisPlayer.setHoldsBall(false);
 		//endregion
