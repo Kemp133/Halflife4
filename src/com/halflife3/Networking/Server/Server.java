@@ -26,7 +26,7 @@ public class Server implements Runnable {
 	public static final int    LISTENER_PORT     = 5544;
 	public static final int    GET_PORT_PORT     = 5566;
 	public static final int    POSITIONS_PORT    = 5533;
-	public final        int    SERVER_TIMEOUT    = 3000; // seconds
+	public final        int    SERVER_TIMEOUT    = 60; // seconds
 	public final        float  STUN_DURATION     = SERVER_FPS * 3;
 
 	public static Vector2[] startPositions;
@@ -116,28 +116,21 @@ public class Server implements Runnable {
 
 	@Override
 	public void run() {
-		running = true;
+		running   = true;
+		welcoming = true;
 		resetting = false;
 		System.out.println("Multicasting on port: " + MULTICAST_PORT);
 		System.out.println("Listening for clients...");
 
 		//region Multicasts WelcomePackets
 		new Thread(() -> {
-			int timeOut = SERVER_TIMEOUT;
-			welcoming = true;
-			while (running && timeOut > 0) {
-				if (welcoming)
+			while (running) {
+				if (welcoming) {
 					multicastPacket(new WelcomePacket(), MULTICAST_PORT);
-
-				NetworkingUtilities.WaitXSeconds(1);
-
-				if (clientList.connectedList.isEmpty()) {
-					if (timeOut <= 3)
-						System.out.println("Timeout in: " + timeOut);
-					timeOut--;
-				} else
-					timeOut = SERVER_TIMEOUT;
+					NetworkingUtilities.WaitXSeconds(1);
+				}
 			}
+
 			running   = false;
 			welcoming = false;
 			clientSocket.close();
@@ -371,6 +364,7 @@ public class Server implements Runnable {
 		for (Goal g : MapRender.getGoalZone())
 			if (bot.getPosition().distance(g.getPosition()) < 200)
 				return g;
+
 		return null;
 	}
 
@@ -378,8 +372,10 @@ public class Server implements Runnable {
 		for (var ip : clientList.connectedIPs) {
 			if (ip.equals(bot.getIpOfClient()))
 				continue;
+
 			PositionPacket enemy   = clientList.positionList.get(ip);
 			Vector2        toEnemy = new Vector2(enemy.posX, enemy.posY);
+
 			if (bot.getPosition().distance(toEnemy) < 250)
 				return toEnemy;
 		}
@@ -433,6 +429,7 @@ public class Server implements Runnable {
 
 	private void bulletCollision() {
 		HashSet<Bullet> bulletsToDestroy = new HashSet<>();
+
 		for (Bullet bullet : getBulletSet()) {
 			for (Brick block : MapRender.GetList())
 				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
@@ -468,10 +465,7 @@ public class Server implements Runnable {
 		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-		if (clientList.connectedList.isEmpty()) {
-			clientSocket.setSoTimeout(SERVER_TIMEOUT * 1001);
-		} else
-			clientSocket.setSoTimeout(0);
+		clientSocket.setSoTimeout(clientList.connectedList.isEmpty() ? (SERVER_TIMEOUT * 1000) : 0);
 
 		try { clientSocket.receive(incPoke); } catch (SocketTimeoutException e) {
 			running = false;
@@ -498,9 +492,11 @@ public class Server implements Runnable {
 		//endregion
 
 		UniquePortPacket portPacket = new UniquePortPacket();
+
 		//region Client's UniqueInfo and new positionList entry
 		portPacket.setPort(clientPort);
 		portPacket.setClientAddress(address);
+
 		for (int i = 0; i < startPositions.length; i++) {
 			Vector2 startPosition = new Vector2(startPositions[i]);
 			if (!availablePositions.get(startPosition))
@@ -532,12 +528,11 @@ public class Server implements Runnable {
 		for (AIPlayer bot : botList.values())
 			bot.resetBasics();
 
-		ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition(), this,
-				clientList);
+		Connection connection = new Connection(address, clientPort, portPacket.getStartPosition(), this, clientList);
 		new Thread(connection).start();
 
-		//Lets the client side get ready to receive the port
-		NetworkingUtilities.WaitXSeconds(3);
+		NetworkingUtilities.WaitXSeconds(3);// Lets the client side get ready to receive the port
+
 		multicastPacket(portPacket, GET_PORT_PORT);
 
 		clientList.connectedList.put(address, connection);
@@ -557,27 +552,26 @@ public class Server implements Runnable {
 			return;
 		}
 
-		if (clientList.connectedList.size() >= startPositions.length)
-			welcoming = true;
+		welcoming = true;
 
 		Vector2 spawnPoint = clientList.connectedList.get(address).getSpawnPoint();
 
 		availablePositions.replace(spawnPoint, true);
 
-		double clientSpawnX = spawnPoint.getX();
-		double clientSpawnY = spawnPoint.getY();
-
 		for (int i = 0; i < startPositions.length; i++) {
-			if (clientSpawnX != startPositions[i].getX() || clientSpawnY != startPositions[i].getY())
+			if (!spawnPoint.equals(startPositions[i]))
 				continue;
 
 			String botName = botNamesList.get(i);
 
 			clientList.positionList.remove(address.toString());
-			clientList.positionList.put(botName, botList.get(botName).getPacketToSend());
-
 			clientList.connectedIPs.remove(address.toString());
+
+			clientList.positionList.put(botName, botList.get(botName).getPacketToSend());
 			clientList.connectedIPs.add(botName);
+			botList.get(botName).setActive(true);
+
+			break;
 		}
 
 		clientList.connectedList.get(address).close();

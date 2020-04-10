@@ -9,7 +9,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-public class ConnectedToServer implements Runnable {
+public class Connection implements Runnable {
 	private final int                 lengthOfPackets;
 	private final Server              server;
 	private final Vector2             spawnPoint;
@@ -20,7 +20,7 @@ public class ConnectedToServer implements Runnable {
 	private       Vector2             client_position;
 	private       boolean             running;
 
-	public ConnectedToServer(InetAddress ip, int port, Vector2 spawn, Server s, ClientList cl) {
+	public Connection(InetAddress ip, int port, Vector2 spawn, Server s, ClientList cl) {
 		server          = s;
 		clientList      = cl;
 		clientAddress   = ip;
