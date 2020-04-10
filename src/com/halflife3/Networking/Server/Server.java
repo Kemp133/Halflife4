@@ -30,18 +30,18 @@ public class Server implements Runnable {
 	public static final float  STUN_DURATION     = SERVER_FPS * 3;
 
 	private        boolean                   running;
-	private static boolean                   welcoming;
-	private static InetAddress               multicastGroup;
-	private static MulticastSocket           multicastSocket;
+	private boolean                   welcoming;
+	private InetAddress               multicastGroup;
+	private MulticastSocket           multicastSocket;
 	private        PositionListPacket        posListPacket;
 	private        DatagramSocket            clientSocket;
 	private        EventListenerServer       listenerServer;
-	private static int                       clientPort   = 6666;
-	private static HashMap<Vector2, Boolean> availablePositions;
-	private static HashMap<Vector2, Boolean> canShoot;
-	public static  Vector2[]                 startPositions;
-	public static  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
-	private static HashMap<String, AIPlayer> botList;
+	private int                       clientPort   = 6666;
+	private HashMap<Vector2, Boolean> availablePositions;
+	private HashMap<Vector2, Boolean> canShoot;
+	public  Vector2[]                 startPositions;
+	public  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
+	private HashMap<String, AIPlayer> botList;
 	private        AI                        botAI;
 	private        Ball                      theBall;
 	private        Vector2                   previousBallVel;
