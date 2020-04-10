@@ -26,8 +26,8 @@ public class Server implements Runnable {
 	public static final int    LISTENER_PORT     = 5544;
 	public static final int    GET_PORT_PORT     = 5566;
 	public static final int    POSITIONS_PORT    = 5533;
-	public static final int    SERVER_TIMEOUT    = 3000; // seconds
-	public static final float  STUN_DURATION     = SERVER_FPS * 3;
+	public final int    SERVER_TIMEOUT    = 3000; // seconds
+	public final float  STUN_DURATION     = SERVER_FPS * 3;
 
 	private        boolean                   running;
 	private boolean                   welcoming;
