@@ -39,7 +39,7 @@ public class Server implements Runnable {
 	private int                       clientPort   = 6666;
 	private HashMap<Vector2, Boolean> availablePositions;
 	private HashMap<Vector2, Boolean> canShoot;
-	public  Vector2[]                 startPositions;
+	public static  Vector2[]                 startPositions;
 	public  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
 	private HashMap<String, AIPlayer> botList;
 	private        AI                        botAI;
