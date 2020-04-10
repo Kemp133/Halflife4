@@ -18,15 +18,15 @@ import java.util.Deque;
 import java.util.HashSet;
 
 public class MapRender {
-	private static      Deque<Brick>       Bricks_list;
-	private static 		HashSet<Speedup>   Speedup_list;
-	private static 		HashSet<FastReload>  FastReload_list;
-	private static      Deque<Goal>        goalZone;
-	public static final int                BLOCK_SIZE = 40;
-	private static      Vector2            ballSpawnPos;
-	private static      ArrayList<Vector2> startPositions;
-	public static       int                mapWidth = 0;
-	public static       int                mapHeight = 0;
+	private static      Deque<Brick>        Bricks_list;
+	private static      HashSet<Speedup>    Speedup_list;
+	private static      HashSet<FastReload> FastReload_list;
+	private static      Deque<Goal>         goalZone;
+	public static final int                 BLOCK_SIZE = 40;
+	private static      Vector2             ballSpawnPos;
+	private static      ArrayList<Vector2>  startPositions;
+	public static       int                 mapWidth   = 0;
+	public static       int                 mapHeight  = 0;
 
 	public static Deque<Brick> GetList() {
 		return Bricks_list;
@@ -40,10 +40,10 @@ public class MapRender {
 	public synchronized static void LoadLevel() {
 		if (mapWidth != 0 && mapHeight != 0) { return; } //To stop loading the map twice when hosting and playing
 		try {
-			Bricks_list    = new ArrayDeque<>();
-			goalZone       = new ArrayDeque<>();
-			startPositions = new ArrayList<>();
-			Speedup_list   = new HashSet<>();
+			Bricks_list     = new ArrayDeque<>();
+			goalZone        = new ArrayDeque<>();
+			startPositions  = new ArrayList<>();
+			Speedup_list    = new HashSet<>();
 			FastReload_list = new HashSet<>();
 			Image mapImage = new Image(new FileInputStream(Maps.Map));
 			mapWidth  = (int) mapImage.getWidth() * 40;
@@ -63,14 +63,12 @@ public class MapRender {
 						goalZone.add(new Goal(x * BLOCK_SIZE, y * BLOCK_SIZE));
 					} else if (pixelReader.getColor(x, y).equals(Color.BLUE)) {
 						startPositions.add(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE));
-					}
-					else if (pixelReader.getColor(x, y).equals(Color.rgb(255,255,0))){
-						Speedup new_su = new Speedup(new Vector2(x*BLOCK_SIZE, y*BLOCK_SIZE), new Vector2(0,0), "res/boosts/speedBoost.png");
-						Speedup_list.add(new_su);
-					}
-					else if (pixelReader.getColor(x, y).equals(Color.rgb(128,0,128))){
-						FastReload new_rl = new FastReload(new Vector2(x*BLOCK_SIZE, y*BLOCK_SIZE), new Vector2(0,0), "res/boosts/damageBoost.png");
-						FastReload_list.add(new_rl);
+					} else if (pixelReader.getColor(x, y).equals(Color.rgb(255, 255, 0))) {
+						Speedup_list.add(new Speedup(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE),
+								"res/boosts/speedBoost.png"));
+					} else if (pixelReader.getColor(x, y).equals(Color.rgb(128, 0, 128))) {
+						FastReload_list.add(new FastReload(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE),
+								"res/boosts/damageBoost.png"));
 					}
 				}
 			}
@@ -91,7 +89,7 @@ public class MapRender {
 		return goalZone;
 	}
 
-	public static HashSet<Speedup> getSpeedup_list(){
+	public static HashSet<Speedup> getSpeedup_list() {
 		return Speedup_list;
 	}
 

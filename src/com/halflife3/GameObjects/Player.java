@@ -1,7 +1,6 @@
 package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.ClientController;
-import com.halflife3.GameModes.MainMode;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.*;
@@ -13,7 +12,9 @@ import java.io.IOException;
 
 public class Player extends Controllable {
 	//region Variables
-	public  float  reload  = MainMode.RELOAD_DURATION;
+	private float  RELOAD_TIME;
+	public  float  reload;
+	private int    movementSpeed;
 	private Image  sprite2;
 	private Affine affine;
 	//endregion
@@ -38,7 +39,7 @@ public class Player extends Controllable {
 
 	@Override
 	public void update(double time) {
-		if (reload < MainMode.RELOAD_DURATION)
+		if (reload < RELOAD_TIME)
 			reload++;
 		if (stunned <= ClientController.FPS / 2f && stunned != 0) {
 			velocity.setX(0);
@@ -91,4 +92,20 @@ public class Player extends Controllable {
 	}
 
 	public void setAffine(Affine affine) { this.affine = affine; }
+
+	public float getReloadTime() {
+		return RELOAD_TIME;
+	}
+
+	public void setReloadTime(float RELOAD_TIME) {
+		this.RELOAD_TIME = RELOAD_TIME;
+	}
+
+	public int getMovementSpeed() {
+		return movementSpeed;
+	}
+
+	public void setMovementSpeed(int movementSpeed) {
+		this.movementSpeed = movementSpeed;
+	}
 }

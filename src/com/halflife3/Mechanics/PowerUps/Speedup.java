@@ -8,26 +8,26 @@ import javafx.scene.shape.Rectangle;
 
 
 public class Speedup extends Sprite {
-    public Rectangle rectangle;
-    public Speedup(Vector2 position, Vector2 velocity, String image) {
-        super(position, velocity,image);
-        keys.add("speed");
-        rectangle = new Rectangle(position.getX(),position.getY(), getWidth(), getHeight());
-    }
+	public Rectangle rectangle;
 
-    @Override
-    public void render(GraphicsContext gc) {
-        gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX(),
-                position.getY() - Camera.GetOffset().getY());
-    }
+	public Speedup(Vector2 position, String image) {
+		super(position, new Vector2(), image);
+		keys.add("speed");
+		rectangle = new Rectangle(position.getX(), position.getY(), getWidth(), getHeight());
+	}
 
-    @Override
-    public Rectangle getBounds() {
-        return rectangle;
-    }
+	@Override
+	public void render(GraphicsContext gc) {
+		gc.drawImage(sprite, position.getX() - Camera.GetOffset().getX(), position.getY() - Camera.GetOffset().getY());
+	}
 
-    @Override
-    public void update(double time) {
+	@Override
+	public Rectangle getBounds() {
+		return rectangle;
+	}
 
-    }
+	@Override
+	public void update(double time) {
+
+	}
 }

@@ -7,9 +7,9 @@ import com.halflife3.Networking.Server.Server;
 import javafx.scene.canvas.*;
 
 public class AIPlayer extends Controllable {
-	public final float RELOAD_DURATION = MainMode.RELOAD_DURATION * Server.SERVER_FPS / ClientController.FPS;
+	public final float RELOAD_TIME = MainMode.NORMAL_RELOAD_DURATION * Server.SERVER_FPS / ClientController.FPS;
 
-	public  float   reload = RELOAD_DURATION;
+	public  float   reload = RELOAD_TIME;
 	private boolean active;
 	private boolean alreadyLooking;
 	private Vector2 soughtPos;
@@ -25,7 +25,7 @@ public class AIPlayer extends Controllable {
 
 	@Override
 	public void update(double time) {
-		if (reload < RELOAD_DURATION)
+		if (reload < RELOAD_TIME)
 			reload++;
 		if (stunned <= Server.SERVER_FPS / 2f && stunned != 0) {
 			velocity.setX(0);

@@ -50,15 +50,13 @@ import static javafx.scene.input.KeyCode.*;
 public class MainMode extends GameMode {
 	protected double scoreLimit;
 
+	public static final float STUN_DURATION          = ClientController.FPS * 3;
+	public static final int   SHOT_SPEED             = 250;
+	public static final float POWER_UP_DURATION      = 50;
 	public static final int   NORMAL_SPEED           = 120;
 	public static final int   QUICK_SPEED            = 240;
-	public static final int   SHOT_SPEED             = 250;
-	public static final float STUN_DURATION          = ClientController.FPS * 3;
 	public static final float NORMAL_RELOAD_DURATION = 50;
 	public static final float QUICK_RELOAD_DURATION  = 10;
-	public static final float POWER_UP_DURATION      = 50;
-	public static       int   MOVEMENT_SPEED         = NORMAL_SPEED;
-	public static       float RELOAD_DURATION        = NORMAL_RELOAD_DURATION;
 
 	//region Other variables
 	public  Pane                    root;
@@ -113,6 +111,8 @@ public class MainMode extends GameMode {
 		//region Initialise This Player
 		thisPlayer = new Player(clientNetwork.getStartingPosition());
 		thisPlayer.setIpOfClient(clientNetwork.getClientAddress().toString());
+		thisPlayer.setReloadTime(NORMAL_RELOAD_DURATION);
+		thisPlayer.setMovementSpeed(NORMAL_SPEED);
 		//endregion
 
 		//region Set The Distances To The Sides Of The Window
@@ -182,10 +182,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
-		executor.submit(() -> {
-			while (true)
-				updateEnemies();
-		});
+		executor.submit(() -> { while (true) { updateEnemies(); } });
 		//endregion
 
 		System.out.println("Game Running");
@@ -206,7 +203,7 @@ public class MainMode extends GameMode {
 			Camera.SetOffsetY(mapHeight - topOfScreen - bottomOfScreen);
 		//endregion
 
-		//region Calculate the rotation
+		//region Calculates the rotation
 		Vector2 playerClientCenter =
 				new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
 				thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
@@ -229,16 +226,16 @@ public class MainMode extends GameMode {
 				thisPlayer.setVelY(0);
 			}
 			if (input.isKeyPressed(A)) {
-				thisPlayer.setVelX(-MOVEMENT_SPEED);
+				thisPlayer.setVelX(-thisPlayer.getMovementSpeed());
 			}
 			if (input.isKeyPressed(D)) {
-				thisPlayer.setVelX(MOVEMENT_SPEED);
+				thisPlayer.setVelX(thisPlayer.getMovementSpeed());
 			}
 			if (input.isKeyPressed(W)) {
-				thisPlayer.setVelY(-MOVEMENT_SPEED);
+				thisPlayer.setVelY(-thisPlayer.getMovementSpeed());
 			}
 			if (input.isKeyPressed(S)) {
-				thisPlayer.setVelY(MOVEMENT_SPEED);
+				thisPlayer.setVelY(thisPlayer.getMovementSpeed());
 			}
 		}
 		//endregion
@@ -253,48 +250,41 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Check power ups
+		//region Speed-Up
 		if (speedup_duration != 0)
 			speedup_duration--;
 		else
-			MOVEMENT_SPEED = NORMAL_SPEED;
+			thisPlayer.setMovementSpeed(NORMAL_SPEED);
 
-		if (quickReload_duration != 0)
-			quickReload_duration--;
-		else {
-			if (thisPlayer.reload == RELOAD_DURATION)
-				thisPlayer.reload = NORMAL_RELOAD_DURATION;
-			RELOAD_DURATION = NORMAL_RELOAD_DURATION;
-		}
-
-
-		HashSet<Speedup> Speedup_destroy = new HashSet<>();
 		for (Speedup su : MapRender.getSpeedup_list()) {
-			if (thisPlayer.getBounds().intersects(su.getBounds().getBoundsInLocal())) {
-				speedup_duration = POWER_UP_DURATION;
-				MOVEMENT_SPEED   = QUICK_SPEED;
-				Speedup_destroy.add(su);
-			}
-		}
-		for (Speedup su : Speedup_destroy) {
+			if (!thisPlayer.getBounds().intersects(su.getBounds().getBoundsInLocal()))
+				continue;
+
+			speedup_duration = POWER_UP_DURATION;
+			thisPlayer.setMovementSpeed(QUICK_SPEED);
 			MapRender.getSpeedup_list().remove(su);
 			su.destroy();
+			break;
 		}
+		//endregion
 
-		HashSet<FastReload> FastReload_destroy = new HashSet<>();
+		//region Quick-Reload
+		if (quickReload_duration != 0)
+			quickReload_duration--;
+		else
+			thisPlayer.setReloadTime(NORMAL_RELOAD_DURATION);
+
 		for (FastReload fd : MapRender.getFastReload_list()) {
-			if (thisPlayer.getBounds().intersects(fd.getBounds().getBoundsInLocal())) {
-				quickReload_duration = POWER_UP_DURATION;
-				RELOAD_DURATION      = QUICK_RELOAD_DURATION;
-				if (thisPlayer.reload > RELOAD_DURATION)
-					thisPlayer.reload = RELOAD_DURATION;
-				FastReload_destroy.add(fd);
-			}
-		}
-		for (FastReload fd : FastReload_destroy) {
+			if (!thisPlayer.getBounds().intersects(fd.getBounds().getBoundsInLocal()))
+				continue;
+
+			quickReload_duration = POWER_UP_DURATION;
+			thisPlayer.setReloadTime(QUICK_RELOAD_DURATION);
 			MapRender.getFastReload_list().remove(fd);
 			fd.destroy();
+			break;
 		}
-
+		//endregion
 		//endregion
 
 		//region Updates position of all game objects locally (has to go after collision)
@@ -310,7 +300,7 @@ public class MainMode extends GameMode {
 
 		//region Shoots a bullet or the ball
 		thisPlayer.setBulletShot(false);
-		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload == RELOAD_DURATION &&
+		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload >= thisPlayer.getReloadTime() &&
 		    thisPlayer.stunned == 0) {
 			double  bulletX      = Math.cos(Math.atan2(direction.getY(), direction.getX()));
 			double  bulletY      = Math.sin(Math.atan2(direction.getY(), direction.getX()));
@@ -359,17 +349,13 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Updates the reload bar
-		amoBar.setProgress(thisPlayer.reload / RELOAD_DURATION);
+		amoBar.setProgress(thisPlayer.reload / thisPlayer.getReloadTime());
 		amoBar.setLayoutX(40);
 		amoBar.setLayoutY(40);
 		//endregion
 
 		//region Updates the power up bar
-		if (speedup_duration > quickReload_duration)
-			PowerUpBar.setProgress(speedup_duration / POWER_UP_DURATION);
-		else
-			PowerUpBar.setProgress(quickReload_duration / POWER_UP_DURATION);
-
+		PowerUpBar.setProgress(Math.max(speedup_duration, quickReload_duration) / POWER_UP_DURATION);
 		PowerUpBar.setLayoutX(40);
 		PowerUpBar.setLayoutY(80);
 		//endregion
@@ -669,7 +655,7 @@ public class MainMode extends GameMode {
 			double  degreeRadians = Math.toRadians(theDoubleValues.degrees);
 			double  bulletX       = Math.cos(degreeRadians);
 			double  bulletY       = Math.sin(degreeRadians);
-			Vector2 shotVel       = new Vector2(bulletX, bulletY).multiply(MOVEMENT_SPEED * 2);
+			Vector2 shotVel       = new Vector2(bulletX, bulletY).multiply(NORMAL_SPEED * 2);
 			Vector2 gunDirection  = new Vector2(bulletX * 32, bulletY * 32);
 			Vector2 bulletPos = new Vector2(theDoubleValues.posX + thisPlayer.getHeight() / 2,
 					theDoubleValues.posY + thisPlayer.getWidth() / 2).add(gunDirection);

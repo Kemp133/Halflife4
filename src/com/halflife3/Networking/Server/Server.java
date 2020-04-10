@@ -323,14 +323,14 @@ public class Server implements Runnable {
 		if (enemyToShoot != null && !bot.isHoldingBall()) {// Faces an enemy
 			Vector2 toEnemy = enemyToShoot.subtract(bot.getPosition());
 			bot.setDegrees((short) Math.toDegrees(Math.atan2(toEnemy.getY(), toEnemy.getX())));
-			if (bot.reload == bot.RELOAD_DURATION && bot.stunned == 0) {
+			if (bot.reload == bot.RELOAD_TIME && bot.stunned == 0) {
 				bot.setBulletShot(true);
 				bot.reload = 0;
 			}
 		} else if (bot.isHoldingBall() && goal != null) {//Faces the goal
 			Vector2 toGoal = goal.getPosition().subtract(bot.getPosition());
 			bot.setDegrees((short) Math.toDegrees(Math.atan2(toGoal.getY(), toGoal.getX())));
-			if (bot.reload == bot.RELOAD_DURATION && bot.stunned == 0) {
+			if (bot.reload == bot.RELOAD_TIME && bot.stunned == 0) {
 				bot.setBulletShot(true);
 				bot.reload  = 0;
 				bot.stunned = 100;
@@ -342,18 +342,18 @@ public class Server implements Runnable {
 
 		//region Sets the bot's velocity on the X axis
 		if (bot.getSoughtPos().getX() > bot.getPosX())
-			bot.setVelocity(MainMode.MOVEMENT_SPEED, bot.getVelY());
+			bot.setVelocity(MainMode.NORMAL_SPEED, bot.getVelY());
 		else if (bot.getSoughtPos().getX() < bot.getPosX())
-			bot.setVelocity(-MainMode.MOVEMENT_SPEED, bot.getVelY());
+			bot.setVelocity(-MainMode.NORMAL_SPEED, bot.getVelY());
 		else
 			bot.setVelocity(0, bot.getVelY());
 		//endregion
 
 		//region Sets the bot's velocity on the Y axis
 		if (bot.getSoughtPos().getY() > bot.getPosY())
-			bot.setVelocity(bot.getVelX(), MainMode.MOVEMENT_SPEED);
+			bot.setVelocity(bot.getVelX(), MainMode.NORMAL_SPEED);
 		else if (bot.getSoughtPos().getY() < bot.getPosY())
-			bot.setVelocity(bot.getVelX(), -MainMode.MOVEMENT_SPEED);
+			bot.setVelocity(bot.getVelX(), -MainMode.NORMAL_SPEED);
 		else
 			bot.setVelocity(bot.getVelX(), 0);
 		//endregion
