@@ -187,6 +187,7 @@ public class Client {
         try {
             outSocket = new DatagramSocket();
             outSocket.send(packet);
+        } catch (NullPointerException ignored) {
         } catch (IOException e) {
             e.printStackTrace();
         }
