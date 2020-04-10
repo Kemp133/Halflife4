@@ -8,26 +8,26 @@ import java.net.InetAddress;
 
 public class EventListenerServer {
 
-    public void received(Object packet, InetAddress sender) {
+    public void received(Object packet, InetAddress sender, Server server, ClientList cl) {
 
         if (packet instanceof ConnectPacket) {
 
-            Server.addConnection(sender);
+            server.addConnection(sender);
 
         } else if (packet instanceof DisconnectPacket) {
 
-            Server.removeConnection(sender);
+            server.removeConnection(sender);
 
         } else if (packet instanceof PositionPacket) {
 
-            replaceEntry(sender.toString(), (PositionPacket) packet);
+            replaceEntry(sender.toString(), (PositionPacket) packet, cl);
 
         }
 
     }
 
-    public static synchronized void replaceEntry(String sender, PositionPacket pos) {
-        ClientListServer.positionList.replace(sender, pos);
+    public synchronized void replaceEntry(String sender, PositionPacket pos, ClientList cl) {
+        cl.positionList.replace(sender, pos);
     }
 
 }

@@ -4,7 +4,6 @@ import com.halflife3.GameModes.GameMode;
 import com.halflife3.GameModes.MainMode;
 import com.halflife3.GameUI.LoseScene;
 import com.halflife3.GameUI.WinScene;
-import com.halflife3.Networking.Server.ClientListServer;
 import javafx.animation.*;
 import javafx.stage.*;
 
@@ -82,13 +81,11 @@ public class ClientController extends BaseController {
 //		}
 		if (gamemode.win) {
 			gamemode = null;
-			ClientListServer.reset();
 			ObjectManager.resetObjects();
 			WinScene win = new WinScene();
 			SceneManager.getInstance().setScene("Win Scene", win.getScene());
 		} else {
 			gamemode = null;
-			ClientListServer.reset();
 			ObjectManager.resetObjects();
 			LoseScene lose = new LoseScene();
 			SceneManager.getInstance().setScene("Lose Scene", lose.getScene());

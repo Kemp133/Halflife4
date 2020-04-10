@@ -26,11 +26,10 @@ public class Server implements Runnable {
 	public static final int    LISTENER_PORT     = 5544;
 	public static final int    GET_PORT_PORT     = 5566;
 	public static final int    POSITIONS_PORT    = 5533;
-	public static final int    GOAL_WIDTH        = 4 * 40;
 	public static final int    SERVER_TIMEOUT    = 3000; // seconds
 	public static final float  STUN_DURATION     = SERVER_FPS * 3;
 
-	private static boolean                   running;
+	private        boolean                   running;
 	private static boolean                   welcoming;
 	private static InetAddress               multicastGroup;
 	private static MulticastSocket           multicastSocket;
@@ -47,6 +46,7 @@ public class Server implements Runnable {
 	private        Ball                      theBall;
 	private        Vector2                   previousBallVel;
 	private        HashSet<Bullet>           bulletSet;
+	private        ClientList                clientList;
 	//endregion
 
 	public void start() {
@@ -61,6 +61,7 @@ public class Server implements Runnable {
 		bulletSet          = new HashSet<>();
 		availablePositions = new HashMap<>();
 		canShoot           = new HashMap<>();
+		clientList         = new ClientList();
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
 		startPositions     = MapRender.getStartPositions();
@@ -85,7 +86,7 @@ public class Server implements Runnable {
 		theBall = new Ball(MapRender.getBallSpawnPos());
 		ObjectManager.removeObject(theBall);
 
-		ClientListServer.positionList.put("ball", theBall.getPositionPacket());
+		clientList.positionList.put("ball", theBall.getPositionPacket());
 		//endregion
 
 		//region Fills the positionList with bot players, giving them available starting positions
@@ -99,8 +100,8 @@ public class Server implements Runnable {
 			botPlayer.setActive(true);
 			botPlayer.setSoughtPos(botAI.getNextPos(botPlayer.getPosition(), theBall.getPosition()));
 			botList.put(botName, botPlayer);
-			ClientListServer.positionList.put(botName, botPlayer.getPacketToSend());
-			ClientListServer.connectedIPs.add(botName);
+			clientList.positionList.put(botName, botPlayer.getPacketToSend());
+			clientList.connectedIPs.add(botName);
 		}
 		//endregion
 
@@ -127,7 +128,7 @@ public class Server implements Runnable {
 
 				NetworkingUtilities.WaitXSeconds(1);
 
-				if (ClientListServer.clientList.isEmpty()) {
+				if (clientList.connectedList.isEmpty()) {
 					if (timeOut <= 3)
 						System.out.println("Timeout in: " + timeOut);
 					timeOut--;
@@ -158,7 +159,7 @@ public class Server implements Runnable {
 
 		//region Listens for incoming connections
 		while (running) {
-			if (ClientListServer.clientList.size() < startPositions.length) {
+			if (clientList.connectedList.size() < startPositions.length) {
 				try {
 					connectionListener();
 				} catch (IOException e) { e.printStackTrace(); }
@@ -183,15 +184,15 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Updates AI controlled players
-		if (!ClientListServer.clientList.isEmpty() && ClientListServer.clientList.size() < startPositions.length)
+		if (!clientList.connectedList.isEmpty() && clientList.connectedList.size() < startPositions.length)
 			for (String ip : botList.keySet())
 				moveAI(elapsedTime, ip);
 		//endregion
 
 		//region Bullets and the ball - position/velocity
 		theBall.isHeld = false;
-		for (String ip : ClientListServer.connectedIPs) {
-			PositionPacket player = ClientListServer.positionList.get(ip);
+		for (String ip : clientList.connectedIPs) {
+			PositionPacket player = clientList.positionList.get(ip);
 
 			double degreeRadians = Math.toRadians(player.degrees);
 			double ballX         = Math.cos(degreeRadians);
@@ -221,7 +222,7 @@ public class Server implements Runnable {
 						botList.get(ip).setHoldsBall(false);
 						botList.get(ip).setBulletShot(false);
 					}
-					EventListenerServer.replaceEntry(ip, player);
+					listenerServer.replaceEntry(ip, player, clientList);
 				} else {
 					Vector2 bulletDir = new Vector2(ballX * 32, ballY * 32);
 					Vector2 bulletPos = new Vector2(player.posX + 6, player.posY + 6).add(bulletDir);
@@ -240,12 +241,12 @@ public class Server implements Runnable {
 
 		//region Updates the ball and its packet
 		theBall.update(elapsedTime);
-		EventListenerServer.replaceEntry("ball", theBall.getPositionPacket());
+		listenerServer.replaceEntry("ball", theBall.getPositionPacket(), clientList);
 		//endregion
 
 		//region Sends the position list packet to all clients
-		posListPacket.posList      = ClientListServer.positionList;
-		posListPacket.connectedIPs = ClientListServer.connectedIPs;
+		posListPacket.posList      = clientList.positionList;
+		posListPacket.connectedIPs = clientList.connectedIPs;
 		multicastPacket(posListPacket, POSITIONS_PORT);
 		//endregion
 
@@ -279,7 +280,7 @@ public class Server implements Runnable {
 		bot.update(time);
 
 		if (bot.stunned > 0) {
-			EventListenerServer.replaceEntry(name, bot.getPacketToSend());
+			listenerServer.replaceEntry(name, bot.getPacketToSend(), clientList);
 			return;
 		}
 
@@ -318,7 +319,7 @@ public class Server implements Runnable {
 //		Shoots bullets at enemies and ball into the goal
 		bot.setBulletShot(false);
 		Vector2 enemyToShoot = getEnemyInRadius(bot);
-		Goal goal = goalInRadius(bot);
+		Goal    goal         = goalInRadius(bot);
 		if (enemyToShoot != null && !bot.isHoldingBall()) {// Faces an enemy
 			Vector2 toEnemy = enemyToShoot.subtract(bot.getPosition());
 			bot.setDegrees((short) Math.toDegrees(Math.atan2(toEnemy.getY(), toEnemy.getX())));
@@ -331,7 +332,7 @@ public class Server implements Runnable {
 			bot.setDegrees((short) Math.toDegrees(Math.atan2(toGoal.getY(), toGoal.getX())));
 			if (bot.reload == bot.RELOAD_DURATION && bot.stunned == 0) {
 				bot.setBulletShot(true);
-				bot.reload = 0;
+				bot.reload  = 0;
 				bot.stunned = 100;
 			}
 		} else {// Faces the way it's going
@@ -358,7 +359,7 @@ public class Server implements Runnable {
 		//endregion
 
 //		  Replaces the position packet of the bot
-		EventListenerServer.replaceEntry(name, bot.getPacketToSend());
+		listenerServer.replaceEntry(name, bot.getPacketToSend(), clientList);
 	}
 
 	private Goal goalInRadius(AIPlayer bot) {
@@ -369,10 +370,10 @@ public class Server implements Runnable {
 	}
 
 	private Vector2 getEnemyInRadius(AIPlayer bot) {
-		for (var ip : ClientListServer.connectedIPs) {
+		for (var ip : clientList.connectedIPs) {
 			if (ip.equals(bot.getIpOfClient()))
 				continue;
-			PositionPacket enemy   = ClientListServer.positionList.get(ip);
+			PositionPacket enemy   = clientList.positionList.get(ip);
 			Vector2        toEnemy = new Vector2(enemy.posX, enemy.posY);
 			if (bot.getPosition().distance(toEnemy) < 250)
 				return toEnemy;
@@ -462,7 +463,7 @@ public class Server implements Runnable {
 		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-		if (ClientListServer.clientList.isEmpty()) {
+		if (clientList.connectedList.isEmpty()) {
 			clientSocket.setSoTimeout(SERVER_TIMEOUT * 1001);
 		} else
 			clientSocket.setSoTimeout(0);
@@ -479,12 +480,12 @@ public class Server implements Runnable {
 		welcoming = false;
 
 		Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
-		listenerServer.received(receivedPoke, incPoke.getAddress());
+		listenerServer.received(receivedPoke, incPoke.getAddress(), this, clientList);
 	}
 
-	public synchronized static void addConnection(InetAddress address) {
+	public synchronized void addConnection(InetAddress address) {
 		//region Checks if Server is full
-		if (ClientListServer.clientList.size() >= startPositions.length) {
+		if (clientList.connectedList.size() >= startPositions.length) {
 			System.out.println("Server is full. Player " + address + " disconnected");
 			welcoming = false;
 			return;
@@ -505,16 +506,16 @@ public class Server implements Runnable {
 
 //            Removes the bot holding the [i]th startPosition
 			String botName = botNamesList.get(i);
-			ClientListServer.positionList.remove(botName);
-			ClientListServer.connectedIPs.remove(botName);
+			clientList.positionList.remove(botName);
+			clientList.connectedIPs.remove(botName);
 			botList.get(botName).setActive(false);
 
 //			  Adds the player (with the [i]th startPosition) to the positionList
 			PositionPacket playerPacket = new PositionPacket();
 			playerPacket.posX = playerPacket.spawnX = startPosition.getX();
 			playerPacket.posY = playerPacket.spawnY = startPosition.getY();
-			ClientListServer.positionList.put(address.toString(), playerPacket);
-			ClientListServer.connectedIPs.add(address.toString());
+			clientList.positionList.put(address.toString(), playerPacket);
+			clientList.connectedIPs.add(address.toString());
 
 //            Disables the [i]th startPosition so that no new players could have it assigned to them
 			availablePositions.replace(startPosition, false);
@@ -526,14 +527,15 @@ public class Server implements Runnable {
 		for (AIPlayer bot : botList.values())
 			bot.resetBasics();
 
-		ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition());
+		ConnectedToServer connection = new ConnectedToServer(address, clientPort, portPacket.getStartPosition(), this,
+				clientList);
 		new Thread(connection).start();
 
 		//Lets the client side get ready to receive the port
 		NetworkingUtilities.WaitXSeconds(3);
 		multicastPacket(portPacket, GET_PORT_PORT);
 
-		ClientListServer.clientList.put(address, connection);
+		clientList.connectedList.put(address, connection);
 
 		clientPort++;
 		welcoming = true;
@@ -544,16 +546,16 @@ public class Server implements Runnable {
 	 *
 	 * @param address The address of the player to be removed
 	 */
-	public static void removeConnection(InetAddress address) {
-		if (ClientListServer.clientList.size() == 1) {
+	public void removeConnection(InetAddress address) {
+		if (clientList.connectedList.size() == 1) {
 			running = false;
 			return;
 		}
 
-		if (ClientListServer.clientList.size() >= startPositions.length)
+		if (clientList.connectedList.size() >= startPositions.length)
 			welcoming = true;
 
-		Vector2 spawnPoint = ClientListServer.clientList.get(address).getSpawnPoint();
+		Vector2 spawnPoint = clientList.connectedList.get(address).getSpawnPoint();
 
 		availablePositions.replace(spawnPoint, true);
 
@@ -566,19 +568,19 @@ public class Server implements Runnable {
 
 			String botName = botNamesList.get(i);
 
-			ClientListServer.positionList.remove(address.toString());
-			ClientListServer.positionList.put(botName, botList.get(botName).getPacketToSend());
+			clientList.positionList.remove(address.toString());
+			clientList.positionList.put(botName, botList.get(botName).getPacketToSend());
 
-			ClientListServer.connectedIPs.remove(address.toString());
-			ClientListServer.connectedIPs.add(botName);
+			clientList.connectedIPs.remove(address.toString());
+			clientList.connectedIPs.add(botName);
 		}
 
-		ClientListServer.clientList.get(address).close();
-		ClientListServer.clientList.remove(address);
+		clientList.connectedList.get(address).close();
+		clientList.connectedList.remove(address);
 		System.out.println(address + " has disconnected");
 	}
 
-	public synchronized static void multicastPacket(Object o, int mPort) {
+	public synchronized void multicastPacket(Object o, int mPort) {
 		try {
 			byte[] sendBuf = NetworkingUtilities.objectToByteArray(o);
 			var    packet  = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);
@@ -594,17 +596,17 @@ public class Server implements Runnable {
 
 			theBall.reset();
 			previousBallVel = new Vector2();
-			EventListenerServer.replaceEntry("ball", theBall.getPositionPacket());
+			listenerServer.replaceEntry("ball", theBall.getPositionPacket(), clientList);
 
 			for (String ip : botList.keySet()) {
 				botList.get(ip).reset();
-				EventListenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend());
+				listenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend(), clientList);
 			}
 		}).start();
 
 		NetworkingUtilities.WaitXSeconds(1);
-		posListPacket.connectedIPs = ClientListServer.connectedIPs;
-		posListPacket.posList      = ClientListServer.positionList;
+		posListPacket.connectedIPs = clientList.connectedIPs;
+		posListPacket.posList      = clientList.positionList;
 		multicastPacket(posListPacket, POSITIONS_PORT);
 	}
 
