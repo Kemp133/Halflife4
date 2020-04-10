@@ -81,8 +81,9 @@ public class MainMode extends GameMode {
 	private int                     leftEndOfScreen;
 	private int                     bottomOfScreen;
 	private int                     topOfScreen;
-	public  float                   speedup_duration     = 0;
-	public  float                   quickReload_duration = 0;
+	private float                   speedup_duration     = 0;
+	private float                   quickReload_duration = 0;
+	private boolean                 resetting;
 	//endregion
 
 	public MainMode(String GameModeName, double score) {
@@ -106,6 +107,7 @@ public class MainMode extends GameMode {
 		stunBar     = new ProgressBar[Server.startPositions.length];
 		root        = new Pane();
 		executor    = Executors.newSingleThreadExecutor();
+		resetting   = false;
 		//endregion
 
 		//region Initialise This Player
@@ -190,6 +192,8 @@ public class MainMode extends GameMode {
 
 	@Override
 	public void gameLoop(double elapsedTime) {
+		if (resetting) { return; }
+
 		//region Camera offset
 		Camera.SetOffsetX(thisPlayer.getPosX() - leftEndOfScreen);
 		Camera.SetOffsetY(thisPlayer.getPosY() - topOfScreen);
@@ -434,6 +438,9 @@ public class MainMode extends GameMode {
 		Goal g = goalScored();
 		if (g == null) { return; }
 
+		resetting = true;
+		thisPlayer.reload = 0;
+
 		if (g.getScoringTeam() == side) {
 			yourScore++;
 			System.out.println("Goal for YOUR team!");
@@ -446,6 +453,11 @@ public class MainMode extends GameMode {
 		ball.reset();
 
 		NetworkingUtilities.WaitXSeconds(1);
+
+		new Thread(() -> {
+			NetworkingUtilities.WaitXSeconds(1);
+			resetting = false;
+		}).start();
 	}
 
 	private Goal goalScored() {

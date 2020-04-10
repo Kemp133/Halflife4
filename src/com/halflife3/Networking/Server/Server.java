@@ -26,27 +26,29 @@ public class Server implements Runnable {
 	public static final int    LISTENER_PORT     = 5544;
 	public static final int    GET_PORT_PORT     = 5566;
 	public static final int    POSITIONS_PORT    = 5533;
-	public final int    SERVER_TIMEOUT    = 3000; // seconds
-	public final float  STUN_DURATION     = SERVER_FPS * 3;
+	public final        int    SERVER_TIMEOUT    = 3000; // seconds
+	public final        float  STUN_DURATION     = SERVER_FPS * 3;
 
-	private        boolean                   running;
+	public static Vector2[] startPositions;
+
+	private boolean                   running;
 	private boolean                   welcoming;
+	private boolean                   resetting;
 	private InetAddress               multicastGroup;
 	private MulticastSocket           multicastSocket;
-	private        PositionListPacket        posListPacket;
-	private        DatagramSocket            clientSocket;
-	private        EventListenerServer       listenerServer;
+	private PositionListPacket        posListPacket;
+	private DatagramSocket            clientSocket;
+	private EventListenerServer       listenerServer;
 	private int                       clientPort   = 6666;
 	private HashMap<Vector2, Boolean> availablePositions;
 	private HashMap<Vector2, Boolean> canShoot;
-	public static  Vector2[]                 startPositions;
 	public  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
 	private HashMap<String, AIPlayer> botList;
-	private        AI                        botAI;
-	private        Ball                      theBall;
-	private        Vector2                   previousBallVel;
-	private        HashSet<Bullet>           bulletSet;
-	private        ClientList                clientList;
+	private AI                        botAI;
+	private Ball                      theBall;
+	private Vector2                   previousBallVel;
+	private HashSet<Bullet>           bulletSet;
+	private ClientList                clientList;
 	//endregion
 
 	public void start() {
@@ -115,6 +117,7 @@ public class Server implements Runnable {
 	@Override
 	public void run() {
 		running = true;
+		resetting = false;
 		System.out.println("Multicasting on port: " + MULTICAST_PORT);
 		System.out.println("Listening for clients...");
 
@@ -151,6 +154,8 @@ public class Server implements Runnable {
 
 				elapsedTime = (System.nanoTime() - lastUpdate) / 1e9;
 				lastUpdate  = System.nanoTime();
+
+				if (resetting) { continue; }
 
 				gameFrame(elapsedTime);
 			}
@@ -591,6 +596,8 @@ public class Server implements Runnable {
 	}
 
 	private void resetMap() {
+		resetting = true;
+
 		new Thread(() -> {
 			System.out.println("Goal has been scored. Resetting positions...");
 
@@ -608,6 +615,11 @@ public class Server implements Runnable {
 		posListPacket.connectedIPs = clientList.connectedIPs;
 		posListPacket.posList      = clientList.positionList;
 		multicastPacket(posListPacket, POSITIONS_PORT);
+
+		new Thread(() -> {
+			NetworkingUtilities.WaitXSeconds(1);
+			resetting = false;
+		}).start();
 	}
 
 	private synchronized void addBullet(Bullet toAdd) {
