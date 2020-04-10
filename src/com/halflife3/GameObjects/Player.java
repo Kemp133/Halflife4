@@ -65,7 +65,6 @@ public class Player extends Controllable {
 		} catch (IOException e) {
 			System.err.println("Image not found!");
 		}
-
 	}
 
 	public void collision(Brick block, double time) {

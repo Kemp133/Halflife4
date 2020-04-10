@@ -3,6 +3,8 @@ package com.halflife3.View;
 import com.halflife3.GameObjects.Brick;
 import com.halflife3.GameObjects.Goal;
 import com.halflife3.GameUI.Maps;
+import com.halflife3.Mechanics.PowerUps.FastReload;
+import com.halflife3.Mechanics.PowerUps.Speedup;
 import com.halflife3.Mechanics.Vector2;
 import javafx.scene.canvas.*;
 import javafx.scene.image.*;
@@ -13,9 +15,12 @@ import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 
 public class MapRender {
 	private static      Deque<Brick>       Bricks_list;
+	private static 		HashSet<Speedup>   Speedup_list;
+	private static 		HashSet<FastReload>  FastReload_list;
 	private static      Deque<Goal>        goalZone;
 	public static final int                BLOCK_SIZE = 40;
 	private static      Vector2            ballSpawnPos;
@@ -38,6 +43,8 @@ public class MapRender {
 			Bricks_list    = new ArrayDeque<>();
 			goalZone       = new ArrayDeque<>();
 			startPositions = new ArrayList<>();
+			Speedup_list   = new HashSet<>();
+			FastReload_list = new HashSet<>();
 			Image mapImage = new Image(new FileInputStream(Maps.Map));
 			mapWidth  = (int) mapImage.getWidth() * 40;
 			mapHeight = (int) mapImage.getHeight() * 40;
@@ -57,6 +64,14 @@ public class MapRender {
 					} else if (pixelReader.getColor(x, y).equals(Color.BLUE)) {
 						startPositions.add(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE));
 					}
+					else if (pixelReader.getColor(x, y).equals(Color.rgb(255,255,0))){
+						Speedup new_su = new Speedup(new Vector2(x*BLOCK_SIZE, y*BLOCK_SIZE), new Vector2(0,0), "res/boosts/speedBoost.png");
+						Speedup_list.add(new_su);
+					}
+					else if (pixelReader.getColor(x, y).equals(Color.rgb(128,0,128))){
+						FastReload new_rl = new FastReload(new Vector2(x*BLOCK_SIZE, y*BLOCK_SIZE), new Vector2(0,0), "res/boosts/damageBoost.png");
+						FastReload_list.add(new_rl);
+					}
 				}
 			}
 
@@ -74,5 +89,13 @@ public class MapRender {
 
 	public static Deque<Goal> getGoalZone() {
 		return goalZone;
+	}
+
+	public static HashSet<Speedup> getSpeedup_list(){
+		return Speedup_list;
+	}
+
+	public static HashSet<FastReload> getFastReload_list() {
+		return FastReload_list;
 	}
 }

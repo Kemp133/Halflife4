@@ -13,6 +13,8 @@ import com.halflife3.GameUI.Maps;
 import com.halflife3.GameUI.MenuUtilitites;
 import com.halflife3.GameObjects.Interfaces.IRenderable;
 import com.halflife3.GameObjects.Interfaces.IUpdateable;
+import com.halflife3.Mechanics.PowerUps.FastReload;
+import com.halflife3.Mechanics.PowerUps.Speedup;
 import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.Client;
 import com.halflife3.Networking.NetworkingUtilities;
@@ -49,10 +51,15 @@ import static javafx.scene.input.KeyCode.*;
 public class MainMode extends GameMode {
 	protected double scoreLimit;
 
-	public static final int   MOVEMENT_SPEED  = 120;
+	public static final int   NORMAL_SPEED  = 120;
+	public static final int   QUICK_SPEED	  = 240;
 	public static final int   SHOT_SPEED      = 250;
 	public static final float STUN_DURATION   = ClientController.FPS * 3;
-	public static final float RELOAD_DURATION = 50;
+	public static final float NORMAL_RELOAD_DURATION = 50;
+	public static final float QUICK_RELOAD_DURATION = 10;
+	public static final float POWER_UP_DURATION = 50;
+	public  static int 		  MOVEMENT_SPEED = NORMAL_SPEED;
+	public  static float	  RELOAD_DURATION = NORMAL_RELOAD_DURATION;
 
 	//region Other variables
 	public  Pane                    root;
@@ -62,6 +69,7 @@ public class MainMode extends GameMode {
 	private Input                   input      = Input.getInstance();
 	private ProgressBar[]           stunBar;
 	private ProgressBar             amoBar;
+	private ProgressBar				PowerUpBar;
 	private Ball                    ball;
 	private Stage                   window;
 	private GraphicsContext         graphicsContext;
@@ -75,6 +83,8 @@ public class MainMode extends GameMode {
 	private int                     leftEndOfScreen;
 	private int                     bottomOfScreen;
 	private int                     topOfScreen;
+	public float 					speedup_duration = 0;
+	public float 					quickReload_duration = 0;
 	//endregion
 
 	public MainMode(String GameModeName, double score) {
@@ -157,6 +167,14 @@ public class MainMode extends GameMode {
 		root.getChildren().add(amoBar);
 		//endregion
 
+		//region Initialise Power up Bar
+		PowerUpBar = new ProgressBar(0);
+		PowerUpBar.setStyle("-fx-accent: blue;");
+		PowerUpBar.setPrefHeight(20);
+		PowerUpBar.setPrefWidth(150);
+		root.getChildren().add(PowerUpBar);
+		//endregion
+
 		//region Initialise Ball
 		PositionPacket ballPacket = Client.listOfClients.posList.get("ball");
 		ball = new Ball(new Vector2(ballPacket.posX, ballPacket.posY));
@@ -233,6 +251,51 @@ public class MainMode extends GameMode {
 		bulletCollision();
 		//endregion
 
+		//region Check power ups
+		if(speedup_duration != 0)
+			speedup_duration--;
+		else
+			MOVEMENT_SPEED = NORMAL_SPEED;
+
+		if(quickReload_duration != 0)
+			quickReload_duration--;
+		else {
+			if(thisPlayer.reload == RELOAD_DURATION)
+				thisPlayer.reload = NORMAL_RELOAD_DURATION;
+			RELOAD_DURATION = NORMAL_RELOAD_DURATION;
+		}
+
+
+		HashSet<Speedup> Speedup_destroy = new HashSet<>();
+		for(Speedup su : MapRender.getSpeedup_list()){
+			if(thisPlayer.getBounds().intersects(su.getBounds().getBoundsInLocal())){
+				speedup_duration = POWER_UP_DURATION;
+				MOVEMENT_SPEED = QUICK_SPEED;
+				Speedup_destroy.add(su);
+			}
+		}
+		for(Speedup su : Speedup_destroy){
+			MapRender.getSpeedup_list().remove(su);
+			su.destroy();
+		}
+
+		HashSet<FastReload> FastReload_destroy = new HashSet<>();
+		for(FastReload fd : MapRender.getFastReload_list()){
+			if(thisPlayer.getBounds().intersects(fd.getBounds().getBoundsInLocal())){
+				quickReload_duration = POWER_UP_DURATION;
+				RELOAD_DURATION = QUICK_RELOAD_DURATION;
+				if(thisPlayer.reload > RELOAD_DURATION)
+					thisPlayer.reload = RELOAD_DURATION;
+				FastReload_destroy.add(fd);
+			}
+		}
+		for(FastReload fd : FastReload_destroy){
+			MapRender.getFastReload_list().remove(fd);
+			fd.destroy();
+		}
+
+		//endregion
+
 		//region Updates position of all game objects locally (has to go after collision)
 		for (IUpdateable go : ObjectManager.getGameObjects())
 			go.update(elapsedTime);
@@ -279,8 +342,9 @@ public class MainMode extends GameMode {
 
 		MapRender.Render(graphicsContext);
 
-		for (IRenderable go : ObjectManager.getGameObjects())
+		for (GameObject go : ObjectManager.getGameObjects()) {
 			go.render(graphicsContext);
+		}
 		//endregion
 
 		//region Updates the stun bar
@@ -298,6 +362,15 @@ public class MainMode extends GameMode {
 		amoBar.setLayoutX(40);
 		amoBar.setLayoutY(40);
 		//endregion
+
+		//region Updates the power up bar
+		if(speedup_duration>quickReload_duration)
+			PowerUpBar.setProgress(speedup_duration/POWER_UP_DURATION);
+		else
+			PowerUpBar.setProgress(quickReload_duration/POWER_UP_DURATION);
+		PowerUpBar.setLayoutX(40);
+		PowerUpBar.setLayoutY(80);
+		//end region
 
 		//region Sends the client's position, whether they've shot a bullet and if they're holding the ball
 		if (thisPlayer.stunned != 0)
