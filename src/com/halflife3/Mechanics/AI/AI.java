@@ -29,7 +29,7 @@ public class AI {
 			for (int i = 0; i < mapHeight; i++) {
 				for (int j = 0; j < mapWidth; j++) {
 					Color color = px.getColor(j, i);
-					map[i][j] = new Node(new Vector2((i * BLOCK_SIZE), (j * BLOCK_SIZE)));
+					map[i][j] = new Node((i * BLOCK_SIZE), (j * BLOCK_SIZE));
 					if (color.equals(Color.BLACK))
 						map[i][j].type = "Wall";
 				}
