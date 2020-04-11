@@ -184,6 +184,10 @@ public final class SceneManager {
 		if (!windowAttributes.decorated) s.initStyle(StageStyle.UNIFIED);
 		if (windowAttributes.isModal) s.initModality(Modality.APPLICATION_MODAL);
 		if (windowAttributes.maximisedOnLoad) s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+
+		try {
+			s.getIcons().add(new Image(new FileInputStream("res/Sprites/Ball/Ball.png")));
+		} catch (Exception ignored) {}
 	}
 
 	/** A method to load the saved window attributes from disk. This is used to preserve user set variables */
