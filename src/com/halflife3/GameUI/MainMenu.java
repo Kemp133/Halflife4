@@ -34,8 +34,8 @@ import java.io.FileNotFoundException;
 public class MainMenu /*extends Application*/ {
 	private              BorderPane borderPane;
 	private              VBox       vbox;
-	private static final String     MENU_AUDIO_PATH                = "res/MainMenu/music_cinematic_darkness_falls.wav";
-	private static final String     MENU_BACKGROUND_IMAGE_LOCATION = "res/Leaderboard/LeaderboardBackground.jpg";
+	private final String     MENU_AUDIO_PATH                = "res/MainMenu/music_cinematic_darkness_falls.wav";
+	private final String     MENU_BACKGROUND_IMAGE_LOCATION = "res/Leaderboard/LeaderboardBackground.jpg";
 
 	private Button      startServer = new Button("Host Game");
 	private Button      joinGame    = new Button("Join Game");
@@ -78,7 +78,7 @@ public class MainMenu /*extends Application*/ {
 		});
 
 		options.setOnAction(actionEvent -> {
-			Platform.runLater(() -> new OptionsController().start());
+			Platform.runLater(() -> new OptionsController(player).start());
 		});
 
 		exit.setOnAction(actionEvent -> {

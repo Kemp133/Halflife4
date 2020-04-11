@@ -1,0 +1,23 @@
+.titled-pane
+{
+    -fx-max-width: 300px;
+    /*-fx-text-fill: linear-gradient(#0000FF, #FFFFFF 95%);*/
+    /*-fx-font-size: 15px;*/
+    -fx-start-margin: 0;
+}
+.titled-pane > .title
+{
+    -fx-fill: rgba(0,0,0,0);
+    -fx-background-color: rgba(176,224,230,0.8);
+    -fx-padding: 0px 0px 0px 5px;
+    -fx-end-margin: 0;
+    -fx-start-margin: 0;
+}
+
+.titled-pane > .content
+{
+    -fx-background-color: rgba(0,0,0,0);
+    -fx-padding: 0px;
+    -fx-start-margin: 0;
+    -fx-end-margin: 0;
+}

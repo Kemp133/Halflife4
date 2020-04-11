@@ -2,16 +2,14 @@ package com.halflife3.DatabaseUI;
 
 import com.halflife3.Controller.BaseController;
 import com.halflife3.GameUI.MenuUtilitites;
+import com.halflife3.Networking.NetworkingUtilities;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.text.*;
 
 import java.io.*;
 
@@ -31,30 +29,38 @@ public class SettingsMenu {
 	public Button getRemoveAcc()        { return removeAcc; }
 	public Button getBack()             { return back; }
 
+	public final int TITLE_FONT_SIZE = 40;
+
 	/*
 	Set-up for scene to allow user to delete account
 	 */
-	private Text		  passwordT		  = new Text();
-	private PasswordField password        = new PasswordField();
-	private Text		  confPasswordT   = new Text();
-	private PasswordField confPassword    = new PasswordField();
-	private Button        confDeleteAcc   = new Button("Delete Account");
-	private Button        back2           = new Button("Back");
-	private Text          userFeedback    = new Text();
+	private Text          passwordT     = new Text();
+	private PasswordField password      = new PasswordField();
+	private Text          confPasswordT = new Text();
+	private PasswordField confPassword  = new PasswordField();
+	private Button        confDeleteAcc = new Button("Delete Account");
+	private Button        back2         = new Button("Back");
+	private Text          userFeedback  = new Text();
 
-	public Text getUserFeedback() { return userFeedback; }
-	public PasswordField getPassword() { return password; }
+	public Text getUserFeedback()          { return userFeedback; }
+	public PasswordField getPassword()     { return password; }
 	public PasswordField getConfPassword() { return confPassword; }
-	public Button getConfDeleteAcc() { return confDeleteAcc; }
-	public Button getBack2() { return back2; }
+	public Button getConfDeleteAcc()       { return confDeleteAcc; }
+	public Button getBack2()               { return back2; }
 
 	private Scene mainScene;
 	private Scene removeAccountScene;
 	private Scene accountDeletedScene;
 
+	private Slider volumeSlider     = new Slider(0, 1, 0);
+	private Button muteVolumeButton = new Button("Mute");
+
+	public Slider getVolumeSlider()     { return volumeSlider; }
+	public Button getMuteVolumeButton() { return muteVolumeButton; }
+
 	public SettingsMenu() {
-		mainScene = createSceneContext(settingsVBox());
-		removeAccountScene = createSceneContext(removeAccVBox());
+		mainScene           = createSceneContext(settingsVBox());
+		removeAccountScene  = createSceneContext(removeAccVBox());
 		accountDeletedScene = createSceneContext(accountDeletedVbox());
 	}
 
@@ -63,13 +69,47 @@ public class SettingsMenu {
 	}
 
 	private VBox settingsVBox() {
+		//region Title
+		Text settingsTitle = new Text("Settings");
+		settingsTitle.setFont(getUsedFont(TITLE_FONT_SIZE));
+		settingsTitle.setStyle("-fx-text-fill: linear-gradient(#0000FF, #FFFFFF 95%);");
+		//endregion
+
+		//region Audio
+		Text volumeLabel = new Text("Volume");
+		volumeLabel.setFont(getUsedFont(12));
+		VBox audioToggles = new VBox(volumeLabel, volumeSlider, muteVolumeButton); //Arrange items vertically
+		volumeSlider.setMaxWidth(Double.MAX_VALUE); //Take up all available width in the container
+		muteVolumeButton.setMaxWidth(Double.MAX_VALUE); //Take up all available width in the container
+		audioToggles.setSpacing(8);
+		TitledPane audioPane = new TitledPane("Audio", audioToggles); //Add audio toggles to the TitledPane
+		audioPane.setCollapsible(false); //TitledPane can collapse by default, this is not wanted behaviour
+		setTitledPaneSettings(audioPane); //Set the styling for this pane
+		//endregion
+
+		//region Account Settings
+		deleteRememberMe.setMaxWidth(Double.MAX_VALUE); //Take up all available width in the container
+		deleteRememberMe.setDisable(logInFileExists()); //Check if the file exists and if it should be enabled. Easier than fixing the label
+		removeAcc.setMaxWidth(Double.MAX_VALUE); //Take up all available width in the container
+		VBox accountButtons = new VBox(deleteRememberMe, removeAcc); //Arrange items vertically
+		accountButtons.setSpacing(10);
+		TitledPane accountPane = new TitledPane("Account Settings", accountButtons); //Add account button to the TitledPage
+		accountPane.setCollapsible(false); //TitledPane can collapse by default, this is not wanted behaviour
+		setTitledPaneSettings(accountPane); //Set styling for this pane
+		//endregion
+
+		//region Combining Audio and Account Panes
+		VBox combinedAudioAccountSettings = new VBox(audioPane, accountPane);
+		combinedAudioAccountSettings.setAlignment(Pos.CENTER);
+		combinedAudioAccountSettings.setSpacing(20);
+		//endregion
+
 		userFeedback.setVisible(false);
 		userFeedback.setStyle("-fx-font-size: 15pt;");
 		userFeedback.setFill(Color.RED);
-		vboxSettings = new VBox(deleteRememberMe, removeAcc, back, userFeedback);
-		vboxSettings.setAlignment(Pos.BASELINE_CENTER);
-		vboxSettings.setPadding(new Insets(50, 0, 0, 20));
-		vboxSettings.setSpacing(60);
+		vboxSettings = new VBox(settingsTitle, combinedAudioAccountSettings, back, userFeedback);
+		vboxSettings.setAlignment(Pos.CENTER);
+		vboxSettings.setSpacing(15);
 		vboxSettings.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 
 		return vboxSettings;
@@ -77,7 +117,7 @@ public class SettingsMenu {
 
 	private VBox accountDeletedVbox() {
 		Text headerText = new Text("Your account has been deleted successfully");
-		Text bodyText = new Text("The game window will close automatically in 5 seconds");
+		Text bodyText   = new Text("The game window will close automatically in 5 seconds");
 		headerText.setStyle("-fx-font-size: 25pt;");
 		headerText.setFill(Color.GREEN);
 		bodyText.setStyle("-fx-font-size: 15pt;");
@@ -113,7 +153,7 @@ public class SettingsMenu {
 
 		Font paladinFont = null;
 		try {
-			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
+			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), TITLE_FONT_SIZE);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -148,8 +188,29 @@ public class SettingsMenu {
 		return borderPane;
 	}
 
-	private Scene createSceneContext(VBox content) { return new Scene(borderPane(content), 800,600); }
+	private Scene createSceneContext(VBox content) { return new Scene(borderPane(content), 800, 600); }
 
-	public Scene getMainScene() { return mainScene; }
-	public Scene getRemoveAccountScene() { return removeAccountScene; }
+	public Scene getMainScene()                    { return mainScene; }
+	public Scene getRemoveAccountScene()           { return removeAccountScene; }
+	private Font getUsedFont(int fontSize) {
+		try {
+			return Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), fontSize);
+		} catch (IOException e) {
+			NetworkingUtilities.CreateErrorMessage("Font Could Not Be Loaded", "The selected font could not be loaded",
+					"Message: " + e.getMessage());
+		}
+		return null;
+	}
+
+	private void setTitledPaneSettings(TitledPane pane) {
+		pane.setFont(getUsedFont(15));
+		pane.setMaxWidth(500);
+		pane.setMaxHeight(100);
+		File f = new File("res/Settings/settingsStyle.css");
+		pane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+	}
+
+	private boolean logInFileExists() {
+		return !(new File("AppData/login.conf").exists());
+	}
 }

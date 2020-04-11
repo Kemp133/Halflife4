@@ -4,7 +4,7 @@ import com.halflife3.Controller.Exceptions.SceneStackEmptyException;
 import com.halflife3.DatabaseUI.SettingsMenu;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.application.*;
-import javafx.scene.paint.*;
+import javafx.scene.media.*;
 import javafx.stage.*;
 
 import java.io.File;
@@ -12,6 +12,11 @@ import java.sql.*;
 
 public class OptionsController extends BaseController {
 	SettingsMenu menu;
+	MediaPlayer player;
+
+	public OptionsController(MediaPlayer player) {
+		this.player = player;
+	}
 
 	@Override
 	public void initialise() {
@@ -26,19 +31,21 @@ public class OptionsController extends BaseController {
 	}
 
 	public void setMainSceneButtons() {
+		//region Set Delete Remember Me OnAction Event
 		menu.getDeleteRememberMe().setOnAction(actionEvent -> {
-			if (deleteLoginConf()) {
-				menu.getUserFeedback().setText("Auto-login removed");
-			} else {
-				menu.getUserFeedback().setText("Remember me has not been used");
-			}
+			if (deleteLoginConf())
+				menu.getDeleteRememberMe().setDisable(true);
 			menu.getUserFeedback().setVisible(true);
 		});
+		//endregion
 
+		//region Set Remove Account OnAction Event
 		menu.getRemoveAcc().setOnAction(actionEvent -> {
 			manager.setScene("Settings Delete Account", menu.getRemoveAccountScene());
 		});
+		//endregion
 
+		//region Set Back Button OnAction Event
 		menu.getBack().setOnAction(actionEvent -> {
 			try {
 				manager.restorePreviousScene();
@@ -46,6 +53,19 @@ public class OptionsController extends BaseController {
 				e.printStackTrace();
 			}
 		});
+		//endregion
+
+		//region Add Mute Volume Button OnAction Event
+		menu.getMuteVolumeButton().setOnAction(actionEvent -> {
+			player.setMute(!player.isMute());
+			menu.getMuteVolumeButton().setText(player.isMute() ? "Un-Mute" : "Mute");
+		});
+		//endregion
+
+		//region Initialize Volume Slider
+		menu.getVolumeSlider().setValue(player.getVolume());
+		menu.getVolumeSlider().setOnMouseReleased(mouseEvent -> player.setVolume(menu.getVolumeSlider().getValue()));
+		//endregion
 	}
 
 	public void setRemoveAccountSceneButtons() {
