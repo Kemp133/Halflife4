@@ -116,6 +116,7 @@ public class Login extends Preloader {
 	 * @return A {@code GridPane} which has all the essential styling done already
 	 */
 	private GridPane basePane() {
+
 		GridPane gridPaneLogin = new GridPane();
 		//Setting size for the pane
 		gridPaneLogin.setMinSize(500, 400);
@@ -188,23 +189,18 @@ public class Login extends Preloader {
 		gridPaneLogin.add(passwordField, 1, 1);
 		gridPaneLogin.add(login, 0, 2);
 		gridPaneLogin.add(createNewUser, 1, 2);
-		gridPaneLogin.add(chbRememberMe, 1, 3); //Remember Me?
+		gridPaneLogin.add(chbRememberMe, 1, 3);
 		gridPaneLogin.add(incorrectFields, 0, 4);
 
-        /*gridPaneLogin.setHalignment(login, HPos.CENTER);
-        gridPaneLogin.setHalignment(createNewUser, HPos.CENTER);*/
-
-		//Top, right, bottom, left
+		//Setting the padding and background color for the gridpane
 		gridPaneLogin.setPadding(new Insets(40, 0, 0, 0));
 		gridPaneLogin.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
-		//gridPaneLogin.setMinSize(500, 400);
 
 		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), "res/Login/login-background.jpg"));
 		borderPane.setCenter(gridPaneLogin);
 
 		File f = new File("res/Login/LoginStyleSheet.css");
 		borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
-		//incorrectFields.setStyle("-fx-font-family: 'Roboto Regular';");
 
 		return borderPane;
 	}
@@ -232,11 +228,7 @@ public class Login extends Preloader {
 		gridPaneCreateUser.add(backButton, 1, 3);
 		gridPaneCreateUser.add(incorrectFields, 0, 4);
 
-		//Sets button alignment to the center
-        /*gridPaneCreateUser.setHalignment(create, HPos.CENTER);
-        gridPaneCreateUser.setHalignment(backButton, HPos.CENTER);*/
-
-		//Top, right, bottom, left
+		//Setting the padding and background color for the gridpane
 		gridPaneCreateUser.setPadding(new Insets(40, 0, 0, 0));
 		gridPaneCreateUser.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 		gridPaneCreateUser.setMinSize(500, 400);
@@ -306,8 +298,6 @@ public class Login extends Preloader {
 
 		initialiseFields();
 		Scene sceneLogin = new Scene(loginPane(), 800, 600);
-        /*File f = new File("res/Login/LoginStyleSheet.css");
-        sceneLogin.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));*/
 		stage.setScene(sceneLogin);
 		stage.show();
 
@@ -333,7 +323,7 @@ public class Login extends Preloader {
 			}
 		});
 
-		//This will change the scene to show the create new user stackpane
+		//This will change the scene to show the create new user scene
 		createNewUser.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -345,7 +335,7 @@ public class Login extends Preloader {
 			}
 		});
 
-		//NEED TO ACCOUNT FOR NON MATCHING PASSWORDS
+		//Creates the account in the database if the username isn't in use and if the passwords match
 		create.setOnAction(e -> {
 			if (nameField.getText() != null && passwordField.getText() != null && passwordFieldConf.getText() != null) {
 				if (doesUserExist(DatabaseManager.getConnection(), nameField.getText()) == true) {
@@ -366,7 +356,7 @@ public class Login extends Preloader {
 			}
 		});
 
-		//This will change the scene to show the login stackpane
+		//This will change the scene to show the login scene
 		backButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -412,6 +402,7 @@ public class Login extends Preloader {
 						} else {
 							//Insert user and password into table
 							addNewUser(DatabaseManager.getConnection(), nameField.getText(), passwordField.getText());
+							incorrectFields.setFill(Color.GREEN);
 							incorrectFields.setText("User created");
 							incorrectFields.setVisible(true);
 						}
