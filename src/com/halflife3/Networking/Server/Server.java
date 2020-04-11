@@ -31,8 +31,6 @@ public class Server implements Runnable {
 	public final        int    SERVER_TIMEOUT    = 60; // seconds
 	public final        float  STUN_DURATION     = SERVER_FPS * 3;
 
-	public static Vector2[] startPositions;
-
 	private boolean                   running;
 	private boolean                   welcoming;
 	private boolean                   resetting;
@@ -42,6 +40,7 @@ public class Server implements Runnable {
 	private DatagramSocket            clientSocket;
 	private EventListenerServer       listenerServer;
 	private int                       clientPort;
+	public  Vector2[]                 startPositions;
 	private HashMap<Vector2, Boolean> availablePositions;
 	private HashMap<Vector2, Boolean> canShoot;
 	public  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
@@ -480,7 +479,6 @@ public class Server implements Runnable {
 		}
 
 		System.out.println(incPoke.getAddress() + " has connected");
-		welcoming = false;
 
 		Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
 		listenerServer.received(receivedPoke, incPoke.getAddress(), this, clientList);
@@ -542,7 +540,6 @@ public class Server implements Runnable {
 		clientList.connectedList.put(address, connection);
 
 		clientPort++;
-		welcoming = true;
 	}
 
 	/**

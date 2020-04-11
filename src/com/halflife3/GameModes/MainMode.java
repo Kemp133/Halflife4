@@ -18,7 +18,6 @@ import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.Client;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
-import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
 import javafx.application.*;
@@ -100,11 +99,15 @@ public class MainMode extends GameMode {
 		clientNetwork.start();
 		//endregion
 
+		//region Map loading
+		MapRender.LoadLevel();
+		//endregion
+
 		//region Initialise Objects
 		input       = Input.getInstance();
 		playerList  = new HashMap<>();
 		scoreSprite = new HashMap<>();
-		stunBar     = new ProgressBar[Server.startPositions.length];
+		stunBar     = new ProgressBar[MapRender.getStartPositions().length];
 		root        = new Pane();
 		executor    = Executors.newSingleThreadExecutor();
 		resetting   = false;
@@ -153,7 +156,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Stun Bars
-		for (int i = 0; i < Server.startPositions.length; i++) {
+		for (int i = 0; i < MapRender.getStartPositions().length; i++) {
 			stunBar[i] = new ProgressBar(0);
 			stunBar[i].setStyle("-fx-accent: green;");
 			stunBar[i].setPrefHeight(8);
@@ -509,10 +512,6 @@ public class MainMode extends GameMode {
 		//region Key input listener setup
 		root.addEventHandler(KeyEvent.ANY, new KeyboardInput());
 		root.addEventHandler(MouseEvent.ANY, new MouseInput());
-		//endregion
-
-		//region Map loading
-		MapRender.LoadLevel();
 		//endregion
 
 		//region Gets width and height of the map
