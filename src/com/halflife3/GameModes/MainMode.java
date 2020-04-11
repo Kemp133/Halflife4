@@ -1,12 +1,9 @@
 package com.halflife3.GameModes;
 
-import com.halflife3.Controller.ClientController;
+import com.halflife3.Controller.*;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
-import com.halflife3.Controller.MenuController;
-import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameObjects.*;
 import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.GameUI.AudioForGame;
@@ -30,6 +27,7 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
+import javafx.scene.text.Text;
 import javafx.scene.transform.*;
 import javafx.stage.*;
 import javafx.util.*;
@@ -399,16 +397,15 @@ public class MainMode extends GameMode {
 	@Override
 	public void finished() {
 //		Log game win or loss in leaderboard
-//				if (yourScore == scoreLimit) { //Can't just call won() right?
-//					updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
-//				}
-//
+		if (yourScore == scoreLimit) { //Can't just call won() right?
+			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
+		}
+
 //		Send packet to end the game
 //		Set up game to await for the won/lost packet
-//
 //		region Showing Who Won
 //				VBox  vbox  = new VBox();
-//				Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) +
+//				Text text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) +
 //				"won!");
 //				vbox.getChildren().add(text);
 //				Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
