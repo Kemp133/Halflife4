@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
 
@@ -29,8 +31,6 @@ public class Server implements Runnable {
 	public final        int    SERVER_TIMEOUT    = 60; // seconds
 	public final        float  STUN_DURATION     = SERVER_FPS * 3;
 
-	public static Vector2[] startPositions;
-
 	private boolean                   running;
 	private boolean                   welcoming;
 	private boolean                   resetting;
@@ -39,7 +39,8 @@ public class Server implements Runnable {
 	private PositionListPacket        posListPacket;
 	private DatagramSocket            clientSocket;
 	private EventListenerServer       listenerServer;
-	private int                       clientPort   = 6666;
+	private int                       clientPort;
+	public  Vector2[]                 startPositions;
 	private HashMap<Vector2, Boolean> availablePositions;
 	private HashMap<Vector2, Boolean> canShoot;
 	public  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
@@ -49,6 +50,7 @@ public class Server implements Runnable {
 	private Vector2                   previousBallVel;
 	private HashSet<Bullet>           bulletSet;
 	private ClientList                clientList;
+	private ExecutorService           executor;
 	//endregion
 
 	public void start() {
@@ -57,6 +59,7 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Object initialisation
+		clientPort         = 6666;
 		botAI              = new AI();
 		previousBallVel    = new Vector2();
 		botList            = new HashMap<>();
@@ -67,6 +70,7 @@ public class Server implements Runnable {
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
 		startPositions     = MapRender.getStartPositions();
+		executor           = Executors.newFixedThreadPool(2);
 		//endregion
 
 		final boolean[] readyAI = {false};
@@ -123,22 +127,18 @@ public class Server implements Runnable {
 		System.out.println("Listening for clients...");
 
 		//region Multicasts WelcomePackets
-		new Thread(() -> {
+		executor.submit(() -> {
 			while (running) {
 				if (welcoming) {
 					multicastPacket(new WelcomePacket(), MULTICAST_PORT);
 					NetworkingUtilities.WaitXSeconds(1);
 				}
 			}
-
-			running   = false;
-			welcoming = false;
-			clientSocket.close();
-		}).start();
+		});
 		//endregion
 
 		//region Tracks the state of the game
-		new Thread(() -> {
+		executor.submit(() -> {
 			long   lastUpdate = System.nanoTime();
 			double elapsedTime;
 			while (running) {
@@ -152,7 +152,7 @@ public class Server implements Runnable {
 
 				gameFrame(elapsedTime);
 			}
-		}).start();
+		});
 		//endregion
 
 		//region Listens for incoming connections
@@ -164,11 +164,13 @@ public class Server implements Runnable {
 			}
 		}
 		//endregion
-
-		exit();
 	}
 
 	private void exit() {
+		running   = false;
+		welcoming = false;
+		executor.shutdownNow();
+		clientSocket.close();
 		multicastSocket.close();
 	}
 
@@ -465,18 +467,18 @@ public class Server implements Runnable {
 		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-		clientSocket.setSoTimeout(clientList.connectedList.isEmpty() ? (SERVER_TIMEOUT * 1000) : 0);
+//		clientSocket.setSoTimeout(clientList.connectedList.isEmpty() ? (SERVER_TIMEOUT * 1000) : 0);
 
 		try { clientSocket.receive(incPoke); } catch (SocketTimeoutException e) {
 			running = false;
 			return;
 		} catch (SocketException e) {
 			System.out.println("Server closed");
+			running = false;
 			return;
 		}
 
 		System.out.println(incPoke.getAddress() + " has connected");
-		welcoming = false;
 
 		Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
 		listenerServer.received(receivedPoke, incPoke.getAddress(), this, clientList);
@@ -538,7 +540,6 @@ public class Server implements Runnable {
 		clientList.connectedList.put(address, connection);
 
 		clientPort++;
-		welcoming = true;
 	}
 
 	/**
@@ -548,7 +549,9 @@ public class Server implements Runnable {
 	 */
 	public void removeConnection(InetAddress address) {
 		if (clientList.connectedList.size() == 1) {
-			running = false;
+			clientList.connectedList.get(address).close();
+			clientList.connectedList.remove(address);
+			exit();
 			return;
 		}
 
@@ -584,9 +587,7 @@ public class Server implements Runnable {
 			byte[] sendBuf = NetworkingUtilities.objectToByteArray(o);
 			var    packet  = new DatagramPacket(sendBuf, sendBuf.length, multicastGroup, mPort);
 			multicastSocket.send(packet);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException ignored) {}
 	}
 
 	private void resetMap() {

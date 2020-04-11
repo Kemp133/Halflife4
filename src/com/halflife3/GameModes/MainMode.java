@@ -1,12 +1,9 @@
 package com.halflife3.GameModes;
 
-import com.halflife3.Controller.ClientController;
+import com.halflife3.Controller.*;
 import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
-import com.halflife3.Controller.MenuController;
-import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Controller.SceneManager;
 import com.halflife3.GameObjects.*;
 import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.GameUI.AudioForGame;
@@ -18,7 +15,6 @@ import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Client.Client;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
-import com.halflife3.Networking.Server.Server;
 import com.halflife3.View.Camera;
 import com.halflife3.View.MapRender;
 import javafx.application.*;
@@ -31,6 +27,7 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
+import javafx.scene.text.Text;
 import javafx.scene.transform.*;
 import javafx.stage.*;
 import javafx.util.*;
@@ -100,11 +97,15 @@ public class MainMode extends GameMode {
 		clientNetwork.start();
 		//endregion
 
+		//region Map loading
+		MapRender.LoadLevel();
+		//endregion
+
 		//region Initialise Objects
 		input       = Input.getInstance();
 		playerList  = new HashMap<>();
 		scoreSprite = new HashMap<>();
-		stunBar     = new ProgressBar[Server.startPositions.length];
+		stunBar     = new ProgressBar[MapRender.getStartPositions().length];
 		root        = new Pane();
 		executor    = Executors.newSingleThreadExecutor();
 		resetting   = false;
@@ -153,7 +154,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Initialise Stun Bars
-		for (int i = 0; i < Server.startPositions.length; i++) {
+		for (int i = 0; i < MapRender.getStartPositions().length; i++) {
 			stunBar[i] = new ProgressBar(0);
 			stunBar[i].setStyle("-fx-accent: green;");
 			stunBar[i].setPrefHeight(8);
@@ -396,16 +397,15 @@ public class MainMode extends GameMode {
 	@Override
 	public void finished() {
 //		Log game win or loss in leaderboard
-//				if (yourScore == scoreLimit) { //Can't just call won() right?
-//					updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
-//				}
-//
+		if (yourScore == scoreLimit) { //Can't just call won() right?
+			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
+		}
+
 //		Send packet to end the game
 //		Set up game to await for the won/lost packet
-//
 //		region Showing Who Won
 //				VBox  vbox  = new VBox();
-//				Text  text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) +
+//				Text text  = new Text("Team " + ((yourScore == scoreLimit) ? side : (side == 'L' ? 'R' : 'L')) +
 //				"won!");
 //				vbox.getChildren().add(text);
 //				Scene wonScene = new Scene(vbox, 800, 600, Color.WHITE);
@@ -509,10 +509,6 @@ public class MainMode extends GameMode {
 		//region Key input listener setup
 		root.addEventHandler(KeyEvent.ANY, new KeyboardInput());
 		root.addEventHandler(MouseEvent.ANY, new MouseInput());
-		//endregion
-
-		//region Map loading
-		MapRender.LoadLevel();
 		//endregion
 
 		//region Gets width and height of the map
