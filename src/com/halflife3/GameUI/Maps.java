@@ -111,7 +111,7 @@ public class Maps {
 		Pane rightPane = new Pane();
 		rightPane.setMinSize(100, 400);
 		Pane bottomPane = new Pane();
-		bottomPane.setMinSize(500, 100);
+		bottomPane.setMinSize(500, 50);
 		borderPane.setTop(title);
 		BorderPane.setMargin(title, insets);
 		BorderPane.setAlignment(title, Pos.TOP_CENTER);
