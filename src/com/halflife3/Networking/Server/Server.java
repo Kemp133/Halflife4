@@ -3,8 +3,8 @@ package com.halflife3.Networking.Server;
 import com.halflife3.Controller.ObjectManager;
 import com.halflife3.GameModes.MainMode;
 import com.halflife3.GameObjects.*;
-import com.halflife3.Mechanics.AI.AI;
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.Networking.Server.AI.AI;
+import com.halflife3.GameObjects.Vector2;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.*;
 import com.halflife3.View.MapRender;
@@ -72,7 +72,7 @@ public class Server implements Runnable {
 		executor           = Executors.newFixedThreadPool(2);
 
 		for (int i = 1; i <= startPositions.length; i++)
-			botNamesList.add(String.format("bot%d", i));
+		     botNamesList.add(String.format("bot%d", i));
 		//endregion
 
 		final boolean[] readyAI = {false};
@@ -497,8 +497,7 @@ public class Server implements Runnable {
 		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-		try { clientSocket.receive(incPoke); }
-		catch (SocketException e) {
+		try { clientSocket.receive(incPoke); } catch (SocketException e) {
 			System.out.println("Server closed");
 			running = false;
 			return;

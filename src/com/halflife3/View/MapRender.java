@@ -3,9 +3,9 @@ package com.halflife3.View;
 import com.halflife3.GameObjects.Brick;
 import com.halflife3.GameObjects.Goal;
 import com.halflife3.GameUI.Maps;
-import com.halflife3.Mechanics.PowerUps.FastReload;
-import com.halflife3.Mechanics.PowerUps.Speedup;
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.GameObjects.FastReload;
+import com.halflife3.GameObjects.Speedup;
+import com.halflife3.GameObjects.Vector2;
 import javafx.scene.canvas.*;
 import javafx.scene.image.*;
 import javafx.scene.paint.*;
@@ -64,11 +64,9 @@ public class MapRender {
 					} else if (pixelReader.getColor(x, y).equals(Color.BLUE)) {
 						startPositions.add(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE));
 					} else if (pixelReader.getColor(x, y).equals(Color.rgb(255, 255, 0))) {
-						Speedup_list.add(new Speedup(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE),
-								"res/boosts/speedBoost.png"));
+						Speedup_list.add(new Speedup(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE)));
 					} else if (pixelReader.getColor(x, y).equals(Color.rgb(128, 0, 128))) {
-						FastReload_list.add(new FastReload(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE),
-								"res/boosts/damageBoost.png"));
+						FastReload_list.add(new FastReload(new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE)));
 					}
 				}
 			}

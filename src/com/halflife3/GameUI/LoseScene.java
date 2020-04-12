@@ -19,7 +19,7 @@ import java.io.FileNotFoundException;
 public class LoseScene /*extends Application*/ {
     private              VBox   vbox;
     private static final String MENU_BACKGROUND_IMAGE_LOCATION = "res/Leaderboard/LeaderboardBackground.jpg";
-    private static final String Win_pic                        = "res/numbers/lose.png";
+    private static final String Win_pic                        = "res/Sprites/Score/lose.png";
     private              Button exit                           = new Button("Back");
     private              Scene  scene;
 

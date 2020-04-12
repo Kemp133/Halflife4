@@ -4,7 +4,6 @@ import com.halflife3.Controller.ObjectManager;
 import com.halflife3.GameObjects.Interfaces.IRenderable;
 import com.halflife3.GameObjects.Interfaces.ICollidable;
 import com.halflife3.GameObjects.Interfaces.IUpdateable;
-import com.halflife3.Mechanics.Vector2;
 
 import java.util.HashSet;
 import java.util.Iterator;

@@ -1,6 +1,6 @@
 package com.halflife3.Controller.Input;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.GameObjects.Vector2;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 

@@ -9,9 +9,9 @@ import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.GameUI.MenuUtilitites;
-import com.halflife3.Mechanics.PowerUps.FastReload;
-import com.halflife3.Mechanics.PowerUps.Speedup;
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.GameObjects.FastReload;
+import com.halflife3.GameObjects.Speedup;
+import com.halflife3.GameObjects.Vector2;
 import com.halflife3.Networking.Client.Client;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
@@ -485,7 +485,7 @@ public class MainMode extends GameMode {
 
 	private void gameInit() {
 		//region Background setup
-		root.setBackground(MenuUtilitites.getBackground(getClass(), "res/Space.png"));
+		root.setBackground(MenuUtilitites.getBackground(getClass(), "res/Sprites/Background/Space.png"));
 		//endregion
 
 		//region Add audio into game
@@ -520,11 +520,11 @@ public class MainMode extends GameMode {
 
 		//region Adds score sprites
 		try {
-			scoreSprite.put(-1, new Image(new FileInputStream("res/numbers/vs.png")));
-			scoreSprite.put(0, new Image(new FileInputStream("res/numbers/0.png")));
-			scoreSprite.put(1, new Image(new FileInputStream("res/numbers/1.png")));
-			scoreSprite.put(2, new Image(new FileInputStream("res/numbers/2.png")));
-			scoreSprite.put(3, new Image(new FileInputStream("res/numbers/3.png")));
+			scoreSprite.put(-1, new Image(new FileInputStream("res/Sprites/Score/vs.png")));
+			scoreSprite.put(0, new Image(new FileInputStream("res/Sprites/Score/0.png")));
+			scoreSprite.put(1, new Image(new FileInputStream("res/Sprites/Score/1.png")));
+			scoreSprite.put(2, new Image(new FileInputStream("res/Sprites/Score/2.png")));
+			scoreSprite.put(3, new Image(new FileInputStream("res/Sprites/Score/3.png")));
 		} catch (FileNotFoundException e) { e.printStackTrace(); }
 		//endregion
 

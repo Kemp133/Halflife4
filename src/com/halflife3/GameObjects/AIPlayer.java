@@ -2,7 +2,6 @@ package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.ClientController;
 import com.halflife3.GameModes.MainMode;
-import com.halflife3.Mechanics.Vector2;
 import com.halflife3.Networking.Server.Server;
 import javafx.scene.canvas.*;
 

@@ -1,4 +1,4 @@
-package com.halflife3.Mechanics;
+package com.halflife3.GameObjects;
 
 import java.io.Serializable;
 import java.util.Objects;

@@ -95,7 +95,7 @@ public final class SceneManager {
 	 */
 	private void setSceneCursor(Scene scene) {
 		try {
-			Image image = new Image(new FileInputStream("res/Crosshair.png"));
+			Image image = new Image(new FileInputStream("res/Sprites/Cursor/crosshair.png"));
 			scene.setCursor(new ImageCursor(image, image.getWidth() / 2, image.getHeight() / 2));
 		} catch (IOException e) {
 			NetworkingUtilities.CreateErrorMessage("Error Loading Cursor", "There was an error loading the cursor",

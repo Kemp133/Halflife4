@@ -1,7 +1,6 @@
 package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.Mechanics.Vector2;
 import com.halflife3.View.Camera;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Rectangle;

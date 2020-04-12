@@ -1,6 +1,6 @@
 package com.halflife3.Networking.Server;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.GameObjects.Vector2;
 import com.halflife3.Networking.Packets.PositionPacket;
 
 import java.io.*;

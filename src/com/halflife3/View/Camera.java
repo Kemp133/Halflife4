@@ -1,6 +1,6 @@
 package com.halflife3.View;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.GameObjects.Vector2;
 
 public class Camera {
 	private static Vector2 offset;

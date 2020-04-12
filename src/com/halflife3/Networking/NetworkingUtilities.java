@@ -59,7 +59,8 @@ public class NetworkingUtilities {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 		while (interfaces.hasMoreElements()) {
 			NetworkInterface net = interfaces.nextElement();
-			if (!net.getName().startsWith("wlan") || !net.isUp()) continue;
+			if (!net.getName().startsWith("wlan") || !net.isUp())
+				continue;
 
 			Enumeration<InetAddress> addresses = net.getInetAddresses();
 			while (addresses.hasMoreElements()) {

@@ -1,6 +1,6 @@
-package com.halflife3.Mechanics.AI;
+package com.halflife3.Networking.Server.AI;
 
-import com.halflife3.Mechanics.Vector2;
+import com.halflife3.GameObjects.Vector2;
 
 import java.util.ArrayList;
 
