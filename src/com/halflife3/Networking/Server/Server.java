@@ -12,7 +12,6 @@ import com.halflife3.View.MapRender;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +27,6 @@ public class Server implements Runnable {
 	public static final int    LISTENER_PORT     = 5544;
 	public static final int    GET_PORT_PORT     = 5566;
 	public static final int    POSITIONS_PORT    = 5533;
-	public final        int    SERVER_TIMEOUT    = 60; // seconds
 	public final        float  STUN_DURATION     = SERVER_FPS * 3;
 
 	private boolean                   running;
@@ -43,7 +41,7 @@ public class Server implements Runnable {
 	public  Vector2[]                 startPositions;
 	private HashMap<Vector2, Boolean> availablePositions;
 	private HashMap<Vector2, Boolean> canShoot;
-	public  ArrayList<String>         botNamesList = new ArrayList<>(Arrays.asList("bot1", "bot2"));
+	public  ArrayList<String>         botNamesList;
 	private HashMap<String, AIPlayer> botList;
 	private AI                        botAI;
 	private Ball                      theBall;
@@ -67,10 +65,14 @@ public class Server implements Runnable {
 		availablePositions = new HashMap<>();
 		canShoot           = new HashMap<>();
 		clientList         = new ClientList();
+		botNamesList       = new ArrayList<>();
 		posListPacket      = new PositionListPacket();
 		listenerServer     = new EventListenerServer();
 		startPositions     = MapRender.getStartPositions();
 		executor           = Executors.newFixedThreadPool(2);
+
+		for (int i = 1; i <= startPositions.length; i++)
+			botNamesList.add(String.format("bot%d", i));
 		//endregion
 
 		final boolean[] readyAI = {false};
@@ -254,6 +256,7 @@ public class Server implements Runnable {
 
 	}
 
+	//region Running game methods
 	private boolean goalScored() {
 		for (Goal g : MapRender.getGoalZone())
 			if (theBall.getBounds().intersects(g.getBounds().getBoundsInLocal()))
@@ -261,6 +264,91 @@ public class Server implements Runnable {
 
 		return false;
 	}
+
+	private void ballWallBounce() {
+		for (Brick block : MapRender.GetList()) {
+			if (!theBall.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+				continue;
+
+			Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
+					block.getPosY() + block.getHeight() / 2);
+			Vector2 ballCenter = new Vector2(theBall.getPosX() + theBall.getWidth() / 2,
+					theBall.getPosY() + theBall.getHeight() / 2);
+
+			Vector2 relevantPos = new Vector2(ballCenter).subtract(brickCenter);
+			double  rel_x       = relevantPos.getX();
+			double  rel_y       = relevantPos.getY();
+
+			if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) || (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) ||
+			    (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) || (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0)) {
+				theBall.collision(2);
+			} else {
+				theBall.collision(1);
+			}
+		}
+	}
+
+	private void bulletCollision() {
+		HashSet<Bullet> bulletsToDestroy = new HashSet<>();
+
+		for (Bullet bullet : getBulletSet()) {
+			for (Brick block : MapRender.GetList())
+				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
+					bulletsToDestroy.add(bullet);
+
+			for (AIPlayer bot : botList.values()) {
+				if (bot.inactive())
+					continue;
+
+				if (!bullet.getBounds().intersects(bot.circle.getBoundsInLocal()))
+					continue;
+
+				bulletsToDestroy.add(bullet);
+
+				if (bot.stunned != 0)
+					continue;
+
+				bot.stunned = STUN_DURATION;
+				bot.setVelocity(bullet.getVelocity().divide(STUN_DURATION / SERVER_FPS));
+				bot.setDeceleration(bot.getVelocity().divide(SERVER_FPS / 2f));
+				bot.setHoldsBall(false);
+				theBall.resetVelocity();
+				theBall.setDeceleration(new Vector2());
+				theBall.isHeld = false;
+			}
+		}
+
+		for (Bullet bullet : bulletsToDestroy)
+			removeBullet(bullet);
+	}
+
+	private void resetMap() {
+		resetting = true;
+
+		new Thread(() -> {
+			System.out.println("Goal has been scored. Resetting positions...");
+
+			theBall.reset();
+			previousBallVel = new Vector2();
+			listenerServer.replaceEntry("ball", theBall.getPositionPacket(), clientList);
+
+			for (String ip : botList.keySet()) {
+				botList.get(ip).reset();
+				listenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend(), clientList);
+			}
+		}).start();
+
+		NetworkingUtilities.WaitXSeconds(1);
+		posListPacket.connectedIPs = clientList.connectedIPs;
+		posListPacket.posList      = clientList.positionList;
+		multicastPacket(posListPacket, POSITIONS_PORT);
+
+		new Thread(() -> {
+			NetworkingUtilities.WaitXSeconds(1);
+			resetting = false;
+		}).start();
+	}
+	//endregion
 
 	/**
 	 * A method to update the position, velocity and rotation of the bot if it is active, check if the bot is holding
@@ -362,6 +450,7 @@ public class Server implements Runnable {
 		listenerServer.replaceEntry(name, bot.getPacketToSend(), clientList);
 	}
 
+	//region AI helper methods
 	private Goal goalInRadius(AIPlayer bot) {
 		for (Goal g : MapRender.getGoalZone())
 			if (bot.getPosition().distance(g.getPosition()) < 200)
@@ -405,64 +494,9 @@ public class Server implements Runnable {
 
 		return theBall.getPosition();
 	}
+	//endregion
 
-	private void ballWallBounce() {
-		for (Brick block : MapRender.GetList()) {
-			if (!theBall.getBounds().intersects(block.getBounds().getBoundsInLocal()))
-				continue;
-
-			Vector2 brickCenter = new Vector2(block.getPosX() + block.getWidth() / 2,
-					block.getPosY() + block.getHeight() / 2);
-			Vector2 ballCenter = new Vector2(theBall.getPosX() + theBall.getWidth() / 2,
-					theBall.getPosY() + theBall.getHeight() / 2);
-
-			Vector2 relevantPos = new Vector2(ballCenter).subtract(brickCenter);
-			double  rel_x       = relevantPos.getX();
-			double  rel_y       = relevantPos.getY();
-
-			if ((rel_x < 0 && rel_y > 0 && rel_x + rel_y > 0) || (rel_x > 0 && rel_y > 0 && rel_y - rel_x > 0) ||
-			    (rel_x < 0 && rel_y < 0 && rel_y - rel_x < 0) || (rel_x > 0 && rel_y < 0 && rel_y + rel_x < 0)) {
-				theBall.collision(2);
-			} else {
-				theBall.collision(1);
-			}
-		}
-	}
-
-	private void bulletCollision() {
-		HashSet<Bullet> bulletsToDestroy = new HashSet<>();
-
-		for (Bullet bullet : getBulletSet()) {
-			for (Brick block : MapRender.GetList())
-				if (bullet.getBounds().intersects(block.getBounds().getBoundsInLocal()))
-					bulletsToDestroy.add(bullet);
-
-			for (AIPlayer bot : botList.values()) {
-				if (bot.inactive())
-					continue;
-
-				if (!bullet.getBounds().intersects(bot.circle.getBoundsInLocal()))
-					continue;
-
-				bulletsToDestroy.add(bullet);
-
-				if (bot.stunned != 0)
-					continue;
-
-				bot.stunned = STUN_DURATION;
-				bot.setVelocity(bullet.getVelocity().divide(STUN_DURATION / SERVER_FPS));
-				bot.setDeceleration(bot.getVelocity().divide(SERVER_FPS / 2f));
-				bot.setHoldsBall(false);
-				theBall.resetVelocity();
-				theBall.setDeceleration(new Vector2());
-				theBall.isHeld = false;
-			}
-		}
-
-		for (Bullet bullet : bulletsToDestroy)
-			removeBullet(bullet);
-	}
-
+	//region Connection methods
 	private void connectionListener() throws IOException {
 		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
@@ -589,34 +623,9 @@ public class Server implements Runnable {
 			multicastSocket.send(packet);
 		} catch (IOException ignored) {}
 	}
+	//endregion
 
-	private void resetMap() {
-		resetting = true;
-
-		new Thread(() -> {
-			System.out.println("Goal has been scored. Resetting positions...");
-
-			theBall.reset();
-			previousBallVel = new Vector2();
-			listenerServer.replaceEntry("ball", theBall.getPositionPacket(), clientList);
-
-			for (String ip : botList.keySet()) {
-				botList.get(ip).reset();
-				listenerServer.replaceEntry(ip, botList.get(ip).getPacketToSend(), clientList);
-			}
-		}).start();
-
-		NetworkingUtilities.WaitXSeconds(1);
-		posListPacket.connectedIPs = clientList.connectedIPs;
-		posListPacket.posList      = clientList.positionList;
-		multicastPacket(posListPacket, POSITIONS_PORT);
-
-		new Thread(() -> {
-			NetworkingUtilities.WaitXSeconds(1);
-			resetting = false;
-		}).start();
-	}
-
+	//region Bullet list methods
 	private synchronized void addBullet(Bullet toAdd) {
 		bulletSet.add(toAdd);
 	}
@@ -628,4 +637,5 @@ public class Server implements Runnable {
 	private synchronized HashSet<Bullet> getBulletSet() {
 		return new HashSet<>(bulletSet);
 	}
+	//endregion
 }

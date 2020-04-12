@@ -27,7 +27,6 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
-import javafx.scene.text.Text;
 import javafx.scene.transform.*;
 import javafx.stage.*;
 import javafx.util.*;
