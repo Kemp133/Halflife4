@@ -158,13 +158,9 @@ public class Server implements Runnable {
 		//endregion
 
 		//region Listens for incoming connections
-		while (running) {
-			if (clientList.connectedList.size() < startPositions.length) {
-				try {
-					connectionListener();
-				} catch (IOException e) { e.printStackTrace(); }
-			}
-		}
+		while (running)
+			if (clientList.connectedList.size() < startPositions.length)
+				connectionListener();
 		//endregion
 	}
 
@@ -497,19 +493,17 @@ public class Server implements Runnable {
 	//endregion
 
 	//region Connection methods
-	private void connectionListener() throws IOException {
+	private void connectionListener() {
 		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
-//		clientSocket.setSoTimeout(clientList.connectedList.isEmpty() ? (SERVER_TIMEOUT * 1000) : 0);
-
-		try { clientSocket.receive(incPoke); } catch (SocketTimeoutException e) {
-			running = false;
-			return;
-		} catch (SocketException e) {
+		try { clientSocket.receive(incPoke); }
+		catch (SocketException e) {
 			System.out.println("Server closed");
 			running = false;
 			return;
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		System.out.println(incPoke.getAddress() + " has connected");
