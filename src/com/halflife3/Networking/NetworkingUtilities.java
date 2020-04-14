@@ -48,14 +48,14 @@ public class NetworkingUtilities {
 	}
 
 	/**
-	 * A method to firstly set the interface to WiFi (if it exists), and then all addresses to find a suitable address
-	 * to use for datagram packets
+	 * A method which iterates through all the network interfaces of the machine and returns the IP address of the
+	 * Wi-Fi interface if the machine is connected to a Wi-Fi network
 	 *
 	 * @return A suitable address to use, using the WiFi interface
 	 *
 	 * @throws SocketException In the event getting the correct interface and finding a suitable socket is unsuccessful
 	 */
-	public static InetAddress setWifiInterface() throws SocketException {
+	public static InetAddress getWifiInterface() throws SocketException {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 		while (interfaces.hasMoreElements()) {
 			NetworkInterface net = interfaces.nextElement();
@@ -71,7 +71,7 @@ public class NetworkingUtilities {
 			}
 		}
 
-		throw new SocketException("Interface could not be set");
+		throw new SocketException("Interface could not be found");
 	}
 
 	/**

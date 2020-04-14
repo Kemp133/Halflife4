@@ -60,7 +60,7 @@ public class Client {
 			serverSocket   = new MulticastSocket(Server.MULTICAST_PORT);
 			positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
 
-			clientAddress = NetworkingUtilities.setWifiInterface();
+			clientAddress = NetworkingUtilities.getWifiInterface();
 			serverSocket.setInterface(clientAddress);
 			positionSocket.setInterface(clientAddress);
 

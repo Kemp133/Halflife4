@@ -83,7 +83,7 @@ public class Server implements Runnable {
 			clientSocket    = new DatagramSocket(LISTENER_PORT);
 			multicastGroup  = InetAddress.getByName(MULTICAST_ADDRESS);
 			multicastSocket = new MulticastSocket();
-			multicastSocket.setInterface(NetworkingUtilities.setWifiInterface());
+			multicastSocket.setInterface(NetworkingUtilities.getWifiInterface());
 		} catch (SocketException e) {
 			NetworkingUtilities.CreateErrorMessage("Error Setting Network Interface",
 					"Network interface could not be " + "set", e.getMessage());
