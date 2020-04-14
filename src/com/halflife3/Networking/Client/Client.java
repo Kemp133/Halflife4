@@ -5,7 +5,6 @@ import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.ConnectPacket;
 import com.halflife3.Networking.Packets.DisconnectPacket;
 import com.halflife3.Networking.Packets.PositionListPacket;
-import com.halflife3.Networking.Packets.WelcomePacket;
 import com.halflife3.Networking.Server.Server;
 
 import java.io.IOException;
@@ -38,21 +37,19 @@ public class Client {
 	public PositionListPacket listOfClients;
 	//endregion
 
-//    Resets the variable values
-	public void reset() {
-		serverSocket     = null;
-		positionSocket   = null;
-		hostAddress      = null;
-		outSocket        = null;
-		clientAddress    = null;
-		uniquePort       = 0;
-		listenerClient   = null;
-		startingPosition = null;
-		listOfClients    = null;
+	public Client() {
+		try {
+			listenerClient = new EventListenerClient();
+			serverSocket   = new MulticastSocket(Server.MULTICAST_PORT);
+			positionSocket = new MulticastSocket(Server.POSITIONS_PORT);
+			outSocket      = new DatagramSocket();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-//    Joins the multicast group to listen for multicasted packets
-	public void joinGroup() {
+	//    Joins the multicast group to listen for multicasted packets
+	public void joinMulticastGroup() {
 		try {
 			System.out.println("Searching for a multicast group...");
 			group = InetAddress.getByName(Server.MULTICAST_ADDRESS);
@@ -78,12 +75,11 @@ public class Client {
 		}
 	}
 
-//    Gets the server's IP address
+	//    Gets the server's IP address
 	public void getHostInfo() {
 		try {
 //            Receives the Welcome packet
-			byte[]         firstBuf    = new byte[NetworkingUtilities.objectToByteArray(new WelcomePacket()).length];
-			DatagramPacket firstPacket = new DatagramPacket(firstBuf, firstBuf.length);
+			DatagramPacket firstPacket = new DatagramPacket(new byte[0], 0);
 			System.out.println("Looking for host...");
 			serverSocket.receive(firstPacket);
 
@@ -100,11 +96,8 @@ public class Client {
 		}
 	}
 
-//    Connects to the server and gets a port to output to
-	public void start() {
-		listenerClient = new EventListenerClient();
-		try { outSocket = new DatagramSocket(); } catch (SocketException ignored) {}
-
+	//    Connects to the server and gets a port to output to
+	public void connectToServer() {
 //        Lets the server know the client has connected
 		sendPacket(new ConnectPacket(), Server.LISTENER_PORT);
 
@@ -114,18 +107,16 @@ public class Client {
 		System.out.println("Client connection set up. Starting game...");
 	}
 
-//    Sends a disconnect packet to the server and closes the sockets
+	//    Sends a disconnect packet to the server and closes the sockets
 	public void disconnect() {
 		sendPacket(new DisconnectPacket(), uniquePort);
 
 		serverSocket.close();
 		outSocket.close();
 		positionSocket.close();
-
-		reset();
 	}
 
-//    Gets the unique port to communicate with the server and a starting position
+	//    Gets the unique port to communicate with the server and a starting position
 	public void getUniqueInfo() {
 		try {
 			serverSocket = new MulticastSocket(GET_PORT_PORT);
@@ -143,11 +134,11 @@ public class Client {
 		System.out.println("Unique Client Port: " + uniquePort);
 	}
 
-//    Receives and sorts a packet
+	//    Receives and sorts a packet
 	public void receivePacket() {
 		try {
-			byte[]         recBuf = new byte[3000];
-			DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
+			byte[] recBuf = new byte[3000];
+			var    packet = new DatagramPacket(recBuf, recBuf.length);
 			serverSocket.receive(packet);
 			Object o = NetworkingUtilities.byteArrayToObject(recBuf);
 			listenerClient.received(o, this);
@@ -156,24 +147,23 @@ public class Client {
 		}
 	}
 
-//    Updates the 'listOfClients' variable
+	//    Updates the 'listOfClients' variable
 	public void receivePositions() {
 		try {
-			byte[]         recBuf = new byte[incPacketSize];
-			DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
+			byte[] recBuf = new byte[incPacketSize];
+			var    packet = new DatagramPacket(recBuf, recBuf.length);
 			positionSocket.receive(packet);
 			Object o = NetworkingUtilities.byteArrayToObject(recBuf);
 			if (incPacketSize == 2000)
 				incPacketSize = NetworkingUtilities.objectToByteArray(o).length + 100;
 			listenerClient.received(o, this);
 		} catch (SocketException ignored) {
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-//    Sends a packet to the Server
+	//    Sends a packet to the Server
 	public void sendPacket(Object objectToSend, int port) {
 		byte[] tempBuf = NetworkingUtilities.objectToByteArray(objectToSend);
 		var    packet  = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, port);

@@ -1,6 +1,6 @@
 package com.halflife3.Networking;
 
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 
 import java.io.*;
 import java.net.*;
@@ -20,8 +20,8 @@ public class NetworkingUtilities {
 	 */
 	public static Object byteArrayToObject(byte[] buf) {
 		Object o = null;
-		try (ByteArrayInputStream bs = new ByteArrayInputStream(buf)) {
-			try (ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(bs))) {
+		try (var bs = new ByteArrayInputStream(buf)) {
+			try (var is = new ObjectInputStream(new BufferedInputStream(bs))) {
 				o = is.readObject();
 			}
 		} catch (IOException | ClassNotFoundException e) { e.printStackTrace(); }
@@ -37,8 +37,8 @@ public class NetworkingUtilities {
 	 */
 	public static byte[] objectToByteArray(Object o) {
 		byte[] sendBuf = null;
-		try (ByteArrayOutputStream bs = new ByteArrayOutputStream()) {
-			try (ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(bs))) {
+		try (var bs = new ByteArrayOutputStream()) {
+			try (var os = new ObjectOutputStream(new BufferedOutputStream(bs))) {
 				os.writeObject(o);
 				os.flush();
 				sendBuf = bs.toByteArray();
@@ -48,14 +48,21 @@ public class NetworkingUtilities {
 	}
 
 	/**
-	 * A method which iterates through all the network interfaces of the machine and returns the IP address of the
+	 * A method which iterates through all the network interfaces of the machine and returns the IPv4 address of the
 	 * Wi-Fi interface if the machine is connected to a Wi-Fi network
 	 *
-	 * @return A suitable address to use, using the WiFi interface
+	 * @return A suitable IPv4 address to use, using the WiFi interface
 	 *
-	 * @throws SocketException In the event getting the correct interface and finding a suitable socket is unsuccessful
+	 * @throws SocketException In the event getting the correct address and finding a suitable socket is unsuccessful
 	 */
-	public static InetAddress getWifiInterface() throws SocketException {
+	public static InetAddress getWifiInterface() throws SocketException, UnknownHostException {
+		try (final DatagramSocket socket = new DatagramSocket()) {
+			socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+			return socket.getLocalAddress();
+		}
+	}
+
+	public static InetAddress getWifiInterfaceTwo() throws SocketException {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 		while (interfaces.hasMoreElements()) {
 			NetworkInterface net = interfaces.nextElement();

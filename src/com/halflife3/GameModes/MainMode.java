@@ -91,9 +91,9 @@ public class MainMode extends GameMode {
 	public void initialise() {
 		//region Networking
 		clientNetwork = new Client();
-		clientNetwork.joinGroup();
+		clientNetwork.joinMulticastGroup();
 		clientNetwork.getHostInfo();
-		clientNetwork.start();
+		clientNetwork.connectToServer();
 		//endregion
 
 		//region Map loading
