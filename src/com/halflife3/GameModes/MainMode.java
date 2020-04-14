@@ -502,7 +502,7 @@ public class MainMode extends GameMode {
 		});
 		audio.getMute().setOnAction(actionEvent -> audio.switchMute());
 		audio.getSlider1().setOnAction(actionEvent -> audio.volumeControl(audio.getVolume()));
-		root.getChildren().add(audio.getMenuBar());
+		//root.getChildren().add(audio.getMenuBar());
 		//endregion
 
 		//region Key input listener setup

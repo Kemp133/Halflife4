@@ -1,4 +1,4 @@
-package com.halflife3.GameUI;
+package com.halflife3.GameUI.testUI;
 
 import javafx.application.*;
 import javafx.geometry.*;
