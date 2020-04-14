@@ -48,12 +48,15 @@ public class NetworkingUtilities {
 	}
 
 	/**
-	 * A method which iterates through all the network interfaces of the machine and returns the IPv4 address of the
-	 * Wi-Fi interface if the machine is connected to a Wi-Fi network
+	 * A method which sets the destination for Send/Receive, discards all packets from other addresses, transfers
+	 * the socket into a "connected" state, setting its appropriate fields. This includes checking the existence of
+	 * the route to the destination according to the system's routing table and setting the local endpoint
+	 * accordingly. Then the preferred outbound IP is returned.
 	 *
-	 * @return A suitable IPv4 address to use, using the WiFi interface
+	 * @return The preferred outbound IPv4 address
 	 *
-	 * @throws SocketException In the event getting the correct address and finding a suitable socket is unsuccessful
+	 * @throws SocketException if a new DatagramSocket could not be created
+	 * @throws UnknownHostException if a host by the name "8.8.8.8" could not be found
 	 */
 	public static InetAddress getWifiInterface() throws SocketException, UnknownHostException {
 		try (final DatagramSocket socket = new DatagramSocket()) {
@@ -62,7 +65,15 @@ public class NetworkingUtilities {
 		}
 	}
 
-	public static InetAddress getWifiInterfaceTwo() throws SocketException {
+	/**
+	 * A method which iterates through all the network interfaces of the machine and returns the IPv4 address of the
+	 * Wi-Fi interface if the machine is connected to a Wi-Fi network
+	 *
+	 * @return A suitable IPv4 address to use, using the WiFi interface
+	 *
+	 * @throws SocketException In the event getting the correct address and finding a suitable socket is unsuccessful
+	 */
+	public static InetAddress getWifiInterface2() throws SocketException {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 		while (interfaces.hasMoreElements()) {
 			NetworkInterface net = interfaces.nextElement();
