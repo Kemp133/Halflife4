@@ -494,8 +494,8 @@ public class Server implements Runnable {
 
 	//region Connection methods
 	private void connectionListener() {
-		byte[]         pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
-		DatagramPacket incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
+		byte[] pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
+		var    incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
 		try { clientSocket.receive(incPoke); } catch (SocketException e) {
 			System.out.println("Server closed");
@@ -508,6 +508,12 @@ public class Server implements Runnable {
 		System.out.println(incPoke.getAddress() + " has connected");
 
 		Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
+
+		if (receivedPoke == null) {
+			System.err.println("Received packet is not a ConnectPacket object");
+			return;
+		}
+
 		listenerServer.received(receivedPoke, incPoke.getAddress(), this, clientList);
 	}
 
