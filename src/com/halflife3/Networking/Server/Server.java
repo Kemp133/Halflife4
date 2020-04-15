@@ -125,8 +125,7 @@ public class Server implements Runnable {
 		running   = true;
 		welcoming = true;
 		resetting = false;
-		System.out.println("Multicasting on port: " + MULTICAST_PORT);
-		System.out.println("Listening for clients...");
+		log("Multicasting on port: " + MULTICAST_PORT + '\n' + "Listening for clients...");
 
 		//region Multicasts WelcomePackets
 		executor.submit(() -> {
@@ -322,7 +321,7 @@ public class Server implements Runnable {
 		resetting = true;
 
 		new Thread(() -> {
-			System.out.println("Goal has been scored. Resetting positions...");
+			log("Goal has been scored. Resetting positions...");
 
 			theBall.reset();
 			previousBallVel = new Vector2();
@@ -498,14 +497,14 @@ public class Server implements Runnable {
 		var    incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
 		try { clientSocket.receive(incPoke); } catch (SocketException e) {
-			System.out.println("Server closed");
+			log("Server closed");
 			running = false;
 			return;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		System.out.println(incPoke.getAddress() + " has connected");
+		log(incPoke.getAddress() + " has connected");
 
 		Object receivedPoke = NetworkingUtilities.byteArrayToObject(pokeBuf);
 
@@ -520,7 +519,7 @@ public class Server implements Runnable {
 	public synchronized void addConnection(InetAddress address) {
 		//region Checks if Server is full
 		if (clientList.connectedList.size() >= startPositions.length) {
-			System.out.println("Server is full. Player " + address + " disconnected");
+			log("Server is full. Player " + address + " disconnected");
 			welcoming = false;
 			return;
 		}
@@ -563,15 +562,10 @@ public class Server implements Runnable {
 		for (AIPlayer bot : botList.values())
 			bot.resetBasics();
 
-		Connection connection = new Connection(address, clientPort, portPacket.getStartPosition(), this, clientList);
+		Connection connection = new Connection(address, clientPort, portPacket, this, clientList);
 		new Thread(connection).start();
 
-		NetworkingUtilities.WaitXSeconds(3);// Lets the client side get ready to receive the port
-
-		multicastPacket(portPacket, GET_PORT_PORT);
-
 		clientList.connectedList.put(address, connection);
-
 		clientPort++;
 	}
 
@@ -612,7 +606,7 @@ public class Server implements Runnable {
 
 		clientList.connectedList.get(address).close();
 		clientList.connectedList.remove(address);
-		System.out.println(address + " has disconnected");
+		log(address + " has disconnected");
 	}
 
 	public synchronized void multicastPacket(Object o, int mPort) {
@@ -637,4 +631,8 @@ public class Server implements Runnable {
 		return new HashSet<>(bulletSet);
 	}
 	//endregion
+
+	private void log(String msg) {
+		System.out.println("\u001B[33m" + msg + "\u001B[0m");
+	}
 }

@@ -169,7 +169,7 @@ public class Client {
 		var    packet  = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, port);
 		try {
 			outSocket.send(packet);
-		} catch (NullPointerException ignored) {
+		} catch (NullPointerException | SocketException ignored) {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

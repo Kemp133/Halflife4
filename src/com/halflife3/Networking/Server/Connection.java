@@ -1,13 +1,17 @@
 package com.halflife3.Networking.Server;
 
 import com.halflife3.GameObjects.Vector2;
+import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
+import com.halflife3.Networking.Packets.UniquePortPacket;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connection implements Runnable {
 	private final int                 lengthOfPackets;
@@ -19,20 +23,30 @@ public class Connection implements Runnable {
 	private       DatagramSocket      uniqueSocket;
 	private       Vector2             client_position;
 	private       boolean             running;
+	private final ExecutorService     executor = Executors.newSingleThreadExecutor();
 
-	public Connection(InetAddress ip, int port, Vector2 spawn, Server s, ClientList cl) {
+	public Connection(InetAddress ip, int port, UniquePortPacket upp, Server s, ClientList cl) {
 		server          = s;
 		clientList      = cl;
 		clientAddress   = ip;
-		spawnPoint      = spawn;
-		client_position = spawn;
+		spawnPoint      = upp.getStartPosition();
+		client_position = upp.getStartPosition();
 		listenerServer  = new EventListenerServer();
-		lengthOfPackets = objectToByteArray(new PositionPacket()).length;
+		lengthOfPackets = NetworkingUtilities.objectToByteArray(new PositionPacket()).length;
 		try { uniqueSocket = new DatagramSocket(port); } catch (SocketException e) { e.printStackTrace(); }
+		executor.submit(() -> {
+			while (true) {
+				s.multicastPacket(upp, Server.GET_PORT_PORT);
+				NetworkingUtilities.WaitXSeconds(1);
+			}
+		});
+
 	}
 
 	@Override
 	public void run() {
+		connectionListener();
+		executor.shutdown();
 		running = true;
 		while (running) {
 			connectionListener();
@@ -50,43 +64,8 @@ public class Connection implements Runnable {
 
 		try { uniqueSocket.receive(incPos); } catch (IOException e) { return; }
 
-		Object receivedPosition = byteArrayToObject(posBuf);
+		Object receivedPosition = NetworkingUtilities.byteArrayToObject(posBuf);
 		listenerServer.received(receivedPosition, clientAddress, server, clientList);
-	}
-
-	private Object byteArrayToObject(byte[] buf) {
-		Object o = null;
-
-		try {
-			ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-			ObjectInputStream    instream   = new ObjectInputStream(new BufferedInputStream(byteStream));
-			o = instream.readObject();
-			instream.close();
-		} catch (EOFException e) {
-			System.out.println("Byte array 'posBuf' in ConnectedToServer class too small");
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		return o;
-	}
-
-	private static byte[] objectToByteArray(Object o) {
-		byte[] sendBuf = null;
-
-		try {
-			ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-			ObjectOutputStream    outstream  = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-			outstream.flush();
-			outstream.writeObject(o);
-			outstream.flush();
-			sendBuf = byteStream.toByteArray();
-			outstream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return sendBuf;
 	}
 
 	public Vector2 getPosition() {
