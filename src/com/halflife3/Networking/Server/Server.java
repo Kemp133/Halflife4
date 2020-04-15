@@ -51,6 +51,11 @@ public class Server implements Runnable {
 	private ExecutorService           executor;
 	//endregion
 
+	/**
+	 * Loads the map for the server to use, initialises all objects, including the <code>Ball</code> and the
+	 * <code>AIPlayers</code>, sets the map up for the <code>AI</code> class to use in path-finding and starts an
+	 * instance of this class, which implements the <code>Runnable</code> interface
+	 */
 	public void start() {
 		//region Loads the map
 		MapRender.LoadLevel();
@@ -114,8 +119,7 @@ public class Server implements Runnable {
 		//endregion
 
 //		Wait until the AI is done loading the map
-		while (!readyAI[0])
-			try { Thread.sleep(1); } catch (InterruptedException ignored) {}
+		while (!readyAI[0]) {try { Thread.sleep(1); } catch (InterruptedException ignored) {}}
 
 		new Thread(this).start();
 	}
@@ -163,6 +167,10 @@ public class Server implements Runnable {
 		//endregion
 	}
 
+	/**
+	 * Stops all <code>Threads</code> and closes all communication sockets, stopping all processes running in this
+	 * class instance
+	 */
 	private void exit() {
 		running   = false;
 		welcoming = false;
@@ -171,6 +179,12 @@ public class Server implements Runnable {
 		multicastSocket.close();
 	}
 
+	/**
+	 * Constitutes one frame in the game. Calls upon different methods to detect collisions, update object positions,
+	 * create and destroy <code>Bullets</code>, multicast updated object positions and check if a goal has been scored
+	 *
+	 * @param elapsedTime The time that has passed since the last time the method was called
+	 */
 	private void gameFrame(double elapsedTime) {
 		bulletCollision(); //Destroy bullets if they hit something
 
@@ -252,6 +266,12 @@ public class Server implements Runnable {
 	}
 
 	//region Running game methods
+	/**
+	 * Iterates through all the <code>Goal</code> nodes and checks if any of them intersect with the <code>Ball</code>
+	 *
+	 * @return <code>true</code> if and only if any <code>Goal</code> object intersects with the <code>Ball</code>
+	 * object, otherwise returns <code>false</code>
+	 */
 	private boolean goalScored() {
 		for (Goal g : MapRender.getGoalZone())
 			if (theBall.getBounds().intersects(g.getBounds().getBoundsInLocal()))
@@ -260,6 +280,10 @@ public class Server implements Runnable {
 		return false;
 	}
 
+	/**
+	 * Checks if the <code>Ball</code> intersects any <code>Brick</code> objects and if so adjusts the
+	 * <code>Ball's</code> velocity accordingly
+	 */
 	private void ballWallBounce() {
 		for (Brick block : MapRender.GetList()) {
 			if (!theBall.getBounds().intersects(block.getBounds().getBoundsInLocal()))
@@ -283,6 +307,11 @@ public class Server implements Runnable {
 		}
 	}
 
+	/**
+	 * Iterates through all the <code>Bullet</code> objects in the server's <code>bulletList</code> and destroys them
+	 * if they intersect with either a <code>Brick</code> or an <code>AIPlayer</code> object. In the latter case, the
+	 * <code>AIPlayer</code> is stunned and the <code>Ball</code> is dropped.
+	 */
 	private void bulletCollision() {
 		HashSet<Bullet> bulletsToDestroy = new HashSet<>();
 
@@ -317,6 +346,10 @@ public class Server implements Runnable {
 			removeBullet(bullet);
 	}
 
+	/**
+	 * Calls the reset() method of the "<code>Ball</code>, and all the <code>AIPlayer</code> objects and then
+	 * multicasts the newly reset positions to all connected clients
+	 */
 	private void resetMap() {
 		resetting = true;
 
@@ -346,8 +379,8 @@ public class Server implements Runnable {
 	//endregion
 
 	/**
-	 * A method to update the position, velocity and rotation of the bot if it is active, check if the bot is holding
-	 * the ball and find a path for the bot to follow using the A* algorithm
+	 * Updates the position, velocity and rotation of the bot if it is active, checks if the bot is holding
+	 * the ball and finds a path for the bot to follow using the A* algorithm
 	 *
 	 * @param time The time passed since the last frame update
 	 * @param name The name of the bot to be updated
@@ -446,6 +479,13 @@ public class Server implements Runnable {
 	}
 
 	//region AI helper methods
+	/**
+	 * Checks if there is a <code>Goal</code> node in a 200 pixel radius around the bot which is passed as an argument
+	 *
+	 * @param bot The <code>AIPlayer</code> object to get the distance to from the <code>Goal</code> nodes
+	 * @return <code>Goal</code> object if and only if such a node exists, that the distance between it and the
+	 * <code>AIPlayer</code> is less than 200 pixels, otherwise returns <code>null</code>
+	 */
 	private Goal goalInRadius(AIPlayer bot) {
 		for (Goal g : MapRender.getGoalZone())
 			if (bot.getPosition().distance(g.getPosition()) < 200)
@@ -454,6 +494,15 @@ public class Server implements Runnable {
 		return null;
 	}
 
+	/**
+	 * Checks if there is an enemy <code>PositionPacket</code> in a 250 pixel radius around the bot which is passed as
+	 * an argument
+	 *
+	 * @param bot The <code>AIPlayer</code> object to get the distance to from the <code>PositionPacket</code>
+	 *               objects saved in the <code>positionList</code> HashMap
+	 * @return <code>Vector2</code> object if and only if such an enemy exists, that the distance between them and the
+	 * 	 * <code>AIPlayer</code> is less than 250 pixels, otherwise returns <code>null</code>
+	 */
 	private Vector2 getEnemyInRadius(AIPlayer bot) {
 		for (var ip : clientList.connectedIPs) {
 			if (ip.equals(bot.getIpOfClient()))
@@ -469,6 +518,16 @@ public class Server implements Runnable {
 		return null;
 	}
 
+	/**
+	 * Checks if the <code>Vector2</code> objects passed as arguments are roughly equal, that is, their absolute values
+	 * do not differ more than 2 units
+	 *
+	 * @param current A <code>Vector2</code> object to check the vicinity of
+	 * @param sought A <code>Vector2</code> object sought to be in the vicinity of
+	 * @return <code>true</code> if and only if the absolute X and Y values of both <code>current</code> and
+	 * <code>sought</code> <code>Vector2</code> objects do not differ more than 2 units, otherwise returns
+	 * <code>false</code>
+	 */
 	private boolean arrived(Vector2 current, Vector2 sought) {
 		return (Math.abs(current.getX() - 2) < Math.abs(sought.getX()) &&
 		        Math.abs(current.getX() + 2) > Math.abs(sought.getX()) &&
@@ -492,6 +551,10 @@ public class Server implements Runnable {
 	//endregion
 
 	//region Connection methods
+	/**
+	 * Listens for any incoming packets from possible clients, converts the received byte array to an object and
+	 * passes the object to a server event listener.
+	 */
 	private void connectionListener() {
 		byte[] pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		var    incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
@@ -516,6 +579,15 @@ public class Server implements Runnable {
 		listenerServer.received(receivedPoke, incPoke.getAddress(), this, clientList);
 	}
 
+	/**
+	 *  Checks whether the server is full, if not, creates a <code>UniquePortPacket</code>, iterates through the
+	 *  <code>availablePositions</code> until it finds one that is occupied by a bot, removes the bot from the
+	 *  <code>positionList</code>,
+	 *  starts the <code>Connection</code> class on a new <code>Thread</code>, which sends the unique port to the
+	 *  client, and adds the player to the <code>connectedList</code>
+	 *
+	 * @param address <code>InetAddress</code> of the client to be added to the game
+	 */
 	public synchronized void addConnection(InetAddress address) {
 		//region Checks if Server is full
 		if (clientList.connectedList.size() >= startPositions.length) {
@@ -609,6 +681,13 @@ public class Server implements Runnable {
 		log(address + " has disconnected");
 	}
 
+	/**
+	 * Multicasts any object passed to it as the first argument on a predefined IP address and a port, passed as the
+	 * second argument.
+	 *
+	 * @param o Object to be multicasted
+	 * @param mPort Port for the object to be multicasted on a predefined IP address
+	 */
 	public synchronized void multicastPacket(Object o, int mPort) {
 		try {
 			byte[] sendBuf = NetworkingUtilities.objectToByteArray(o);
@@ -619,19 +698,39 @@ public class Server implements Runnable {
 	//endregion
 
 	//region Bullet list methods
+	/**
+	 * Adds a <code>Bullet</code> object to the server's <code>bulletSet</code> hash set.
+	 *
+	 * @param toAdd <code>Bullet</code> to be added to the set
+	 */
 	private synchronized void addBullet(Bullet toAdd) {
 		bulletSet.add(toAdd);
 	}
 
+	/**
+	 * Removes a <code>Bullet</code> object from the server's <code>bulletSet</code> hash set.
+	 *
+	 * @param toRemove <code>Bullet</code> to be removed from the set
+	 */
 	private synchronized void removeBullet(Bullet toRemove) {
 		bulletSet.remove(toRemove);
 	}
 
+	/**
+	 * Returns the server's <code>bulletSet</code> hash set of <code>Bullets</code>
+	 *
+	 * @return <code>bulletSet</code> hash set of <code>Bullets</code>
+	 */
 	private synchronized HashSet<Bullet> getBulletSet() {
 		return new HashSet<>(bulletSet);
 	}
 	//endregion
 
+	/**
+	 * Prints out a passed message in yellow
+	 *
+	 * @param msg <code>String</code> message to be printed
+	 */
 	private void log(String msg) {
 		System.out.println("\u001B[33m" + msg + "\u001B[0m");
 	}
