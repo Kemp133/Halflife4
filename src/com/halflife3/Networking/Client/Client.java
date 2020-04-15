@@ -48,7 +48,11 @@ public class Client {
 		}
 	}
 
-	//    Joins the multicast group to listen for multicasted packets
+	/**
+	 * Joins the multicast group on the static <code>Server.MULTICAST_PORT</code> to listen for packets multicasted by
+	 * the server and sets the interface of the <code>serverSocket</code> and the <code>positionSocket</code> to the
+	 * preferred IPv4 address
+	 */
 	public void joinMulticastGroup() {
 		try {
 			System.out.println("Searching for a multicast group...");
@@ -75,7 +79,10 @@ public class Client {
 		}
 	}
 
-	//    Gets the server's IP address
+	/**
+	 * Listens for a packet on the server multicast port and after receiving it registers and prints out the server's
+	 * IPv4 address
+	 */
 	public void getHostInfo() {
 		try {
 //            Receives the Welcome packet
@@ -86,17 +93,17 @@ public class Client {
 //            Gets the server's address
 			hostAddress = firstPacket.getAddress();
 
-			new Thread(() -> {
-				try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
-				System.out.println("Host found: " + hostAddress);
-				System.out.println("Waiting for unique port...");
-			}).start();
+			System.out.println("Host found: " + hostAddress);
+			System.out.println("Waiting for unique port...");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	//    Connects to the server and gets a port to output to
+	/**
+	 * Sends the serialised <code>ConnectPacket</code> class object to the server, letting it know the player has
+	 * connected to the game, and gets the unique port and starting position from the server
+	 */
 	public void connectToServer() {
 //        Lets the server know the client has connected
 		sendPacket(new ConnectPacket(), Server.LISTENER_PORT);
@@ -107,7 +114,10 @@ public class Client {
 		System.out.println("Client connection set up. Starting game...");
 	}
 
-	//    Sends a disconnect packet to the server and closes the sockets
+	/**
+	 * Sends the serialised <code>DisconnectPacket</code> class object to the server, letting it know the player has
+	 * disconnected from the game, and closes all communication sockets
+	 */
 	public void disconnect() {
 		sendPacket(new DisconnectPacket(), uniquePort);
 
@@ -116,7 +126,12 @@ public class Client {
 		positionSocket.close();
 	}
 
-	//    Gets the unique port to communicate with the server and a starting position
+	/**
+	 * Briefly creates a new <code>MulticastSocket</code> for the <code>serverSocket</code>, receives the
+	 * <code>UniquePortPacket</code> class object which is then processed by the client event listener to initialise
+	 * the unique communication port and the starting position of the player, and changes
+	 * <code>serverSocket</code> back to the previous <code>MulticastSocket</code>
+	 */
 	public void getUniqueInfo() {
 		try {
 			serverSocket = new MulticastSocket(GET_PORT_PORT);
@@ -134,7 +149,11 @@ public class Client {
 		System.out.println("Unique Client Port: " + uniquePort);
 	}
 
-	//    Receives and sorts a packet
+	/**
+	 * Receives any serialised class as an array of bytes, converts it back to an object by calling the
+	 * byteArrayToObject() method and passing it the byte array, and passes the object to
+	 * the client event listener for further processing
+	 */
 	public void receivePacket() {
 		try {
 			byte[] recBuf = new byte[3000];
@@ -147,7 +166,11 @@ public class Client {
 		}
 	}
 
-	//    Updates the 'listOfClients' variable
+	/**
+	 * Receives the serialised <code>PositionListPacket</code> class as an array of bytes, converts it back to the
+	 * class object by calling the byteArrayToObject() method and passing it the byte array, and passes the object to
+	 * the client event listener for further processing
+	 */
 	public void receivePositions() {
 		try {
 			byte[] recBuf = new byte[incPacketSize];
@@ -163,7 +186,13 @@ public class Client {
 		}
 	}
 
-	//    Sends a packet to the Server
+	/**
+	 * Sends any object passed to it as the first argument to the server with a port, passed as the
+	 * second argument.
+	 *
+	 * @param objectToSend Object to be sent
+	 * @param port         Port used on which the server will be listening for the packet
+	 */
 	public void sendPacket(Object objectToSend, int port) {
 		byte[] tempBuf = NetworkingUtilities.objectToByteArray(objectToSend);
 		var    packet  = new DatagramPacket(tempBuf, tempBuf.length, hostAddress, port);
@@ -174,25 +203,6 @@ public class Client {
 			e.printStackTrace();
 		}
 	}
-
-	//region Old objectToByteArray Method (just in case)
-	//    Converts a byte array into an object (packet)
-//    private static Object byteArrayToObject(byte[] buf) {
-//        Object o = null;
-//
-//        try {
-//            ByteArrayInputStream byteStream = new ByteArrayInputStream(buf);
-//            ObjectInputStream instream = new ObjectInputStream(new BufferedInputStream(byteStream));
-//            o = instream.readObject();
-//            instream.close();
-//        } catch (IOException | ClassNotFoundException e) {
-//            incPacketSize = 2000;
-//            e.printStackTrace();
-//        }
-//
-//        return o;
-//    }
-	//endregion
 
 	//region Getters and setters
 	public InetAddress getClientAddress() { return clientAddress; }

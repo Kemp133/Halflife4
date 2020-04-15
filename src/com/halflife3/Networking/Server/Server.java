@@ -177,6 +177,7 @@ public class Server implements Runnable {
 		executor.shutdownNow();
 		clientSocket.close();
 		multicastSocket.close();
+		log("Server closed");
 	}
 
 	/**
@@ -553,14 +554,13 @@ public class Server implements Runnable {
 	//region Connection methods
 	/**
 	 * Listens for any incoming packets from possible clients, converts the received byte array to an object and
-	 * passes the object to a server event listener.
+	 * passes the object to a server event listener for further processing
 	 */
 	private void connectionListener() {
 		byte[] pokeBuf = new byte[NetworkingUtilities.objectToByteArray(new ConnectPacket()).length];
 		var    incPoke = new DatagramPacket(pokeBuf, pokeBuf.length);
 
 		try { clientSocket.receive(incPoke); } catch (SocketException e) {
-			log("Server closed");
 			running = false;
 			return;
 		} catch (IOException e) {
@@ -647,6 +647,8 @@ public class Server implements Runnable {
 	 * @param address The address of the player to be removed
 	 */
 	public void removeConnection(InetAddress address) {
+		log(address + " has disconnected");
+
 		if (clientList.connectedList.size() == 1) {
 			clientList.connectedList.get(address).close();
 			clientList.connectedList.remove(address);
@@ -678,7 +680,6 @@ public class Server implements Runnable {
 
 		clientList.connectedList.get(address).close();
 		clientList.connectedList.remove(address);
-		log(address + " has disconnected");
 	}
 
 	/**
@@ -727,7 +728,7 @@ public class Server implements Runnable {
 	//endregion
 
 	/**
-	 * Prints out a passed message in yellow
+	 * Prints out a passed message in a yellow font
 	 *
 	 * @param msg <code>String</code> message to be printed
 	 */
