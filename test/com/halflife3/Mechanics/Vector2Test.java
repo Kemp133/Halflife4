@@ -1,6 +1,6 @@
 package com.halflife3.Mechanics;
 
-
+import com.halflife3.GameObjects.Vector2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +15,8 @@ public class Vector2Test {
 	@Test
 	@DisplayName("Adding a vector to another vector")
 	public void AddVectorAndVector() {
-		Vector2 v1 = new Vector2(x1, y1);
-		Vector2 v2 = new Vector2(x2, y2);
+		Vector2 v1       = new Vector2(x1, y1);
+		Vector2 v2       = new Vector2(x2, y2);
 		Vector2 expected = new Vector2(x1 + x2, y1 + y2);
 
 		assertEquals(expected, v1.add(v2));
@@ -228,9 +228,6 @@ public class Vector2Test {
 	public void VectorToString() {
 		Vector2 v1 = new Vector2(x1, y1), v2 = new Vector2(x2, y2);
 		String expected1 = GetToStringRepresentation(x1, y1), expected2 = GetToStringRepresentation(x2, y2);
-
-		String test1 = GetToStringRepresentation(x1, y1);
-		String test1b = v1.toString();
 
 		assertAll(
 				"Asserting toString method working for vectors",

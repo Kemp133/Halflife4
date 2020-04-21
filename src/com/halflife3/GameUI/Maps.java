@@ -1,7 +1,6 @@
 package com.halflife3.GameUI;
 
 import com.halflife3.Controller.MapMenuController;
-import com.halflife3.Controller.MenuController;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
@@ -9,23 +8,19 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Maps {
-	static public String      Map  = "res/Maps/map1.png";
-	private       Button      map0 = new Button("Map1");
-	private       Button      map1 = new Button("Map2");
-	private       Button      map2 = new Button("Map3");
-	private       Button      back = new Button("Back to Main Menu");
-	private       ImageView   imgView1;
-	private       ImageView   imgView2;
-	private       ImageView   imgView3;
-	private ArrayList<String> mapList;
+	public static String            Map  = "Maps/map1.png";
+	private       Button            map0 = new Button("Map1");
+	private       Button            map1 = new Button("Map2");
+	private       Button            map2 = new Button("Map3");
+	private       Button            back = new Button("Back to Main Menu");
+	private       ImageView         imgView1;
+	private       ImageView         imgView2;
+	private       ImageView         imgView3;
+	private       ArrayList<String> mapList;
 
 	private Scene scene;
 
@@ -54,7 +49,7 @@ public class Maps {
 		});
 
 		map2.setOnAction(actionEvent -> {
-			Map = mapList.get(3);
+			Map = mapList.get(2);
 			map2.getStyleClass().add("button1");
 			map0.getStyleClass().remove("button1");
 			map1.getStyleClass().remove("button1");
@@ -92,14 +87,9 @@ public class Maps {
 	private BorderPane borderPane() {
 		BorderPane borderPane = new BorderPane();
 
-		Font paladinFont = null;
-		try {
-			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
 
-		Label  title  = new Label("Maps");
+		Label title = new Label("Maps");
 		title.setFont(paladinFont);
 		title.setStyle("-fx-text-fill: linear-gradient(#0000FF, #FFFFFF 95%);");
 
@@ -120,17 +110,15 @@ public class Maps {
 		borderPane.setRight(rightPane);
 		borderPane.setBottom(bottomPane);
 
-		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), "res/Leaderboard/LeaderboardBackground" +
-		                                                                  ".jpg"));
+		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), "Leaderboard/LeaderboardBackground.jpg"));
 		borderPane.setCenter(vbox());
 
-		File f = new File("res/MainMenu/MainMenuCSS.css");
-		borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+		borderPane.getStylesheets().add(getClass().getClassLoader().getResource("MainMenu/MainMenuCSS.css").toExternalForm());
 		return borderPane;
 	}
 
 	private void initialiseMenuScene() {
-		scene = new Scene(borderPane(), MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
+		scene = new Scene(borderPane(), WindowAttributes.GAME_WINDOW_WIDTH, WindowAttributes.GAME_WINDOW_HEIGHT);
 	}
 
 	private void getImage() {
@@ -157,11 +145,17 @@ public class Maps {
 	private ArrayList<String> pathList() {
 		ArrayList<String> paths = new ArrayList<>();
 
-		File directory = new File("res\\Maps");
-		int fileCount = Objects.requireNonNull(directory.list()).length;
+		File directory = null;
+
+		try {
+			directory = new File("Maps/");
+		} catch (Exception ignored) {}
+
+		System.out.println(directory);
+		int fileCount = directory.list().length;
 
 		for (int i = 1; i <= fileCount; i++)
-		     paths.add(String.format("res/Maps/map%d.png", i));
+		     paths.add(String.format("Maps/map%d.png", i));
 
 		return paths;
 	}

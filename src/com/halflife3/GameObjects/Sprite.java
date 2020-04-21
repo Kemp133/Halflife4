@@ -61,8 +61,10 @@ public abstract class Sprite extends GameObject {
 	 * @param pathToSprite The location of the sprite in the project structure
 	 */
 	public void setSprite(String pathToSprite) {
-		sprite = new Image(new File(pathToSprite).toURI().toString());
+		sprite = new Image(getClass().getClassLoader().getResourceAsStream(pathToSprite));
 	}
+
+	public void setSprite(Image imageToSet) { sprite = imageToSet; }
 
 	/**
 	 * A method to get the width of the image

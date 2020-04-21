@@ -24,7 +24,7 @@ public class Ball extends Sprite {
 	 * position, and the circle shape is initialized
 	 */
 	public Ball(Vector2 position) {
-		super(position, new Vector2(), "res/Sprites/Ball/Ball.png");
+		super(position, new Vector2(), "Sprites/Ball/Ball.png");
 		keys.add("Ball");
 		position.subtract(getWidth() / 2, getHeight() / 2);
 		spawnPosition         = new Vector2(position);

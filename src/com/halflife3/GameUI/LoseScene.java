@@ -17,86 +17,76 @@ import java.io.FileNotFoundException;
  * This class acts as a view for the Final stage of the game, if you win the game you will see this page.
  */
 public class LoseScene /*extends Application*/ {
-    private              VBox   vbox;
-    private static final String MENU_BACKGROUND_IMAGE_LOCATION = "res/Leaderboard/LeaderboardBackground.jpg";
-    private static final String Win_pic                        = "res/Sprites/Score/lose.png";
-    private              Button exit                           = new Button("Back");
-    private              Scene  scene;
+	private              VBox   vbox;
+	private static final String MENU_BACKGROUND_IMAGE_LOCATION = "Leaderboard/LeaderboardBackground.jpg";
+	private static final String Lose_pic                       = "numbers/lose.png";
+	private              Button exit                           = new Button("Back");
+	private              Scene  scene;
 
-    public LoseScene() {
-        initialiseMenuScene();
-    }
+	public LoseScene() {
+		initialiseMenuScene();
+	}
 
-    private VBox vbox() {
-        exit.setOnAction(actionEvent -> {
-            MainMenu main = new MainMenu();
-            SceneManager.getInstance().setScene("Main Menu", main.getScene());
-        });
+	private VBox vbox() {
+		exit.setOnAction(actionEvent -> {
+			MainMenu main = new MainMenu();
+			SceneManager.getInstance().setScene("Main Menu", main.getScene());
+		});
 
-        VBox vbox2 = new VBox(exit);
-        vbox2.setAlignment(Pos.CENTER);
-        vbox2.setPadding(new Insets(50, 0, 0, 0));
+		VBox vbox2 = new VBox(exit);
+		vbox2.setAlignment(Pos.CENTER);
+		vbox2.setPadding(new Insets(50, 0, 0, 0));
 
-        try {
-            Image     win_image = new Image(new FileInputStream(Win_pic));
-            ImageView Win_show  = new ImageView(win_image);
-            vbox = new VBox(Win_show, vbox2);
-        } catch (FileNotFoundException e) {
-            System.out.println("Image not found");
-        }
+		Image     win_image = new Image(getClass().getClassLoader().getResourceAsStream(Lose_pic));
+		ImageView Win_show  = new ImageView(win_image);
+		vbox = new VBox(Win_show, vbox2);
 
-        vbox.setAlignment(Pos.BASELINE_CENTER);
-        vbox.setPadding(new Insets(120, 0, 40, 0));
+		vbox.setAlignment(Pos.BASELINE_CENTER);
+		vbox.setPadding(new Insets(120, 0, 40, 0));
 
-        return vbox;
-    }
+		return vbox;
+	}
 
-    private BorderPane borderPane() {
-        BorderPane borderPane = new BorderPane();
+	private BorderPane borderPane() {
+		BorderPane borderPane = new BorderPane();
 
-        Font paladinFont = null;
-        try {
-            paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+		Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
 
-        Label title = new Label("Space Ball");
-        title.setFont(paladinFont);
-        title.setStyle("-fx-text-fill: linear-gradient(#0000FF, #FFFFFF 95%);");
+		Label title = new Label("Space Ball");
+		title.setFont(paladinFont);
+		title.setStyle("-fx-text-fill: linear-gradient(#0000FF, #FFFFFF 95%);");
 
-        Insets insets  = new Insets(30);
-        Pane   topPane = new Pane();
-        topPane.setMinSize(500, 100);
-        Pane leftPane = new Pane();
-        leftPane.setMinSize(0, 0);
-        Pane rightPane = new Pane();
-        rightPane.setMinSize(0, 0);
-        Pane bottomPane = new Pane();
-        bottomPane.setMinSize(500, 100);
-        borderPane.setTop(title);
-        BorderPane.setMargin(title, insets);
-        BorderPane.setAlignment(title, Pos.TOP_CENTER);
+		Insets insets  = new Insets(30);
+		Pane   topPane = new Pane();
+		topPane.setMinSize(500, 100);
+		Pane leftPane = new Pane();
+		leftPane.setMinSize(0, 0);
+		Pane rightPane = new Pane();
+		rightPane.setMinSize(0, 0);
+		Pane bottomPane = new Pane();
+		bottomPane.setMinSize(500, 100);
+		borderPane.setTop(title);
+		BorderPane.setMargin(title, insets);
+		BorderPane.setAlignment(title, Pos.TOP_CENTER);
 
-        borderPane.setLeft(leftPane);
-        borderPane.setRight(rightPane);
-        borderPane.setBottom(bottomPane);
+		borderPane.setLeft(leftPane);
+		borderPane.setRight(rightPane);
+		borderPane.setBottom(bottomPane);
 
-        borderPane.setBackground(MenuUtilitites.getBackground(getClass(), MENU_BACKGROUND_IMAGE_LOCATION));
-        borderPane.setCenter(vbox());
+		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), MENU_BACKGROUND_IMAGE_LOCATION));
+		borderPane.setCenter(vbox());
 
-        File f = new File("res/MainMenu/MainMenuCSS.css");
-        borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+		borderPane.getStylesheets().add(getClass().getClassLoader().getResource("MainMenu/MainMenuCSS.css").toExternalForm());
 
-        return borderPane;
-    }
+		return borderPane;
+	}
 
-    private void initialiseMenuScene() {
-        scene = new Scene(borderPane(), MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
-    }
+	private void initialiseMenuScene() {
+		scene = new Scene(borderPane(), WindowAttributes.GAME_WINDOW_WIDTH, WindowAttributes.GAME_WINDOW_HEIGHT);
+	}
 
-    public Scene getScene() {
-        return scene;
-    }
+	public Scene getScene() {
+		return scene;
+	}
 }
 

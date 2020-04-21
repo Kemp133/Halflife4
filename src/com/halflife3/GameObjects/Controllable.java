@@ -22,7 +22,7 @@ public abstract class Controllable extends Sprite {
 		packetToSend        = new PositionPacket();
 		packetToSend.spawnX = position.getX();
 		packetToSend.spawnY = position.getY();
-		setSprite("res/Sprites/PlayerSkins/Cosmo_Hovering.png");
+		setSprite("Sprites/PlayerSkins/Cosmo_Hovering.png");
 		circle = new Circle(position.getX() + getWidth() / 2 + 1, position.getY() + getHeight() / 2 + 1,
 				Math.max(getWidth(), getHeight()) / 2 + 1);
 	}

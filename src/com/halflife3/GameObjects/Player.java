@@ -8,6 +8,7 @@ import javafx.scene.transform.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Player extends Controllable {
 	//region Variables
@@ -21,7 +22,7 @@ public class Player extends Controllable {
 	public Player(Vector2 position) {
 		super(position);
 		keys.add("player");
-		setSprite2("res/Sprites/PlayerSkins/Cosmo_Moving.png");
+		setSprite2("Sprites/PlayerSkins/Cosmo_Moving.png");
 		affine = new Affine();
 	}
 
@@ -60,11 +61,7 @@ public class Player extends Controllable {
 	}
 
 	public void setSprite2(String pathToSprite) {
-		try (FileInputStream fis = new FileInputStream(pathToSprite)) {
-			sprite2 = new Image(fis);
-		} catch (IOException e) {
-			System.err.println("Image not found!");
-		}
+			sprite2 = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(pathToSprite)));
 	}
 
 	public void collision(Brick block, double time) {

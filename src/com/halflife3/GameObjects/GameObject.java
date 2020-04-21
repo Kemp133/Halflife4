@@ -1,8 +1,8 @@
 package com.halflife3.GameObjects;
 
 import com.halflife3.Controller.ObjectManager;
-import com.halflife3.GameObjects.Interfaces.IRenderable;
 import com.halflife3.GameObjects.Interfaces.ICollidable;
+import com.halflife3.GameObjects.Interfaces.IRenderable;
 import com.halflife3.GameObjects.Interfaces.IUpdateable;
 
 import java.util.HashSet;
@@ -149,8 +149,7 @@ public abstract class GameObject implements IRenderable, IUpdateable, ICollidabl
 		ObjectManager.removeObject(this);
 		position = null;
 		velocity = null;
-		keys     = null;//These two signal to the Garbage Collector that the Object is ready to be destroyed (as well
-		// as the things the class references)
+		keys     = null;
 	}
 
 	/**

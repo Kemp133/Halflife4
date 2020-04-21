@@ -8,10 +8,10 @@ import java.io.File;
 
 public class AudioForGame {
 	private MenuBar        menuBar      = new MenuBar();
-	private File           filename1    = new File("res/2019-04-18_-_The_Epic_Boss_Fight_-_David_Fesliyan.mp3");
-	private File           filename2    = new File("res/9_mm_gunshot-mike-koenig-123.mp3");
-	private Media          media1       = new Media(filename1.toURI().toString());
-	private Media          media2       = new Media(filename2.toURI().toString());
+	private String         filename1    = "2019-04-18_-_The_Epic_Boss_Fight_-_David_Fesliyan.mp3";
+	private String         filename2    = "9_mm_gunshot-mike-koenig-123.mp3";
+	private Media          media1       = new Media(getClass().getClassLoader().getResource(filename1).toExternalForm());
+	private Media          media2       = new Media(getClass().getClassLoader().getResource(filename2).toExternalForm());
 	private MediaPlayer    battle_music = new MediaPlayer(media1);
 	private MediaPlayer    bullet_music = new MediaPlayer(media2);
 	private Menu           menu         = new Menu("Audio Settings");

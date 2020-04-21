@@ -1,10 +1,10 @@
 package com.halflife3.GameUI;
 
+import com.halflife3.GameObjects.Vector2;
 import com.halflife3.Networking.NetworkingUtilities;
 import javafx.scene.image.*;
 import javafx.scene.layout.*;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -24,7 +24,7 @@ public class MenuUtilitites {
 	 * @return A background image showing the image pointed to by {@code backgroundLocation}
 	 */
 	public static Background getBackground(Class<?> from, String backgroundLocation) {
-		try (var fis = new FileInputStream(backgroundLocation)) {
+		try (var fis = Vector2.class.getClassLoader().getResourceAsStream(backgroundLocation)) {
 			Image img = new Image(fis);
 			var   bs  = new BackgroundSize(800, 600, false, false, false, true);
 			var   bi  = new BackgroundImage(

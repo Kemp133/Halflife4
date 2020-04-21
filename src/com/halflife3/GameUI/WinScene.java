@@ -18,8 +18,8 @@ import java.io.FileNotFoundException;
  */
 public class WinScene /*extends Application*/ {
 	private              VBox   vbox;
-	private static final String MENU_BACKGROUND_IMAGE_LOCATION = "res/Leaderboard/LeaderboardBackground.jpg";
-	private static final String Win_pic                        = "res/Sprites/Score/win.png";
+	private static final String MENU_BACKGROUND_IMAGE_LOCATION = "Leaderboard/LeaderboardBackground.jpg";
+	private static final String Win_pic                        = "numbers/win.png";
 	private              Button exit                           = new Button("Back");
 	private              Scene  scene;
 
@@ -37,13 +37,9 @@ public class WinScene /*extends Application*/ {
 		vbox2.setAlignment(Pos.CENTER);
 		vbox2.setPadding(new Insets(50, 0, 0, 0));
 
-		try {
-			Image     win_image = new Image(new FileInputStream(Win_pic));
-			ImageView Win_show  = new ImageView(win_image);
-			vbox = new VBox(Win_show, vbox2);
-		} catch (FileNotFoundException e) {
-			System.out.println("Image not found");
-		}
+		Image     win_image = new Image(getClass().getClassLoader().getResourceAsStream(Win_pic));
+		ImageView Win_show  = new ImageView(win_image);
+		vbox = new VBox(Win_show, vbox2);
 
 		vbox.setAlignment(Pos.BASELINE_CENTER);
 		vbox.setPadding(new Insets(120, 0, 40, 0));
@@ -54,12 +50,7 @@ public class WinScene /*extends Application*/ {
 	private BorderPane borderPane() {
 		BorderPane borderPane = new BorderPane();
 
-		Font paladinFont = null;
-		try {
-			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
 
 		Label title = new Label("Space Ball");
 		title.setFont(paladinFont);
@@ -85,14 +76,13 @@ public class WinScene /*extends Application*/ {
 		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), MENU_BACKGROUND_IMAGE_LOCATION));
 		borderPane.setCenter(vbox());
 
-		File f = new File("res/MainMenu/MainMenuCSS.css");
-		borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+		borderPane.getStylesheets().add(getClass().getClassLoader().getResource("MainMenu/MainMenuCSS.css").toExternalForm());
 
 		return borderPane;
 	}
 
 	private void initialiseMenuScene() {
-		scene = new Scene(borderPane(), MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
+		scene = new Scene(borderPane(), WindowAttributes.GAME_WINDOW_WIDTH, WindowAttributes.GAME_WINDOW_HEIGHT);
 	}
 
 	public Scene getScene() {
