@@ -1,16 +1,11 @@
 package com.halflife3.GameModes;
 
 import com.halflife3.Controller.*;
-import com.halflife3.Controller.Input.Input;
-import com.halflife3.Controller.Input.KeyboardInput;
-import com.halflife3.Controller.Input.MouseInput;
+import com.halflife3.Controller.Input.*;
 import com.halflife3.GameObjects.*;
-import com.halflife3.GameUI.AudioForGame;
-import com.halflife3.GameUI.Maps;
-import com.halflife3.GameUI.MenuUtilitites;
-import com.halflife3.GameObjects.FastReload;
-import com.halflife3.GameObjects.Speedup;
-import com.halflife3.GameObjects.Vector2;
+import com.halflife3.GameUI.*;
+import com.halflife3.GameObjects.Interfaces.*;
+import com.halflife3.GameObjects.*;
 import com.halflife3.Networking.Client.Client;
 import com.halflife3.Networking.NetworkingUtilities;
 import com.halflife3.Networking.Packets.PositionPacket;
