@@ -1,9 +1,7 @@
 package com.halflife3.Controller;
 
-import com.halflife3.GameModes.GameMode;
-import com.halflife3.GameModes.MainMode;
-import com.halflife3.GameUI.LoseScene;
-import com.halflife3.GameUI.WinScene;
+import com.halflife3.GameModes.*;
+import com.halflife3.GameUI.*;
 import javafx.animation.*;
 import javafx.stage.*;
 
@@ -17,12 +15,12 @@ import javafx.stage.*;
  * errors with incorrectly using the SceneManager.
  * <p>
  * This class also keeps track of the game mode in {@code gamemode} as well as the FPS target that the game mode
- * should be
- * played at. Hopefully in the (near) future I can move the FPS into the game mode and have this value encapsulated
- * fully.
+ * should be played at.
  */
 public class ClientController extends BaseController {
+	/** A private reference to the game mode that is currently running */
 	private             GameMode gamemode;
+	/** A static final reference to the target FPS that the game should try and play at */
 	public static final int      FPS = 30;
 
 	@Override
@@ -70,27 +68,15 @@ public class ClientController extends BaseController {
 
 	@Override
 	public void end() {
-//		try {
-//			SceneManager.getInstance().restorePreviousScene(); //Can't call this inside of animation timer
-//		} catch(Exception e) {
-//			NetworkingUtilities.CreateErrorMessage(
-//					"Scene Stack Empty!",
-//					"SceneManager threw an exception",
-//					"Message" + e.getMessage()
-//			);
-//		}
 		if (gamemode.win) {
-			gamemode = null;
-			ObjectManager.resetObjects();
 			WinScene win = new WinScene();
 			SceneManager.getInstance().setScene("Win Scene", win.getScene());
 		} else {
-			gamemode = null;
-			ObjectManager.resetObjects();
 			LoseScene lose = new LoseScene();
 			SceneManager.getInstance().setScene("Lose Scene", lose.getScene());
 		}
-
+		gamemode = null;
+		ObjectManager.resetObjects();
 	}
 
 	@Override
