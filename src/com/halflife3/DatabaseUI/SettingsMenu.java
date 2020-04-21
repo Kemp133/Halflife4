@@ -2,7 +2,6 @@ package com.halflife3.DatabaseUI;
 
 import com.halflife3.Controller.BaseController;
 import com.halflife3.GameUI.MenuUtilitites;
-import com.halflife3.Networking.NetworkingUtilities;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -65,7 +64,7 @@ public class SettingsMenu {
 	}
 
 	private Background addBackground() {
-		return MenuUtilitites.getBackground(getClass(), "res/Leaderboard/LeaderboardBackground.jpg");
+		return MenuUtilitites.getBackground(getClass(), "Leaderboard/LeaderboardBackground.jpg");
 	}
 
 	private VBox settingsVBox() {
@@ -89,7 +88,8 @@ public class SettingsMenu {
 
 		//region Account Settings
 		deleteRememberMe.setMaxWidth(Double.MAX_VALUE); //Take up all available width in the container
-		deleteRememberMe.setDisable(logInFileExists()); //Check if the file exists and if it should be enabled. Easier than fixing the label
+		deleteRememberMe.setDisable(logInFileExists()); //Check if the file exists and if it should be enabled. Easier than fixing the
+		// label
 		removeAcc.setMaxWidth(Double.MAX_VALUE); //Take up all available width in the container
 		VBox accountButtons = new VBox(deleteRememberMe, removeAcc); //Arrange items vertically
 		accountButtons.setSpacing(10);
@@ -117,12 +117,13 @@ public class SettingsMenu {
 
 	private VBox accountDeletedVbox() {
 		Text headerText = new Text("Your account has been deleted successfully");
-		Text bodyText   = new Text("The game window will close automatically in 5 seconds");
+		Text bodyText   = new Text("The Application will close in 5 seconds");
 		headerText.setStyle("-fx-font-size: 25pt;");
 		headerText.setFill(Color.GREEN);
 		bodyText.setStyle("-fx-font-size: 15pt;");
 		bodyText.setFill(Color.GREEN);
 		VBox vBox = new VBox(headerText, bodyText);
+		vBox.setSpacing(15);
 		vBox.setAlignment(Pos.CENTER);
 		vBox.setStyle("-fx-background-color: rgba(176,224,230,0.8)");
 		return vBox;
@@ -151,12 +152,7 @@ public class SettingsMenu {
 	private BorderPane borderPane(VBox scene) {
 		borderPane = new BorderPane();
 
-		Font paladinFont = null;
-		try {
-			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), TITLE_FONT_SIZE);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), TITLE_FONT_SIZE);
 
 		Label title = new Label("Space Ball");
 		title.setFont(paladinFont);
@@ -182,8 +178,7 @@ public class SettingsMenu {
 		borderPane.setBackground(addBackground());
 		borderPane.setCenter(scene);
 
-		File f = new File("res/MainMenu/MainMenuCSS.css");
-		borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+		borderPane.getStylesheets().add(getClass().getClassLoader().getResource("MainMenu/MainMenuCSS.css").toExternalForm());
 
 		return borderPane;
 	}
@@ -192,22 +187,17 @@ public class SettingsMenu {
 
 	public Scene getMainScene()                    { return mainScene; }
 	public Scene getRemoveAccountScene()           { return removeAccountScene; }
+	public Scene getAccountDeletedScene()          { return accountDeletedScene; }
+
 	private Font getUsedFont(int fontSize) {
-		try {
-			return Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), fontSize);
-		} catch (IOException e) {
-			NetworkingUtilities.CreateErrorMessage("Font Could Not Be Loaded", "The selected font could not be loaded",
-					"Message: " + e.getMessage());
-		}
-		return null;
+		return Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), fontSize);
 	}
 
 	private void setTitledPaneSettings(TitledPane pane) {
 		pane.setFont(getUsedFont(15));
 		pane.setMaxWidth(500);
 		pane.setMaxHeight(100);
-		File f = new File("res/Settings/settingsStyle.css");
-		pane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+		pane.getStylesheets().add(getClass().getClassLoader().getResource("Settings/settingsStyle.css").toExternalForm());
 	}
 
 	private boolean logInFileExists() {

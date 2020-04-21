@@ -12,7 +12,7 @@ import java.sql.*;
 
 public class OptionsController extends BaseController {
 	SettingsMenu menu;
-	MediaPlayer player;
+	MediaPlayer  player;
 
 	public OptionsController(MediaPlayer player) {
 		this.player = player;
@@ -41,14 +41,14 @@ public class OptionsController extends BaseController {
 
 		//region Set Remove Account OnAction Event
 		menu.getRemoveAcc().setOnAction(actionEvent -> {
-			manager.setScene("Settings Delete Account", menu.getRemoveAccountScene());
+			SceneManager.getInstance().setScene("Settings Delete Account", menu.getRemoveAccountScene());
 		});
 		//endregion
 
 		//region Set Back Button OnAction Event
 		menu.getBack().setOnAction(actionEvent -> {
 			try {
-				manager.restorePreviousScene();
+				SceneManager.getInstance().restorePreviousScene();
 			} catch (SceneStackEmptyException e) {
 				e.printStackTrace();
 			}
@@ -74,11 +74,13 @@ public class OptionsController extends BaseController {
 				menu.getUserFeedback().setText("Passwords do not match");
 				setNullFields();
 			} else {
-				if (DatabaseManager.confirmUser(DatabaseManager.getConnection(),
-						BaseController.GetApplicationUser().username, menu.getPassword().getText())) {
-					manager.setScene("Account Deleted", menu.getRemoveAccountScene());
+				if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username,
+						menu.getPassword().getText())) {
+
+					SceneManager.getInstance().setScene("Account Deleted", menu.getAccountDeletedScene());
 					deleteUserDetails(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username);
 					deleteLoginConf();
+
 					Platform.runLater(() -> {
 						NetworkingUtilities.WaitXSeconds(5);
 						closeApplication();
@@ -93,7 +95,7 @@ public class OptionsController extends BaseController {
 
 		menu.getBack2().setOnAction(actionEvent -> {
 			try {
-				manager.restorePreviousScene();
+				SceneManager.getInstance().restorePreviousScene();
 			} catch (SceneStackEmptyException e) {
 				e.printStackTrace();
 			}

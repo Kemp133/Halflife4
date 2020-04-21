@@ -82,12 +82,7 @@ public class Login extends Preloader {
 
 	/** A method to set the text properties of the objects in the menu */
 	private void textProperties() {
-		Font paladinFont = null;
-		try {
-			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
 
 		name.setFont(paladinFont);
 		name.setStyle("-fx-font-size: 20px;");
@@ -139,12 +134,7 @@ public class Login extends Preloader {
 	private BorderPane baseBPane() {
 		BorderPane borderPane = new BorderPane();
 
-		Font paladinFont = null;
-		try {
-			paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
 
 		Label title = new Label("Login");
 		title.setFont(paladinFont);
@@ -196,11 +186,11 @@ public class Login extends Preloader {
 		gridPaneLogin.setPadding(new Insets(40, 0, 0, 0));
 		gridPaneLogin.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 
-		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), "res/Login/login-background.jpg"));
+		borderPane.setBackground(MenuUtilitites.getBackground(getClass(), "Login/login-background.jpg"));
 		borderPane.setCenter(gridPaneLogin);
 
-		File f = new File("res/Login/LoginStyleSheet.css");
-		borderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+//		File f = new File("res/Login/LoginStyleSheet.css");
+		borderPane.getStylesheets().add(getClass().getClassLoader().getResource("Login/LoginStyleSheet.css").toExternalForm());
 
 		return borderPane;
 	}
@@ -233,11 +223,10 @@ public class Login extends Preloader {
 		gridPaneCreateUser.setStyle("-fx-background-color: rgba(176,224,230,0.8);");
 		gridPaneCreateUser.setMinSize(500, 400);
 
-		newBorderPane.setBackground(MenuUtilitites.getBackground(getClass(), "res/Login/login-background.jpg"));
+		newBorderPane.setBackground(MenuUtilitites.getBackground(getClass(), "Login/login-background.jpg"));
 		newBorderPane.setCenter(gridPaneCreateUser);
 
-		File f = new File("res/Login/LoginStyleSheet.css");
-		newBorderPane.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+		newBorderPane.getStylesheets().add(getClass().getClassLoader().getResource("Login/LoginStyleSheet.css").toExternalForm());
 
 		return newBorderPane;
 	}
@@ -302,24 +291,21 @@ public class Login extends Preloader {
 		stage.show();
 
 		//Setting on click events for login
-		login.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if (nameField.getText() != null && passwordField.getText() != null) {
-					if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), nameField.getText(),
-							passwordField.getText())) {
-						hasLoggedIn = true;
-						if (chbRememberMe.isSelected()) writeLoginAttributesToFile();
-						mayBeHid();
-					} else {
-						setNullFields();
-						incorrectFields.setText("Incorrect username and/or password.");
-						incorrectFields.setVisible(true);
-					}
+		login.setOnAction(e -> {
+			if (nameField.getText() != null && passwordField.getText() != null) {
+				if (DatabaseManager.confirmUser(DatabaseManager.getConnection(), nameField.getText(),
+						passwordField.getText())) {
+					hasLoggedIn = true;
+					if (chbRememberMe.isSelected()) writeLoginAttributesToFile();
+					mayBeHid();
 				} else {
-					incorrectFields.setText("Type in a username and password");
+					setNullFields();
+					incorrectFields.setText("Incorrect username and/or password.");
 					incorrectFields.setVisible(true);
 				}
+			} else {
+				incorrectFields.setText("Type in a username and password");
+				incorrectFields.setVisible(true);
 			}
 		});
 

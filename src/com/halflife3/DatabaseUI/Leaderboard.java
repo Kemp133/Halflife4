@@ -39,12 +39,7 @@ public class Leaderboard {
                 /*
         Font properties
          */
-        Font paladinFont = null;
-        try {
-            paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
 
         /*
         Label properties
@@ -112,8 +107,7 @@ public class Leaderboard {
 
     public Scene getLeaderboardScene(int width, int height) {
         Scene scene = new Scene(borderPane, width, height);
-        File f = new File("res/Leaderboard/LeaderboardStyleSheet.css");
-        scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+        scene.getStylesheets().add(getClass().getClassLoader().getResource("Leaderboard/LeaderboardStyleSheet.css").toExternalForm());
         return scene;
     }
 
@@ -159,14 +153,10 @@ public class Leaderboard {
 
     private Background addBackground() {
         try {
-
-            FileInputStream inputStream = new FileInputStream("res/Leaderboard/LeaderboardBackground.jpg");
-            Image image = new Image(inputStream);
-
+            Image image = new Image(getClass().getClassLoader().getResourceAsStream("Leaderboard/LeaderboardBackground.jpg"));
             BackgroundSize backgroundSize = new BackgroundSize(800, 600, false, false, false, true);
             BackgroundImage backgroundImage = new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
-            Background background = new Background(backgroundImage);
-            return background;
+            return new Background(backgroundImage);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -180,12 +170,8 @@ public class Leaderboard {
         /*
         Font properties
          */
-        Font paladinFont = null;
-        try {
-            paladinFont = Font.loadFont(new FileInputStream(new File("res/Font/PaladinsSemiItalic.otf")), 40);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Font paladinFont = Font.loadFont(getClass().getClassLoader().getResourceAsStream("Font/PaladinsSemiItalic.otf"), 40);
+
 
         /*
         Label properties
@@ -259,8 +245,8 @@ public class Leaderboard {
 
         Scene scene = new Scene(borderPane);
 
-        File f = new File("res/Leaderboard/LeaderboardStyleSheet.css");
-        scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+        File f = new File("Leaderboard/LeaderboardStyleSheet.css");
+        scene.getStylesheets().add(getClass().getClassLoader().getResource("Leaderboard/LeaderboardStyleSheet.css").toExternalForm());
 
         return scene;
     }

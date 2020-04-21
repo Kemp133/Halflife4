@@ -5,7 +5,6 @@ import com.halflife3.Controller.Input.Input;
 import com.halflife3.Controller.Input.KeyboardInput;
 import com.halflife3.Controller.Input.MouseInput;
 import com.halflife3.GameObjects.*;
-import com.halflife3.GameObjects.Interfaces.IUpdateable;
 import com.halflife3.GameUI.AudioForGame;
 import com.halflife3.GameUI.Maps;
 import com.halflife3.GameUI.MenuUtilitites;
@@ -118,10 +117,10 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Set The Distances To The Sides Of The Window
-		rightEndOfScreen = (int) (MenuController.GAME_WINDOW_WIDTH / 2 + thisPlayer.getWidth());
-		leftEndOfScreen  = (int) (MenuController.GAME_WINDOW_WIDTH / 2 - thisPlayer.getWidth());
-		topOfScreen      = (int) ((MenuController.GAME_WINDOW_HEIGHT - thisPlayer.getHeight()) / 2);
-		bottomOfScreen   = (int) ((MenuController.GAME_WINDOW_HEIGHT + thisPlayer.getHeight()) / 2);
+		rightEndOfScreen = (int) (WindowAttributes.GAME_WINDOW_WIDTH / 2 + thisPlayer.getWidth());
+		leftEndOfScreen  = (int) (WindowAttributes.GAME_WINDOW_WIDTH / 2 - thisPlayer.getWidth());
+		topOfScreen      = (int) ((WindowAttributes.GAME_WINDOW_HEIGHT - thisPlayer.getHeight()) / 2);
+		bottomOfScreen   = (int) ((WindowAttributes.GAME_WINDOW_HEIGHT + thisPlayer.getHeight()) / 2);
 		//endregion
 
 		//region Wait For Server To Acknowledge Player Connection
@@ -135,11 +134,11 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Set Up Scene
-		Canvas canvas = new Canvas(MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
+		Canvas canvas = new Canvas(WindowAttributes.GAME_WINDOW_WIDTH, WindowAttributes.GAME_WINDOW_HEIGHT);
 		root.getChildren().add(canvas);
 		graphicsContext = canvas.getGraphicsContext2D();
 
-		Scene scene = new Scene(root, MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
+		Scene scene = new Scene(root, WindowAttributes.GAME_WINDOW_WIDTH, WindowAttributes.GAME_WINDOW_HEIGHT);
 		SceneManager.getInstance().setScene("Game Scene", scene);
 		window = SceneManager.getInstance().getMainWindow();
 		//endregion
@@ -184,7 +183,10 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Thread To Update Position Of All Enemies and The Ball
-		executor.submit(() -> { while (true) { updateEnemies(); } });
+		executor.submit(() -> {
+			while (true)
+				updateEnemies();
+		});
 		//endregion
 
 		System.out.println("Game Running");
@@ -192,7 +194,8 @@ public class MainMode extends GameMode {
 
 	@Override
 	public void gameLoop(double elapsedTime) {
-		if (resetting) { return; }
+		if (resetting)
+			return;
 
 		//region Camera offset
 		Camera.SetOffsetX(thisPlayer.getPosX() - leftEndOfScreen);
@@ -207,12 +210,10 @@ public class MainMode extends GameMode {
 			Camera.SetOffsetY(mapHeight - topOfScreen - bottomOfScreen);
 		//endregion
 
-		//region Calculates the rotation
-		Vector2 playerClientCenter =
-				new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
+		//region Calculate the rotation
+		Vector2 playerClientCenter = new Vector2(thisPlayer.getPosX() - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
 				thisPlayer.getPosY() - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
-		Vector2 direction = new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY()).subtract(
-				playerClientCenter);
+		Vector2 direction = new Vector2(input.getMousePosition().getX(), input.getMousePosition().getY()).subtract(playerClientCenter);
 
 		Affine rotate = new Affine();
 		short  deg    = (short) Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
@@ -223,24 +224,17 @@ public class MainMode extends GameMode {
 
 		//region Sets player's velocity according to input
 		if (thisPlayer.stunned == 0) {
-			if (input.isKeyReleased(A) && input.isKeyReleased(D)) {
-				thisPlayer.setVelX(0);
-			}
-			if (input.isKeyReleased(W) && input.isKeyReleased(S)) {
-				thisPlayer.setVelY(0);
-			}
-			if (input.isKeyPressed(A)) {
-				thisPlayer.setVelX(-thisPlayer.getMovementSpeed());
-			}
-			if (input.isKeyPressed(D)) {
-				thisPlayer.setVelX(thisPlayer.getMovementSpeed());
-			}
-			if (input.isKeyPressed(W)) {
-				thisPlayer.setVelY(-thisPlayer.getMovementSpeed());
-			}
-			if (input.isKeyPressed(S)) {
-				thisPlayer.setVelY(thisPlayer.getMovementSpeed());
-			}
+			Vector2 toSet = new Vector2();
+			if (input.isKeyPressed(A))
+				toSet.add(-thisPlayer.getMovementSpeed(), 0);
+			if (input.isKeyPressed(D))
+				toSet.add(thisPlayer.getMovementSpeed(), 0);
+			if (input.isKeyPressed(W))
+				toSet.add(0, -thisPlayer.getMovementSpeed());
+			if (input.isKeyPressed(S))
+				toSet.add(0, thisPlayer.getMovementSpeed());
+
+			thisPlayer.setVelocity(toSet);
 		}
 		//endregion
 
@@ -304,8 +298,7 @@ public class MainMode extends GameMode {
 
 		//region Shoots a bullet or the ball
 		thisPlayer.setBulletShot(false);
-		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload >= thisPlayer.getReloadTime() &&
-		    thisPlayer.stunned == 0) {
+		if (input.isButtonPressed(MouseButton.PRIMARY) && thisPlayer.reload == thisPlayer.getReloadTime() && thisPlayer.stunned == 0) {
 			double  bulletX      = Math.cos(Math.atan2(direction.getY(), direction.getX()));
 			double  bulletY      = Math.sin(Math.atan2(direction.getY(), direction.getX()));
 			Vector2 shotVelocity = new Vector2(bulletX, bulletY).multiply(SHOT_SPEED);
@@ -333,13 +326,7 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Re-renders all game objects
-		graphicsContext.clearRect(0, 0, MenuController.GAME_WINDOW_WIDTH, MenuController.GAME_WINDOW_HEIGHT);
-
-		MapRender.Render(graphicsContext);
-
-		for (GameObject go : ObjectManager.getGameObjects()) {
-			go.render(graphicsContext);
-		}
+		RenderManager.getInstance().render(graphicsContext);
 		//endregion
 
 		//region Updates the stun bar
@@ -369,14 +356,15 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Renders the score text
-		graphicsContext.drawImage(scoreSprite.get(yourScore), MenuController.GAME_WINDOW_WIDTH / 2f - 40, 40);
-		graphicsContext.drawImage(scoreSprite.get(-1), MenuController.GAME_WINDOW_WIDTH / 2f + 10, 40);
-		graphicsContext.drawImage(scoreSprite.get(enemyScore), MenuController.GAME_WINDOW_WIDTH / 2f + 40, 40);
+		graphicsContext.drawImage(scoreSprite.get(yourScore), WindowAttributes.GAME_WINDOW_WIDTH / 2f - 40, 40);
+		graphicsContext.drawImage(scoreSprite.get(-1), WindowAttributes.GAME_WINDOW_WIDTH / 2f + 10, 40);
+		graphicsContext.drawImage(scoreSprite.get(enemyScore), WindowAttributes.GAME_WINDOW_WIDTH / 2f + 40, 40);
 		//endregion
 
 		//region End Condition
 		if (won() || lost()) {
-			if (won()) { win = true; }
+			if (won())
+				win = true;
 			finished();
 			return;
 		}
@@ -397,7 +385,7 @@ public class MainMode extends GameMode {
 	public void finished() {
 //		Log game win or loss in leaderboard
 		if (yourScore == scoreLimit) { //Can't just call won() right?
-			updateLBoard(getConnection(), BaseController.GetApplicationUser().username);
+			updateLBoard(DatabaseManager.getConnection(), BaseController.GetApplicationUser().username);
 		}
 
 //		Send packet to end the game
@@ -412,7 +400,12 @@ public class MainMode extends GameMode {
 //				window.setScene(wonScene);
 //				//endregion
 
-		end();
+		hasFinished = true;
+		ObjectManager.resetObjects();
+//		RenderManager.getInstance().removeAllObjects();
+		System.out.println("Game exited");
+		executor.shutdownNow();
+		clientNetwork.disconnect();
 	}
 
 	@Override
@@ -426,18 +419,12 @@ public class MainMode extends GameMode {
 		return enemyScore == scoreLimit;
 	}
 
-	private void end() {
-		hasFinished = true;
-		System.out.println("Game exited");
-		executor.shutdownNow();
-		clientNetwork.disconnect();
-	}
-
 	private void checkForGoal() {
 		Goal g = goalScored();
-		if (g == null) { return; }
+		if (g == null)
+			return;
 
-		resetting = true;
+		resetting         = true;
 		thisPlayer.reload = 0;
 
 		if (g.getScoringTeam() == side) {
@@ -485,7 +472,7 @@ public class MainMode extends GameMode {
 
 	private void gameInit() {
 		//region Background setup
-		root.setBackground(MenuUtilitites.getBackground(getClass(), "res/Sprites/Background/Space.png"));
+		root.setBackground(MenuUtilitites.getBackground(getClass(), "Sprites/Background/Space.png"));
 		//endregion
 
 		//region Add audio into game
@@ -519,13 +506,11 @@ public class MainMode extends GameMode {
 		//endregion
 
 		//region Adds score sprites
-		try {
-			scoreSprite.put(-1, new Image(new FileInputStream("res/Sprites/Score/vs.png")));
-			scoreSprite.put(0, new Image(new FileInputStream("res/Sprites/Score/0.png")));
-			scoreSprite.put(1, new Image(new FileInputStream("res/Sprites/Score/1.png")));
-			scoreSprite.put(2, new Image(new FileInputStream("res/Sprites/Score/2.png")));
-			scoreSprite.put(3, new Image(new FileInputStream("res/Sprites/Score/3.png")));
-		} catch (FileNotFoundException e) { e.printStackTrace(); }
+		scoreSprite.put(-1, new Image(getClass().getClassLoader().getResourceAsStream("Sprites/Score/vs.png")));
+		scoreSprite.put(0, new Image(getClass().getClassLoader().getResourceAsStream("Sprites/Score/0.png")));
+		scoreSprite.put(1, new Image(getClass().getClassLoader().getResourceAsStream("Sprites/Score/1.png")));
+		scoreSprite.put(2, new Image(getClass().getClassLoader().getResourceAsStream("Sprites/Score/2.png")));
+		scoreSprite.put(3, new Image(getClass().getClassLoader().getResourceAsStream("Sprites/Score/3.png")));
 		//endregion
 
 		//region Pause menu
@@ -570,7 +555,7 @@ public class MainMode extends GameMode {
 			toMainMenu.setOnAction(actionEvent -> {
 				root.setEffect(null);
 				popupStage.hide();
-				end();
+				finished();
 			});
 			//endregion
 
@@ -640,8 +625,7 @@ public class MainMode extends GameMode {
 			//region Rotation / Position / Velocity
 			if (!ip.equals("ball")) {
 				Affine rotate = new Affine();
-				rotate.appendRotation(theDoubleValues.degrees,
-						theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
+				rotate.appendRotation(theDoubleValues.degrees, theDoubleValues.posX - Camera.GetOffsetX() + thisPlayer.getWidth() / 2,
 						theDoubleValues.posY - Camera.GetOffsetY() + thisPlayer.getHeight() / 2);
 
 				enemy.setAffine(rotate);
@@ -711,49 +695,9 @@ public class MainMode extends GameMode {
 			bullet.destroy();
 	}
 
-	private static Connection getConnection() {
-		Connection c = null;
-		try {
-			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql://rogue.db.elephantsql.com:5432/nuzmlzpr";
-			url = url.trim();
-			c   = DriverManager.getConnection(url, "nuzmlzpr", "pd7OdC_3BiVrAPNU68CETtFtBaqFxJFB");
-
-			if (c != null) {
-				System.out.println("Connection complete");
-			} else {
-				System.out.println("Connection failed");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		return c;
-	}
-
-	private void closeConnections(Connection c, PreparedStatement p, ResultSet r) {
-		if (c != null) {
-			try {
-				c.close();
-			} catch (SQLException ignored) {}
-		}
-		if (p != null) {
-			try {
-				p.close();
-			} catch (SQLException ignored) {}
-		}
-		if (r != null) {
-			try {
-				r.close();
-			} catch (SQLException ignored) {}
-		}
-	}
-
 	private void updateLBoard(Connection c, String username) {
 		PreparedStatement preparedStatement = null;
-		int               score             = currentScore(getConnection(), username);
+		int               score             = currentScore(DatabaseManager.getConnection(), username);
 		try {
 			String query = "UPDATE userdatascore SET score = " + (++score) + " WHERE name = '" + username + "'";
 			preparedStatement = c.prepareStatement(query);
@@ -762,7 +706,7 @@ public class MainMode extends GameMode {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			closeConnections(c, preparedStatement, null);
+			DatabaseManager.closeConnections(c, preparedStatement, null);
 		}
 	}
 
@@ -783,7 +727,7 @@ public class MainMode extends GameMode {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			closeConnections(c, preparedStatement, rs);
+			DatabaseManager.closeConnections(c, preparedStatement, rs);
 		}
 		return 0;
 	}

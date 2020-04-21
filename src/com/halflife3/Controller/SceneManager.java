@@ -15,23 +15,24 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Stack;
 
 /**
  * @author Johnathon Kemp - HalfLife Team Project
  * @version 1.0.0
  * <p>
- * This class is a singleton which deals with the scenes, and changing between them. When a scene is added, it is first
- * put into the {@code Scenes} hash map, along with a string to refer to that scene with in the future. This means that
- * future scenes are cached, and therefore do not need to be loaded every time a scene is needed.
+ * This class is a singleton which deals with the scenes, and changing between them. When a scene is added, it is first put into the {@code
+ * Scenes} hash map, along with a string to refer to that scene with in the future. This means that future scenes are cached, and therefore
+ * do not need to be loaded every time a scene is needed.
  * <p>
- * As and when you want to revert to a previous scene, the {@code sceneOrder} stack keeps a track of all scenes set on
- * the main window, meaning that when {@code restorePreviousScene} is called, the first value is {@code pop}'ed off and
- * not captured as it isn't needed, and then {@code setScene} is called with the {@code peek()}'d value of the stack.
+ * As and when you want to revert to a previous scene, the {@code sceneOrder} stack keeps a track of all scenes set on the main window,
+ * meaning that when {@code restorePreviousScene} is called, the first value is {@code pop}'ed off and not captured as it isn't needed, and
+ * then {@code setScene} is called with the {@code peek()}'d value of the stack.
  * <p>
- * As this is a singleton pattern, the {@code instance} variable is used to store a static reference to this object,
- * meaning this entire class can be accessed as if it was all static (but also reduces the amount of space taken up in
- * permanent generation [the area in the JVM where static variables are stored]).
+ * As this is a singleton pattern, the {@code instance} variable is used to store a static reference to this object, meaning this entire
+ * class can be accessed as if it was all static (but also reduces the amount of space taken up in permanent generation [the area in the JVM
+ * where static variables are stored]).
  */
 public final class SceneManager {
 	private Stage                  mainWindow;
@@ -85,22 +86,18 @@ public final class SceneManager {
 		setSceneCursor(scene);
 		mainWindow.setScene(scene);
 		sceneOrder.push(label);
+		mainWindow.setTitle(label);
 	}
 
 	/**
-	 * A method to set the cursor of the scene. For simplicity's sake, this cursor is the one used in the game modes,
-	 * and now in every scene so we don't have to worry about the cursor disappearing between scenes.
+	 * A method to set the cursor of the scene. For simplicity's sake, this cursor is the one used in the game modes, and now in every
+	 * scene so we don't have to worry about the cursor disappearing between scenes.
 	 *
 	 * @param scene The scene to set the cursor of
 	 */
 	private void setSceneCursor(Scene scene) {
-		try {
-			Image image = new Image(new FileInputStream("res/Sprites/Cursor/crosshair.png"));
-			scene.setCursor(new ImageCursor(image, image.getWidth() / 2, image.getHeight() / 2));
-		} catch (IOException e) {
-			NetworkingUtilities.CreateErrorMessage("Error Loading Cursor", "There was an error loading the cursor",
-					"Message: " + e.getMessage());
-		}
+		Image image = new Image(getClass().getClassLoader().getResourceAsStream("crosshair.png"));
+		scene.setCursor(new ImageCursor(image, image.getWidth() / 2, image.getHeight() / 2));
 	}
 
 	/**
@@ -113,6 +110,7 @@ public final class SceneManager {
 	public void setScene(String label) throws SceneDoesNotExistException {
 		mainWindow.setScene(getScene(label));
 		sceneOrder.push(label);
+		mainWindow.setTitle(label);
 	}
 	//endregion
 
@@ -122,6 +120,7 @@ public final class SceneManager {
 			throw new SceneStackEmptyException("The scene stack only contains one value! No scene to restore");
 		sceneOrder.pop();
 		mainWindow.setScene(Scenes.get(sceneOrder.peek()));
+		mainWindow.setTitle(sceneOrder.peek());
 	}
 
 	/** A method to restore the previous stage as the currently set main stage in SceneManager */
@@ -167,7 +166,8 @@ public final class SceneManager {
 	 * @param scene The scene to add to the hash map
 	 */
 	private void addScene(String label, Scene scene) {
-		if (!Scenes.containsKey(label)) Scenes.put(label, scene);
+		if (!Scenes.containsKey(label))
+			Scenes.put(label, scene);
 	}
 
 	/**
@@ -181,12 +181,15 @@ public final class SceneManager {
 		s.setMaximized(windowAttributes.maximisedOnLoad);
 		s.setFullScreen(windowAttributes.fullScreenOnLoad);
 
-		if (!windowAttributes.decorated) s.initStyle(StageStyle.UNIFIED);
-		if (windowAttributes.isModal) s.initModality(Modality.APPLICATION_MODAL);
-		if (windowAttributes.maximisedOnLoad) s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+		if (!windowAttributes.decorated)
+			s.initStyle(StageStyle.UNIFIED);
+		if (windowAttributes.isModal)
+			s.initModality(Modality.APPLICATION_MODAL);
+		if (windowAttributes.maximisedOnLoad)
+			s.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
 
 		try {
-			s.getIcons().add(new Image(new FileInputStream("res/Sprites/Ball/Ball.png")));
+			s.getIcons().add(new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("Sprites/Ball/Ball.png"))));
 		} catch (Exception ignored) {}
 	}
 
@@ -202,10 +205,9 @@ public final class SceneManager {
 			if (Files.notExists(Paths.get("AppData"))) {
 				boolean createdAppData = new File("AppData").mkdir();
 				if (!createdAppData) {
-					NetworkingUtilities.CreateErrorMessage("Could not create AppData directory", "Error Creating " +
-							"AppData Directory",
-							"AppData file could not be created. Please check that files can be " + "created in the " +
-									"root directory!");
+					NetworkingUtilities.CreateErrorMessage("Could not create AppData directory",
+							"Error Creating AppData Directory",
+							"AppData file could not be created. Please check that files can be created in the root directory!");
 
 					//Error shown, now end the application
 					Platform.exit();
@@ -240,7 +242,8 @@ public final class SceneManager {
 	 * @return The static reference to this class
 	 */
 	public static SceneManager getInstance() {
-		if (instance == null) instance = new SceneManager();
+		if (instance == null)
+			instance = new SceneManager();
 		return instance;
 	}
 }
