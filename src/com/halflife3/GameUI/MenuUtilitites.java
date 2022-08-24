@@ -24,7 +24,7 @@ public class MenuUtilitites {
 	 * @return A background image showing the image pointed to by {@code backgroundLocation}
 	 */
 	public static Background getBackground(Class<?> from, String backgroundLocation) {
-		try (var fis = Vector2.class.getClassLoader().getResourceAsStream(backgroundLocation)) {
+		try (var fis = from.getClassLoader().getResourceAsStream(backgroundLocation)) {
 			Image img = new Image(fis);
 			var   bs  = new BackgroundSize(800, 600, false, false, false, true);
 			var   bi  = new BackgroundImage(

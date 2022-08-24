@@ -95,9 +95,15 @@ public final class SceneManager {
 	 *
 	 * @param scene The scene to set the cursor of
 	 */
-	private void setSceneCursor(Scene scene) {
-		Image image = new Image(getClass().getClassLoader().getResourceAsStream("crosshair.png"));
-		scene.setCursor(new ImageCursor(image, image.getWidth() / 2, image.getHeight() / 2));
+	private void setSceneCursor(Scene scene) throws NullPointerException {
+		try (var resStream = getClass().getClassLoader().getResourceAsStream("Sprites/Cursor/crosshair.png")) {
+			assert resStream != null;
+
+			Image image = new Image(resStream);
+			scene.setCursor(new ImageCursor(image, image.getWidth() / 2, image.getHeight() / 2));
+		} catch (Exception e) {
+			throw new NullPointerException("SceneManager cannot set the cursor!");
+		}
 	}
 
 	/**

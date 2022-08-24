@@ -9,6 +9,24 @@ import java.sql.*;
  * are ever needed to be made then they can be done in one place and then everywhere else will automatically use the new changes.
  */
 public class DatabaseManager {
+	private static String DB_CONNECTION_STRING;
+	private static String DB_USERNAME;
+	private static String DB_PASSWORD;
+
+	static {
+		var envs = System.getenv();
+		if (envs.containsKey("DATABASE_PASSWORD")) {
+			DB_PASSWORD = envs.get("DATABASE_PASSWORD");
+		}
+
+		if (envs.containsKey("DATABASE_CONNECTION_STRING")) {
+			DB_CONNECTION_STRING = envs.get("DATABASE_CONNECTION_STRING");
+		}
+
+		if (envs.containsKey("DATABASE_USERNAME")) {
+			DB_USERNAME = envs.get("DATABASE_USERNAME");
+		}
+	}
 	/**
 	 * A method to get a connection to the database
 	 *
@@ -16,10 +34,15 @@ public class DatabaseManager {
 	 */
 	public static Connection getConnection() {
 		Connection c = null;
+
+		if (DB_PASSWORD == null || DB_CONNECTION_STRING == null) {
+			System.err.println("Database password environment variable not set!");
+			System.exit(1);
+		}
+
 		try {
 			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql://rogue.db.elephantsql.com:5432/nuzmlzpr".trim();
-			c = DriverManager.getConnection(url, "nuzmlzpr", "pd7OdC_3BiVrAPNU68CETtFtBaqFxJFB");
+			c = DriverManager.getConnection("jdbc:" + DB_CONNECTION_STRING, DB_USERNAME, DB_PASSWORD);
 
 			if (c != null) {
 				System.out.println("Connection complete");
@@ -30,7 +53,7 @@ public class DatabaseManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
+			System.exit(1);
 		}
 		return c;
 	}
